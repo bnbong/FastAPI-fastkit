@@ -1,0 +1,22 @@
+[project]
+name = "FastAPI-fastkit"
+version = "0.1.0"
+description = "Fast, easy-to-use starter kit for new users of Python and FastAPI"
+authors = [
+    {name = "bnbong", email = "bbbong9@gmail.com"},
+]
+dependencies = [
+    "click>=8.1.7",
+    "rich>=13.9.2",
+]
+requires-python = ">=3.12"
+readme = "README.md"
+license = {text = "MIT"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+
+[tool.pdm]
+distribution = true

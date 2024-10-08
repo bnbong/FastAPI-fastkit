@@ -1,0 +1,23 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: fastapi-fastkit
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Junhyeok
+    family-names: Lee
+    email: bbbong9@gmail.com
+    affiliation: Hanyang Univ. ERICA
+repository-code: 'https://github.com/bnbong/FastAPI-fastkit'
+abstract: >-
+  This project was created to speed up the configuration of
+  the development environment needed to develop
+  PostgreSQL-based web apps for new users of Python and
+  FastAPI
+keywords:
+  - fastapi-fastkit
+license: MIT
