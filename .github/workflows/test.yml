@@ -1,0 +1,9 @@
+name: test sources before merge
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test-fastapi-fastkit-sources:
+    runs-on: ubuntu-latest

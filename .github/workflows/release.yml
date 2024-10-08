@@ -1,0 +1,9 @@
+name: release package to github
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  release-fastapi-fastkit-package:
+    runs-on: ubuntu-latest

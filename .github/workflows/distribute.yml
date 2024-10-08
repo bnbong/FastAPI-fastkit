@@ -1,0 +1,9 @@
+name: Distribute source to pypi package
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  distribute-fastapi-fastkit-package-bundle:
+    runs-on: ubuntu-latest
