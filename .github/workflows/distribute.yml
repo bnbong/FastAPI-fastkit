@@ -7,3 +7,6 @@ on:
 jobs:
   distribute-fastapi-fastkit-package-bundle:
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
