@@ -4,39 +4,56 @@ It is highly desirable to improve the project to provide better access for users
 
 Highly appreciate it for your interesting in this project and for your contribution by investing your precious time.
 
-## Setting up Environment
+Before contributing to this open source, I strongly recommend that you read the 
+[SECURITY.md](SECURITY.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) files to understand 
+the direction of this project and the precautions for cooperation.
 
-FastAPI-fastkit's default project template uses following stacks:
+## Setting up development environment
+
+FastAPI-fastkit uses following stacks:
 
 - Python 3.12.4
-- FastAPI 0.115.0
-- Uvicorn 0.31.0
-- PostgreSQL 17 (Dockerized)
-- Docker (stable version)
-- alembic 1.13.3
-- SQLModel 0.0.22
-- fastapi-cli 0.0.5
+- click 8.1.7
+- rick 13.9.2
 
-### Why using these stacks?
+[//]: # ()
+[//]: # (- Python 3.12.4)
 
-Some of the dependencies include projects that have just been created. And we want to keep most of the dependencies up to date.
+[//]: # (- FastAPI 0.115.0)
 
-The reason for this is that this project is not meant to be a stable and lightweight project. 
-This project is focused solely on the purpose of making it easier for new users of Python and FastAPI to adapt to this ecosystem.
+[//]: # (- Uvicorn 0.31.0)
 
-However, for a user's best experience, each dependency must be organically connected and reducing its viability is also very important.
+[//]: # (- PostgreSQL 17 &#40;Dockerized&#41;)
 
-The right to maintain this is the responsibility of the project owner [bnbong](mailto:bbbong9@gmail.com) and the contributors who contribute to this project. 
+[//]: # (- Docker &#40;stable version&#41;)
 
-In this regard, the details that should be noted when contributing to this open source project are specified in more detail in the [SECURITY.md](SECURITY.md) and [CONTRIBUTING.md](CONTRIBUTING.md) files.
+[//]: # (- alembic 1.13.3)
 
-### Setting up local dev env
+[//]: # (- SQLModel 0.0.22)
+
+[//]: # (- fastapi-cli 0.0.5)
+
+### Local dev configuration
 
 (content will be added later)
 
+### Linting & Formatting
+
+(content will be added later - formatter : black)
+
 ## Documentation
 
-(other content will be added later)
+(content will be added later)
+
+## Testing
+
+(content will be added later)
+
+## Adding new FastAPI-based template project
+
+(content will be added later)
+(this block will contain about dependancy settings using virtual env, project tree, file extension of all sources(must end with .py-tpl),
+README.md writing guide(using [PROJECT_README_TEMPLATE.md](fastapi-project-template/PROJECT_README_TEMPLATE.md) template), foldering, other third party config, etc...)
 
 ---
 @author bnbong bbbong9@gmail.com
