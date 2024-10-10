@@ -11,10 +11,14 @@ dependencies = [
     "pytest>=8.3.3",
     "black>=24.10.0",
     "pre-commit>=4.0.1",
+    "pytest-cov>=5.0.0",
 ]
 requires-python = ">=3.12"
 readme = "README.md"
 license = {text = "MIT"}
+
+[project.scripts]
+fastkit = "fastapi_fastkit.cli:fastkit_cli"
 
 [build-system]
 requires = ["pdm-backend"]
@@ -22,4 +26,5 @@ build-backend = "pdm.backend"
 
 
 [tool.pdm]
+version = { source = "file", path = "src/fastapi_fastkit/__init__.py" }
 distribution = true

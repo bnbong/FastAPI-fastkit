@@ -1,8 +1,6 @@
+# TODO : logger will run at only debug mode.
 # --------------------------------------------------------------------------
-# FastAPI-fastkit package main routine
+# The Module defines console logging operations.
 #
-# @author bnbong
+# @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
-from cli import fastkit_cli
-
-fastkit_cli()

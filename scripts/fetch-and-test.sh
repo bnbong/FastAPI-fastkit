@@ -2,3 +2,4 @@
 set -x
 set -e
 
+pdm sync
