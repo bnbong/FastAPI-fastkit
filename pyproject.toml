@@ -28,3 +28,7 @@ build-backend = "pdm.backend"
 [tool.pdm]
 version = { source = "file", path = "src/fastapi_fastkit/__init__.py" }
 distribution = true
+
+[tool.pytest.ini_options]
+testpaths = ["test"]
+python_files = "test_*.py"
