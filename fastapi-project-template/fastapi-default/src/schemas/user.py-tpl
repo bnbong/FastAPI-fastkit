@@ -1,0 +1,81 @@
+# --------------------------------------------------------------------------
+# The module defines User schemas.
+# --------------------------------------------------------------------------
+from datetime import datetime, date
+from uuid import UUID
+from enum import Enum
+
+from pydantic import BaseModel, Field, EmailStr, SecretStr, field_serializer
+from typing import Optional, List
+
+
+class UserBase(BaseModel):
+    email: EmailStr = Field(
+        ..., title="User's Email", description="The email address of the user."
+    )
+    bio: str = Field(None, title="User's bio", description="Personal introduction of the user.")
+    firstName: str = Field(
+        ..., title="User's first name", description="The real name of the user."
+    )
+    lastName: str = Field(
+        ..., title="User's last name", description="The last name of the user."
+    )
+    gender: str = Field(..., title="User's gender", description="The gender of the user.")
+    country: str = Field(..., title="User's country", description="Country of the user.")
+    isActive: bool = Field(
+        ..., title="User's active status", description="The active state of the user."
+    )
+    createdDate: datetime = Field(
+        ...,
+        title="User's account created date",
+        description="Date of creation of the user account.",
+    )
+    password: Optional[SecretStr] = Field(
+        None, title="User's password", description="Password of the user account."
+    )
+
+    # items: Optional[List] = List[ItemSchema]
+
+    @field_serializer("password", when_used="json")
+    def dump_secret(self, v):
+        return v.get_secret_value()
+
+
+class UserSchema(UserBase):
+    id: UUID = Field(
+        ..., title="User's ID (pk)", description="The unique database identifier for the user."
+    )
+    userId: str = Field(..., title="User's ID", description="ID of the user account.")
+    roles: List[str] = Field(
+        ..., title="User's roles", description="List of roles for the user."
+    )
+    profileImageUrl: Optional[str] = Field(
+        None,
+        title="User's profile image URL",
+        description="The URL of the user's profile image.",
+    )
+
+    class ConfigDict:
+        from_attributes = True
+
+
+class UserCreate(UserBase):
+    firstName: str = Field(
+        ..., title="User's first name", description="The real name of the user."
+    )
+    lastName: str = Field(
+        ..., title="User's last name", description="The last name of the user."
+    )
+    email: EmailStr = Field(
+        ..., title="User's Email", description="The email address of the user."
+    )
+    password: str = Field(
+        ..., title="User's password", description="Password of the user account."
+    )
+
+
+class UserUpdate(BaseModel):
+    bio: str = Field(None, title="User's bio", description="Personal introduction of the user.")
+    profileImg: str = Field(
+        None, title="User's profile image", description="The URL of the user's profile image."
+    )

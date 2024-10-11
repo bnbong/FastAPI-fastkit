@@ -1,0 +1,2 @@
+# run pytest
+poetry run pytest ../test -s -v

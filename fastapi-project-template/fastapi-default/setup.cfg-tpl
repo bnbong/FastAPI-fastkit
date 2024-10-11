@@ -1,0 +1,13 @@
+[flake8]
+ignore = E501, E305
+
+[isort]
+line_length=100
+virtual_env=venv
+
+[tool:pytest]
+pythonpath = src
+testpaths = test
+python_files = test_*.py
+asyncio_mode = auto
+timeout = 3

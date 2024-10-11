@@ -1,0 +1,33 @@
+# --------------------------------------------------------------------------
+# The module initialize Mocking Data storage at FastAPI main coroutine's
+# memory space.
+# --------------------------------------------------------------------------
+import os
+import json
+
+# Global Mock Data storage (Stores : FastAPI app coroutine - In FastAPI thread memory)
+mock_user_data = []
+
+
+def initialize_mock_data() -> None:
+    base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+    user_file_path = os.path.join(base_path, "src", "mocks", "mock_users.json")
+
+    with open(user_file_path, "r", encoding="utf-8") as f:
+        user_data = json.load(f)
+
+    # If the model has relations with other model,
+    # you can map it their respective columns like below:
+    item_data = json.loads(json.dumps({'some': 'item', "user_id": "123e4567-e89b-12d3-a456-426614174000"}))
+    item_map = {}
+    for item in item_data:
+        user_id = item["user_id"]
+        if user_id not in item_map:
+            item_map[user_id] = []
+        item_map[user_id].append(item)
+
+    for user in user_data:
+        user_id = user["id"]
+        user["items"] = item_map.get(user_id, [])
+
+    mock_user_data.extend(user_data)

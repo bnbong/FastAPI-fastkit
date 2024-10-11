@@ -1,0 +1,112 @@
+# --------------------------------------------------------------------------
+# User router testcases
+# --------------------------------------------------------------------------
+import pytest
+import pytest_asyncio
+
+from fastapi import status
+from uuid import UUID
+from httpx import AsyncClient
+
+from test.conftest import BaseTestRouter
+
+
+@pytest.mark.asyncio
+class TestUserAPI(BaseTestRouter):
+
+    @pytest_asyncio.fixture(autouse=True)
+    async def setup(self, client: AsyncClient):
+        self.MOCK_USER_ID = UUID("123e4567-e89b-12d3-a456-426614174000")
+        self.INVALID_USER_ID = UUID("123e4567-e89b-12d3-a456-426614174999")
+        self.base_url = "/user"
+
+    async def test_create_user(self, client: AsyncClient):
+        # given
+        user_data = {
+            "username": "testuser",
+            "email": "testuser@example.com",
+        }
+
+        # when
+        response = await client.post(f"{self.base_url}/", json=user_data)
+
+        # then
+        assert response.status_code == status.HTTP_201_CREATED
+        json_response = response.json()
+        assert json_response["message"]["username"] == "testuser"
+        assert json_response["message"]["email"] == "testuser@example.com"
+
+    async def test_get_user_valid(self, client: AsyncClient):
+        # given
+        user_id = self.MOCK_USER_ID
+
+        # when
+        response = await client.get(f"{self.base_url}/{user_id}")
+
+        # then
+        assert response.status_code == status.HTTP_200_OK
+        json_response = response.json()
+        assert json_response["status"] == 200
+        assert json_response["code"] == "HTTP-200"
+        assert json_response["message"]["id"] == str(user_id)
+
+    async def test_get_user_invalid(self, client: AsyncClient):
+        # given
+        invalid_user_id = self.INVALID_USER_ID
+
+        # when
+        response = await client.get(f"{self.base_url}/{invalid_user_id}")
+
+        # then
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    async def test_update_user_valid(self, client: AsyncClient):
+        # given
+        user_id = self.MOCK_USER_ID
+        update_data = {
+            "username": "updateduser",
+            "email": "updateduser@example.com",
+        }
+
+        # when
+        response = await client.patch(f"{self.base_url}/{user_id}", json=update_data)
+
+        # then
+        assert response.status_code == status.HTTP_200_OK
+        json_response = response.json()
+        assert json_response["message"]["username"] == "updateduser"
+        assert json_response["message"]["email"] == "updateduser@example.com"
+
+    async def test_update_user_invalid(self, client: AsyncClient):
+        # given
+        invalid_user_id = self.INVALID_USER_ID
+        update_data = {
+            "username": "invaliduser",
+            "email": "invaliduser@example.com",
+        }
+
+        # when
+        response = await client.patch(f"{self.base_url}/{invalid_user_id}", json=update_data)
+
+        # then
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    async def test_delete_user_valid(self, client: AsyncClient):
+        # given
+        user_id = self.MOCK_USER_ID
+
+        # when
+        response = await client.delete(f"{self.base_url}/{user_id}")
+
+        # then
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+
+    async def test_delete_user_invalid(self, client: AsyncClient):
+        # given
+        invalid_user_id = self.INVALID_USER_ID
+
+        # when
+        response = await client.delete(f"{self.base_url}/{invalid_user_id}")
+
+        # then
+        assert response.status_code == status.HTTP_404_NOT_FOUND

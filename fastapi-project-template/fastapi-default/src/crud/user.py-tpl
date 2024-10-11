@@ -1,0 +1,85 @@
+# --------------------------------------------------------------------------
+# The module defines User model's CRUD methods.
+# --------------------------------------------------------------------------
+import os
+
+from typing import Type
+from uuid import UUID
+
+from ._base import load_json
+
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import select, delete
+
+from src.schemas.user import UserSchema
+from src.db.models.user import UserCreate, User, UserUpdate
+from src.helper.exceptions import InternalException, ErrorCode
+
+
+def get_mock_user_data(id: UUID, response_model: Type[UserSchema]):
+    base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+    file_path = os.path.join(base_path, "src", "mocks", "mock_users.json")
+    users = load_json(file_path)
+    user_data = next((user for user in users if user["id"] == str(id)), None)
+    if user_data is None:
+        raise InternalException(
+            message="ERROR : User not found.", error_code=ErrorCode.NOT_FOUND
+        )
+    return response_model(**user_data)
+
+
+async def create_user(db: AsyncSession, user: UserCreate) -> User:
+    db_user = User(**user.dict())
+    try:
+        db.add(db_user)
+        await db.commit()
+        await db.refresh(db_user)
+        return db_user
+    except IntegrityError:
+        await db.rollback()
+        raise InternalException(
+            error_code=ErrorCode.CONFLICT,
+            message="ERROR : This user is already exist.",
+        )
+
+
+async def get_user(db: AsyncSession, id: UUID) -> User:
+    query = select(User).where(User.id == id)
+    response = await db.execute(query)
+    return response.scalar_one_or_none()
+
+
+async def get_user_by_email(db: AsyncSession, email: str) -> User:
+    query = select(User).where(User.email == email)
+    response = await db.execute(query)
+    return response.scalar_one_or_none()
+
+
+async def update_user(db: AsyncSession, id: UUID, user: UserUpdate) -> User:
+    db_user = await get_user(db, id)
+    if not db_user:
+        raise InternalException(
+            error_code=ErrorCode.NOT_FOUND, message="ERROR : User not found."
+        )
+
+    for k, v in user.dict(exclude_unset=True).items():
+        setattr(db_user, k, v)
+
+    try:
+        await db.commit()
+        await db.refresh(db_user)
+        return db_user
+    except IntegrityError:
+        await db.rollback()
+        raise InternalException(
+            error_code=ErrorCode.CONFLICT,
+            message="ERROR : There is information that overlaps with other user information.",
+        )
+
+
+async def delete_user(db: AsyncSession, id: UUID) -> int:
+    query = delete(User).where(User.id == id)
+    response = await db.execute(query)
+    await db.commit()
+    return response.rowcount

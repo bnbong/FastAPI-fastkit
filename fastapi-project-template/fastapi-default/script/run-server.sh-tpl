@@ -1,0 +1,2 @@
+# run test server
+fastapi dev main.py --reload

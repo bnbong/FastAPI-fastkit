@@ -1,0 +1,17 @@
+[
+  {
+    "id": "123e4567-e89b-12d3-a456-426614174000",
+    "userId": "bnbong",
+    "email": "bbbong9@gmail.com",
+    "roles": ["NORMAL_USER"],
+    "profileImageUrl": null,
+    "bio": "hello, My name is JunHyeok Lee.",
+    "firstName": "JunHyeok",
+    "lastName": "Lee",
+    "gender": "M",
+    "country": "KOREA",
+    "isActive": true,
+    "createdDate": "2000-02-10T01:53:16.707426",
+    "password": "password123"
+  }
+]

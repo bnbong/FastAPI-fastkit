@@ -25,8 +25,8 @@ class FastkitConfig:
 
     # Testing Options
     TEST_SERVER_PORT: int = 8000
-    TEST_DEFAULT_TERMINAL_WIDTH = 100
-    TEST_MAX_TERMINAL_WIDTH = 1000
+    TEST_DEFAULT_TERMINAL_WIDTH: int = 80
+    TEST_MAX_TERMINAL_WIDTH: int = 1000
 
     @staticmethod
     def __get_fastapi_fastkit_root() -> Path:
