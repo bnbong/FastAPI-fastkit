@@ -13,7 +13,7 @@ All source codes in demo projects must consist of **`.py-tpl`**, _not_ .py.
 ## Adding new FastAPI-based template project
 
 Before adding new FastAPI-based template project here, I strongly recommend that you read the 
-[SECURITY.md](SECURITY.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) files to understand 
+[SECURITY.md](../SECURITY.md) and [CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md) files to understand 
 the direction of this project and the precautions for cooperation.
 
 (outlink to CONTRIBUTING.md will be included & manual will be added later)
