@@ -11,13 +11,13 @@ from typing import Union
 
 from logging import getLogger
 
-from click.core import BaseCommand
+from click.core import BaseCommand, Context
 
 from rich import print
 from rich.panel import Panel
 
 from . import __version__
-from fastapi_fastkit.core.settings import FastkitConfig
+from fastapi_fastkit.core.settings import settings
 from fastapi_fastkit.core.exceptions import CLIExceptions, TemplateExceptions
 from fastapi_fastkit.utils.transducer import copy_and_convert_template
 
@@ -40,7 +40,7 @@ def _inject_project_metadata(
 
     :param target_dir: Directory for the new project to deploy
     :param project_name: new project name
-    :param author: cli user name
+    :param author: cli username
     :param author_email: cli user email
     :param description: new project description
     """
@@ -76,7 +76,7 @@ def _inject_project_metadata(
 @click.group()
 @click.option("--debug/--no-debug", default=False)
 @click.pass_context
-def fastkit_cli(ctx, debug) -> Union["BaseCommand", None]:
+def fastkit_cli(ctx: Context, debug: bool) -> Union["BaseCommand", None]:
     """
     main FastAPI-fastkit CLI operation group
 
@@ -88,13 +88,22 @@ def fastkit_cli(ctx, debug) -> Union["BaseCommand", None]:
     ctx.ensure_object(dict)
 
     ctx.obj["DEBUG"] = debug
+    if ctx.obj["DEBUG"]:
+        warning_panel = Panel(
+            "running at debugging mode!!",
+            title="❗️ Warning ❗",
+            style="yellow",
+            highlight=True,
+        )
+        click.echo(print(warning_panel))
+        settings.set_debug_mode(debug_mode=ctx.obj["DEBUG"])
 
     return
 
 
 @fastkit_cli.command()
 @click.pass_context
-def echo(ctx) -> None:
+def echo(ctx: Context) -> None:
     """
     About FastAPI-fastkit
 
@@ -102,9 +111,6 @@ def echo(ctx) -> None:
     :type ctx: <Object click.Context>
     :return: None
     """
-    if ctx.obj["DEBUG"]:
-        click.echo(print("[yellow]runs at debugging mode!![/yellow]"))
-
     fastkit_info = f"""
     ⚡️ FastAPI fastkit - fastest [bold]FastAPI[/bold] initializer. ⚡️
 
@@ -141,7 +147,7 @@ def echo(ctx) -> None:
 )
 @click.pass_context
 def startproject(
-    ctx,
+    ctx: Context,
     template: str,
     project_name: str,
     author: str,
@@ -158,10 +164,7 @@ def startproject(
     :param author_email: Author email
     :param description: Project description
     """
-    if ctx.obj["DEBUG"]:
-        click.echo(print("[yellow]runs at debugging mode!![/yellow]"))
-
-    template_dir = FastkitConfig.FASTKIT_TEMPLATE_ROOT
+    template_dir = settings.FASTKIT_TEMPLATE_ROOT
     target_template = os.path.join(template_dir, template)
     print(f"Template path: {target_template}")
 
@@ -171,7 +174,7 @@ def startproject(
         )
 
     try:
-        user_local = FastkitConfig.USER_WORKSPACE
+        user_local = settings.USER_WORKSPACE
         click.echo(f"FastAPI template project will deploy at '{user_local}'")
 
         click.echo(f"Project Name: {project_name}")
@@ -196,14 +199,14 @@ def startproject(
 
 @fastkit_cli.command()
 @click.pass_context
-def deleteproject(ctx) -> None:
+def deleteproject(ctx: Context) -> None:
     # TODO : implement this
     pass
 
 
 @fastkit_cli.command()
 @click.pass_context
-def runserver(ctx) -> None:
+def runserver(ctx: Context) -> None:
     """
     Run FastAPI template server at CLI
 
@@ -211,7 +214,5 @@ def runserver(ctx) -> None:
     :type ctx: <Object click.Context>
     :return: None
     """
-    if ctx.obj["DEBUG"]:
-        click.echo(print("[yellow]runs at debugging mode!![/yellow]"))
     # TODO : implement this using fastapi-cli?
     pass

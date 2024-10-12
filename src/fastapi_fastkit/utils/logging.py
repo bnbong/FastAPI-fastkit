@@ -10,7 +10,7 @@ from typing import Union
 from rich.console import Console
 from rich.logging import RichHandler
 
-from fastapi_fastkit.core.settings import FastkitConfig
+from fastapi_fastkit.core.settings import settings
 
 
 def setup_logging(terminal_width: Union[int, None] = None) -> None:
@@ -28,5 +28,5 @@ def setup_logging(terminal_width: Union[int, None] = None) -> None:
     )
     rich_handler.setFormatter(formatter)
 
-    logger.setLevel(FastkitConfig.LOGGING_LEVEL)
+    logger.setLevel(settings.LOGGING_LEVEL)
     logger.propagate = False
