@@ -17,7 +17,8 @@ from rich import print
 from rich.panel import Panel
 
 from . import __version__
-from fastapi_fastkit.core.settings import settings
+from fastapi_fastkit.utils.logging import setup_logging
+from fastapi_fastkit.core.settings import FastkitConfig
 from fastapi_fastkit.core.exceptions import CLIExceptions, TemplateExceptions
 from fastapi_fastkit.utils.transducer import copy_and_convert_template
 
@@ -85,10 +86,11 @@ def fastkit_cli(ctx: Context, debug: bool) -> Union["BaseCommand", None]:
     :param debug: parameter from CLI
     :return: None(will be wrapped with click.core.BaseCommand via @click decorator)
     """
+    settings = FastkitConfig()
+
     ctx.ensure_object(dict)
 
-    ctx.obj["DEBUG"] = debug
-    if ctx.obj["DEBUG"]:
+    if debug:
         warning_panel = Panel(
             "running at debugging mode!!",
             title="❗️ Warning ❗",
@@ -96,7 +98,11 @@ def fastkit_cli(ctx: Context, debug: bool) -> Union["BaseCommand", None]:
             highlight=True,
         )
         click.echo(print(warning_panel))
-        settings.set_debug_mode(debug_mode=ctx.obj["DEBUG"])
+        settings.set_debug_mode()
+
+    ctx.obj["settings"] = settings
+
+    setup_logging(settings=settings)
 
     return
 
@@ -121,8 +127,14 @@ def echo(ctx: Context) -> None:
     - Current Version : {__version__}
     - Github : [link]https://github.com/bnbong/FastAPI-fastkit[/link]
     """
+    settings = ctx.obj["settings"]
     description_panel = Panel(fastkit_info, title="About FastAPI-fastkit")
     click.echo(print(description_panel))
+
+    if settings.DEBUG_MODE:
+        debug_output = f"FASTKIT_PROJECT_ROOT: {settings.FASTKIT_PROJECT_ROOT}\nUSER_WORKSPACE: {settings.USER_WORKSPACE}"
+
+        click.echo(debug_output)
 
 
 @fastkit_cli.command(context_settings={"ignore_unknown_options": True})
@@ -164,6 +176,8 @@ def startproject(
     :param author_email: Author email
     :param description: Project description
     """
+    settings = ctx.obj["settings"]
+
     template_dir = settings.FASTKIT_TEMPLATE_ROOT
     target_template = os.path.join(template_dir, template)
     print(f"Template path: {target_template}")

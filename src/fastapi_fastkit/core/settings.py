@@ -15,9 +15,9 @@ class FastkitConfig:
     FASTKIT_PROJECT_ROOT: str = None  # default : None (will be overridden)
     FASTKIT_TEMPLATE_ROOT: str = None  # default : None (will be overridden)
     LOG_FILE_PATH: str = None  # default : None (will be overridden)
+    USER_WORKSPACE: str = None  # default : None (will be overridden)
 
     # Default Options
-    USER_WORKSPACE: str = os.getcwd()
     DEBUG_MODE: bool = False
     LOGGING_LEVEL: str = "DEBUG"
 
@@ -50,6 +50,7 @@ class FastkitConfig:
         cls.LOG_FILE_PATH = os.path.join(
             cls.FASTKIT_PROJECT_ROOT, "logs", "fastkit.log"
         )
+        cls.USER_WORKSPACE = os.getcwd()
 
         # Validate the configurations
         cls._validate()
@@ -61,13 +62,16 @@ class FastkitConfig:
         Raises an error if validation fails.
         """
         if not cls.FASTKIT_PROJECT_ROOT or not os.path.isdir(cls.FASTKIT_PROJECT_ROOT):
-            raise BackendExceptions("FASTKIT_PROJECT_ROOT is not allocated to valid directory.")
+            raise BackendExceptions(
+                "FASTKIT_PROJECT_ROOT is not allocated to valid directory."
+            )
 
         if not cls.FASTKIT_TEMPLATE_ROOT or not os.path.isdir(cls.FASTKIT_PROJECT_ROOT):
-            raise BackendExceptions("FASTKIT_TEMPLATE_ROOT is not allocated to valid directory.")
+            raise BackendExceptions(
+                "FASTKIT_TEMPLATE_ROOT is not allocated to valid directory."
+            )
 
         if not cls.LOG_FILE_PATH or not os.path.isdir(cls.FASTKIT_PROJECT_ROOT):
-            raise BackendExceptions("LOG_FILE_PATH is not allocated to valid directory.")
-
-
-settings = FastkitConfig()
+            raise BackendExceptions(
+                "LOG_FILE_PATH is not allocated to valid directory."
+            )

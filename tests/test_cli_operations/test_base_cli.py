@@ -16,9 +16,12 @@ class TestCLI:
         pass
 
     def test_echo(self, console) -> None:
-        result = self.runner.invoke(fastkit_cli, ["echo"], terminal_width=80)  # type: ignore
+        # given
 
-        print(result.output)
+        # when
+        result = self.runner.invoke(fastkit_cli, ["echo"])  # type: ignore
+
+        # then
         assert (
             "╭─────────────────────────── About FastAPI-fastkit ────────────────────────────╮"
             in result.output

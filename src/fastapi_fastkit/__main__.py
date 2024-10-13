@@ -5,4 +5,4 @@
 # --------------------------------------------------------------------------
 from cli import fastkit_cli
 
-fastkit_cli(obj={})
+fastkit_cli()
