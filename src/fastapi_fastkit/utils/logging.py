@@ -13,7 +13,9 @@ from rich.logging import RichHandler
 from fastapi_fastkit.core.settings import FastkitConfig
 
 
-def setup_logging(settings: FastkitConfig, terminal_width: Union[int, None] = None) -> None:
+def setup_logging(
+    settings: FastkitConfig, terminal_width: Union[int, None] = None
+) -> None:
     logger = logging.getLogger("fastapi-fastkit")
     console = Console(width=terminal_width) if terminal_width else None
     formatter = logging.Formatter("%(message)s")
