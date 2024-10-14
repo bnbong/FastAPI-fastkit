@@ -52,13 +52,20 @@ class TestCLI:
         result = self.runner.invoke(
             fastkit_cli,  # type: ignore
             ["startproject", "fastapi-default"],
-            input='\n'.join(["test-project", "bnbong", "bbbong9@gmail.com", "test project"]),
+            input="\n".join(
+                ["test-project", "bnbong", "bbbong9@gmail.com", "test project"]
+            ),
         )
 
         # then
-        project_path = Path(temp_dir) / "fastapi-default"  # TODO : change this after adding folder naming feature.
+        project_path = (
+            Path(temp_dir) / "fastapi-default"
+        )  # TODO : change this after adding folder naming feature.
         assert project_path.exists() and project_path.is_dir()
-        assert f"FastAPI project 'test-project' from 'fastapi-default' has been created and saved to {temp_dir}!" in result.output
+        assert (
+            f"FastAPI project 'test-project' from 'fastapi-default' has been created and saved to {temp_dir}!"
+            in result.output
+        )
 
         expected_files = ["main.py", "setup.py"]
         for file in expected_files:

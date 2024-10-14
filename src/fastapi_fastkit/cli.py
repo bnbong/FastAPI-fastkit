@@ -4,6 +4,7 @@
 #
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
+import re
 import os
 import click
 
@@ -29,6 +30,31 @@ logger = getLogger(__name__)
 # --------------------------------------------------------------------------
 # Backend operators
 # --------------------------------------------------------------------------
+REGEX = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b"
+
+
+def validate_email(ctx, param, value):
+    """
+    Check if the provided email is in a valid format.
+    This will recursively loop until a valid email input entry is given.
+
+    :param ctx: context of passing configurations (NOT specify it at CLI)
+    :type ctx: <Object click.Context>
+    :param param: parameters from CLI
+    :param value: values from CLI
+    :return:
+    """
+    try:
+        if not re.match(REGEX, value):
+            raise ValueError(value)
+        else:
+            return value
+    except ValueError as e:
+        click.echo("Incorrect email address given: {}".format(e))
+        value = click.prompt(param.prompt)
+        return validate_email(ctx, param, value)
+
+
 def _inject_project_metadata(
     target_dir: str,
     project_name: str,
@@ -71,11 +97,27 @@ def _inject_project_metadata(
         raise TemplateExceptions("ERROR : Having some errors with injecting metadata")
 
 
+def _print_version(ctx: Context, value: click.Option, *args, **kwargs) -> None:
+    # TODO : apply this at fastapi-cli group
+    """
+    print current version of fastapi-fastkit
+
+    :param ctx: context of passing configurations (NOT specify it at CLI)
+    :type ctx: <Object click.Context>
+    """
+    if value:
+        version_info = f"fastapi-fastkit version {__version__}"
+        click.echo(print(version_info))
+        ctx.exit()
+
+
 # --------------------------------------------------------------------------
 # Click operator methods
 # --------------------------------------------------------------------------
 @click.group()
 @click.option("--debug/--no-debug", default=False)
+# @click.option('--version', callback=_print_version,
+#               expose_value=False)
 @click.pass_context
 def fastkit_cli(ctx: Context, debug: bool) -> Union["BaseCommand", None]:
     """
@@ -138,7 +180,7 @@ def echo(ctx: Context) -> None:
 
 
 @fastkit_cli.command(context_settings={"ignore_unknown_options": True})
-@click.argument("template")
+@click.argument("template", default="fastapi-default")
 @click.option(
     "--project-name",
     prompt="Enter the project name",
@@ -151,6 +193,8 @@ def echo(ctx: Context) -> None:
     "--author-email",
     prompt="Enter the author email",
     help="The email of the project author.",
+    type=str,
+    callback=validate_email,
 )
 @click.option(
     "--description",
@@ -166,6 +210,7 @@ def startproject(
     author_email: str,
     description: str,
 ) -> None:
+    # TODO : add a feature - name project folder name to project_name
     """
     Create a new FastAPI project from templates and inject metadata.
 
@@ -179,6 +224,7 @@ def startproject(
     settings = ctx.obj["settings"]
 
     template_dir = settings.FASTKIT_TEMPLATE_ROOT
+    click.echo(f"Deploying FastAPI project using '{template}' template")
     target_template = os.path.join(template_dir, template)
     print(f"Template path: {target_template}")
 
@@ -186,6 +232,15 @@ def startproject(
         raise CLIExceptions(
             f"Error: Template '{template}' does not exist in '{template_dir}'."
         )
+    # TODO : add confirm step : checking template stack & name & metadata, confirm it y/n
+    # click.echo("Project Stack: [FastAPI, Uvicorn, SQLAlchemy, Docker (optional)]")
+
+    confirm = click.confirm(
+        "\nDo you want to proceed with project creation?", default=False
+    )
+    if not confirm:
+        click.echo("Project creation aborted!")
+        return
 
     try:
         user_local = settings.USER_WORKSPACE
@@ -193,8 +248,12 @@ def startproject(
 
         click.echo(f"Project Name: {project_name}")
 
-        # TODO : add confirm step : checking template stack & name & metadata, confirm it y/n
-        # click.echo("Project Stack: [FastAPI, Uvicorn, SQLAlchemy, Docker (optional)]")
+        confirm = click.confirm(
+            "\nDo you want to proceed with project creation?", default=False
+        )
+        if not confirm:
+            click.echo("Project creation aborted!")
+            return
 
         copy_and_convert_template(target_template, user_local)
 
