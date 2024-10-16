@@ -53,13 +53,13 @@ class TestCLI:
             fastkit_cli,  # type: ignore
             ["startproject", "fastapi-default"],
             input="\n".join(
-                ["test-project", "bnbong", "bbbong9@gmail.com", "test project"]
+                ["test-project", "bnbong", "bbbong9@gmail.com", "test project", "Y"]
             ),
         )
 
         # then
         project_path = (
-            Path(temp_dir) / "fastapi-default"
+            Path(temp_dir) / "test-project"
         )  # TODO : change this after adding folder naming feature.
         assert project_path.exists() and project_path.is_dir()
         assert (

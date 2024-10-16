@@ -97,27 +97,12 @@ def _inject_project_metadata(
         raise TemplateExceptions("ERROR : Having some errors with injecting metadata")
 
 
-def _print_version(ctx: Context, value: click.Option, *args, **kwargs) -> None:
-    # TODO : apply this at fastapi-cli group
-    """
-    print current version of fastapi-fastkit
-
-    :param ctx: context of passing configurations (NOT specify it at CLI)
-    :type ctx: <Object click.Context>
-    """
-    if value:
-        version_info = f"fastapi-fastkit version {__version__}"
-        click.echo(print(version_info))
-        ctx.exit()
-
-
 # --------------------------------------------------------------------------
 # Click operator methods
 # --------------------------------------------------------------------------
 @click.group()
 @click.option("--debug/--no-debug", default=False)
-# @click.option('--version', callback=_print_version,
-#               expose_value=False)
+@click.version_option(__version__, prog_name="fastapi-fastkit")
 @click.pass_context
 def fastkit_cli(ctx: Context, debug: bool) -> Union["BaseCommand", None]:
     """
@@ -233,6 +218,10 @@ def startproject(
             f"Error: Template '{template}' does not exist in '{template_dir}'."
         )
     # TODO : add confirm step : checking template stack & name & metadata, confirm it y/n
+    click.echo(f"\nProject Name: {project_name}")
+    click.echo(f"Author: {author}")
+    click.echo(f"Author Email: {author_email}")
+    click.echo(f"Description: {description}")
     # click.echo("Project Stack: [FastAPI, Uvicorn, SQLAlchemy, Docker (optional)]")
 
     confirm = click.confirm(
@@ -244,23 +233,16 @@ def startproject(
 
     try:
         user_local = settings.USER_WORKSPACE
+        project_dir = os.path.join(user_local, project_name)
+
         click.echo(f"FastAPI template project will deploy at '{user_local}'")
 
-        click.echo(f"Project Name: {project_name}")
+        copy_and_convert_template(target_template, project_dir, project_name)
 
-        confirm = click.confirm(
-            "\nDo you want to proceed with project creation?", default=False
-        )
-        if not confirm:
-            click.echo("Project creation aborted!")
-            return
-
-        copy_and_convert_template(target_template, user_local)
-
-        _new_user_local = os.path.join(user_local, template)
+        # _new_user_local = os.path.join(user_local, template)
 
         _inject_project_metadata(
-            _new_user_local, project_name, author, author_email, description
+            project_dir, project_name, author, author_email, description
         )
 
         click.echo(

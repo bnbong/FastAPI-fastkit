@@ -26,18 +26,21 @@ def _convert_tpl_to_real_extension(file_path: str) -> str:
     return file_path
 
 
-def copy_and_convert_template(template_dir: str, target_dir: str) -> None:
+def copy_and_convert_template(template_dir: str, target_dir: str, project_name: str = None) -> None:
     """
     Copies all files from the template directory to the target directory,
     converting any files ending in `.*-tpl` during the copy process.
 
+    :param project_name: name of new project user defined at CLI.
     :param template_dir: The source directory containing the template files.
     :type template_dir: str
     :param target_dir: The destination directory where files will be copied.
     :type target_dir: str
     """
     template_name = os.path.basename(template_dir)
-    target_path = os.path.join(target_dir, template_name)
+    if project_name is None:
+        project_name = template_name
+    target_path = os.path.join(target_dir, project_name)
     os.makedirs(target_path, exist_ok=True)
 
     for root, dirs, files in os.walk(template_dir):
