@@ -26,7 +26,9 @@ def _convert_tpl_to_real_extension(file_path: str) -> str:
     return file_path
 
 
-def copy_and_convert_template(template_dir: str, target_dir: str, project_name: str = None) -> None:
+def copy_and_convert_template(
+    template_dir: str, target_dir: str, project_name: str = ""
+) -> None:
     """
     Copies all files from the template directory to the target directory,
     converting any files ending in `.*-tpl` during the copy process.

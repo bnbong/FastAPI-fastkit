@@ -8,7 +8,7 @@ import re
 import os
 import click
 
-from typing import Union
+from typing import Union, Any
 
 from logging import getLogger
 
@@ -22,6 +22,7 @@ from fastapi_fastkit.utils.logging import setup_logging
 from fastapi_fastkit.core.settings import FastkitConfig
 from fastapi_fastkit.core.exceptions import CLIExceptions, TemplateExceptions
 from fastapi_fastkit.utils.transducer import copy_and_convert_template
+from fastapi_fastkit.utils.inspector import delete_project
 
 
 logger = getLogger(__name__)
@@ -33,7 +34,7 @@ logger = getLogger(__name__)
 REGEX = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b"
 
 
-def validate_email(ctx, param, value):
+def validate_email(ctx: Context, param: Any, value: Any) -> Any:
     """
     Check if the provided email is in a valid format.
     This will recursively loop until a valid email input entry is given.
@@ -131,7 +132,7 @@ def fastkit_cli(ctx: Context, debug: bool) -> Union["BaseCommand", None]:
 
     setup_logging(settings=settings)
 
-    return
+    return None
 
 
 @fastkit_cli.command()
@@ -239,8 +240,6 @@ def startproject(
 
         copy_and_convert_template(target_template, project_dir, project_name)
 
-        # _new_user_local = os.path.join(user_local, template)
-
         _inject_project_metadata(
             project_dir, project_name, author, author_email, description
         )
@@ -253,10 +252,34 @@ def startproject(
 
 
 @fastkit_cli.command()
+@click.argument("project_name")
 @click.pass_context
-def deleteproject(ctx: Context) -> None:
-    # TODO : implement this
-    pass
+def deleteproject(ctx: Context, project_name: str) -> None:
+    settings = ctx.obj["settings"]
+
+    user_local = settings.USER_WORKSPACE
+    project_dir = os.path.join(user_local, project_name)
+
+    if not os.path.exists(project_dir):
+        click.echo(f"Error: Project '{project_name}' does not exist at '{user_local}'.")
+        return
+
+    confirm = click.confirm(
+        f"\nAre you sure you want to delete the project '{project_name}' at '{project_dir}'?",
+        default=False,
+    )
+    if not confirm:
+        click.echo("Project deletion aborted!")
+        return
+
+    try:
+        # TODO : adjust this
+        delete_project(project_dir)
+        click.echo(
+            f"Project '{project_name}' has been successfully deleted from '{user_local}'."
+        )
+    except Exception as e:
+        click.echo(f"Error during project deletion: {e}")
 
 
 @fastkit_cli.command()

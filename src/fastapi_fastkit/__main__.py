@@ -3,6 +3,6 @@
 #
 # @author bnbong
 # --------------------------------------------------------------------------
-from cli import fastkit_cli
+from fastapi_fastkit.cli import fastkit_cli
 
 fastkit_cli()

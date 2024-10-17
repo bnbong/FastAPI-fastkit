@@ -12,10 +12,10 @@ from .exceptions import BackendExceptions
 
 class FastkitConfig:
     # Overridable values
-    FASTKIT_PROJECT_ROOT: str = None  # default : None (will be overridden)
-    FASTKIT_TEMPLATE_ROOT: str = None  # default : None (will be overridden)
-    LOG_FILE_PATH: str = None  # default : None (will be overridden)
-    USER_WORKSPACE: str = None  # default : None (will be overridden)
+    FASTKIT_PROJECT_ROOT: str = ""  # default : None (will be overridden)
+    FASTKIT_TEMPLATE_ROOT: str = ""  # default : None (will be overridden)
+    LOG_FILE_PATH: str = ""  # default : None (will be overridden)
+    USER_WORKSPACE: str = ""  # default : None (will be overridden)
 
     # Default Options
     DEBUG_MODE: bool = False
@@ -38,7 +38,7 @@ class FastkitConfig:
         return Path(__file__).parent.parent.parent.parent
 
     @classmethod
-    def __init__(cls):
+    def __init__(cls) -> None:
         """
         Initialize the configuration by performing important checks and setups.
         Override directories to correct position.
