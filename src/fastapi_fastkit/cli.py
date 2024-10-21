@@ -196,7 +196,6 @@ def startproject(
     author_email: str,
     description: str,
 ) -> None:
-    # TODO : add a feature - name project folder name to project_name
     """
     Create a new FastAPI project from templates and inject metadata.
 
@@ -218,12 +217,11 @@ def startproject(
         raise CLIExceptions(
             f"Error: Template '{template}' does not exist in '{template_dir}'."
         )
-    # TODO : add confirm step : checking template stack & name & metadata, confirm it y/n
     click.echo(f"\nProject Name: {project_name}")
     click.echo(f"Author: {author}")
     click.echo(f"Author Email: {author_email}")
     click.echo(f"Description: {description}")
-    # click.echo("Project Stack: [FastAPI, Uvicorn, SQLAlchemy, Docker (optional)]")
+    # click.echo("Project Stack: [FastAPI, Uvicorn, SQLAlchemy, Docker (optional)]")  # TODO : impl this?
 
     confirm = click.confirm(
         "\nDo you want to proceed with project creation?", default=False
@@ -238,7 +236,7 @@ def startproject(
 
         click.echo(f"FastAPI template project will deploy at '{user_local}'")
 
-        copy_and_convert_template(target_template, project_dir, project_name)
+        copy_and_convert_template(target_template, user_local, project_name)
 
         _inject_project_metadata(
             project_dir, project_name, author, author_email, description

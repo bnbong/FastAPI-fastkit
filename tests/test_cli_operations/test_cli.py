@@ -60,7 +60,7 @@ class TestCLI:
         # then
         project_path = (
             Path(temp_dir) / "test-project"
-        )  # TODO : change this after adding folder naming feature.
+        )
         assert project_path.exists() and project_path.is_dir()
         assert (
             f"FastAPI project 'test-project' from 'fastapi-default' has been created and saved to {temp_dir}!"
@@ -85,3 +85,39 @@ class TestCLI:
             assert "test-project" in setup_py_content
             assert "bnbong" in setup_py_content
             assert "bbbong9@gmail.com" in setup_py_content
+
+    def test_deleteproject(self, temp_dir) -> None:
+        # given
+        os.chdir(temp_dir)
+        project_name = "test-project"
+        result = self.runner.invoke(
+            fastkit_cli,  # type: ignore
+            ["startproject", "fastapi-default"],
+            input="\n".join(
+                [project_name, "bnbong", "bbbong9@gmail.com", "test project", "Y"]
+            ),
+        )
+        project_path = (
+                Path(temp_dir) / project_name
+        )
+        assert project_path.exists() and project_path.is_dir()
+        assert (
+                f"FastAPI project '{project_name}' from 'fastapi-default' has been created and saved to {temp_dir}!"
+                in result.output
+        )
+
+        expected_files = ["main.py", "setup.py"]
+        for file in expected_files:
+            file_path = project_path / file
+            assert file_path.exists() and file_path.is_file()
+
+        # when
+        result = self.runner.invoke(
+            fastkit_cli,  # type: ignore
+            ["deleteproject", project_name],
+            input="Y",
+        )
+
+        # then
+        assert f"Project '{project_name}' has been successfully deleted" in result.output
+        assert not project_path.exists()
