@@ -44,14 +44,14 @@ class TestCLI:
             in result.output
         )
 
-    def test_startproject(self, temp_dir) -> None:
+    def test_startup(self, temp_dir) -> None:
         # given
         os.chdir(temp_dir)
 
         # when
         result = self.runner.invoke(
             fastkit_cli,  # type: ignore
-            ["startproject", "fastapi-default"],
+            ["startup", "fastapi-default"],
             input="\n".join(
                 ["test-project", "bnbong", "bbbong9@gmail.com", "test project", "Y"]
             ),
@@ -92,7 +92,7 @@ class TestCLI:
         project_name = "test-project"
         result = self.runner.invoke(
             fastkit_cli,  # type: ignore
-            ["startproject", "fastapi-default"],
+            ["startup", "fastapi-default"],
             input="\n".join(
                 [project_name, "bnbong", "bbbong9@gmail.com", "test project", "Y"]
             ),

@@ -165,6 +165,16 @@ def echo(ctx: Context) -> None:
         click.echo(debug_output)
 
 
+@fastkit_cli.command()
+def list() -> None:
+    # TODO : impl this
+    """
+    Get available templates list.
+    :return: None
+    """
+    pass
+
+
 @fastkit_cli.command(context_settings={"ignore_unknown_options": True})
 @click.argument("template", default="fastapi-default")
 @click.option(
@@ -188,7 +198,7 @@ def echo(ctx: Context) -> None:
     help="The description of the new FastAPI project.",
 )
 @click.pass_context
-def startproject(
+def startup(
     ctx: Context,
     template: str,
     project_name: str,
@@ -205,6 +215,7 @@ def startproject(
     :param author: Author name
     :param author_email: Author email
     :param description: Project description
+    :return: None
     """
     settings = ctx.obj["settings"]
 
@@ -249,10 +260,21 @@ def startproject(
         click.echo(f"Error during project creation: {e}")
 
 
+@fastkit_cli.command(context_settings={"ignore_unknown_options": True})
+def startproject() -> None:
+    # TODO : impl this, add a stack selecting process?
+    """
+    Start a empty FastAPI project.
+    :return:
+    """
+    pass
+
+
 @fastkit_cli.command()
 @click.argument("project_name")
 @click.pass_context
 def deleteproject(ctx: Context, project_name: str) -> None:
+    # TODO : add checking step - if target project is not from fastkit, discard the attempt.
     settings = ctx.obj["settings"]
 
     user_local = settings.USER_WORKSPACE
