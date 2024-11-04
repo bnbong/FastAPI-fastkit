@@ -4,11 +4,10 @@
 #
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
-import re
 import os
 import click
 
-from typing import Union, Any
+from typing import Union
 
 from logging import getLogger
 
@@ -18,9 +17,10 @@ from rich import print
 from rich.panel import Panel
 
 from . import __version__
+from .backend import validate_email, inject_project_metadata, read_template_stack
 from fastapi_fastkit.utils.logging import setup_logging
 from fastapi_fastkit.core.settings import FastkitConfig
-from fastapi_fastkit.core.exceptions import CLIExceptions, TemplateExceptions
+from fastapi_fastkit.core.exceptions import CLIExceptions
 from fastapi_fastkit.utils.transducer import copy_and_convert_template
 from fastapi_fastkit.utils.inspector import delete_project
 
@@ -28,79 +28,6 @@ from fastapi_fastkit.utils.inspector import delete_project
 logger = getLogger(__name__)
 
 
-# --------------------------------------------------------------------------
-# Backend operators
-# --------------------------------------------------------------------------
-REGEX = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b"
-
-
-def validate_email(ctx: Context, param: Any, value: Any) -> Any:
-    """
-    Check if the provided email is in a valid format.
-    This will recursively loop until a valid email input entry is given.
-
-    :param ctx: context of passing configurations (NOT specify it at CLI)
-    :type ctx: <Object click.Context>
-    :param param: parameters from CLI
-    :param value: values from CLI
-    :return:
-    """
-    try:
-        if not re.match(REGEX, value):
-            raise ValueError(value)
-        else:
-            return value
-    except ValueError as e:
-        click.echo("Incorrect email address given: {}".format(e))
-        value = click.prompt(param.prompt)
-        return validate_email(ctx, param, value)
-
-
-def _inject_project_metadata(
-    target_dir: str,
-    project_name: str,
-    author: str,
-    author_email: str,
-    description: str,
-) -> None:
-    """
-    Inject metadata into the main.py and setup.py files.
-
-    :param target_dir: Directory for the new project to deploy
-    :param project_name: new project name
-    :param author: cli username
-    :param author_email: cli user email
-    :param description: new project description
-    """
-    main_py_path = os.path.join(target_dir, "main.py")
-    setup_py_path = os.path.join(target_dir, "setup.py")
-
-    try:
-        with open(main_py_path, "r+") as f:
-            content = f.read()
-            content = content.replace("app_title", f'"{project_name}"')
-            content = content.replace("app_description", f'"{description}"')
-            f.seek(0)
-            f.write(content)
-            f.truncate()
-
-        with open(setup_py_path, "r+") as f:
-            content = f.read()
-            content = content.replace("<project_name>", project_name, 1)
-            content = content.replace("<description>", description, 1)
-            content = content.replace("<author>", author, 1)
-            content = content.replace("<author_email>", author_email, 1)
-            f.seek(0)
-            f.write(content)
-            f.truncate()
-    except Exception as e:
-        click.echo(e)
-        raise TemplateExceptions("ERROR : Having some errors with injecting metadata")
-
-
-# --------------------------------------------------------------------------
-# Click operator methods
-# --------------------------------------------------------------------------
 @click.group()
 @click.option("--debug/--no-debug", default=False)
 @click.version_option(__version__, prog_name="fastapi-fastkit")
@@ -232,6 +159,7 @@ def startup(
     click.echo(f"Author: {author}")
     click.echo(f"Author Email: {author_email}")
     click.echo(f"Description: {description}")
+    read_template_stack()
     # click.echo("Project Stack: [FastAPI, Uvicorn, SQLAlchemy, Docker (optional)]")  # TODO : impl this?
 
     confirm = click.confirm(
@@ -249,7 +177,7 @@ def startup(
 
         copy_and_convert_template(target_template, user_local, project_name)
 
-        _inject_project_metadata(
+        inject_project_metadata(
             project_dir, project_name, author, author_email, description
         )
 
