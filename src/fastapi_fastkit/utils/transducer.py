@@ -66,4 +66,5 @@ def copy_and_convert_template(
 
 def _convert_real_extension_to_tpl() -> None:
     # TODO : impl this for converting runnable FastAPI app code to template - debugging operation for contributors
+    # this will be used at inspector module, not package user's runtime.
     pass
