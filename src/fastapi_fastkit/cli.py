@@ -6,6 +6,7 @@
 # --------------------------------------------------------------------------
 import os
 import click
+import subprocess
 
 from typing import Union
 
@@ -231,14 +232,54 @@ def deleteproject(ctx: Context, project_name: str) -> None:
 
 
 @fastkit_cli.command()
+@click.option(
+    "--host",
+    default="127.0.0.1",
+    show_default=True,
+    help="The host to bind the server to.",
+)
+@click.option(
+    "--port",
+    default=8000,
+    show_default=True,
+    help="The port to bind the server to.",
+)
+@click.option(
+    "--reload/--no-reload",
+    default=True,
+    show_default=True,
+    help="Enable or disable auto-reloading on code changes.",
+)
 @click.pass_context
-def runserver(ctx: Context) -> None:
+def runserver(ctx: Context, host: str = '127.0.0.1', port: int = 8000, reload: bool = True) -> None:
+    # TODO : add & apply click option
+    # TODO : edit template 'fastapi-default'. fix modules
     """
-    Run FastAPI template server at CLI
+    Run the FastAPI server for the current project.
 
-    :param ctx: context of passing configurations (NOT specify it at CLI)
-    :type ctx: <Object click.Context>
+    :param ctx: Click context object
+    :param host: Host address to bind the server to
+    :param port: Port number to bind the server to
+    :param reload: Enable or disable auto-reload
     :return: None
     """
-    # TODO : implement this using fastapi-cli?
-    pass
+    settings = ctx.obj["settings"]
+    project_dir = settings.USER_WORKSPACE
+
+    app_path = os.path.join(project_dir, "main.py")
+    if not os.path.exists(app_path):
+        click.echo(f"Error: No 'main.py' found in the project directory '{project_dir}'.")
+        return
+
+    # TODO : edit this - add click's params
+    command = [
+        "fastapi",
+        "dev",
+        "main.py"
+    ]
+
+    try:
+        click.echo(f"Starting FastAPI server at {host}:{port}...")
+        subprocess.run(command, check=True)
+    except subprocess.CalledProcessError as e:
+        click.echo(f"Error: Failed to start the FastAPI server.\n{e}")
