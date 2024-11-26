@@ -58,9 +58,7 @@ class TestCLI:
         )
 
         # then
-        project_path = (
-            Path(temp_dir) / "test-project"
-        )
+        project_path = Path(temp_dir) / "test-project"
         assert project_path.exists() and project_path.is_dir()
         assert (
             f"FastAPI project 'test-project' from 'fastapi-default' has been created and saved to {temp_dir}!"
@@ -97,13 +95,11 @@ class TestCLI:
                 [project_name, "bnbong", "bbbong9@gmail.com", "test project", "Y"]
             ),
         )
-        project_path = (
-                Path(temp_dir) / project_name
-        )
+        project_path = Path(temp_dir) / project_name
         assert project_path.exists() and project_path.is_dir()
         assert (
-                f"FastAPI project '{project_name}' from 'fastapi-default' has been created and saved to {temp_dir}!"
-                in result.output
+            f"FastAPI project '{project_name}' from 'fastapi-default' has been created and saved to {temp_dir}!"
+            in result.output
         )
 
         expected_files = ["main.py", "setup.py"]
@@ -119,5 +115,7 @@ class TestCLI:
         )
 
         # then
-        assert f"Project '{project_name}' has been successfully deleted" in result.output
+        assert (
+            f"Project '{project_name}' has been successfully deleted" in result.output
+        )
         assert not project_path.exists()

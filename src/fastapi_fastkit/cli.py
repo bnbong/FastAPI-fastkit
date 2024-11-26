@@ -94,7 +94,7 @@ def echo(ctx: Context) -> None:
 
 
 @fastkit_cli.command()
-def list() -> None:
+def list_templates() -> None:
     # TODO : impl this
     """
     Get available templates list.
@@ -191,7 +191,7 @@ def startup(
 
 @fastkit_cli.command(context_settings={"ignore_unknown_options": True})
 def startproject() -> None:
-    # TODO : impl this, add a stack selecting process?
+    # TODO : impl this. this method includes a stack selecting process. when user select a stack, it will be auto installed at venv environment, and make list of installed dependencies at requirements.txt file.
     """
     Start a empty FastAPI project.
     :return:
@@ -251,7 +251,9 @@ def deleteproject(ctx: Context, project_name: str) -> None:
     help="Enable or disable auto-reloading on code changes.",
 )
 @click.pass_context
-def runserver(ctx: Context, host: str = '127.0.0.1', port: int = 8000, reload: bool = True) -> None:
+def runserver(
+    ctx: Context, host: str = "127.0.0.1", port: int = 8000, reload: bool = True
+) -> None:
     # TODO : add & apply click option
     # TODO : edit template 'fastapi-default'. fix modules
     """
@@ -268,15 +270,13 @@ def runserver(ctx: Context, host: str = '127.0.0.1', port: int = 8000, reload: b
 
     app_path = os.path.join(project_dir, "main.py")
     if not os.path.exists(app_path):
-        click.echo(f"Error: No 'main.py' found in the project directory '{project_dir}'.")
+        click.echo(
+            f"Error: No 'main.py' found in the project directory '{project_dir}'."
+        )
         return
 
     # TODO : edit this - add click's params
-    command = [
-        "fastapi",
-        "dev",
-        "main.py"
-    ]
+    command = ["fastapi", "dev", "main.py"]
 
     try:
         click.echo(f"Starting FastAPI server at {host}:{port}...")
