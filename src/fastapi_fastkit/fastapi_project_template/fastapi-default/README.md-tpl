@@ -1,0 +1,17 @@
+# Simple FastAPI Project
+
+This is a test project using FastAPI. It is a RESTful API server with user management functionality.
+
+## Features
+
+- User Creation, Read, Update, Delete (CRUD) functionality
+- Automatic OpenAPI documentation generation (Swagger UI, ReDoc)
+- Custom exception handling
+- Test environment with mock data
+
+## Stack
+
+- Python 3.11+
+- FastAPI 0.111.1
+- Pydantic 2.8.2
+- pytest 8.2.2

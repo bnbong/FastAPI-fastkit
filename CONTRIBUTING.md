@@ -48,7 +48,7 @@ FastAPI-fastkit uses following stacks:
 
 (content will be added later)
 (this block will contain about dependancy settings using virtual env, project tree, file extension of all sources(must end with .py-tpl),
-README.md writing guide(using [PROJECT_README_TEMPLATE.md](fastapi-project-template/PROJECT_README_TEMPLATE.md) template), foldering, other third party config, etc...)
+README.md writing guide(using [PROJECT_README_TEMPLATE.md](src/fastapi_fastkit/fastapi_project_template/PROJECT_README_TEMPLATE.md) template), foldering, other third party config, etc...)
 
 ## Additional note
 

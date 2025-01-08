@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FastAPI Test Project</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px auto;
+            max-width: 800px;
+            padding: 0 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .description {
+            color: #666;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to FastAPI Test Project</h1>
+    <p class="description">This is a test project using FastAPI framework.</p>
+    <p class="description">API Documentation: <a href="/docs">Swagger UI</a> | <a href="/redoc">ReDoc</a></p>
+</body>
+</html>

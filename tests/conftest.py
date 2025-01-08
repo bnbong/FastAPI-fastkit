@@ -16,7 +16,9 @@ def temp_dir():
     Fixture that creates a temporary directory for test cases and yields its path.
     After tests are done, the directory is removed.
     """
-    current_workspace = os.getcwd()
+    current_workspace = os.path.dirname(
+        os.path.abspath(__file__)
+    )  # use test/ directory as workspace
     temp_dir = os.path.join(current_workspace, "temp_test_workspace")
     os.makedirs(temp_dir, exist_ok=True)
     yield temp_dir

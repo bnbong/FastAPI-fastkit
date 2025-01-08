@@ -32,10 +32,44 @@ class FastkitConfig:
     @staticmethod
     def __get_fastapi_fastkit_root() -> Path:
         """
-        Returns the root directory of the FastAPI-fastkit project by navigating up
-        the file structure. This method dynamically finds the root.
+        Returns the root directory of the installed FastAPI-fastkit package.
+        For development: returns the project root
+        For installed package: returns the package installation directory
         """
-        return Path(__file__).parent.parent.parent.parent
+        try:
+            import fastapi_fastkit  # pylint: disable=import-outside-toplevel
+
+            package_root = Path(fastapi_fastkit.__file__).parent.parent
+            if package_root.name == "site-packages":
+                return package_root / "fastapi_fastkit"
+            return package_root
+        except ImportError:
+            # Fallback for development environment
+            return Path(__file__).parent.parent.parent.parent
+
+    @staticmethod
+    def __get_template_root() -> Path:
+        """
+        Returns the template directory of the installed FastAPI-fastkit package.
+        For development: returns the project template directory
+        For installed package: returns the package template directory
+        """
+        try:
+            import fastapi_fastkit  # pylint: disable=import-outside-toplevel
+
+            package_root = Path(fastapi_fastkit.__file__).parent
+            template_dir = package_root / "fastapi_project_template"
+            if template_dir.exists():
+                return template_dir
+            # If inside site-packages
+            if package_root.parent.name == "site-packages":
+                return (
+                    package_root.parent / "fastapi_fastkit" / "fastapi_project_template"
+                )
+            return package_root.parent / "fastapi_project_template"
+        except ImportError:
+            # Fallback for development environment
+            return Path(__file__).parent.parent / "fastapi_project_template"
 
     @classmethod
     def __init__(cls) -> None:
@@ -44,9 +78,7 @@ class FastkitConfig:
         Override directories to correct position.
         """
         cls.FASTKIT_PROJECT_ROOT = str(cls.__get_fastapi_fastkit_root())
-        cls.FASTKIT_TEMPLATE_ROOT = os.path.join(
-            cls.FASTKIT_PROJECT_ROOT, "fastapi-project-template"
-        )
+        cls.FASTKIT_TEMPLATE_ROOT = str(cls.__get_template_root())
         cls.LOG_FILE_PATH = os.path.join(
             cls.FASTKIT_PROJECT_ROOT, "logs", "fastkit.log"
         )
@@ -71,7 +103,6 @@ class FastkitConfig:
                 "FASTKIT_TEMPLATE_ROOT is not allocated to valid directory."
             )
 
-        if not cls.LOG_FILE_PATH or not os.path.isdir(cls.FASTKIT_PROJECT_ROOT):
-            raise BackendExceptions(
-                "LOG_FILE_PATH is not allocated to valid directory."
-            )
+        log_dir = os.path.dirname(cls.LOG_FILE_PATH)
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)

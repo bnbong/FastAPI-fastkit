@@ -6,7 +6,7 @@ from __future__ import annotations
 import logging
 
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from starlette.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from setuptools_scm import get_version
@@ -76,6 +76,10 @@ def create_app(app_settings: AppSettings, app_title: str, app_description: str) 
             status_code=exc.status,
             content=exc.to_response(path=str(request.url)).model_dump(),
         )
+
+    @app.get("/", include_in_schema=False)
+    async def root(request: Request):
+        return RedirectResponse(url="/v1/")
 
     app.include_router(router)
 

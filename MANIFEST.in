@@ -1,0 +1,4 @@
+recursive-include src/fastapi_fastkit/fastapi_project_template *
+recursive-exclude src/fastapi_fastkit/fastapi_project_template *.pyc
+recursive-exclude src/fastapi_fastkit/fastapi_project_template *.pyo
+recursive-exclude src/fastapi_fastkit/fastapi_project_template __pycache__

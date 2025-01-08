@@ -1,4 +1,3 @@
-# TODO : make logic with click(cli operation) & rich(decorate console outputs and indicate manuals)
 # --------------------------------------------------------------------------
 # The Module defines main and core CLI operations for FastAPI-fastkit.
 #
@@ -17,9 +16,17 @@ from click.core import BaseCommand, Context
 
 from rich import print
 from rich.panel import Panel
+from rich.console import Console
 
 from . import __version__
-from .backend import validate_email, inject_project_metadata
+from .backend import (
+    validate_email,
+    inject_project_metadata,
+    print_error,
+    print_success,
+    print_warning,
+    create_info_table,
+)
 from fastapi_fastkit.utils.logging import setup_logging
 from fastapi_fastkit.core.settings import FastkitConfig
 from fastapi_fastkit.core.exceptions import CLIExceptions
@@ -28,6 +35,8 @@ from fastapi_fastkit.utils.inspector import delete_project
 
 
 logger = getLogger(__name__)
+
+console = Console()
 
 
 @click.group()
@@ -48,13 +57,7 @@ def fastkit_cli(ctx: Context, debug: bool) -> Union["BaseCommand", None]:
     ctx.ensure_object(dict)
 
     if debug:
-        warning_panel = Panel(
-            "running at debugging mode!!",
-            title="❗️ Warning ❗",
-            style="yellow",
-            highlight=True,
-        )
-        click.echo(print(warning_panel))
+        print_warning("running at debugging mode!!")
         settings.set_debug_mode()
 
     ctx.obj["settings"] = settings
@@ -98,27 +101,28 @@ def echo(ctx: Context) -> None:
 def list_templates() -> None:
     """
     Display the list of available templates.
-
-    :return: None
     """
     settings = FastkitConfig()
     template_dir = settings.FASTKIT_TEMPLATE_ROOT
 
     if not os.path.exists(template_dir):
-        click.echo("Template directory not found.")
+        print_error("Template directory not found.")
         return
 
     templates = [
         d
         for d in os.listdir(template_dir)
-        if os.path.isdir(os.path.join(template_dir, d))
+        if os.path.isdir(os.path.join(template_dir, d)) and d != "__pycache__"
     ]
 
     if not templates:
-        click.echo("No available templates.")
+        print_warning("No available templates.")
         return
 
-    click.echo("\nAvailable templates:")
+    table = create_info_table(
+        "Available Templates", {template: "No description" for template in templates}
+    )
+
     for template in templates:
         template_path = os.path.join(template_dir, template)
         readme_path = os.path.join(template_path, "README.md-tpl")
@@ -130,7 +134,9 @@ def list_templates() -> None:
                 if first_line.startswith("# "):
                     description = first_line[2:]
 
-        click.echo(f"- {template}: {description}")
+        table.add_row(template, description)
+
+    console.print(table)
 
 
 @fastkit_cli.command(context_settings={"ignore_unknown_options": True})
@@ -183,21 +189,29 @@ def startup(
     print(f"Template path: {target_template}")
 
     if not os.path.exists(target_template):
+        print_error(f"Template '{template}' does not exist in '{template_dir}'.")
         raise CLIExceptions(
-            f"Error: Template '{template}' does not exist in '{template_dir}'."
+            f"Template '{template}' does not exist in '{template_dir}'."
         )
-    click.echo(f"\nProject Name: {project_name}")
-    click.echo(f"Author: {author}")
-    click.echo(f"Author Email: {author_email}")
-    click.echo(f"Description: {description}")
-    # read_template_stack()
+    table = create_info_table(
+        "Project Information",
+        {
+            "Project Name": project_name,
+            "Author": author,
+            "Author Email": author_email,
+            "Description": description,
+        },
+    )
+
+    console.print("\n")
+    console.print(table)
     # click.echo("Project Stack: [FastAPI, Uvicorn, SQLAlchemy, Docker (optional)]")  # TODO : impl this?
 
     confirm = click.confirm(
         "\nDo you want to proceed with project creation?", default=False
     )
     if not confirm:
-        click.echo("Project creation aborted!")
+        print_error("Project creation aborted!")
         return
 
     try:
@@ -212,11 +226,12 @@ def startup(
             project_dir, project_name, author, author_email, description
         )
 
-        click.echo(
+        print_success(
             f"FastAPI project '{project_name}' from '{template}' has been created and saved to {user_local}!"
         )
+
     except Exception as e:
-        click.echo(f"Error during project creation: {e}")
+        print_error(f"Error during project creation: {e}")
 
 
 @fastkit_cli.command(context_settings={"ignore_unknown_options": True})
@@ -244,11 +259,15 @@ def startproject(project_name: str, stack: str) -> None:
     project_dir = os.path.join(settings.USER_WORKSPACE, project_name)
 
     if os.path.exists(project_dir):
-        click.echo(f"Error: Project '{project_name}' already exists.")
+        print_error(f"Error: Project '{project_name}' already exists.")
         return
 
     try:
         os.makedirs(project_dir)
+
+        table = create_info_table(
+            f"Creating Project: {project_name}", {"Component": "Status"}
+        )
 
         dependencies = {
             "minimal": ["fastapi", "uvicorn"],
@@ -268,15 +287,23 @@ def startproject(project_name: str, stack: str) -> None:
         with open(os.path.join(project_dir, "requirements.txt"), "w") as f:
             for dep in dependencies[stack]:
                 f.write(f"{dep}\n")
+                table.add_row(dep, "✓")
 
-        click.echo("Creating virtual environment and installing dependencies...")
-        subprocess.run(["python", "-m", "venv", os.path.join(project_dir, "venv")])
-        subprocess.run(["pip", "install", "-r", "requirements.txt"], cwd=project_dir)
+        console.print(table)
 
-        click.echo(f"Project '{project_name}' has been created successfully!")
+        with console.status("[bold green]Setting up project environment..."):
+            console.print("[yellow]Creating virtual environment...[/yellow]")
+            subprocess.run(["python", "-m", "venv", os.path.join(project_dir, "venv")])
+
+            console.print("[yellow]Installing dependencies...[/yellow]")
+            subprocess.run(
+                ["pip", "install", "-r", "requirements.txt"], cwd=project_dir
+            )
+
+        print_success(f"Project '{project_name}' has been created successfully!")
 
     except Exception as e:
-        click.echo(f"Error during project creation: {e}")
+        print_error(f"Error during project creation: {e}")
         shutil.rmtree(project_dir, ignore_errors=True)
 
 
@@ -316,11 +343,11 @@ def deleteproject(ctx: Context, project_name: str) -> None:
     project_dir = os.path.join(user_local, project_name)
 
     if not os.path.exists(project_dir):
-        click.echo(f"Error: Project '{project_name}' does not exist in '{user_local}'.")
+        print_error(f"Project '{project_name}' does not exist in '{user_local}'.")
         return
 
     if not is_fastkit_project(project_dir):
-        click.echo(f"Error: '{project_name}' is not a FastAPI-fastkit project.")
+        print_error(f"'{project_name}' is not a FastAPI-fastkit project.")
         return
 
     confirm = click.confirm(
@@ -328,16 +355,15 @@ def deleteproject(ctx: Context, project_name: str) -> None:
         default=False,
     )
     if not confirm:
-        click.echo("Project deletion cancelled!")
+        print_error("Project deletion cancelled!")
         return
 
     try:
         delete_project(project_dir)
-        click.echo(
-            f"Project '{project_name}' has been successfully deleted from '{user_local}'."
-        )
+        print_success(f"Project '{project_name}' has been deleted successfully!")
+
     except Exception as e:
-        click.echo(f"Error during project deletion: {e}")
+        print_error(f"Error during project deletion: {e}")
 
 
 @fastkit_cli.command()
@@ -388,7 +414,7 @@ def runserver(
 
     app_path = os.path.join(project_dir, "main.py")
     if not os.path.exists(app_path):
-        click.echo(f"Error: Could not find 'main.py' in '{project_dir}'.")
+        print_error(f"Could not find 'main.py' in '{project_dir}'.")
         return
 
     command = [
@@ -406,7 +432,7 @@ def runserver(
         command.append("--reload")
 
     try:
-        click.echo(f"Starting FastAPI server at {host}:{port}...")
+        print_success(f"Starting FastAPI server at {host}:{port}...")
         subprocess.run(command, check=True)
     except subprocess.CalledProcessError as e:
-        click.echo(f"Error: Failed to start FastAPI server.\n{e}")
+        print_error(f"Failed to start FastAPI server.\n{e}")

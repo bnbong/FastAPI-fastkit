@@ -7,38 +7,73 @@ import re
 import os
 import click
 
-from typing import Any, Union
+from typing import Any
 
 from logging import getLogger
-
 from click.core import Context
+from rich.panel import Panel
+from rich.console import Console
+from rich.text import Text
+from rich.table import Table
 
 from fastapi_fastkit.core.exceptions import TemplateExceptions
 
-
 logger = getLogger(__name__)
+
+if "PYTEST_CURRENT_TEST" in os.environ:
+    console = Console(no_color=True)
+else:
+    console = Console()
 
 REGEX = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b"
 
 
-def validate_email(ctx: Context, param: Any, value: Any) -> Any:
-    """
-    Check if the provided email is in a valid format.
-    This will recursively loop until a valid email input entry is given.
+def print_error(message: str, title: str = "Error") -> None:
+    """Print an error message with specified output style."""
+    error_text = Text()
+    error_text.append("❌ ", style="bold red")
+    error_text.append(message)
+    console.print(Panel(error_text, border_style="red", title=title))
 
-    :param ctx: context of passing configurations (NOT specify it at CLI)
-    :type ctx: <Object click.Context>
-    :param param: parameters from CLI
-    :param value: values from CLI
-    :return:
-    """
+
+def print_success(message: str, title: str = "Success") -> None:
+    """Print a success message with specified output style."""
+    success_text = Text()
+    success_text.append("✨ ", style="bold yellow")
+    success_text.append(message, style="bold green")
+    console.print(Panel(success_text, border_style="green", title=title))
+
+
+def print_warning(message: str, title: str = "Warning") -> None:
+    """Print a warning message with specified output style."""
+    warning_text = Text()
+    warning_text.append("⚠️ ", style="bold yellow")
+    warning_text.append(message)
+    console.print(Panel(warning_text, border_style="yellow", title=title))
+
+
+def create_info_table(
+    title: str, data: dict[str, str], show_header: bool = False
+) -> Table:
+    """Create a table for displaying information."""
+    table = Table(title=title, show_header=show_header, title_style="bold magenta")
+    table.add_column("Field", style="cyan")
+    table.add_column("Value", style="green")
+
+    for key, value in data.items():
+        table.add_row(key, value)
+
+    return table
+
+
+def validate_email(ctx: Context, param: Any, value: Any) -> Any:
+    """Validate email format."""
     try:
         if not re.match(REGEX, value):
             raise ValueError(value)
-        else:
-            return value
+        return value
     except ValueError as e:
-        click.echo("Incorrect email address given: {}".format(e))
+        print_error(f"Incorrect email address given: {e}")
         value = click.prompt(param.prompt)
         return validate_email(ctx, param, value)
 
@@ -50,19 +85,11 @@ def inject_project_metadata(
     author_email: str,
     description: str,
 ) -> None:
-    """
-    Inject metadata into the main.py and setup.py files.
-
-    :param target_dir: Directory for the new project to deploy
-    :param project_name: new project name
-    :param author: cli username
-    :param author_email: cli user email
-    :param description: new project description
-    """
-    main_py_path = os.path.join(target_dir, "main.py")
-    setup_py_path = os.path.join(target_dir, "setup.py")
-
+    """Inject project metadata."""
     try:
+        main_py_path = os.path.join(target_dir, "main.py")
+        setup_py_path = os.path.join(target_dir, "setup.py")
+
         with open(main_py_path, "r+") as f:
             content = f.read()
             content = content.replace("app_title", f'"{project_name}"')
@@ -81,8 +108,8 @@ def inject_project_metadata(
             f.write(content)
             f.truncate()
     except Exception as e:
-        click.echo(e)
-        raise TemplateExceptions("ERROR : Having some errors with injecting metadata")
+        print_error(f"Error during metadata injection: {e}")
+        raise TemplateExceptions("Failed to inject metadata")
 
 
 # TODO : modify this function
