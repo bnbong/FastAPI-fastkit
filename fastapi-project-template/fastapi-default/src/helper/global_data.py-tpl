@@ -18,7 +18,7 @@ def initialize_mock_data() -> None:
 
     # If the model has relations with other model,
     # you can map it their respective columns like below:
-    item_data = json.loads(json.dumps({'some': 'item', "user_id": "123e4567-e89b-12d3-a456-426614174000"}))
+    item_data = [{'some': 'item', "user_id": "123e4567-e89b-12d3-a456-426614174000"}]
     item_map = {}
     for item in item_data:
         user_id = item["user_id"]

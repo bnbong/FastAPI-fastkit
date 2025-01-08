@@ -11,6 +11,27 @@ repos:
     -   id: check-yaml
     -   id: check-toml
     -   id: check-added-large-files
+
+-   repo: local
+    hooks:
+    -   id: format
+        name: format
+        entry: bash scripts/format.sh
+        language: system
+        pass_filenames: false
+        
+    -   id: lint
+        name: lint
+        entry: bash scripts/lint.sh
+        language: system
+        pass_filenames: false
+        
+    -   id: test
+        name: test
+        entry: bash scripts/fetch-and-test.sh
+        language: system
+        pass_filenames: false
+
 ci:
     autofix_commit_msg: 🎨 [pre-commit.ci] Auto format from pre-commit.com hooks
     autoupdate_commit_msg: ⬆ [pre-commit.ci] pre-commit autoupdate

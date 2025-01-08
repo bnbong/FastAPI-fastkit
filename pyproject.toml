@@ -8,17 +8,21 @@ authors = [
 dependencies = [
     "click>=8.1.7",
     "rich>=13.9.2",
-    "pytest>=8.3.3",
-    "black>=24.10.0",
-    "pre-commit>=4.0.1",
-    "pytest-cov>=5.0.0",
-    "mypy>=1.12.0",
-    "isort>=5.13.2",
     "fastapi-cli>=0.0.5",
 ]
 requires-python = ">=3.12"
 readme = "README.md"
 license = {text = "MIT"}
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.3",
+    "pytest-cov>=5.0.0",
+    "black>=24.10.0",
+    "pre-commit>=4.0.1",
+    "mypy>=1.12.0",
+    "isort>=5.13.2",
+]
 
 [project.scripts]
 fastkit = "fastapi_fastkit.cli:fastkit_cli"
@@ -27,10 +31,23 @@ fastkit = "fastapi_fastkit.cli:fastkit_cli"
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
 
-
 [tool.pdm]
 version = { source = "file", path = "src/fastapi_fastkit/__init__.py" }
 distribution = true
+
+[tool.pdm.dev-dependencies]
+test = [
+    "pytest>=8.3.3",
+    "pytest-cov>=5.0.0",
+]
+lint = [
+    "black>=24.10.0",
+    "mypy>=1.12.0",
+    "isort>=5.13.2",
+]
+dev = [
+    "pre-commit>=4.0.1",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["test"]

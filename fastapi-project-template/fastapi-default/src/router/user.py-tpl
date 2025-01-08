@@ -3,7 +3,7 @@
 # --------------------------------------------------------------------------
 from . import *
 
-from src import mock_user_data
+from src.helper.global_data import mock_user_data
 from src.crud.user import get_mock_user_data
 from src.schemas import ResponseSchema
 from src.schemas.user import UserSchema, UserCreate, UserUpdate
@@ -28,23 +28,23 @@ def generate_new_user_id():
 )
 async def create_user_route(
     data: UserCreate,
+    request: Request,
 ):
-    new_user = {
-        "id": generate_new_user_id(),
-        "username": data.username,
-        "email": data.email,
-        "createdAt": datetime.utcnow().isoformat() + "Z",
-        "modifiedAt": datetime.utcnow().isoformat() + "Z",
-    }
-    mock_user_data.append(new_user)
-    response = ResponseSchema(
-        timestamp=datetime.utcnow().isoformat() + "Z",
-        status=201,
-        code="HTTP-201",
-        path=str(request.url),
-        message=UserSchema(**new_user),
-    )
-    return response
+    try:
+        new_user = create_mock_user(data)
+        response = ResponseSchema(
+            timestamp=datetime.utcnow().isoformat() + "Z",
+            status=201,
+            code="HTTP-201",
+            path=str(request.url),
+            message=UserSchema(**new_user),
+        )
+        return response
+    except InternalException as e:
+        return JSONResponse(
+            status_code=e.status,
+            content=e.to_response(path=str(request.url)).model_dump(),
+        )
 
 
 @router.get(
