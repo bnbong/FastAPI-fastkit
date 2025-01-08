@@ -85,5 +85,6 @@ def inject_project_metadata(
         raise TemplateExceptions("ERROR : Having some errors with injecting metadata")
 
 
-def read_template_stack() -> Union[list, None]:
-    pass
+# TODO : modify this function
+# def read_template_stack() -> Union[list, None]:
+#     pass

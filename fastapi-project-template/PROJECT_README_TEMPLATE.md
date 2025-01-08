@@ -59,7 +59,7 @@ Thank you for your interest in and use of our software.
 
 ### Template information
 
-> fill out template project author information below (do not modify opensource owner information)   
+> fill out template project author information below (do not modify opensource owner information)
 > information of creator must include `Email` address
 
 - Template creator : {fill here}

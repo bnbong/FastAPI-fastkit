@@ -8,15 +8,15 @@
 
 ## Responsibility of providing FastAPI-based template
 
-Some of the FastAPI-based template project's dependencies will include projects that have just been created. 
+Some of the FastAPI-based template project's dependencies will include projects that have just been created.
 And we want to keep most of the template project's dependencies up to date.
 
-The reason for this is that this project is not meant to be deploying a stable and lightweight project for commercial use. 
+The reason for this is that this project is not meant to be deploying a stable and lightweight project for commercial use.
 This project is focused solely on the purpose of making it easier for new users of Python and FastAPI to adapt to this ecosystem.
 
 However, for a user's best experience, each dependency must be organically connected and reducing its viability is also very important.
 
-Be aware, The right to maintain this is the responsibility of the project owner [bnbong](mailto:bbbong9@gmail.com) and the contributors who contribute to this project. 
+Be aware, The right to maintain this is the responsibility of the project owner [bnbong](mailto:bbbong9@gmail.com) and the contributors who contribute to this project.
 
 
 ---

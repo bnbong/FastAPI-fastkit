@@ -2,7 +2,7 @@
     <img align="top" width="70%" src=".github/FastAPI-fastkit_logo/fastkit_general_logo.png" alt="FastAPI-fastkit"/>
 </p>
 <p align="center">
-<em><b>FastAPI-fastkit</b>: Fast, easy-to-use starter kit for new users of Python and FastAPI</em>   
+<em><b>FastAPI-fastkit</b>: Fast, easy-to-use starter kit for new users of Python and FastAPI</em>
 </p>
 <p align="center">
 <a href="https://pypi.org/project/fastapi-fastkit" target="_blank">

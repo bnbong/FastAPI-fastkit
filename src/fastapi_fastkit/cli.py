@@ -19,7 +19,7 @@ from rich import print
 from rich.panel import Panel
 
 from . import __version__
-from .backend import validate_email, inject_project_metadata, read_template_stack
+from .backend import validate_email, inject_project_metadata
 from fastapi_fastkit.utils.logging import setup_logging
 from fastapi_fastkit.core.settings import FastkitConfig
 from fastapi_fastkit.core.exceptions import CLIExceptions
@@ -190,7 +190,7 @@ def startup(
     click.echo(f"Author: {author}")
     click.echo(f"Author Email: {author_email}")
     click.echo(f"Description: {description}")
-    read_template_stack()
+    # read_template_stack()
     # click.echo("Project Stack: [FastAPI, Uvicorn, SQLAlchemy, Docker (optional)]")  # TODO : impl this?
 
     confirm = click.confirm(

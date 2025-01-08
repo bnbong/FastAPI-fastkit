@@ -4,8 +4,8 @@ It is highly desirable to improve the project to provide better access for users
 
 Highly appreciate it for your interesting in this project and for your contribution by investing your precious time.
 
-Before contributing to this open source, I strongly recommend that you read the 
-[SECURITY.md](SECURITY.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) files to understand 
+Before contributing to this open source, I strongly recommend that you read the
+[SECURITY.md](SECURITY.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) files to understand
 the direction of this project and the precautions for cooperation.
 
 ### Milestone of FastAPI-fastkit

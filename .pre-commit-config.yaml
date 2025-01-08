@@ -19,13 +19,13 @@ repos:
         entry: bash scripts/format.sh
         language: system
         pass_filenames: false
-        
+
     -   id: lint
         name: lint
         entry: bash scripts/lint.sh
         language: system
         pass_filenames: false
-        
+
     -   id: test
         name: test
         entry: bash scripts/fetch-and-test.sh
