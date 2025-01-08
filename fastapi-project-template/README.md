@@ -9,6 +9,7 @@ All source codes in demo projects must consist of **`.py-tpl`**, _not_ .py.
 ## Base structure of FastAPI template project
 
 (manual will be added later)
+(TODO : add description about -> include "FastAPI-fastkit" in setup.py)
 
 ## Adding new FastAPI-based template project
 

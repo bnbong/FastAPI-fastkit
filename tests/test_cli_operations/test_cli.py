@@ -119,3 +119,125 @@ class TestCLI:
             f"Project '{project_name}' has been successfully deleted" in result.output
         )
         assert not project_path.exists()
+
+    def test_list_templates(self, temp_dir) -> None:
+        # given
+        os.chdir(temp_dir)
+
+        # when
+        result = self.runner.invoke(fastkit_cli, ["list-templates"])  # type: ignore
+
+        # then
+        assert "Available templates:" in result.output
+        assert "fastapi-default" in result.output
+        assert "fastapi-dockerized" in result.output
+
+    def test_startproject_minimal(self, temp_dir) -> None:
+        # given
+        os.chdir(temp_dir)
+        project_name = "test-minimal"
+
+        # when
+        result = self.runner.invoke(
+            fastkit_cli,  # type: ignore
+            ["startproject"],
+            input="\n".join([project_name, "minimal"]),
+        )
+
+        # then
+        project_path = Path(temp_dir) / project_name
+        assert project_path.exists() and project_path.is_dir()
+        assert (
+            f"Project '{project_name}' has been created successfully!" in result.output
+        )
+
+        requirements_path = project_path / "requirements.txt"
+        assert requirements_path.exists() and requirements_path.is_file()
+
+        with open(requirements_path, "r") as f:
+            content = f.read()
+            assert "fastapi" in content
+            assert "uvicorn" in content
+            assert "sqlalchemy" not in content
+
+        venv_path = project_path / "venv"
+        assert venv_path.exists() and venv_path.is_dir()
+
+    def test_startproject_full(self, temp_dir) -> None:
+        # given
+        os.chdir(temp_dir)
+        project_name = "test-full"
+
+        # when
+        result = self.runner.invoke(
+            fastkit_cli,  # type: ignore
+            ["startproject"],
+            input="\n".join([project_name, "full"]),
+        )
+
+        # then
+        project_path = Path(temp_dir) / project_name
+        assert project_path.exists() and project_path.is_dir()
+        assert (
+            f"Project '{project_name}' has been created successfully!" in result.output
+        )
+
+        requirements_path = project_path / "requirements.txt"
+        assert requirements_path.exists() and requirements_path.is_file()
+
+        with open(requirements_path, "r") as f:
+            content = f.read()
+            assert "fastapi" in content
+            assert "uvicorn" in content
+            assert "sqlalchemy" in content
+            assert "redis" in content
+            assert "celery" in content
+
+        venv_path = project_path / "venv"
+        assert venv_path.exists() and venv_path.is_dir()
+
+    def test_startproject_existing_project(self, temp_dir) -> None:
+        # given
+        os.chdir(temp_dir)
+        project_name = "test-existing"
+        os.makedirs(os.path.join(temp_dir, project_name))
+
+        # when
+        result = self.runner.invoke(
+            fastkit_cli,  # type: ignore
+            ["startproject"],
+            input="\n".join([project_name, "minimal"]),
+        )
+
+        # then
+        assert f"Error: Project '{project_name}' already exists." in result.output
+
+    def test_is_fastkit_project(self, temp_dir) -> None:
+        # given
+        os.chdir(temp_dir)
+        project_name = "test-project"
+
+        # Create a regular project
+        result = self.runner.invoke(
+            fastkit_cli,  # type: ignore
+            ["startup", "fastapi-default"],
+            input="\n".join(
+                [project_name, "bnbong", "bbbong9@gmail.com", "test project", "Y"]
+            ),
+        )
+
+        project_path = Path(temp_dir) / project_name
+        assert project_path.exists()
+
+        # when/then
+        from fastapi_fastkit.cli import is_fastkit_project
+
+        assert is_fastkit_project(str(project_path)) is True
+
+        # Create a non-fastkit project
+        non_fastkit_path = Path(temp_dir) / "non-fastkit"
+        os.makedirs(non_fastkit_path)
+        with open(non_fastkit_path / "setup.py", "w") as f:
+            f.write("# Regular project setup")
+
+        assert is_fastkit_project(str(non_fastkit_path)) is False

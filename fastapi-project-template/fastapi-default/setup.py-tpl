@@ -18,6 +18,7 @@ install_requires = [
     "watchfiles==0.22.0",
     "pytest==8.2.2",
     "pytest-asyncio==0.23.8",
+    "FastAPI-fastkit",
 ]
 
 # IDE will watch this setup config through your project src, and help you to set up your environment

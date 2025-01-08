@@ -7,6 +7,7 @@
 import os
 import click
 import subprocess
+import shutil
 
 from typing import Union
 
@@ -95,12 +96,41 @@ def echo(ctx: Context) -> None:
 
 @fastkit_cli.command()
 def list_templates() -> None:
-    # TODO : impl this
     """
-    Get available templates list.
+    Display the list of available templates.
+
     :return: None
     """
-    pass
+    settings = FastkitConfig()
+    template_dir = settings.FASTKIT_TEMPLATE_ROOT
+
+    if not os.path.exists(template_dir):
+        click.echo("Template directory not found.")
+        return
+
+    templates = [
+        d
+        for d in os.listdir(template_dir)
+        if os.path.isdir(os.path.join(template_dir, d))
+    ]
+
+    if not templates:
+        click.echo("No available templates.")
+        return
+
+    click.echo("\nAvailable templates:")
+    for template in templates:
+        template_path = os.path.join(template_dir, template)
+        readme_path = os.path.join(template_path, "README.md-tpl")
+
+        description = "No description"
+        if os.path.exists(readme_path):
+            with open(readme_path, "r") as f:
+                first_line = f.readline().strip()
+                if first_line.startswith("# "):
+                    description = first_line[2:]
+
+        click.echo(f"- {template}: {description}")
 
 
 @fastkit_cli.command(context_settings={"ignore_unknown_options": True})
@@ -190,39 +220,118 @@ def startup(
 
 
 @fastkit_cli.command(context_settings={"ignore_unknown_options": True})
-def startproject() -> None:
-    # TODO : impl this. this method includes a stack selecting process. when user select a stack, it will be auto installed at venv environment, and make list of installed dependencies at requirements.txt file.
+@click.option(
+    "--project-name",
+    prompt="Enter project name",
+    help="Name of the new FastAPI project",
+)
+@click.option(
+    "--stack",
+    type=click.Choice(["minimal", "standard", "full"]),
+    prompt="Select stack",
+    help="Project stack configuration",
+)
+def startproject(project_name: str, stack: str) -> None:
     """
-    Start a empty FastAPI project.
-    :return:
+    Start a new FastAPI project.
+    Dependencies will be automatically installed based on the selected stack.
+
+    :param project_name: Project name
+    :param stack: Project stack configuration
+    :return: None
     """
-    pass
+    settings = FastkitConfig()
+    project_dir = os.path.join(settings.USER_WORKSPACE, project_name)
+
+    if os.path.exists(project_dir):
+        click.echo(f"Error: Project '{project_name}' already exists.")
+        return
+
+    try:
+        os.makedirs(project_dir)
+
+        dependencies = {
+            "minimal": ["fastapi", "uvicorn"],
+            "standard": ["fastapi", "uvicorn", "sqlalchemy", "alembic", "pytest"],
+            "full": [
+                "fastapi",
+                "uvicorn",
+                "sqlalchemy",
+                "alembic",
+                "pytest",
+                "redis",
+                "celery",
+                "docker-compose",
+            ],
+        }
+
+        with open(os.path.join(project_dir, "requirements.txt"), "w") as f:
+            for dep in dependencies[stack]:
+                f.write(f"{dep}\n")
+
+        click.echo("Creating virtual environment and installing dependencies...")
+        subprocess.run(["python", "-m", "venv", os.path.join(project_dir, "venv")])
+        subprocess.run(["pip", "install", "-r", "requirements.txt"], cwd=project_dir)
+
+        click.echo(f"Project '{project_name}' has been created successfully!")
+
+    except Exception as e:
+        click.echo(f"Error during project creation: {e}")
+        shutil.rmtree(project_dir, ignore_errors=True)
+
+
+def is_fastkit_project(project_dir: str) -> bool:
+    """
+    Check if the project was created with fastkit.
+    Inspects the contents of the setup.py file.
+
+    :param project_dir: Project directory
+    :return: True if the project was created with fastkit, False otherwise
+    """
+    setup_py = os.path.join(project_dir, "setup.py")
+    if not os.path.exists(setup_py):
+        return False
+
+    try:
+        with open(setup_py, "r") as f:
+            content = f.read()
+            return "FastAPI-fastkit" in content
+    except:
+        return False
 
 
 @fastkit_cli.command()
 @click.argument("project_name")
 @click.pass_context
 def deleteproject(ctx: Context, project_name: str) -> None:
-    # TODO : add checking step - if target project is not from fastkit, discard the attempt.
-    settings = ctx.obj["settings"]
+    """
+    Delete a FastAPI project.
 
+    :param ctx: Click context object
+    :param project_name: Project name
+    :return: None
+    """
+    settings = ctx.obj["settings"]
     user_local = settings.USER_WORKSPACE
     project_dir = os.path.join(user_local, project_name)
 
     if not os.path.exists(project_dir):
-        click.echo(f"Error: Project '{project_name}' does not exist at '{user_local}'.")
+        click.echo(f"Error: Project '{project_name}' does not exist in '{user_local}'.")
+        return
+
+    if not is_fastkit_project(project_dir):
+        click.echo(f"Error: '{project_name}' is not a FastAPI-fastkit project.")
         return
 
     confirm = click.confirm(
-        f"\nAre you sure you want to delete the project '{project_name}' at '{project_dir}'?",
+        f"\nDo you want to delete project '{project_name}' at '{project_dir}'?",
         default=False,
     )
     if not confirm:
-        click.echo("Project deletion aborted!")
+        click.echo("Project deletion cancelled!")
         return
 
     try:
-        # TODO : adjust this
         delete_project(project_dir)
         click.echo(
             f"Project '{project_name}' has been successfully deleted from '{user_local}'."
@@ -236,28 +345,37 @@ def deleteproject(ctx: Context, project_name: str) -> None:
     "--host",
     default="127.0.0.1",
     show_default=True,
-    help="The host to bind the server to.",
+    help="Host to bind the server",
 )
 @click.option(
     "--port",
     default=8000,
     show_default=True,
-    help="The port to bind the server to.",
+    help="Port to bind the server",
 )
 @click.option(
     "--reload/--no-reload",
     default=True,
     show_default=True,
-    help="Enable or disable auto-reloading on code changes.",
+    help="Enable/disable auto-reload on code changes",
+)
+@click.option(
+    "--workers",
+    default=1,
+    show_default=True,
+    help="Number of worker processes",
 )
 @click.pass_context
 def runserver(
-    ctx: Context, host: str = "127.0.0.1", port: int = 8000, reload: bool = True
+    ctx: Context,
+    host: str = "127.0.0.1",
+    port: int = 8000,
+    reload: bool = True,
+    workers: int = 1,
 ) -> None:
-    # TODO : add & apply click option
-    # TODO : edit template 'fastapi-default'. fix modules
     """
     Run the FastAPI server for the current project.
+    [TODO] Alternative Point : using FastAPI-fastkit's 'fastapi dev' command
 
     :param ctx: Click context object
     :param host: Host address to bind the server to
@@ -270,16 +388,25 @@ def runserver(
 
     app_path = os.path.join(project_dir, "main.py")
     if not os.path.exists(app_path):
-        click.echo(
-            f"Error: No 'main.py' found in the project directory '{project_dir}'."
-        )
+        click.echo(f"Error: Could not find 'main.py' in '{project_dir}'.")
         return
 
-    # TODO : edit this - add click's params
-    command = ["fastapi", "dev", "main.py"]
+    command = [
+        "uvicorn",
+        "main:app",
+        "--host",
+        host,
+        "--port",
+        str(port),
+        "--workers",
+        str(workers),
+    ]
+
+    if reload:
+        command.append("--reload")
 
     try:
         click.echo(f"Starting FastAPI server at {host}:{port}...")
         subprocess.run(command, check=True)
     except subprocess.CalledProcessError as e:
-        click.echo(f"Error: Failed to start the FastAPI server.\n{e}")
+        click.echo(f"Error: Failed to start FastAPI server.\n{e}")
