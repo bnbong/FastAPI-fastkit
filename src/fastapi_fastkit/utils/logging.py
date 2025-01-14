@@ -4,7 +4,6 @@
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
 import logging
-
 from typing import Union
 
 from rich.console import Console

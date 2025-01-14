@@ -3,27 +3,22 @@
 #
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
-import re
 import os
-import click
-
+import re
+from logging import getLogger
 from typing import Any
 
-from logging import getLogger
+import click
 from click.core import Context
 from rich.panel import Panel
-from rich.console import Console
-from rich.text import Text
 from rich.table import Table
+from rich.text import Text
 
 from fastapi_fastkit.core.exceptions import TemplateExceptions
 
-logger = getLogger(__name__)
+from . import console
 
-if "PYTEST_CURRENT_TEST" in os.environ:
-    console = Console(no_color=True)
-else:
-    console = Console()
+logger = getLogger(__name__)
 
 REGEX = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b"
 

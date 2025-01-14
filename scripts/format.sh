@@ -5,4 +5,4 @@ set -x
 base_dir=$(dirname $(dirname $0))
 
 black --config "${base_dir}/pyproject.toml" --check .
-black .
+black --config "${base_dir}/pyproject.toml" .

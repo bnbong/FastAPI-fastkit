@@ -4,7 +4,6 @@
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
 import os
-
 from pathlib import Path
 
 from .exceptions import BackendExceptions
@@ -37,7 +36,7 @@ class FastkitConfig:
         For installed package: returns the package installation directory
         """
         try:
-            import fastapi_fastkit  # pylint: disable=import-outside-toplevel
+            import fastapi_fastkit
 
             package_root = Path(fastapi_fastkit.__file__).parent.parent
             if package_root.name == "site-packages":
@@ -55,7 +54,7 @@ class FastkitConfig:
         For installed package: returns the package template directory
         """
         try:
-            import fastapi_fastkit  # pylint: disable=import-outside-toplevel
+            import fastapi_fastkit
 
             package_root = Path(fastapi_fastkit.__file__).parent
             template_dir = package_root / "fastapi_project_template"

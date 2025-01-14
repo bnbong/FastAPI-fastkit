@@ -4,39 +4,33 @@
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
 import os
-import click
-import subprocess
 import shutil
-
+import subprocess
+from logging import getLogger
 from typing import Union
 
-from logging import getLogger
-
+import click
 from click.core import BaseCommand, Context
-
 from rich import print
 from rich.panel import Panel
-from rich.console import Console
 
-from . import __version__
+from fastapi_fastkit.core.exceptions import CLIExceptions
+from fastapi_fastkit.core.settings import FastkitConfig
+from fastapi_fastkit.utils.inspector import delete_project
+from fastapi_fastkit.utils.logging import setup_logging
+from fastapi_fastkit.utils.transducer import copy_and_convert_template
+
+from . import __version__, console
 from .backend import (
-    validate_email,
+    create_info_table,
     inject_project_metadata,
     print_error,
     print_success,
     print_warning,
-    create_info_table,
+    validate_email,
 )
-from fastapi_fastkit.utils.logging import setup_logging
-from fastapi_fastkit.core.settings import FastkitConfig
-from fastapi_fastkit.core.exceptions import CLIExceptions
-from fastapi_fastkit.utils.transducer import copy_and_convert_template
-from fastapi_fastkit.utils.inspector import delete_project
-
 
 logger = getLogger(__name__)
-
-console = Console()
 
 
 @click.group()
@@ -401,7 +395,7 @@ def runserver(
 ) -> None:
     """
     Run the FastAPI server for the current project.
-    [TODO] Alternative Point : using FastAPI-fastkit's 'fastapi dev' command
+    [1.1.0 update TODO] Alternative Point : using FastAPI-fastkit's 'fastapi dev' command
 
     :param ctx: Click context object
     :param host: Host address to bind the server to

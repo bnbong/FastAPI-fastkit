@@ -5,9 +5,10 @@
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
 import os
+from pathlib import Path
+from typing import Any
 
 from click.testing import CliRunner
-from pathlib import Path
 
 from fastapi_fastkit.cli import fastkit_cli
 
@@ -17,14 +18,14 @@ class TestCLI:
         self.runner = CliRunner()
         self.current_workspace = os.getcwd()
 
-    def teardown_method(self, console) -> None:
+    def teardown_method(self, console: Any) -> None:
         os.chdir(self.current_workspace)
 
     def test_echo(self) -> None:
         # given
 
         # when
-        result = self.runner.invoke(fastkit_cli, ["echo"])  # type: ignore
+        result = self.runner.invoke(fastkit_cli, ["echo"])
 
         # then
         assert "About FastAPI-fastkit" in result.output
@@ -33,13 +34,13 @@ class TestCLI:
         assert "Project Maintainer : bnbong(JunHyeok Lee)" in result.output
         assert "Github : https://github.com/bnbong/FastAPI-fastkit" in result.output
 
-    def test_startup(self, temp_dir) -> None:
+    def test_startup(self, temp_dir: str) -> None:
         # given
         os.chdir(temp_dir)
 
         # when
         result = self.runner.invoke(
-            fastkit_cli,  # type: ignore
+            fastkit_cli,
             ["startup", "fastapi-default"],
             input="\n".join(
                 ["test-project", "bnbong", "bbbong9@gmail.com", "test project", "Y"]
@@ -70,12 +71,12 @@ class TestCLI:
             assert "bnbong" in setup_py_content
             assert "bbbong9@gmail.com" in setup_py_content
 
-    def test_deleteproject(self, temp_dir) -> None:
+    def test_deleteproject(self, temp_dir: str) -> None:
         # given
         os.chdir(temp_dir)
         project_name = "test-project"
         result = self.runner.invoke(
-            fastkit_cli,  # type: ignore
+            fastkit_cli,
             ["startup", "fastapi-default"],
             input="\n".join(
                 [project_name, "bnbong", "bbbong9@gmail.com", "test project", "Y"]
@@ -87,7 +88,7 @@ class TestCLI:
 
         # when
         result = self.runner.invoke(
-            fastkit_cli,  # type: ignore
+            fastkit_cli,
             ["deleteproject", project_name],
             input="Y",
         )
@@ -96,26 +97,26 @@ class TestCLI:
         assert "Success" in result.output
         assert not project_path.exists()
 
-    def test_list_templates(self, temp_dir) -> None:
+    def test_list_templates(self, temp_dir: str) -> None:
         # given
         os.chdir(temp_dir)
 
         # when
-        result = self.runner.invoke(fastkit_cli, ["list-templates"])  # type: ignore
+        result = self.runner.invoke(fastkit_cli, ["list-templates"])
 
         # then
         assert "Available Templates" in result.output
         assert "fastapi-default" in result.output
         assert "fastapi-dockerized" in result.output
 
-    def test_startproject_minimal(self, temp_dir) -> None:
+    def test_startproject_minimal(self, temp_dir: str) -> None:
         # given
         os.chdir(temp_dir)
         project_name = "test-minimal"
 
         # when
         result = self.runner.invoke(
-            fastkit_cli,  # type: ignore
+            fastkit_cli,
             ["startproject"],
             input="\n".join([project_name, "minimal"]),
         )
@@ -140,14 +141,14 @@ class TestCLI:
         venv_path = project_path / "venv"
         assert venv_path.exists() and venv_path.is_dir()
 
-    def test_startproject_full(self, temp_dir) -> None:
+    def test_startproject_full(self, temp_dir: str) -> None:
         # given
         os.chdir(temp_dir)
         project_name = "test-full"
 
         # when
         result = self.runner.invoke(
-            fastkit_cli,  # type: ignore
+            fastkit_cli,
             ["startproject"],
             input="\n".join([project_name, "full"]),
         )
@@ -173,7 +174,7 @@ class TestCLI:
         venv_path = project_path / "venv"
         assert venv_path.exists() and venv_path.is_dir()
 
-    def test_startproject_existing_project(self, temp_dir) -> None:
+    def test_startproject_existing_project(self, temp_dir: str) -> None:
         # given
         os.chdir(temp_dir)
         project_name = "test-existing"
@@ -181,7 +182,7 @@ class TestCLI:
 
         # when
         result = self.runner.invoke(
-            fastkit_cli,  # type: ignore
+            fastkit_cli,
             ["startproject"],
             input="\n".join([project_name, "minimal"]),
         )
@@ -190,14 +191,14 @@ class TestCLI:
         assert "❌" in result.output
         assert f"Error: Project '{project_name}' already exists" in result.output
 
-    def test_is_fastkit_project(self, temp_dir) -> None:
+    def test_is_fastkit_project(self, temp_dir: str) -> None:
         # given
         os.chdir(temp_dir)
         project_name = "test-project"
 
         # Create a regular project
         result = self.runner.invoke(
-            fastkit_cli,  # type: ignore
+            fastkit_cli,
             ["startup", "fastapi-default"],
             input="\n".join(
                 [project_name, "bnbong", "bbbong9@gmail.com", "test project", "Y"]

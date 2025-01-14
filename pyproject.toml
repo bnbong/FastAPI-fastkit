@@ -53,6 +53,9 @@ dev = [
 testpaths = ["test"]
 python_files = "test_*.py"
 
+[tool.isort]
+profile = "black"
+
 [tool.mypy]
 strict = true
 

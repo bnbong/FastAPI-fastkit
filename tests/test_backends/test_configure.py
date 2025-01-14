@@ -4,7 +4,6 @@
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
 import os
-
 from pathlib import Path
 
 from click.testing import CliRunner

@@ -5,13 +5,15 @@
 # --------------------------------------------------------------------------
 import os
 import shutil
+from typing import Generator
+
 import pytest
 
 from fastapi_fastkit.core.settings import FastkitConfig
 
 
 @pytest.fixture(autouse=True, scope="session")
-def temp_dir():
+def temp_dir() -> Generator[str, None, None]:
     """
     Fixture that creates a temporary directory for test cases and yields its path.
     After tests are done, the directory is removed.
