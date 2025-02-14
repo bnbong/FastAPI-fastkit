@@ -47,6 +47,14 @@ def print_warning(message: str, title: str = "Warning") -> None:
     console.print(Panel(warning_text, border_style="yellow", title=title))
 
 
+def print_info(message: str, title: str = "Info") -> None:
+    """Print an info message with specified output style."""
+    info_text = Text()
+    info_text.append("ℹ ", style="bold blue")
+    info_text.append(message)
+    console.print(Panel(info_text, border_style="blue", title=title))
+
+
 def create_info_table(
     title: str, data: dict[str, str], show_header: bool = False
 ) -> Table:

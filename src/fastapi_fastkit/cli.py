@@ -16,7 +16,6 @@ from rich.panel import Panel
 
 from fastapi_fastkit.core.exceptions import CLIExceptions
 from fastapi_fastkit.core.settings import FastkitConfig
-from fastapi_fastkit.utils.inspector import delete_project
 from fastapi_fastkit.utils.logging import setup_logging
 from fastapi_fastkit.utils.transducer import copy_and_convert_template
 
@@ -25,6 +24,7 @@ from .backend import (
     create_info_table,
     inject_project_metadata,
     print_error,
+    print_info,
     print_success,
     print_warning,
     validate_email,
@@ -234,19 +234,13 @@ def startup(
     prompt="Enter project name",
     help="Name of the new FastAPI project",
 )
-@click.option(
-    "--stack",
-    type=click.Choice(["minimal", "standard", "full"]),
-    prompt="Select stack",
-    help="Project stack configuration",
-)
-def startproject(project_name: str, stack: str) -> None:
+def startproject(project_name: str) -> None:
     """
     Start a new FastAPI project.
-    Dependencies will be automatically installed based on the selected stack.
+    This command will automatically create a new FastAPI project directory and a python virtual environment.
+    Dependencies will be automatically installed based on the selected stack at venv.
 
     :param project_name: Project name
-    :param stack: Project stack configuration
     :return: None
     """
     settings = FastkitConfig()
@@ -256,27 +250,42 @@ def startproject(project_name: str, stack: str) -> None:
         print_error(f"Error: Project '{project_name}' already exists.")
         return
 
+    dependencies = {
+        "minimal": ["fastapi", "uvicorn"],
+        "standard": ["fastapi", "uvicorn", "sqlalchemy", "alembic", "pytest"],
+        "full": [
+            "fastapi",
+            "uvicorn",
+            "sqlalchemy",
+            "alembic",
+            "pytest",
+            "redis",
+            "celery",
+            "docker-compose",
+        ],
+    }
+
+    console.print("\n[bold]Available Stacks and Dependencies:[/bold]")
+    for stack_name, deps in dependencies.items():
+        table = create_info_table(
+            f"{stack_name.upper()} Stack",
+            {f"Dependency {i+1}": dep for i, dep in enumerate(deps)},
+        )
+        console.print(table)
+        console.print("\n")
+
+    stack = click.prompt(
+        "Select stack",
+        type=click.Choice(["minimal", "standard", "full"]),
+        show_choices=True,
+    )
+
     try:
         os.makedirs(project_dir)
 
         table = create_info_table(
-            f"Creating Project: {project_name}", {"Component": "Status"}
+            f"Creating Project: {project_name}", {"Component": "Collected"}
         )
-
-        dependencies = {
-            "minimal": ["fastapi", "uvicorn"],
-            "standard": ["fastapi", "uvicorn", "sqlalchemy", "alembic", "pytest"],
-            "full": [
-                "fastapi",
-                "uvicorn",
-                "sqlalchemy",
-                "alembic",
-                "pytest",
-                "redis",
-                "celery",
-                "docker-compose",
-            ],
-        }
 
         with open(os.path.join(project_dir, "requirements.txt"), "w") as f:
             for dep in dependencies[stack]:
@@ -287,14 +296,30 @@ def startproject(project_name: str, stack: str) -> None:
 
         with console.status("[bold green]Setting up project environment..."):
             console.print("[yellow]Creating virtual environment...[/yellow]")
-            subprocess.run(["python", "-m", "venv", os.path.join(project_dir, "venv")])
+            venv_path = os.path.join(project_dir, "venv")
+            subprocess.run(["python", "-m", "venv", venv_path], check=True)
+
+            if os.name == "nt":  # Windows
+                pip_path = os.path.join(venv_path, "Scripts", "pip")
+            else:  # Linux/Mac
+                pip_path = os.path.join(venv_path, "bin", "pip")
 
             console.print("[yellow]Installing dependencies...[/yellow]")
             subprocess.run(
-                ["pip", "install", "-r", "requirements.txt"], cwd=project_dir
+                [pip_path, "install", "-r", "requirements.txt"],
+                cwd=project_dir,
+                check=True,
             )
 
         print_success(f"Project '{project_name}' has been created successfully!")
+
+        if os.name == "nt":
+            activate_venv = f"    {os.path.join(venv_path, 'Scripts', 'activate.bat')}"
+        else:
+            activate_venv = f"    source {os.path.join(venv_path, 'bin', 'activate')}"
+        print_info(
+            "To activate the virtual environment, run:\n\n" + activate_venv,
+        )
 
     except Exception as e:
         print_error(f"Error during project creation: {e}")
@@ -353,7 +378,7 @@ def deleteproject(ctx: Context, project_name: str) -> None:
         return
 
     try:
-        delete_project(project_dir)
+        shutil.rmtree(project_dir)
         print_success(f"Project '{project_name}' has been deleted successfully!")
 
     except Exception as e:

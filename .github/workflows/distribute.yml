@@ -1,12 +1,23 @@
 name: Distribute source to pypi package
+
 on:
-  pull_request:
-    branches:
-      - main
+  release:
+    types: [published]
+
 
 jobs:
-  distribute-fastapi-fastkit-package-bundle:
+  pypi-publish:
+    name: upload release to PyPI
     runs-on: ubuntu-latest
+    permissions:
+      # This permission is needed for private repositories.
+      contents: read
+      # IMPORTANT: this permission is mandatory for trusted publishing
+      id-token: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+
+      - uses: pdm-project/setup-pdm@v4
+
+      - name: Publish package distributions to PyPI
+        run: pdm publish
