@@ -7,6 +7,7 @@
 # @author bnbong
 # --------------------------------------------------------------------------
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -114,3 +115,13 @@ def inspect_template(template_path: str) -> Dict[str, Any | List[str]]:
         "errors": inspector.errors,
         "warnings": inspector.warnings,
     }
+
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: python inspector.py <template_dir>")
+        sys.exit(1)
+
+    template_dir = sys.argv[1]
+    result = inspect_template(template_dir)
+    print(result)

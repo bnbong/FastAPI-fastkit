@@ -8,7 +8,7 @@
 <a href="https://pypi.org/project/fastapi-fastkit" target="_blank">
     <img src="https://img.shields.io/pypi/v/fastapi-fastkit" alt="PyPI - Version">
 </a>
-<a href="https://img.shields.io/github/v/release/bnbong/FastAPI-fastkit" target="_blank">
+<a href="https://github.com/bnbong/FastAPI-fastkit/releases" target="_blank">
     <img src="https://img.shields.io/github/v/release/bnbong/FastAPI-fastkit" alt="GitHub Release">
 </a>
 </p>
@@ -100,7 +100,7 @@ Installing dependencies...
 ╭───────────────────────────────────────────────────────────────────── Info ─────────────────────────────────────────────────────────────────────╮
 │ ℹ To activate the virtual environment, run:                                                                                                    │
 │                                                                                                                                                │
-│     source /<new-venv-path>/venv/bin/activate                                     │
+│     source /<new-venv-path>/venv/bin/activate                                                                                                  │
 ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
@@ -137,7 +137,7 @@ FastAPI template project will deploy at '<your-project-path>'
 
 ╭─────────────────────────────────────────────────────────────────── Success ────────────────────────────────────────────────────────────────────╮
 │ ✨ FastAPI project '<your-project-name>' from 'fastapi-default' has been created and saved to                                                  │
-│ <your-project-path>!                                                                                     │
+│ <your-project-path>!                                                                                                                           │
 ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
