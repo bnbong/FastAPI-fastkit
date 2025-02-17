@@ -23,6 +23,7 @@ FastAPI-fastkit uses following stacks:
 - Python 3.12.4
 - click 8.1.7
 - rich 13.9.2
+- pre-commit
 
 ### Local dev configuration
 
@@ -84,6 +85,19 @@ Example:
 git commit -m '[FEAT] Add new FastAPI template for microservices'
 git commit -m '[FIX] Fix virtual environment activation in Windows'
 ```
+
+#### Pre-commit
+
+You can use pre-commit to automatically run linting, formatting, and type checking before committing.
+
+```bash
+# Install pre-commit hooks
+pre-commit install
+```
+
+After installing pre-commit hooks, the pre-commit hooks will be run automatically when you commit.
+
+Check the pre-commit's output when you making new commit, and fix the code if there are any errors.
 
 ## Documentation
 
