@@ -47,7 +47,7 @@ async def lifespan(app: FastAPI):
         logger.info("Application shutdown")
 
 
-def create_app(app_settings: AppSettings, app_title: str, app_description: str) -> FastAPI:
+def create_app(app_settings: AppSettings, app_title: str = "FastAPI Backend", app_description: str = "backend application") -> FastAPI:
     app = FastAPI(
         title=f"{app_title}",
         description=f"{app_description}",

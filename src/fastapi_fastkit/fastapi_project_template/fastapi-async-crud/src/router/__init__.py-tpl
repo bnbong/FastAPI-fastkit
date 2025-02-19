@@ -1,0 +1,48 @@
+# --------------------------------------------------------------------------
+# The module connect routers to Backend Application.
+# --------------------------------------------------------------------------
+import os
+import json
+
+from uuid import UUID
+from datetime import datetime
+
+from fastapi import APIRouter, status, Request
+from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.templating import Jinja2Templates
+
+from src.helper.exceptions import InternalException
+
+from .user import router as user_router
+
+router = APIRouter(prefix="/v1")
+
+router.include_router(user_router, tags=["user"])
+
+templates = Jinja2Templates(os.path.join(os.path.dirname(__file__), "../templates"))
+
+
+@router.get("/", response_class=HTMLResponse, include_in_schema=False)
+async def root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+
+@router.get(
+    "/ping",
+    summary="Server health check",
+    description="Checking FastAPI server's health.",
+    response_model=dict,
+    responses={
+        200: {
+            "description": "Ping Success",
+            "content": {"application/json": {"example": {"ping": "pong"}}},
+        },
+    },
+)
+async def ping():
+    return {"ping": "pong"}
+
+
+def load_json(file_path: str):
+    with open(file_path, "r", encoding="utf-8") as f:
+        return json.load(f)

@@ -36,7 +36,6 @@ class TemplateInspector:
     def _check_file_structure(self) -> bool:
         """Check the required file and directory structure."""
         required_paths = [
-            "src/main.py-tpl",
             "tests",
             "requirements.txt-tpl",
             "setup.py-tpl",
@@ -66,23 +65,34 @@ class TemplateInspector:
 
         with open(req_path) as f:
             deps = f.read().splitlines()
-            if "fastapi" not in deps:
+            package_names = [dep.split("==")[0] for dep in deps if dep]
+            if "fastapi" not in package_names:
                 self.errors.append("FastAPI dependency not found")
                 return False
         return True
 
     def _check_fastapi_implementation(self) -> bool:
-        """Check the FastAPI implementation."""
-        main_path = self.template_path / "src/main.py-tpl"
-        if not main_path.exists():
-            self.errors.append("main.py-tpl not found")
+        """Check if the template has a proper FastAPI server implementation."""
+        main_paths = [
+            self.template_path / "src/main.py-tpl",
+            self.template_path / "main.py-tpl",
+        ]
+
+        main_file_found = False
+        for main_path in main_paths:
+            if main_path.exists():
+                main_file_found = True
+                with open(main_path) as f:
+                    content = f.read()
+                    if "uvicorn.run" not in content:
+                        self.errors.append(f"Web server call not found in {main_path}")
+                        return False
+                break
+
+        if not main_file_found:
+            self.errors.append("main.py-tpl not found in either src/ or root directory")
             return False
 
-        with open(main_path) as f:
-            content = f.read()
-            if "from fastapi import FastAPI" not in content:
-                self.errors.append("FastAPI import not found in main.py-tpl")
-                return False
         return True
 
     def _test_template(self) -> bool:

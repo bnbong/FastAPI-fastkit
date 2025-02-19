@@ -8,7 +8,7 @@ from fastapi import status
 from uuid import UUID
 from httpx import AsyncClient
 
-from test.conftest import BaseTestRouter
+from tests.conftest import BaseTestRouter
 
 
 @pytest.mark.asyncio

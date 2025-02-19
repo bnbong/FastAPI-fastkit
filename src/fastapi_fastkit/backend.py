@@ -5,6 +5,7 @@
 # --------------------------------------------------------------------------
 import os
 import re
+import subprocess
 from logging import getLogger
 from typing import Any
 
@@ -14,7 +15,7 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
-from fastapi_fastkit.core.exceptions import TemplateExceptions
+from fastapi_fastkit.core.exceptions import BackendExceptions, TemplateExceptions
 
 from . import console
 
@@ -88,6 +89,7 @@ def inject_project_metadata(
     author_email: str,
     description: str,
 ) -> None:
+    # TODO : add main.py location at parameter
     """Inject project metadata."""
     try:
         main_py_path = os.path.join(target_dir, "main.py")
@@ -113,6 +115,51 @@ def inject_project_metadata(
     except Exception as e:
         print_error(f"Error during metadata injection: {e}")
         raise TemplateExceptions("Failed to inject metadata")
+
+
+def create_venv(project_dir: str) -> str:
+    """Create a virtual environment."""
+    try:
+        with console.status("[bold green]Setting up project environment..."):
+            console.print("[yellow]Creating virtual environment...[/yellow]")
+            venv_path = os.path.join(project_dir, ".venv")
+            subprocess.run(["python", "-m", "venv", venv_path], check=True)
+
+        if os.name == "nt":
+            activate_venv = f"    {os.path.join(venv_path, 'Scripts', 'activate.bat')}"
+        else:
+            activate_venv = f"    source {os.path.join(venv_path, 'bin', 'activate')}"
+            print_info(
+                "venv created at "
+                + venv_path
+                + "\nTo activate the virtual environment, run:\n\n"
+                + activate_venv,
+            )
+        return venv_path
+
+    except Exception as e:
+        print_error(f"Error during venv creation: {e}")
+        raise BackendExceptions("Failed to create venv")
+
+
+def install_dependencies(project_dir: str, venv_path: str) -> None:
+    """Install project dependencies in the virtual environment."""
+    try:
+        if os.name == "nt":  # Windows
+            pip_path = os.path.join(venv_path, "Scripts", "pip")
+        else:  # Linux/Mac
+            pip_path = os.path.join(venv_path, "bin", "pip")
+
+        with console.status("[bold green]Installing dependencies..."):
+            subprocess.run(
+                [pip_path, "install", "-r", "requirements.txt"],
+                cwd=project_dir,
+                check=True,
+            )
+
+    except Exception as e:
+        print_error(f"Error during dependency installation: {e}")
+        raise BackendExceptions("Failed to install dependencies")
 
 
 # TODO : modify this function

@@ -22,9 +22,10 @@ from fastapi_fastkit.utils.transducer import copy_and_convert_template
 from . import __version__, console
 from .backend import (
     create_info_table,
+    create_venv,
     inject_project_metadata,
+    install_dependencies,
     print_error,
-    print_info,
     print_success,
     print_warning,
     validate_email,
@@ -220,6 +221,9 @@ def startup(
             project_dir, project_name, author, author_email, description
         )
 
+        venv_path = create_venv(project_dir)
+        install_dependencies(project_dir, venv_path)
+
         print_success(
             f"FastAPI project '{project_name}' from '{template}' has been created and saved to {user_local}!"
         )
@@ -236,7 +240,7 @@ def startup(
 )
 def startproject(project_name: str) -> None:
     """
-    Start a new FastAPI project.
+    Start a empty FastAPI project setup.
     This command will automatically create a new FastAPI project directory and a python virtual environment.
     Dependencies will be automatically installed based on the selected stack at venv.
 
@@ -294,32 +298,10 @@ def startproject(project_name: str) -> None:
 
         console.print(table)
 
-        with console.status("[bold green]Setting up project environment..."):
-            console.print("[yellow]Creating virtual environment...[/yellow]")
-            venv_path = os.path.join(project_dir, "venv")
-            subprocess.run(["python", "-m", "venv", venv_path], check=True)
-
-            if os.name == "nt":  # Windows
-                pip_path = os.path.join(venv_path, "Scripts", "pip")
-            else:  # Linux/Mac
-                pip_path = os.path.join(venv_path, "bin", "pip")
-
-            console.print("[yellow]Installing dependencies...[/yellow]")
-            subprocess.run(
-                [pip_path, "install", "-r", "requirements.txt"],
-                cwd=project_dir,
-                check=True,
-            )
+        venv_path = create_venv(project_dir)
+        install_dependencies(project_dir, venv_path)
 
         print_success(f"Project '{project_name}' has been created successfully!")
-
-        if os.name == "nt":
-            activate_venv = f"    {os.path.join(venv_path, 'Scripts', 'activate.bat')}"
-        else:
-            activate_venv = f"    source {os.path.join(venv_path, 'bin', 'activate')}"
-        print_info(
-            "To activate the virtual environment, run:\n\n" + activate_venv,
-        )
 
     except Exception as e:
         print_error(f"Error during project creation: {e}")
@@ -418,6 +400,7 @@ def runserver(
     reload: bool = True,
     workers: int = 1,
 ) -> None:
+    # TODO : check where main.py is located and run it
     """
     Run the FastAPI server for the current project.
     [1.1.0 update TODO] Alternative Point : using FastAPI-fastkit's 'fastapi dev' command
