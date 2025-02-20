@@ -1,0 +1,25 @@
+# Simple FastAPI Project
+
+Simple CRUD API application using FastAPI
+
+## Features
+
+- Item Creation, Read, Update, Delete (CRUD) functionality
+- Automatic OpenAPI documentation generation (Swagger UI, ReDoc)
+- Test environment with mock data
+
+## Stack
+
+- Python 3.12+
+- FastAPI + uvicorn
+- pydantic & pydantic-settings
+- pytest
+- mypy + black + isort
+
+## How to run
+
+at venv, run command below:
+
+```bash
+$ uvicorn src.main:app --reload
+```

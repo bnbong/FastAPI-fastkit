@@ -89,7 +89,7 @@ def inject_project_metadata(
     author_email: str,
     description: str,
 ) -> None:
-    # TODO : add main.py location at parameter
+    # TODO : add main.py location at parameter & find settings.py, config.py, etc and inject project name init
     """Inject project metadata."""
     try:
         main_py_path = os.path.join(target_dir, "main.py")
