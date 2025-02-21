@@ -32,6 +32,6 @@ jobs:
       - name: Setup PDM
         uses: pdm-project/setup-pdm@v4
       - name: Install dependencies
-        run: pdm install --dev
+        run: pdm install -G dev
       - name: Run tests
         run: pdm run pytest
