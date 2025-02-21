@@ -4,7 +4,7 @@ Simple CRUD API application using FastAPI
 
 ## Features
 
-- Item Creation, Read, Update, Delete (CRUD) functionality
+- Item Creation, Read, Update, Delete (CRUD) functionality (For Demo)
 - Automatic OpenAPI documentation generation (Swagger UI, ReDoc)
 - Test environment with mock data
 
@@ -12,14 +12,26 @@ Simple CRUD API application using FastAPI
 
 - Python 3.12+
 - FastAPI + uvicorn
-- pydantic & pydantic-settings
+- pydantic 2 & pydantic-settings
 - pytest
 - mypy + black + isort
 
 ## How to run
 
-at venv, run command below:
+At venv, run command below:
 
 ```bash
 $ uvicorn src.main:app --reload
 ```
+
+After running server instance, you can check API documentation below:
+
+```bash
+<domain>/docs  # Swagger format
+<domain>/redoc  # ReDoc format
+
+# example
+http://127.0.0.1/docs
+```
+
+For other FastAPI guides, please refer <https://fastapi.tiangolo.com/tutorial/>

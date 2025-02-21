@@ -400,7 +400,6 @@ def runserver(
 ) -> None:
     """
     Run the FastAPI server for the current project.
-    [1.1.0 update TODO] Alternative Point : using FastAPI-fastkit's 'fastapi dev' command
 
     :param ctx: Click context object
     :param host: Host address to bind the server to
