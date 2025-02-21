@@ -64,7 +64,6 @@ Follow these steps when adding a new template:
 4. Pre-PR checklist:
    - [ ] All files use .py-tpl extension
    - [ ] FastAPI-fastkit dependency included
-   - [ ] README.md follows template
    - [ ] Security requirements met
    - [ ] Tests implemented and passing
    - [ ] Documentation complete

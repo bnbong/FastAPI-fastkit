@@ -30,6 +30,7 @@ repos:
         name: test
         entry: bash scripts/test.sh
         language: system
+        types: [python]
         pass_filenames: false
 
 ci:

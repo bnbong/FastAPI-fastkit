@@ -69,7 +69,7 @@ bash scripts/lint.sh
 
 ### Making commits
 
-Use these tags in commit messages:
+Use these tags in PR title:
 
 - [FEAT]: New feature
 - [FIX]: Bug fix
@@ -82,8 +82,11 @@ Use these tags in commit messages:
 Example:
 
 ```bash
-git commit -m '[FEAT] Add new FastAPI template for microservices'
-git commit -m '[FIX] Fix virtual environment activation in Windows'
+# PR title example 1
+'[FEAT] Add new FastAPI template for microservices'
+
+# PR title example 2
+'[FIX] Fix virtual environment activation in Windows'
 ```
 
 #### Pre-commit
@@ -212,7 +215,6 @@ template-name/
 3. Pre-submission Checklist:
    - [ ] All files use .py-tpl extension
    - [ ] FastAPI-fastkit dependency included
-   - [ ] README.md follows template
    - [ ] Security requirements met
    - [ ] Tests implemented and passing
    - [ ] Documentation complete
