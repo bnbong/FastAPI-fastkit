@@ -9,7 +9,7 @@ import subprocess
 from fastapi_fastkit import console
 from fastapi_fastkit.core.exceptions import BackendExceptions, TemplateExceptions
 from fastapi_fastkit.core.settings import settings
-from fastapi_fastkit.utils.main import print_error, print_info, print_success
+from fastapi_fastkit.utils.main import print_error, print_info
 
 
 def find_template_core_modules(project_dir: str) -> dict[str, str]:
@@ -110,12 +110,13 @@ def create_venv(project_dir: str) -> str:
             activate_venv = f"    {os.path.join(venv_path, 'Scripts', 'activate.bat')}"
         else:
             activate_venv = f"    source {os.path.join(venv_path, 'bin', 'activate')}"
-            print_info(
-                "venv created at "
-                + venv_path
-                + "\nTo activate the virtual environment, run:\n\n"
-                + activate_venv,
-            )
+
+        print_info(
+            "venv created at "
+            + venv_path
+            + "\nTo activate the virtual environment, run:\n\n"
+            + activate_venv,
+        )
         return venv_path
 
     except Exception as e:
@@ -137,12 +138,54 @@ def install_dependencies(project_dir: str, venv_path: str) -> None:
                 cwd=project_dir,
                 check=True,
             )
+        if os.name == "nt":
+            activate_venv = f"    {os.path.join(venv_path, 'Scripts', 'activate.bat')}"
+        else:
+            activate_venv = f"    source {os.path.join(venv_path, 'bin', 'activate')}"
+
+        print_info(
+            "Dependencies installed successfully."
+            + "\nTo activate the virtual environment, run:\n\n"
+            + activate_venv,
+        )
 
     except Exception as e:
         print_error(f"Error during dependency installation: {e}")
         raise BackendExceptions("Failed to install dependencies")
 
 
-# TODO : modify this function
-# def read_template_stack() -> Union[list, None]:
-#     pass
+def read_template_stack(template_path: str) -> list[str]:
+    """
+    Read the install_requires from setup.py-tpl in the template directory.
+    Returns a list of required packages.
+
+    :param template_path: Path to the template directory
+    :return: List of required packages
+    """
+    setup_path = os.path.join(template_path, "setup.py-tpl")
+    if not os.path.exists(setup_path):
+        return []
+
+    try:
+        with open(setup_path, "r") as f:
+            content = f.read()
+            # Find the install_requires section using proper string matching
+            if "install_requires: list[str] = [" in content:
+                start_idx = content.find("install_requires: list[str] = [") + len(
+                    "install_requires: list[str] = ["
+                )
+                end_idx = content.find("]", start_idx)
+                if start_idx != -1 and end_idx != -1:
+                    deps_str = content[start_idx:end_idx]
+                    # Clean and parse the dependencies
+                    deps = [
+                        dep.strip().strip("'").strip('"')
+                        for dep in deps_str.split(",")
+                        if dep.strip() and not dep.isspace()
+                    ]
+                    return [dep for dep in deps if dep]  # Remove empty strings
+    except Exception as e:
+        print_error(f"Error reading template dependencies: {e}")
+        return []
+
+    return []

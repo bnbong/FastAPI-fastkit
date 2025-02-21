@@ -19,15 +19,11 @@ This project was created to speed up the configuration of the development enviro
 
 This project was inspired by the `SpringBoot initializer` & Python Django's `django-admin` cli operation.
 
----
-
 ## Key Features
 
 - **Immediate FastAPI project creation** : Super-fast FastAPI workspace & project creation via CLI, inspired by `django-admin`feature of [Python Django](https://github.com/django/django)
 - **Prettier CLI outputs** : beautiful CLI experiment ([rich library](https://github.com/Textualize/rich) feature)
 - **Standards-based FastAPI project template** : All FastAPI-fastkit templates are based on Python standards and FastAPI's common use
-
----
 
 ## Installation
 
@@ -141,8 +137,6 @@ FastAPI template project will deploy at '<your-project-path>'
 ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
----
-
 ## Significance of FastAPI-fastkit
 
 FastAPI-fastkit aims to provide a fast and easy-to-use starter kit for new users of Python and FastAPI.
@@ -150,8 +144,6 @@ FastAPI-fastkit aims to provide a fast and easy-to-use starter kit for new users
 This idea was initiated with the aim of full fill to help FastAPI newcomers to learn from the beginning, which is the production significance of the FastAPI-cli package added with the [FastAPI 0.111.0 version update](https://github.com/fastapi/fastapi/releases/tag/0.111.0).
 
 As one person who has been using and loving FastAPI for a long time, I wanted to develop a project that could help me a little bit to practice [the wonderful motivation](https://github.com/fastapi/fastapi/pull/11522#issuecomment-2264639417) that FastAPI developer [tiangolo](https://github.com/tiangolo) has.
-
----
 
 ## License
 

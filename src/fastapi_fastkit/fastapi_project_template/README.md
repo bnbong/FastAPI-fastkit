@@ -38,9 +38,17 @@ template-name/
       ...
    )
    ```
-3. Basic CRUD operations example
-4. Unit tests implementation
-5. API documentation (OpenAPI/Swagger)
+3. `setup.py` must include `install_requires` section, it must include essential dependencies for the template project. Also, note that install_requires list must be type annotated.
+   for example:
+   ```
+   ...
+   install_requires: list[str] = [
+      ...
+   ],
+   ```
+4. Basic CRUD operations example
+5. Unit tests implementation
+6. API documentation (OpenAPI/Swagger)
 
 ## Adding new FastAPI-based template project
 

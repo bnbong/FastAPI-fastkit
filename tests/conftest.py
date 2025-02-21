@@ -42,4 +42,4 @@ def console() -> Generator[Console, None, None]:
     """
     Fixture to create a Console instance for tests.
     """
-    yield Console(file=StringIO(), width=120)
+    yield Console(file=StringIO(), width=FastkitConfig.TEST_DEFAULT_TERMINAL_WIDTH)

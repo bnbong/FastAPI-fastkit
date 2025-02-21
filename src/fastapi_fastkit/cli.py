@@ -15,8 +15,10 @@ from rich.panel import Panel
 
 from fastapi_fastkit.backend.main import (
     create_venv,
+    find_template_core_modules,
     inject_project_metadata,
     install_dependencies,
+    read_template_stack,
 )
 from fastapi_fastkit.backend.transducer import copy_and_convert_template
 from fastapi_fastkit.core.exceptions import CLIExceptions
@@ -200,7 +202,15 @@ def startup(
 
     console.print("\n")
     console.print(table)
-    # click.echo("Project Stack: [FastAPI, Uvicorn, SQLAlchemy, Docker (optional)]")  # TODO : impl this?
+
+    template_deps = read_template_stack(target_template)
+    if template_deps:
+        deps_table = create_info_table(
+            "Template Dependencies",
+            {f"Dependency {i+1}": dep for i, dep in enumerate(template_deps)},
+        )
+        console.print("\n")
+        console.print(deps_table)
 
     confirm = click.confirm(
         "\nDo you want to proceed with project creation?", default=False
@@ -402,14 +412,20 @@ def runserver(
     settings = ctx.obj["settings"]
     project_dir = settings.USER_WORKSPACE
 
-    app_path = os.path.join(project_dir, "main.py")
-    if not os.path.exists(app_path):
+    core_modules = find_template_core_modules(project_dir)
+    if not core_modules["main"]:
         print_error(f"Could not find 'main.py' in '{project_dir}'.")
         return
 
+    main_path = core_modules["main"]
+    if "src/" in main_path:
+        app_module = "src.main:app"
+    else:
+        app_module = "main:app"
+
     command = [
         "uvicorn",
-        "main:app",
+        app_module,
         "--host",
         host,
         "--port",

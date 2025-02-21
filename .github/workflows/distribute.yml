@@ -1,8 +1,9 @@
 name: Distribute source to pypi package
 
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - '*'
 
 
 jobs:
@@ -19,5 +20,19 @@ jobs:
 
       - uses: pdm-project/setup-pdm@v4
 
+      - name: Install dependencies
+        run: pdm install
+
+      - name: Extract tag name
+        id: tag
+        run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Update version in __init__.py
+        run: |
+          echo "__version__ = '${{ steps.tag.outputs.TAG_NAME }}'" > src/fastapi_fastkit/__init__.py
+
+      - name: Build package
+        run: pdm build
+
       - name: Publish package distributions to PyPI
-        run: pdm publish
+        uses: pypa/gh-action-pypi-publish@release/v1
