@@ -398,7 +398,6 @@ def runserver(
     reload: bool = True,
     workers: int = 1,
 ) -> None:
-    # TODO : check where main.py is located and run it
     """
     Run the FastAPI server for the current project.
     [1.1.0 update TODO] Alternative Point : using FastAPI-fastkit's 'fastapi dev' command

@@ -1,12 +1,33 @@
-name: test sources before merge
+# TODO : add test job - using coverage
+name: test sources before publish
 on:
-  pull_request:
+  push:
     branches:
       - main
+  pull_request:
+    types:
+      - opened
+      - synchronize
 
 jobs:
   test-fastapi-fastkit-sources:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version:
+          - "3.13"  # max
+          - "3.12"
+          - "3.11"
+          - "3.10"
+          - "3.9"
+          - "3.8"  # min
+      fail-fast: false
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: pdm install

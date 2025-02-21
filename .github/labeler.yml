@@ -1,0 +1,14 @@
+enhancement:
+  - all:
+    - changed-files:
+        - any-glob-to-any-file: 'src/**/*'
+        - all-globs-to-all-files:
+          - '!src/fastapi_fastkit/fastapi_project_template/*'
+          - 'src/fastapi_fastkit/fastapi_project_template/README.md'
+
+template:
+  - all:
+    - changed-files:
+        - any-glob-to-any-file:
+          - 'src/fastapi_fastkit/fastapi_project_template/*'
+          - '!src/fastapi_fastkit/fastapi_project_template/README.md'
