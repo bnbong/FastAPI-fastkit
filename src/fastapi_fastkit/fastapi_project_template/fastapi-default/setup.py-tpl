@@ -12,7 +12,7 @@ install_requires: list[str] = [
 
 setup(
     name="<project_name>",
-    description="<description>",
+    description="[FastAPI-fastkit templated] <description>",
     author="<author>",
     author_email=f"<author_email>",
     packages=find_packages(where="src"),

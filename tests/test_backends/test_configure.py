@@ -19,7 +19,7 @@ class TestBackend:
     def teardown_method(self) -> None:
         os.chdir(self.current_workspace)
 
-    def test_project_root_and_user_workspace(self, temp_dir) -> None:
+    def test_project_root_and_user_workspace(self, temp_dir: str) -> None:
         """
         Test that USER_WORKSPACE can change dynamically and is independent
         of FASTKIT_PROJECT_ROOT, which should always point to the source directory.
@@ -28,7 +28,7 @@ class TestBackend:
         os.chdir(temp_dir)
 
         # when
-        result = self.runner.invoke(fastkit_cli, ["--debug", "echo"])  # type: ignore
+        result = self.runner.invoke(fastkit_cli, ["--debug", "echo"])
 
         # then
         expected_current_user_workspace = temp_dir

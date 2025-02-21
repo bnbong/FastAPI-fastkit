@@ -2,7 +2,7 @@
 
 Each fastapi demo project in this folder is pasted to the user's local folder with the FastAPI-fastkit replication as the source code is.
 
-For those with experience in developing Django, it is easy to understand that it performs a similar operation to the `$ django-admin start project mysite` cli-operation.
+For those with experience in developing Django, it is easy to understand that it performs a similar operation to the `$ django-admin startproject <project-name>` cli-operation.
 
 All source codes in demo projects must consist of **`.py-tpl`**, _not_ .py.
 
@@ -28,7 +28,16 @@ template-name/
 ### Key Requirements:
 
 1. All source files must use `.py-tpl` extension
-2. `setup.py` must include `fastapi-fastkit` dependency
+2. `setup.py` must include `fastapi-fastkit` string in project description
+   for example:
+   ```
+   ...
+   setup(
+      ...
+      description = "[fastapi-fastkit templated] <description>",
+      ...
+   )
+   ```
 3. Basic CRUD operations example
 4. Unit tests implementation
 5. API documentation (OpenAPI/Swagger)

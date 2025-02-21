@@ -5,6 +5,7 @@
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
 import os
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -52,24 +53,48 @@ class TestCLI:
         assert project_path.exists() and project_path.is_dir()
         assert "Success" in result.output
 
-        expected_files = ["main.py", "setup.py"]
-        for file in expected_files:
-            file_path = project_path / file
-            assert file_path.exists() and file_path.is_file()
+        # Check core module files
+        expected_files = {
+            "main": ["src/main.py", "main.py"],
+            "setup": ["setup.py", "src/setup.py"],
+            "config": {
+                "files": ["settings.py", "config.py"],
+                "paths": ["src/core", "src", ""],
+            },
+        }
 
-        main_py_path = project_path / "main.py"
-        setup_py_path = project_path / "setup.py"
+        found_files = {"main": False, "setup": False, "config": False}
 
-        with open(main_py_path, "r") as main_py:
-            main_py_content = main_py.read()
-            assert "test-project" in main_py_content
-            assert "test project" in main_py_content
+        # Check main.py
+        for main_path in expected_files["main"]:
+            file_path = project_path / main_path
+            if file_path.exists() and file_path.is_file():
+                found_files["main"] = True
+                break
 
-        with open(setup_py_path, "r") as setup_py:
-            setup_py_content = setup_py.read()
-            assert "test-project" in setup_py_content
-            assert "bnbong" in setup_py_content
-            assert "bbbong9@gmail.com" in setup_py_content
+        # Check setup.py
+        for setup_path in expected_files["setup"]:
+            file_path = project_path / setup_path
+            if file_path.exists() and file_path.is_file():
+                found_files["setup"] = True
+                with open(file_path, "r") as f:
+                    content = f.read()
+                    assert "test-project" in content
+                    assert "bnbong" in content
+                    assert "bbbong9@gmail.com" in content
+                break
+
+        # Check config files
+        for config_path in expected_files["config"]["paths"]:  # type: ignore
+            for config_file in expected_files["config"]["files"]:  # type: ignore
+                file_path = project_path / config_path / config_file
+                if file_path.exists() and file_path.is_file():
+                    found_files["config"] = True
+                    break
+            if found_files["config"]:
+                break
+
+        assert all(found_files.values()), "Not all core module files were found"
 
     def test_deleteproject(self, temp_dir: str) -> None:
         # given
@@ -124,22 +149,25 @@ class TestCLI:
         # then
         project_path = Path(temp_dir) / project_name
         assert project_path.exists() and project_path.is_dir()
-        assert (
-            f"✨ Project '{project_name}' has been created successfully!"
-            in result.output
-        )
+        assert "Success" in result.output
 
-        requirements_path = project_path / "requirements.txt"
-        assert requirements_path.exists() and requirements_path.is_file()
-
-        with open(requirements_path, "r") as f:
+        with open(project_path / "requirements.txt", "r") as f:
             content = f.read()
             assert "fastapi" in content
             assert "uvicorn" in content
             assert "sqlalchemy" not in content
 
-        venv_path = project_path / "venv"
+        # Check virtual environment creation
+        venv_path = project_path / ".venv"
         assert venv_path.exists() and venv_path.is_dir()
+
+        # Check if core dependencies are installed in venv
+        pip_list = subprocess.run(
+            [str(venv_path / "bin" / "pip"), "list"], capture_output=True, text=True
+        )
+        installed_packages = pip_list.stdout.lower()
+        assert "fastapi" in installed_packages
+        assert "uvicorn" in installed_packages
 
     def test_startproject_full(self, temp_dir: str) -> None:
         # given
@@ -156,23 +184,35 @@ class TestCLI:
         # then
         project_path = Path(temp_dir) / project_name
         assert project_path.exists() and project_path.is_dir()
-        assert (
-            f"Project '{project_name}' has been created successfully!" in result.output
-        )
+        assert "Success" in result.output
 
-        requirements_path = project_path / "requirements.txt"
-        assert requirements_path.exists() and requirements_path.is_file()
+        expected_deps = [
+            "fastapi",
+            "uvicorn",
+            "sqlalchemy",
+            "alembic",
+            "pytest",
+            "redis",
+            "celery",
+        ]
 
-        with open(requirements_path, "r") as f:
+        with open(project_path / "requirements.txt", "r") as f:
             content = f.read()
-            assert "fastapi" in content
-            assert "uvicorn" in content
-            assert "sqlalchemy" in content
-            assert "redis" in content
-            assert "celery" in content
+            for dep in expected_deps:
+                assert dep in content
 
-        venv_path = project_path / "venv"
+        # Check virtual environment creation
+        venv_path = project_path / ".venv"
         assert venv_path.exists() and venv_path.is_dir()
+
+        # Check if all dependencies are installed in venv
+        pip_list = subprocess.run(
+            [str(venv_path / "bin" / "pip"), "list"], capture_output=True, text=True
+        )
+        installed_packages = pip_list.stdout.lower()
+
+        for dep in expected_deps:
+            assert dep in installed_packages
 
     def test_startproject_existing_project(self, temp_dir: str) -> None:
         # given

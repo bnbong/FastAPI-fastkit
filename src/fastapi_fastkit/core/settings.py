@@ -20,6 +20,41 @@ class FastkitConfig:
     DEBUG_MODE: bool = False
     LOGGING_LEVEL: str = "DEBUG"
 
+    # Template Metadata Options
+    TEMPLATE_PATHS: dict[str, list[str] | dict[str, list[str]]] = {
+        "main": [
+            "src/main.py",
+            "main.py",
+        ],
+        "setup": [
+            "setup.py",
+            "src/setup.py",
+        ],
+        "config": {
+            "files": ["settings.py", "config.py"],
+            "paths": [
+                "src/core",
+                "src",
+                "",
+            ],
+        },
+    }
+
+    # Startproject Options
+    PROJECT_STACKS: dict[str, list[str]] = {
+        "minimal": ["fastapi", "uvicorn"],
+        "standard": ["fastapi", "uvicorn", "sqlalchemy", "alembic", "pytest"],
+        "full": [
+            "fastapi",
+            "uvicorn",
+            "sqlalchemy",
+            "alembic",
+            "pytest",
+            "redis",
+            "celery",
+        ],
+    }
+
     # Testing Options
     TEST_SERVER_PORT: int = 8000
     TEST_DEFAULT_TERMINAL_WIDTH: int = 80
@@ -105,3 +140,6 @@ class FastkitConfig:
         log_dir = os.path.dirname(cls.LOG_FILE_PATH)
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
+
+
+settings = FastkitConfig()

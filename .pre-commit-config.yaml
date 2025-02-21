@@ -28,7 +28,7 @@ repos:
 
     -   id: test
         name: test
-        entry: bash scripts/fetch-and-test.sh
+        entry: bash scripts/test.sh
         language: system
         pass_filenames: false
 

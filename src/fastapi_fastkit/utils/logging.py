@@ -1,5 +1,8 @@
 # --------------------------------------------------------------------------
-# The Module defines console logging operations.
+# The Module defines custom console logging operations.
+#
+# Will be added later versions of FastAPI-fastkit,
+#   when log collection is implemented.
 #
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------

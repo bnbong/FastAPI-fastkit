@@ -6,7 +6,6 @@
 import os
 import shutil
 import subprocess
-from logging import getLogger
 from typing import Union
 
 import click
@@ -14,24 +13,24 @@ from click.core import BaseCommand, Context
 from rich import print
 from rich.panel import Panel
 
-from fastapi_fastkit.core.exceptions import CLIExceptions
-from fastapi_fastkit.core.settings import FastkitConfig
-from fastapi_fastkit.utils.logging import setup_logging
-from fastapi_fastkit.utils.transducer import copy_and_convert_template
-
-from . import __version__, console
-from .backend import (
-    create_info_table,
+from fastapi_fastkit.backend.main import (
     create_venv,
     inject_project_metadata,
     install_dependencies,
+)
+from fastapi_fastkit.backend.transducer import copy_and_convert_template
+from fastapi_fastkit.core.exceptions import CLIExceptions
+from fastapi_fastkit.core.settings import FastkitConfig
+from fastapi_fastkit.utils.logging import setup_logging
+from fastapi_fastkit.utils.main import (
+    create_info_table,
     print_error,
     print_success,
     print_warning,
     validate_email,
 )
 
-logger = getLogger(__name__)
+from . import __version__, console
 
 
 @click.group()
@@ -93,11 +92,12 @@ def echo(ctx: Context) -> None:
 
 
 @fastkit_cli.command()
-def list_templates() -> None:
+@click.pass_context
+def list_templates(ctx: Context) -> None:
     """
     Display the list of available templates.
     """
-    settings = FastkitConfig()
+    settings = ctx.obj["settings"]
     template_dir = settings.FASTKIT_TEMPLATE_ROOT
 
     if not os.path.exists(template_dir):
@@ -217,11 +217,12 @@ def startup(
 
         copy_and_convert_template(target_template, user_local, project_name)
 
+        venv_path = create_venv(project_dir)
+
         inject_project_metadata(
             project_dir, project_name, author, author_email, description
         )
 
-        venv_path = create_venv(project_dir)
         install_dependencies(project_dir, venv_path)
 
         print_success(
@@ -238,7 +239,8 @@ def startup(
     prompt="Enter project name",
     help="Name of the new FastAPI project",
 )
-def startproject(project_name: str) -> None:
+@click.pass_context
+def startproject(ctx: Context, project_name: str) -> None:
     """
     Start a empty FastAPI project setup.
     This command will automatically create a new FastAPI project directory and a python virtual environment.
@@ -247,30 +249,16 @@ def startproject(project_name: str) -> None:
     :param project_name: Project name
     :return: None
     """
-    settings = FastkitConfig()
+    settings = ctx.obj["settings"]
     project_dir = os.path.join(settings.USER_WORKSPACE, project_name)
 
     if os.path.exists(project_dir):
         print_error(f"Error: Project '{project_name}' already exists.")
         return
 
-    dependencies = {
-        "minimal": ["fastapi", "uvicorn"],
-        "standard": ["fastapi", "uvicorn", "sqlalchemy", "alembic", "pytest"],
-        "full": [
-            "fastapi",
-            "uvicorn",
-            "sqlalchemy",
-            "alembic",
-            "pytest",
-            "redis",
-            "celery",
-            "docker-compose",
-        ],
-    }
-
     console.print("\n[bold]Available Stacks and Dependencies:[/bold]")
-    for stack_name, deps in dependencies.items():
+
+    for stack_name, deps in settings.PROJECT_STACKS.items():
         table = create_info_table(
             f"{stack_name.upper()} Stack",
             {f"Dependency {i+1}": dep for i, dep in enumerate(deps)},
@@ -280,7 +268,7 @@ def startproject(project_name: str) -> None:
 
     stack = click.prompt(
         "Select stack",
-        type=click.Choice(["minimal", "standard", "full"]),
+        type=click.Choice(list(settings.PROJECT_STACKS.keys())),
         show_choices=True,
     )
 
@@ -292,7 +280,7 @@ def startproject(project_name: str) -> None:
         )
 
         with open(os.path.join(project_dir, "requirements.txt"), "w") as f:
-            for dep in dependencies[stack]:
+            for dep in settings.PROJECT_STACKS[stack]:
                 f.write(f"{dep}\n")
                 table.add_row(dep, "✓")
 

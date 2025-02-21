@@ -5,9 +5,11 @@
 # --------------------------------------------------------------------------
 import os
 import shutil
+from io import StringIO
 from typing import Generator
 
 import pytest
+from rich.console import Console
 
 from fastapi_fastkit.core.settings import FastkitConfig
 
@@ -33,3 +35,11 @@ def set_terminal_width() -> None:
     Fixture to set the terminal width for tests.
     """
     os.environ["COLUMNS"] = str(FastkitConfig.TEST_DEFAULT_TERMINAL_WIDTH)
+
+
+@pytest.fixture(autouse=True, scope="session")
+def console() -> Generator[Console, None, None]:
+    """
+    Fixture to create a Console instance for tests.
+    """
+    yield Console(file=StringIO(), width=120)
