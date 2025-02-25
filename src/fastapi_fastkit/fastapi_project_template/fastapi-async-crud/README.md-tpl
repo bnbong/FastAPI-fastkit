@@ -1,17 +1,107 @@
-# Simple FastAPI Project
+# Async Item Management API Server
 
-This is a test project using FastAPI. It is a RESTful API server with user management functionality.
+A FastAPI-based item management API implemented with asynchronous processing.
 
-## Features
+## Tech Stack
 
-- User Creation, Read, Update, Delete (CRUD) functionality
-- Automatic OpenAPI documentation generation (Swagger UI, ReDoc)
-- Custom exception handling
-- Test environment with mock data
+- Python 3.12+
+- FastAPI + uvicorn
+- Pydantic 2 & pydantic-settings
+- pytest, pytest-asyncio
+- mypy + black + isort
+- aiofiles (async file handling)
 
-## Stack
+## Project Structure
 
-- Python 3.11+
-- FastAPI 0.111.1
-- Pydantic 2.8.2
-- pytest 8.2.2
+```
+.
+├── README.md
+├── requirements.txt
+├── setup.py
+├── scripts
+│   └── run-server.sh
+├── src
+│   ├── main.py
+│   ├── schemas
+│   │   └── items.py
+│   ├── mocks
+│   │   └── mock_items.json
+│   ├── crud
+│   │   └── items.py
+│   ├── core
+│   │   └── config.py
+│   └── api
+│       ├── api.py
+│       └── routes
+│           └── items.py
+└── tests
+    ├── __init__.py
+    ├── test_items.py
+    └── conftest.py
+```
+
+## How to Run
+
+Run in virtual environment:
+
+```bash
+# Install dependencies
+$ pip install -r requirements.txt
+
+# Start development server (using script)
+$ bash scripts/run-server.sh
+
+# Manual run
+$ uvicorn src.main:app --reload
+```
+
+Access API documentation after server starts:
+
+```bash
+<domain:port>/docs  # Swagger format
+<domain:port>/redoc  # ReDoc format
+
+# example
+http://127.0.0.1:8000/docs
+```
+
+## API Endpoints
+
+| Method | Endpoint         | Description                |
+|--------|------------------|----------------------------|
+| GET    | `/items/`        | List all items             |
+| GET    | `/items/{id}`    | Get single item            |
+| POST   | `/items/`        | Create new item            |
+| PUT    | `/items/{id}`    | Update existing item       |
+| DELETE | `/items/{id}`    | Delete item                |
+
+## Key Features
+
+- Async file I/O operations using aiofiles
+- Mock data initialization
+- Pydantic model validation
+- CRUD operations implementation
+- Integrated test cases
+- In-memory JSON database for development
+
+## Running Tests
+
+```bash
+# Run all tests
+$ pytest tests/
+
+# Run specific test file
+$ pytest tests/test_items.py -v
+```
+
+For FastAPI documentation: <https://fastapi.tiangolo.com/>
+
+## Project Origin
+
+This project was created using the [FastAPI-fastkit](https://github.com/bnbong/FastAPI-fastkit) template.
+
+FastAPI-fastkit is an open-source project that helps developers quickly set up FastAPI-based applications with proper structure and tooling.
+
+### Template Information
+- Template author: [bnbong](mailto:bbbong9@gmail.com)
+- Project maintainer: [bnbong](mailto:bbbong9@gmail.com)
