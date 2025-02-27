@@ -3,8 +3,10 @@
 #
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
+import os
 import re
-from typing import Any
+import traceback
+from typing import Any, Optional
 
 import click
 from click.core import Context
@@ -14,16 +16,39 @@ from rich.table import Table
 from rich.text import Text
 
 from fastapi_fastkit import console
+from fastapi_fastkit.core.settings import settings
 
 REGEX = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b"
 
 
-def print_error(message: str, title: str = "Error", console: Console = console) -> None:
+def print_error(
+    message: str,
+    title: str = "Error",
+    console: Console = console,
+    show_traceback: bool = False,
+) -> None:
     """Print an error message with specified output style."""
     error_text = Text()
     error_text.append("❌ ", style="bold red")
     error_text.append(message)
     console.print(Panel(error_text, border_style="red", title=title))
+
+    if show_traceback and settings.DEBUG_MODE:
+        console.print("[bold yellow]Stack trace:[/bold yellow]")
+        console.print(traceback.format_exc())
+
+
+def handle_exception(e: Exception, message: Optional[str] = None) -> None:
+    """
+    Handle exception and print appropriate error message.
+
+    :param e: The exception that occurred
+    :param message: Optional custom error message
+    """
+    error_msg = message or f"Error: {str(e)}"
+
+    # Show traceback if in debug mode
+    print_error(error_msg, show_traceback=True)
 
 
 def print_success(
@@ -81,3 +106,23 @@ def validate_email(ctx: Context, param: Any, value: Any) -> Any:
         print_error(f"Incorrect email address given: {e}")
         value = click.prompt(param.prompt)
         return validate_email(ctx, param, value)
+
+
+def is_fastkit_project(project_dir: str) -> bool:
+    """
+    Check if the project was created with fastkit.
+    Inspects the contents of the setup.py file.
+
+    :param project_dir: Project directory
+    :return: True if the project was created with fastkit, False otherwise
+    """
+    setup_py = os.path.join(project_dir, "setup.py")
+    if not os.path.exists(setup_py):
+        return False
+
+    try:
+        with open(setup_py, "r") as f:
+            content = f.read()
+            return "FastAPI-fastkit" in content
+    except:
+        return False

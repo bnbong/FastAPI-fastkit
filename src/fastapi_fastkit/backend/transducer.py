@@ -64,6 +64,42 @@ def copy_and_convert_template(
                 shutil.copy2(src_file, dst_file)
 
 
+def copy_and_convert_template_file(
+    source_file: str, target_file: str, replacements: dict = None  # type: ignore
+) -> bool:
+    """
+    Copies a single template file to the target location, converting it from .*-tpl
+    to its proper extension and replacing any placeholders with provided values.
+
+    :param source_file: Path to the source template file (with -tpl extension)
+    :param target_file: Path to target destination file (without -tpl extension)
+    :param replacements: Dictionary of placeholder replacements {placeholder: value}
+    :return: True if successful, False otherwise
+    """
+    try:
+        if not os.path.exists(source_file):
+            return False
+
+        # Read a single source content (with .py-tpl extension)
+        with open(source_file, "r") as src_file:
+            content = src_file.read()
+
+        if replacements and isinstance(replacements, dict):
+            for placeholder, value in replacements.items():
+                content = content.replace(placeholder, value)
+
+        target_dir = os.path.dirname(target_file)
+        os.makedirs(target_dir, exist_ok=True)
+
+        with open(target_file, "w") as tgt_file:
+            tgt_file.write(content)
+
+        return True
+    except Exception as e:
+        print(f"Error copying template file: {e}")
+        return False
+
+
 def _convert_real_extension_to_tpl() -> None:
     # TODO : impl this for converting runnable FastAPI app code to template - debugging operation for contributors
     # this will be used at inspector module, not package user's runtime.

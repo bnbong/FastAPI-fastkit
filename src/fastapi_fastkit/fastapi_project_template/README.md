@@ -50,6 +50,26 @@ template-name/
 5. Unit tests implementation
 6. API documentation (OpenAPI/Swagger)
 
+## Base structure of modules template
+
+This template is used to create a new FastAPI project with a specific module structure.
+
+This template strategy is used at `fastkit addroute` operation.
+
+The module structure is as follows (version 1.0.X based):
+
+```
+modules/
+├── api/
+├── crud/
+└── schemas/
+```
+
+In further versions, I don't have any plan to add other modules to this template, for example, `auth`, `db`, etc.
+
+So, if you have any suggestions, please let me know or contribute to this operation.
+
+
 ## Adding new FastAPI-based template project
 
 Before adding new FastAPI-based template project here, I strongly recommend that you read the

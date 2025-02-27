@@ -14,6 +14,7 @@ from rich import print
 from rich.panel import Panel
 
 from fastapi_fastkit.backend.main import (
+    add_new_route,
     create_venv,
     find_template_core_modules,
     inject_project_metadata,
@@ -26,7 +27,9 @@ from fastapi_fastkit.core.settings import FastkitConfig
 from fastapi_fastkit.utils.logging import setup_logging
 from fastapi_fastkit.utils.main import (
     create_info_table,
+    is_fastkit_project,
     print_error,
+    print_info,
     print_success,
     print_warning,
     validate_email,
@@ -159,7 +162,7 @@ def list_templates(ctx: Context) -> None:
     help="The description of the new FastAPI project.",
 )
 @click.pass_context
-def startup(
+def startdemo(
     ctx: Context,
     template: str,
     project_name: str,
@@ -240,23 +243,45 @@ def startup(
         )
 
     except Exception as e:
-        print_error(f"Error during project creation: {e}")
+        print_error(f"Error during project creation: {str(e)}")
 
 
 @fastkit_cli.command(context_settings={"ignore_unknown_options": True})
 @click.option(
     "--project-name",
-    prompt="Enter project name",
-    help="Name of the new FastAPI project",
+    prompt="Enter the project name",
+    help="The name of the new FastAPI project.",
+)
+@click.option(
+    "--author", prompt="Enter the author name", help="The name of the project author."
+)
+@click.option(
+    "--author-email",
+    prompt="Enter the author email",
+    help="The email of the project author.",
+    type=str,
+    callback=validate_email,
+)
+@click.option(
+    "--description",
+    prompt="Enter the project description",
+    help="The description of the new FastAPI project.",
 )
 @click.pass_context
-def startproject(ctx: Context, project_name: str) -> None:
+def init(
+    ctx: Context, project_name: str, author: str, author_email: str, description: str
+) -> None:
     """
     Start a empty FastAPI project setup.
     This command will automatically create a new FastAPI project directory and a python virtual environment.
     Dependencies will be automatically installed based on the selected stack at venv.
+    Project metadata will be injected to the project files.
 
-    :param project_name: Project name
+    :param ctx: Click context object
+    :param project_name: Project name for the new project
+    :param author: Author name
+    :param author_email: Author email
+    :param description: Project description
     :return: None
     """
     settings = ctx.obj["settings"]
@@ -266,6 +291,20 @@ def startproject(ctx: Context, project_name: str) -> None:
         print_error(f"Error: Project '{project_name}' already exists.")
         return
 
+    # Display project information
+    project_info_table = create_info_table(
+        "Project Information",
+        {
+            "Project Name": project_name,
+            "Author": author,
+            "Author Email": author_email,
+            "Description": description,
+        },
+    )
+    console.print("\n")
+    console.print(project_info_table)
+
+    # Display available stacks
     console.print("\n[bold]Available Stacks and Dependencies:[/bold]")
 
     for stack_name, deps in settings.PROJECT_STACKS.items():
@@ -282,48 +321,134 @@ def startproject(ctx: Context, project_name: str) -> None:
         show_choices=True,
     )
 
-    try:
-        os.makedirs(project_dir)
+    template = "fastapi-empty"
+    template_dir = settings.FASTKIT_TEMPLATE_ROOT
+    target_template = os.path.join(template_dir, template)
 
-        table = create_info_table(
+    if not os.path.exists(target_template):
+        print_error(f"Template '{template}' does not exist in '{template_dir}'.")
+        raise CLIExceptions(
+            f"Template '{template}' does not exist in '{template_dir}'."
+        )
+
+    confirm = click.confirm(
+        "\nDo you want to proceed with project creation?", default=False
+    )
+    if not confirm:
+        print_error("Project creation aborted!")
+        return
+
+    try:
+        user_local = settings.USER_WORKSPACE
+        project_dir = os.path.join(user_local, project_name)
+
+        click.echo(f"FastAPI project will deploy at '{user_local}'")
+
+        copy_and_convert_template(target_template, user_local, project_name)
+
+        inject_project_metadata(
+            project_dir, project_name, author, author_email, description
+        )
+
+        deps_table = create_info_table(
             f"Creating Project: {project_name}", {"Component": "Collected"}
         )
 
         with open(os.path.join(project_dir, "requirements.txt"), "w") as f:
             for dep in settings.PROJECT_STACKS[stack]:
                 f.write(f"{dep}\n")
-                table.add_row(dep, "✓")
+                deps_table.add_row(dep, "✓")
 
-        console.print(table)
+        console.print(deps_table)
 
         venv_path = create_venv(project_dir)
         install_dependencies(project_dir, venv_path)
 
-        print_success(f"Project '{project_name}' has been created successfully!")
+        print_success(
+            f"FastAPI project '{project_name}' has been created successfully and saved to {user_local}!"
+        )
+
+        print_info(
+            "To start your project, run 'fastkit runserver' at newly created FastAPI project directory"
+        )
 
     except Exception as e:
-        print_error(f"Error during project creation: {e}")
-        shutil.rmtree(project_dir, ignore_errors=True)
+        print_error(f"Error during project creation: {str(e)}")
+        if os.path.exists(project_dir):
+            shutil.rmtree(project_dir, ignore_errors=True)
 
 
-def is_fastkit_project(project_dir: str) -> bool:
+@fastkit_cli.command()
+@click.argument("project_name")
+@click.argument("route_name")
+@click.pass_context
+def addroute(ctx: Context, project_name: str, route_name: str) -> None:
     """
-    Check if the project was created with fastkit.
-    Inspects the contents of the setup.py file.
+    Add a new route to the FastAPI project.
 
-    :param project_dir: Project directory
-    :return: True if the project was created with fastkit, False otherwise
+    :param ctx: Click context object
+    :param project_name: Project name
+    :param route_name: Name of the new route to add
+    :return: None
     """
-    setup_py = os.path.join(project_dir, "setup.py")
-    if not os.path.exists(setup_py):
-        return False
+    settings = ctx.obj["settings"]
+    user_local = settings.USER_WORKSPACE
+    project_dir = os.path.join(user_local, project_name)
+
+    # Check if project exists
+    if not os.path.exists(project_dir):
+        print_error(f"Project '{project_name}' does not exist in '{user_local}'.")
+        return
+
+    # Verify it's a fastkit project
+    if not is_fastkit_project(project_dir):
+        print_error(f"'{project_name}' is not a FastAPI-fastkit project.")
+        return
+
+    # Validate route name
+    if not route_name.isidentifier():
+        print_error(f"Route name '{route_name}' is not a valid Python identifier.")
+        return
+
+    # Route name shouldn't match reserved keywords
+    import keyword
+
+    if keyword.iskeyword(route_name):
+        print_error(
+            f"Route name '{route_name}' is a Python keyword and cannot be used."
+        )
+        return
 
     try:
-        with open(setup_py, "r") as f:
-            content = f.read()
-            return "FastAPI-fastkit" in content
-    except:
-        return False
+        # Show information about the operation
+        table = create_info_table(
+            "Adding New Route",
+            {
+                "Project": project_name,
+                "Route Name": route_name,
+                "Target Directory": project_dir,
+            },
+        )
+        console.print(table)
+
+        # Confirm before proceeding
+        confirm = click.confirm(
+            f"\nDo you want to add route '{route_name}' to project '{project_name}'?",
+            default=True,
+        )
+        if not confirm:
+            print_error("Operation cancelled!")
+            return
+
+        # Add the new route
+        add_new_route(project_dir, route_name)
+
+        print_success(
+            f"Successfully added new route '{route_name}' to project `{project_name}`"
+        )
+
+    except Exception as e:
+        print_error(f"Error during route addition: {str(e)}")
 
 
 @fastkit_cli.command()
@@ -405,10 +530,40 @@ def runserver(
     :param host: Host address to bind the server to
     :param port: Port number to bind the server to
     :param reload: Enable or disable auto-reload
+    :param workers: Number of worker processes
     :return: None
     """
     settings = ctx.obj["settings"]
     project_dir = settings.USER_WORKSPACE
+
+    # Check for virtual environment
+    venv_path = os.path.join(project_dir, ".venv")
+    if not os.path.exists(venv_path) or not os.path.isdir(venv_path):
+        print_error(
+            "Virtual environment not found. Is this a project deployed with Fastkit?"
+        )
+        confirm = click.confirm(
+            "Do you want to continue with system Python?", default=False
+        )
+        if not confirm:
+            return
+        venv_python = None
+    else:
+        if os.name == "nt":  # Windows
+            venv_python = os.path.join(venv_path, "Scripts", "python.exe")
+        else:  # Unix/Linux/Mac
+            venv_python = os.path.join(venv_path, "bin", "python")
+
+        if not os.path.exists(venv_python):
+            print_error(
+                f"Python interpreter not found in virtual environment: {venv_python}"
+            )
+            confirm = click.confirm(
+                "Do you want to continue with system Python?", default=False
+            )
+            if not confirm:
+                return
+            venv_python = None
 
     core_modules = find_template_core_modules(project_dir)
     if not core_modules["main"]:
@@ -421,22 +576,57 @@ def runserver(
     else:
         app_module = "main:app"
 
-    command = [
-        "uvicorn",
-        app_module,
-        "--host",
-        host,
-        "--port",
-        str(port),
-        "--workers",
-        str(workers),
-    ]
+    if venv_python:
+        print_info(f"Using Python from virtual environment: {venv_python}")
+        command = [
+            venv_python,
+            "-m",
+            "uvicorn",
+            app_module,
+            "--host",
+            host,
+            "--port",
+            str(port),
+            "--workers",
+            str(workers),
+        ]
+    else:
+        command = [
+            "uvicorn",
+            app_module,
+            "--host",
+            host,
+            "--port",
+            str(port),
+            "--workers",
+            str(workers),
+        ]
 
     if reload:
         command.append("--reload")
 
     try:
         print_success(f"Starting FastAPI server at {host}:{port}...")
-        subprocess.run(command, check=True)
+
+        # Set up environment variables for the subprocess
+        env = os.environ.copy()
+        if venv_python:
+            python_path = os.path.dirname(os.path.dirname(venv_python))
+            if "PYTHONPATH" in env:
+                env["PYTHONPATH"] = f"{python_path}:{env['PYTHONPATH']}"
+            else:
+                env["PYTHONPATH"] = python_path
+
+        # Run the server with the configured environment
+        subprocess.run(command, check=True, env=env)
     except subprocess.CalledProcessError as e:
         print_error(f"Failed to start FastAPI server.\n{e}")
+    except FileNotFoundError:
+        if venv_python:
+            print_error(
+                f"Failed to run Python from the virtual environment. Make sure uvicorn is installed in the project's virtual environment."
+            )
+        else:
+            print_error(
+                f"uvicorn not found. Make sure it's installed in your system Python."
+            )
