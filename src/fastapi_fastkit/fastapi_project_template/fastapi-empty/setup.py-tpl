@@ -5,6 +5,7 @@ from setuptools import find_packages, setup
 
 install_requires: list[str] = [
     "fastapi",
+    "uvicorn",
     "pydantic",
     "pydantic-settings",
     "python-dotenv",

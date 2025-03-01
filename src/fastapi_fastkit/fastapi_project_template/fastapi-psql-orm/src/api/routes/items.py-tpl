@@ -1,0 +1,109 @@
+# --------------------------------------------------------------------------
+# Item CRUD Endpoint
+# --------------------------------------------------------------------------
+from typing import List
+from collections.abc import Generator
+
+from fastapi import APIRouter, Depends, HTTPException
+from sqlmodel import Session
+
+from src.api.deps import get_db
+from src.crud.items import create_item, delete_item, get_item, get_items, update_item
+from src.schemas.items import ItemBase, ItemCreate, ItemResponse
+
+router = APIRouter()
+
+
+@router.get("/items", response_model=List[ItemResponse])
+def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    """
+    Retrieve a list of items with optional pagination.
+
+    Args:
+        skip: Number of records to skip
+        limit: Maximum number of records to return
+        db: Database session dependency
+
+    Returns:
+        List of items
+    """
+    return get_items(db, skip=skip, limit=limit)
+
+
+@router.get("/items/{item_id}", response_model=ItemResponse)
+def read_item(item_id: int, db: Session = Depends(get_db)):
+    """
+    Retrieve a specific item by ID.
+
+    Args:
+        item_id: ID of the item to retrieve
+        db: Database session dependency
+
+    Returns:
+        The requested item
+
+    Raises:
+        HTTPException: If item is not found
+    """
+    db_item = get_item(db, item_id=item_id)
+    if db_item is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return db_item
+
+
+@router.post("/items", response_model=ItemResponse, status_code=201)
+def create_new_item(item: ItemCreate, db: Session = Depends(get_db)):
+    """
+    Create a new item.
+
+    Args:
+        item: Item data from request body
+        db: Database session dependency
+
+    Returns:
+        The created item with its new ID
+    """
+    return create_item(db, item.model_dump())
+
+
+@router.put("/items/{item_id}", response_model=ItemResponse)
+def update_existing_item(item_id: int, item: ItemCreate, db: Session = Depends(get_db)):
+    """
+    Update an existing item.
+
+    Args:
+        item_id: ID of the item to update
+        item: Updated item data from request body
+        db: Database session dependency
+
+    Returns:
+        The updated item
+
+    Raises:
+        HTTPException: If item is not found
+    """
+    db_item = update_item(db, item_id=item_id, item_data=item.model_dump())
+    if db_item is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return db_item
+
+
+@router.delete("/items/{item_id}")
+def delete_existing_item(item_id: int, db: Session = Depends(get_db)):
+    """
+    Delete an item.
+
+    Args:
+        item_id: ID of the item to delete
+        db: Database session dependency
+
+    Returns:
+        Success message
+
+    Raises:
+        HTTPException: If item is not found
+    """
+    success = delete_item(db, item_id=item_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return {"message": "Item deleted successfully"}

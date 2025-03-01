@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -e
+set -x
+
+export PYTHONPATH=$PYTHONPATH:$(pwd)
+
+python src/utils/tests_pre_start.py
+
+pytest

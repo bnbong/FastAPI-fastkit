@@ -9,9 +9,9 @@ install_requires: list[str] = [
     "pydantic",
     "pydantic-settings",
     "python-dotenv",
-    "aiofiles",
-    "pytest",
-    "pytest-asyncio",
+    "sqlmodel",
+    "SQLAlchemy",
+    "alembic",
 ]
 
 setup(

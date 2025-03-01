@@ -1,0 +1,45 @@
+# --------------------------------------------------------------------------
+# Main server application module
+# --------------------------------------------------------------------------
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+from starlette.middleware.cors import CORSMiddleware
+
+from src.api.api import api_router
+from src.core.config import settings
+from src.core.db import create_db_and_tables
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Application lifespan manager for startup and shutdown events.
+
+    Creates database tables on startup.
+    """
+    # Create tables on startup (in development only)
+    if settings.ENVIRONMENT == "development":
+        create_db_and_tables()
+    yield
+    # Clean up resources on shutdown if needed
+
+
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    lifespan=lifespan,
+    description="A simple Item CRUD API demonstrating FastAPI with SQLModel and PostgreSQL",
+    version="0.1.0",
+)
+
+if settings.all_cors_origins:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.all_cors_origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+
+app.include_router(api_router)

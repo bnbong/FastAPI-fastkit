@@ -1,0 +1,19 @@
+# --------------------------------------------------------------------------
+# API router session dependency module
+# --------------------------------------------------------------------------
+from collections.abc import Generator
+
+from sqlmodel import Session
+
+from src.core.db import engine
+
+
+def get_db() -> Generator[Session, None, None]:
+    """
+    Dependency for database session.
+
+    Yields:
+        Database session that will be automatically closed after request completion
+    """
+    with Session(engine) as session:
+        yield session

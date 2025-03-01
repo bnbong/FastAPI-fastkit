@@ -81,7 +81,7 @@ def print_info(message: str, title: str = "Info", console: Console = console) ->
 
 def create_info_table(
     title: str,
-    data: dict[str, str],
+    data: Optional[dict[str, str]] = None,
     show_header: bool = False,
     console: Console = console,
 ) -> Table:
@@ -90,8 +90,9 @@ def create_info_table(
     table.add_column("Field", style="cyan")
     table.add_column("Value", style="green")
 
-    for key, value in data.items():
-        table.add_row(key, value)
+    if data:
+        for key, value in data.items():
+            table.add_row(key, value)
 
     return table
 

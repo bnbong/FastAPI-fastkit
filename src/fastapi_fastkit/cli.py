@@ -109,19 +109,18 @@ def list_templates(ctx: Context) -> None:
         print_error("Template directory not found.")
         return
 
+    excluded_dirs = ["__pycache__", "modules"]
     templates = [
         d
         for d in os.listdir(template_dir)
-        if os.path.isdir(os.path.join(template_dir, d)) and d != "__pycache__"
+        if os.path.isdir(os.path.join(template_dir, d)) and d not in excluded_dirs
     ]
 
     if not templates:
         print_warning("No available templates.")
         return
 
-    table = create_info_table(
-        "Available Templates", {template: "No description" for template in templates}
-    )
+    table = create_info_table("Available Templates")
 
     for template in templates:
         template_path = os.path.join(template_dir, template)

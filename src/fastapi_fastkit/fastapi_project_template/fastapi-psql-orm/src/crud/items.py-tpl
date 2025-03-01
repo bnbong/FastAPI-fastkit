@@ -1,0 +1,102 @@
+# --------------------------------------------------------------------------
+# Item CRUD method module
+# --------------------------------------------------------------------------
+from typing import Dict, List, Optional, Union
+
+from sqlmodel import Session, select
+
+from src.core.db import engine
+from src.schemas.items import ItemBase
+
+
+def get_item(db: Session, item_id: int) -> Optional[ItemBase]:
+    """
+    Retrieve a single item by its ID.
+
+    Args:
+        db: Database session
+        item_id: ID of the item to retrieve
+
+    Returns:
+        The item if found, None otherwise
+    """
+    return db.get(ItemBase, item_id)
+
+
+def get_items(db: Session, skip: int = 0, limit: int = 100) -> List[ItemBase]:
+    """
+    Retrieve a list of items with pagination.
+
+    Args:
+        db: Database session
+        skip: Number of records to skip (for pagination)
+        limit: Maximum number of records to return
+
+    Returns:
+        List of items
+    """
+    statement = select(ItemBase).offset(skip).limit(limit)
+    return list(db.exec(statement).all())
+
+
+def create_item(db: Session, item: Dict[str, Union[str, float]]) -> ItemBase:
+    """
+    Create a new item in the database.
+
+    Args:
+        db: Database session
+        item: Dictionary containing item data
+
+    Returns:
+        The created item
+    """
+    db_item = ItemBase(**item)
+    db.add(db_item)
+    db.commit()
+    db.refresh(db_item)
+    return db_item
+
+
+def update_item(db: Session, item_id: int, item_data: Dict[str, Union[str, float]]) -> Optional[ItemBase]:
+    """
+    Update an existing item.
+
+    Args:
+        db: Database session
+        item_id: ID of the item to update
+        item_data: Dictionary containing updated item data
+
+    Returns:
+        The updated item if found, None otherwise
+    """
+    db_item = get_item(db, item_id)
+    if not db_item:
+        return None
+
+    for key, value in item_data.items():
+        setattr(db_item, key, value)
+
+    db.add(db_item)
+    db.commit()
+    db.refresh(db_item)
+    return db_item
+
+
+def delete_item(db: Session, item_id: int) -> bool:
+    """
+    Delete an item from the database.
+
+    Args:
+        db: Database session
+        item_id: ID of the item to delete
+
+    Returns:
+        True if the item was deleted, False if not found
+    """
+    db_item = get_item(db, item_id)
+    if not db_item:
+        return False
+
+    db.delete(db_item)
+    db.commit()
+    return True

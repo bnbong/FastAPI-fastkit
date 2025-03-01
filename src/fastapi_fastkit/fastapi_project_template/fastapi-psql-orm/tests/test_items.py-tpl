@@ -1,0 +1,44 @@
+# --------------------------------------------------------------------------
+# Item endpoint testcases
+# --------------------------------------------------------------------------
+import json
+
+import pytest
+
+
+def test_read_all_items(client):
+    response = client.get("/items")
+    assert response.status_code == 200
+    assert len(response.json()) == 2
+
+
+def test_read_item_success(client):
+    response = client.get("/items/1")
+    assert response.status_code == 200
+    assert response.json()["name"] == "Test Item 1"
+
+
+def test_read_item_not_found(client):
+    response = client.get("/items/999")
+    assert response.status_code == 404
+
+
+def test_create_item(client):
+    new_item = {"name": "New Item", "price": 30.0, "category": "new"}
+    response = client.post("/items", json=new_item)
+    assert response.status_code == 201
+    assert response.json()["id"] == 3
+
+
+def test_update_item(client):
+    updated_data = {"name": "Updated Item", "price": 15.0, "category": "updated"}
+    response = client.put("/items/1", json=updated_data)
+    assert response.status_code == 200
+    assert response.json()["name"] == "Updated Item"
+
+
+def test_delete_item(client):
+    response = client.delete("/items/1")
+    assert response.status_code == 200
+    response = client.get("/items/1")
+    assert response.status_code == 404
