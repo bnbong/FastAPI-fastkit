@@ -39,7 +39,9 @@ $ pip install FastAPI-fastkit
 
 ### Create a new FastAPI project workspace environment immediately
 
-Create a new FastAPI project workspace with:
+You can now start new FastAPI project really fast with FastAPI-fastkit!
+
+Create a new FastAPI project workspace immediately with:
 
 ```console
 $ fastkit init
@@ -108,7 +110,9 @@ This command will create a new FastAPI project workspace environment with Python
 
 ### Add a new route to the FastAPI project
 
-Add a new route to the FastAPI project with:
+`FastAPI-fastkit` makes it easy to expand your FastAPI project.
+
+Add a new route endpoint to your FastAPI project with:
 
 ```console
 $ fastkit addroute <your-project-name> <new-route-name>
@@ -124,7 +128,11 @@ $ fastkit addroute <your-project-name> <new-route-name>
 ```
 
 
-### Place a structured FastAPI project immediately
+### Place a structured FastAPI demo project immediately
+
+You can also start with a structured FastAPI demo project.
+
+Demo projects are consist of various tech stacks with simple item CRUD endpoints implemented.
 
 Place a structured FastAPI demo project immediately with:
 
@@ -157,6 +165,12 @@ FastAPI template project will deploy at '<your-project-path>'
 │ ✨ FastAPI project '<your-project-name>' from 'fastapi-default' has been created and saved to                                                  │
 │ <your-project-path>!                                                                                                                           │
 ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+To view the list of available FastAPI demos, check with:
+
+```console
+$ fastkit list-templates
 ```
 
 ## Significance of FastAPI-fastkit

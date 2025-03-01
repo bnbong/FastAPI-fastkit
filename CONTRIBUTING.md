@@ -67,7 +67,7 @@ bash scripts/lint.sh
 ```
 
 
-### Making commits
+### Making PRs
 
 Use these tags in PR title:
 
