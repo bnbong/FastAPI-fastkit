@@ -1,0 +1,103 @@
+# --------------------------------------------------------------------------
+# The module defines custom Backend Application Exception class, overrides basic Exception.
+# --------------------------------------------------------------------------
+from datetime import UTC, datetime
+from enum import Enum
+
+from pydantic import BaseModel, Field
+
+from src.schemas.base import ResponseSchema
+
+
+class ErrorCode(Enum):
+    """
+    ErrorCode is designed to easily categorize errors into code in the log of the server application.
+
+    It is designed for custom code-based log filtering in third-party log monitoring systems
+    by matching with key HTTP status codes.
+    """
+
+    # HTTP
+    BAD_REQUEST = ("BAD_REQUEST", "HTTP-001", 400)
+    NOT_FOUND = ("NOT_FOUND", "HTTP-002", 404)
+    METHOD_NOT_ALLOWED = ("METHOD_NOT_ALLOWED", "HTTP-003", 405)
+    NOT_ACCESSABLE = ("NOT_ACCESSABLE", "HTTP-004", 406)
+    TIMEOUT = ("TIMEOUT", "HTTP-005", 408)
+    UNPROCESSABLE = ("UNPROCESSABLE", "HTTP-006", 422)
+    TOO_MANY_REQUEST = ("TOO_MANY_REQUEST", "HTTP-007", 429)
+
+    # DATA
+    CONFLICT = ("CONFLICT", "DATA-001", 409)
+
+    # AUTH
+    UNAUTHORIZED = ("UNAUTHORIZED", "AUTH-001", 401)
+    FORBIDDEN = ("FORBIDDEN", "AUTH-002", 403)
+
+    # SERVER
+    UNKNOWN_ERROR = ("UNKNOWN_ERROR", "SEVR-001", 500)
+    BAD_GATEWAY = ("BAD_GATEWAY", "SEVR-002", 502)
+    SERVICE_UNAVAILABLE = ("SERVICE_UNAVAILABLE", "SEVR-003", 503)
+    GATEWAY_TIMEOUT = ("GATEWAY_TIMEOUT", "SEVR-004", 504)
+
+    # [Example] Specific Error Code for ITEM
+    ITEM_NOT_FOUND = ("ITEM_NOT_FOUND", "DATA-002", 404)
+    ITEM_CONFLICT = ("ITEM_CONFLICT", "DATA-003", 409)
+
+    # < ADD YOUR ERROR CODES HERE >
+
+    def __init__(self, error: str, code: str, status_code: int):
+        self.error = error
+        self.code = code
+        self.status_code = status_code
+
+
+class ExceptionSchema(BaseModel):
+    timestamp: str = Field(
+        ...,
+        description="Timestamp of the error occurred.",
+    )
+    status: int = Field(..., description="HTTP status code of the error")
+    code: str = Field(
+        ...,
+        description="Server identification code of the error.",
+    )
+    message: str = Field(
+        ...,
+        description="Message content of the error.",
+    )
+    path: str = Field(
+        ...,
+        description="Path where the error occurred.",
+    )
+
+    class ConfigDict:
+        json_schema_extra = {
+            "example": {
+                "default": {
+                    "timestamp": "2023-02-10T01:00:00.000Z",
+                    "status": 500,
+                    "code": "SEVR-000",
+                    "path": "/v1/<some/endpoint>",
+                    "message": "ERROR : Unknown error occurred in server logic.",
+                }
+            }
+        }
+
+
+class InternalException(Exception):
+    def __init__(self, message: str, error_code: ErrorCode):
+        self.timestamp = (
+            datetime.now(UTC).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+        )
+        self.status = error_code.status_code
+        self.error_code = error_code.code
+        self.message = f"ERROR : {message}"
+
+    def to_response(self, path: str) -> ResponseSchema[str]:
+        return ResponseSchema(
+            timestamp=self.timestamp,
+            status=self.status,
+            code=self.error_code,
+            path=path,
+            message=self.message,
+        )

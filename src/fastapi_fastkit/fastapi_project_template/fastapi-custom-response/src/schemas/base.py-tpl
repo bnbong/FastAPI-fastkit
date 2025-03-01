@@ -1,0 +1,49 @@
+# --------------------------------------------------------------------------
+# The module defines custom base response schemas.
+# --------------------------------------------------------------------------
+from typing import Generic, Optional, TypeVar
+
+from pydantic import BaseModel, Field
+
+T = TypeVar("T")
+
+
+class ResponseSchema(BaseModel, Generic[T]):
+    timestamp: str = Field(
+        ...,
+        description="The timestamp when the response was generated.",
+    )
+    status: int = Field(..., description="HTTP status code.")
+    code: str = Field(
+        ...,
+        description="Server identification code.",
+    )
+    path: str = Field(
+        ...,
+        description="Request path.",
+    )
+    message: T = Field(
+        ...,
+        description="Data details or error messages requested.",
+    )
+
+    class ConfigDict:
+        json_schema_extra = {
+            "example": {
+                "timestamp": "2023-02-10T01:00:00.000Z",
+                "status": 200,
+                "code": "HTTP-200",
+                "path": "/v1/<some/endpoint>",
+                "message": {
+                    "id": "123e4567-e89b-12d3-a456-426614174000",
+                    "email": "example@example.com",
+                    "password": "secret",
+                    "nickname": "example_nick",
+                    "create_at": "2023-02-10T01:00:00.000Z",
+                    "bio": "example bio",
+                    "profile_img": "https://example.com/profile.jpg",
+                    "first_name": "John",
+                    "last_name": "Doe",
+                },
+            }
+        }

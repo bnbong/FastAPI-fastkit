@@ -39,11 +39,16 @@ $ pip install FastAPI-fastkit
 
 ### Create a new FastAPI project workspace environment immediately
 
-Create a new FastAPI project workspace with:
+You can now start new FastAPI project really fast with FastAPI-fastkit!
+
+Create a new FastAPI project workspace immediately with:
 
 ```console
-$ fastkit startproject
-Enter project name: <your-project-name>
+$ fastkit init
+Enter the project name: <your-project-name>
+Enter the author name: <your-name>
+Enter the author email: <your-email>
+Enter the project description: <your-project-description>
 
 Available Stacks and Dependencies:
       MINIMAL Stack
@@ -90,24 +95,49 @@ Installing dependencies...
 
 ---> 100%
 
-╭─────────────────────────────────────────────────────────────────── Success ────────────────────────────────────────────────────────────────────╮
-│ ✨ Project '<your-project-name>' has been created successfully!                                                                                │
-╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-╭───────────────────────────────────────────────────────────────────── Info ─────────────────────────────────────────────────────────────────────╮
-│ ℹ To activate the virtual environment, run:                                                                                                    │
-│                                                                                                                                                │
-│     source /<new-venv-path>/venv/bin/activate                                                                                                  │
-╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── Success ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ ✨ Dependencies installed successfully                                                                                                                                                                                                                                                │
+╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── Success ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ ✨ FastAPI project '<your-project-name>' has been created successfully and saved to '<your-project-path>'!                                                                                                                                                     │
+╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── Info ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ ℹ To start your project, run 'fastkit runserver' at newly created FastAPI project directory                                                                                                                                                                                           │
+╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
 This command will create a new FastAPI project workspace environment with Python virtual environment.
 
-### Place a structured FastAPI project immediately
+### Add a new route to the FastAPI project
 
-Place a structured FastAPI project immediately with:
+`FastAPI-fastkit` makes it easy to expand your FastAPI project.
+
+Add a new route endpoint to your FastAPI project with:
 
 ```console
-$ fastkit startup
+$ fastkit addroute <your-project-name> <new-route-name>
+
+---> 100%
+
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── Info ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ ℹ Updated main.py to include the API router                                                                                                                                                                                                                                           │
+╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── Success ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ ✨ Successfully added new route '<new-route-name>' to project '<your-project-name>'.                                                                                                                                                                                                                                   │
+╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+
+### Place a structured FastAPI demo project immediately
+
+You can also start with a structured FastAPI demo project.
+
+Demo projects are consist of various tech stacks with simple item CRUD endpoints implemented.
+
+Place a structured FastAPI demo project immediately with:
+
+```console
+$ fastkit startdemo
 Enter the project name: <your-project-name>
 Enter the author name: <your-name>
 Enter the author email: <your-email>
@@ -135,6 +165,12 @@ FastAPI template project will deploy at '<your-project-path>'
 │ ✨ FastAPI project '<your-project-name>' from 'fastapi-default' has been created and saved to                                                  │
 │ <your-project-path>!                                                                                                                           │
 ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+To view the list of available FastAPI demos, check with:
+
+```console
+$ fastkit list-templates
 ```
 
 ## Significance of FastAPI-fastkit

@@ -1,0 +1,27 @@
+# --------------------------------------------------------------------------
+# module description here
+# --------------------------------------------------------------------------
+from setuptools import find_packages, setup
+
+install_requires = [
+    "fastapi",
+    "uvicorn",
+    "httpx",
+    "pydantic",
+    "pydantic_core",
+    "pydantic-settings",
+    "pytest",
+    "pytest-asyncio",
+]
+
+# IDE will watch this setup config through your project src, and help you to set up your environment
+setup(
+    name="<project_name>",
+    description="[FastAPI-fastkit templated] <description>",
+    author="<author>",
+    author_email=f"<author_email>",
+    packages=find_packages(where="src"),
+    use_scm_version=True,
+    requires=["python (>=3.11)"],
+    install_requires=install_requires,
+)

@@ -1,0 +1,119 @@
+# Dockerized FastAPI Item Management API
+
+This project is a Docker containerized FastAPI-based item management API application.
+
+## Requirements
+
+- Docker
+
+## Tech Stack
+
+- Python 3.12+
+- FastAPI + uvicorn
+- Docker
+- pydantic 2 & pydantic-settings
+- pytest
+- mypy + black + isort
+
+## Project Structure
+
+```
+.
+├── Dockerfile
+├── README.md
+├── requirements.txt
+├── setup.py
+├── scripts
+│   └── run-server.sh
+├── src
+│   ├── main.py
+│   ├── schemas
+│   │   └── items.py
+│   ├── mocks
+│   │   └── mock_items.json
+│   ├── crud
+│   │   └── items.py
+│   ├── core
+│   │   └── config.py
+│   └── api
+│       ├── api.py
+│       └── routes
+│           └── items.py
+└── tests
+    ├── __init__.py
+    ├── test_items.py
+    └── conftest.py
+```
+
+## How to run
+
+### Run with Docker
+
+```bash
+# Build image
+$ docker build -t fastapi-item-app .
+
+# Run container
+$ docker run -d --name item-container -p 8000:8000 fastapi-item-app
+```
+
+### Run with instance
+
+At venv, run command below:
+
+```bash
+# Start development server (using script)
+$ bash scripts/run-server.sh
+
+# Manual run
+$ uvicorn src.main:app --reload
+```
+
+After running server instance, you can check API documentation below:
+
+```bash
+<domain:port>/docs  # Swagger format
+<domain:port>/redoc  # ReDoc format
+
+# example
+http://127.0.0.1:8000/docs
+```
+
+## API Endpoints
+
+| Method | Endpoint         | Description                |
+|--------|------------------|----------------------------|
+| GET    | `/items/`        | List all items             |
+| GET    | `/items/{id}`    | Get single item            |
+| POST   | `/items/`        | Create new item            |
+| PUT    | `/items/{id}`    | Update existing item       |
+| DELETE | `/items/{id}`    | Delete item                |
+
+## Key Features
+
+- Initial data loading with mock data
+- Pydantic model-based data validation
+- Demo CRUD operations implementation (Item CRUD)
+- Integrated test cases
+
+## Running Tests
+
+```bash
+# Run all tests
+$ pytest tests/
+
+# Run specific test file
+$ pytest tests/test_items.py -v
+```
+
+For other FastAPI guides, please refer <https://fastapi.tiangolo.com/tutorial/>
+
+# Project Origin
+
+This project was created based on the template from the [FastAPI-fastkit](https://github.com/bnbong/FastAPI-fastkit) project.
+
+The `FastAPI-fastkit` is an open-source project that helps Python and FastAPI beginners quickly set up a FastAPI-based application development environment in a framework-like structure.
+
+### Template Information
+- Template creator: [bnbong](mailto:bbbong9@gmail.com)
+- FastAPI-fastkit project maintainer: [bnbong](mailto:bbbong9@gmail.com)

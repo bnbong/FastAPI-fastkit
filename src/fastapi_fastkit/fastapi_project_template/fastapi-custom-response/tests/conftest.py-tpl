@@ -1,0 +1,42 @@
+# --------------------------------------------------------------------------
+# pytest runtime configuration module
+# --------------------------------------------------------------------------
+import asyncio
+import os
+import typing
+from pathlib import Path
+
+import pytest
+import pytest_asyncio
+from httpx import ASGITransport, AsyncClient
+
+from src.main import app
+
+MOCK_PATH = os.path.join(os.path.dirname(__file__), "../src/mocks/mock_items.json")
+
+
+@pytest.fixture(scope="session")
+def event_loop(request) -> typing.Generator:
+    loop = asyncio.get_event_loop()
+    yield loop
+    loop.close()
+
+
+@pytest_asyncio.fixture(scope="module", autouse=True)
+def mock_data_reset():
+    # Back up original data into memory
+    mock_path = Path(__file__).parent.parent / "src/mocks/mock_items.json"
+    original_data = mock_path.read_text()
+
+    yield
+
+    # After test, restore original data
+    mock_path.write_text(original_data)
+
+
+@pytest_asyncio.fixture(scope="module")
+async def client():
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as ac:
+        yield ac

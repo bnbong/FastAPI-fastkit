@@ -1,0 +1,39 @@
+# --------------------------------------------------------------------------
+# Main server application module
+# --------------------------------------------------------------------------
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from starlette.middleware.cors import CORSMiddleware
+
+from src.api.api import api_router
+from src.core.config import settings
+from src.helper.exceptions import InternalException
+from src.utils.documents import add_description_at_api_tags
+
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+)
+
+if settings.all_cors_origins:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.all_cors_origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+
+# Apply Custom Exception Handler
+@app.exception_handler(InternalException)
+async def internal_exception_handler(request: Request, exc: InternalException):
+    return JSONResponse(
+        status_code=exc.status,
+        content=exc.to_response(path=str(request.url)).model_dump(),
+    )
+
+
+app.include_router(api_router)
+
+# Apply Custom OpenAPI Tags description
+add_description_at_api_tags(app)

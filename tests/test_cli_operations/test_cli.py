@@ -35,14 +35,14 @@ class TestCLI:
         assert "Project Maintainer : bnbong(JunHyeok Lee)" in result.output
         assert "Github : https://github.com/bnbong/FastAPI-fastkit" in result.output
 
-    def test_startup(self, temp_dir: str) -> None:
+    def test_startdemo(self, temp_dir: str) -> None:
         # given
         os.chdir(temp_dir)
 
         # when
         result = self.runner.invoke(
             fastkit_cli,
-            ["startup", "fastapi-default"],
+            ["startdemo", "fastapi-default"],
             input="\n".join(
                 ["test-project", "bnbong", "bbbong9@gmail.com", "test project", "Y"]
             ),
@@ -96,13 +96,13 @@ class TestCLI:
 
         assert all(found_files.values()), "Not all core module files were found"
 
-    def test_deleteproject(self, temp_dir: str) -> None:
+    def test_delete_demoproject(self, temp_dir: str) -> None:
         # given
         os.chdir(temp_dir)
         project_name = "test-project"
         result = self.runner.invoke(
             fastkit_cli,
-            ["startup", "fastapi-default"],
+            ["startdemo", "fastapi-default"],
             input="\n".join(
                 [project_name, "bnbong", "bbbong9@gmail.com", "test project", "Y"]
             ),
@@ -134,22 +134,36 @@ class TestCLI:
         assert "fastapi-default" in result.output
         assert "fastapi-dockerized" in result.output
 
-    def test_startproject_minimal(self, temp_dir: str) -> None:
+    def test_init_minimal(self, temp_dir: str) -> None:
         # given
         os.chdir(temp_dir)
         project_name = "test-minimal"
+        author = "test-author"
+        author_email = "test@example.com"
+        description = "A minimal FastAPI project"
 
         # when
         result = self.runner.invoke(
             fastkit_cli,
-            ["startproject"],
-            input="\n".join([project_name, "minimal"]),
+            ["init"],
+            input="\n".join(
+                [project_name, author, author_email, description, "minimal", "Y"]
+            ),
         )
 
         # then
         project_path = Path(temp_dir) / project_name
         assert project_path.exists() and project_path.is_dir()
         assert "Success" in result.output
+
+        setup_py = project_path / "setup.py"
+        if setup_py.exists():
+            with open(setup_py, "r") as f:
+                content = f.read()
+                assert project_name in content
+                assert author in content
+                assert author_email in content
+                assert description in content
 
         with open(project_path / "requirements.txt", "r") as f:
             content = f.read()
@@ -157,11 +171,9 @@ class TestCLI:
             assert "uvicorn" in content
             assert "sqlalchemy" not in content
 
-        # Check virtual environment creation
         venv_path = project_path / ".venv"
         assert venv_path.exists() and venv_path.is_dir()
 
-        # Check if core dependencies are installed in venv
         pip_list = subprocess.run(
             [str(venv_path / "bin" / "pip"), "list"], capture_output=True, text=True
         )
@@ -169,22 +181,36 @@ class TestCLI:
         assert "fastapi" in installed_packages
         assert "uvicorn" in installed_packages
 
-    def test_startproject_full(self, temp_dir: str) -> None:
+    def test_init_full(self, temp_dir: str) -> None:
         # given
         os.chdir(temp_dir)
         project_name = "test-full"
+        author = "test-author"
+        author_email = "test@example.com"
+        description = "A full FastAPI project"
 
         # when
         result = self.runner.invoke(
             fastkit_cli,
-            ["startproject"],
-            input="\n".join([project_name, "full"]),
+            ["init"],
+            input="\n".join(
+                [project_name, author, author_email, description, "full", "Y"]
+            ),
         )
 
         # then
         project_path = Path(temp_dir) / project_name
         assert project_path.exists() and project_path.is_dir()
         assert "Success" in result.output
+
+        setup_py = project_path / "setup.py"
+        if setup_py.exists():
+            with open(setup_py, "r") as f:
+                content = f.read()
+                assert project_name in content
+                assert author in content
+                assert author_email in content
+                assert description in content
 
         expected_deps = [
             "fastapi",
@@ -201,11 +227,9 @@ class TestCLI:
             for dep in expected_deps:
                 assert dep in content
 
-        # Check virtual environment creation
         venv_path = project_path / ".venv"
         assert venv_path.exists() and venv_path.is_dir()
 
-        # Check if all dependencies are installed in venv
         pip_list = subprocess.run(
             [str(venv_path / "bin" / "pip"), "list"], capture_output=True, text=True
         )
@@ -214,7 +238,7 @@ class TestCLI:
         for dep in expected_deps:
             assert dep in installed_packages
 
-    def test_startproject_existing_project(self, temp_dir: str) -> None:
+    def test_init_existing_project(self, temp_dir: str) -> None:
         # given
         os.chdir(temp_dir)
         project_name = "test-existing"
@@ -223,8 +247,16 @@ class TestCLI:
         # when
         result = self.runner.invoke(
             fastkit_cli,
-            ["startproject"],
-            input="\n".join([project_name, "minimal"]),
+            ["init"],
+            input="\n".join(
+                [
+                    project_name,
+                    "test-author",
+                    "test@example.com",
+                    "test description",
+                    "minimal",
+                ]
+            ),
         )
 
         # then
@@ -239,7 +271,7 @@ class TestCLI:
         # Create a regular project
         result = self.runner.invoke(
             fastkit_cli,
-            ["startup", "fastapi-default"],
+            ["startdemo", "fastapi-default"],
             input="\n".join(
                 [project_name, "bnbong", "bbbong9@gmail.com", "test project", "Y"]
             ),
@@ -249,7 +281,7 @@ class TestCLI:
         assert project_path.exists()
 
         # when/then
-        from fastapi_fastkit.cli import is_fastkit_project
+        from fastapi_fastkit.utils.main import is_fastkit_project
 
         assert is_fastkit_project(str(project_path)) is True
 

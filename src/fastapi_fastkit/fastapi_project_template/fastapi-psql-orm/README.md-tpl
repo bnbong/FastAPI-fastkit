@@ -1,0 +1,144 @@
+# Dockerized FastAPI Item Management API with PostgreSQL
+
+This project is a Docker containerized FastAPI-based item management API application with PostgreSQL database integration.
+
+## Requirements
+
+- Docker and Docker Compose
+
+## Tech Stack
+
+- Python 3.12+
+- FastAPI + uvicorn
+- PostgreSQL
+- SQLModel (SQLAlchemy + Pydantic)
+- Alembic
+- Docker & Docker Compose
+- pytest
+- mypy + black + isort
+
+## Project Structure
+
+````
+.
+├── Dockerfile
+├── README.md
+├── docker-compose.yml
+├── requirements.txt
+├── setup.py
+├── alembic.ini
+├── scripts
+│   ├── pre-start.sh
+│   └── test.sh
+├── src
+│   ├── api
+│   │   ├── api.py
+│   │   ├── deps.py
+│   │   └── routes
+│   │       └── items.py
+│   ├── core
+│   │   ├── config.py
+│   │   └── db.py
+│   ├── crud
+│   │   └── items.py
+│   ├── alembic
+│   │   ├── env.py
+│   │   └── versions/
+│   ├── schemas
+│   │   └── items.py
+│   ├── utils
+│   │   ├── backend_pre_start.py
+│   │   ├── init_data.py
+│   │   └── tests_pre_start.py
+│   └── main.py
+└── tests
+    ├── __init__.py
+    ├── test_items.py
+    └── conftest.py
+````
+
+
+## How to Run
+
+### Run with Docker
+
+````bash
+# Build and run with Docker Compose
+$ docker-compose up -d
+
+# Check container status
+$ docker-compose ps
+````
+
+
+Once the containers are running, you can check the API documentation at:
+
+````
+http://localhost:8000/docs  # Swagger format
+http://localhost:8000/redoc  # ReDoc format
+````
+
+
+### Run in Development Mode (Inside Container)
+
+````bash
+# Run the application in development mode (using `--reload` option)
+$ docker-compose exec app uvicorn src.main:app --reload --host 0.0.0.0
+````
+
+
+## API Endpoints
+
+| Method | Endpoint         | Description                |
+|--------|------------------|----------------------------|
+| GET    | `/items/`        | List all items             |
+| GET    | `/items/{id}`    | Get single item            |
+| POST   | `/items/`        | Create new item            |
+| PUT    | `/items/{id}`    | Update existing item       |
+| DELETE | `/items/{id}`    | Delete item                |
+
+## Key Features
+
+- Persistent storage using PostgreSQL database
+- Database migrations using Alembic
+- ORM using SQLModel (SQLAlchemy + Pydantic)
+- Full containerization via Docker Compose
+- Automatic loading of initial sample data
+- Pydantic model-based data validation
+- Integrated test cases
+
+## Running Tests
+
+Tests __must__ be run inside the Docker container:
+
+````bash
+# Run all tests inside the container
+$ docker exec fastapi-psql-orm-app-1 bash scripts/test.sh
+
+# Run specific test file (example)
+$ docker exec fastapi-psql-orm-app-1 bash -c "cd /app && pytest tests/test_items.py -v"
+````
+
+## Database Management
+
+After making a new database's change, you must migrate it.
+
+````bash
+# Apply database migrations
+$ docker exec fastapi-psql-orm-app-1 bash -c "alembic upgrade head"
+
+# Create new migrations
+$ docker exec fastapi-psql-orm-app-1 bash -c "alembic revision --autogenerate -m 'description'"
+````
+
+For other FastAPI guides, please refer <https://fastapi.tiangolo.com/tutorial/>
+
+# Project Origin
+
+This project was created based on the template from the [FastAPI-fastkit](https://github.com/bnbong/FastAPI-fastkit) project.
+
+The `FastAPI-fastkit` is an open-source project that helps Python and FastAPI beginners quickly set up a FastAPI-based application development environment in a framework-like structure.
+
+### Template Information
+- Template creator: [bnbong](mailto:bbbong9@gmail.com)
+- FastAPI-fastkit project maintainer: [bnbong](mailto:bbbong9@gmail.com)

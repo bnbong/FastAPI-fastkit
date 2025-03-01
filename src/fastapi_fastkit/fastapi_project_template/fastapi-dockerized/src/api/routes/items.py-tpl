@@ -1,0 +1,54 @@
+from typing import List
+
+from fastapi import APIRouter, HTTPException
+
+from src.crud.items import read_items, write_items
+from src.schemas.items import ItemCreate, ItemResponse
+
+router = APIRouter()
+
+
+@router.get("/items", response_model=List[ItemResponse])
+async def read_all_items():
+    return read_items()
+
+
+@router.get("/items/{item_id}", response_model=ItemResponse)
+async def read_item(item_id: int):
+    items = read_items()
+    item = next((i for i in items if i["id"] == item_id), None)
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return item
+
+
+@router.post("/items", response_model=ItemResponse, status_code=201)
+async def create_item(item: ItemCreate):
+    items = read_items()
+    new_id = max(i["id"] for i in items) + 1 if items else 1
+    new_item = {**item.model_dump(), "id": new_id}
+    items.append(new_item)
+    write_items(items)
+    return new_item
+
+
+@router.put("/items/{item_id}", response_model=ItemResponse)
+async def update_item(item_id: int, item: ItemCreate):
+    items = read_items()
+    index = next((i for i, v in enumerate(items) if v["id"] == item_id), None)
+    if index is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    updated_item = {**item.model_dump(), "id": item_id}
+    items[index] = updated_item
+    write_items(items)
+    return updated_item
+
+
+@router.delete("/items/{item_id}")
+async def delete_item(item_id: int):
+    items = read_items()
+    new_items = [i for i in items if i["id"] != item_id]
+    if len(new_items) == len(items):
+        raise HTTPException(status_code=404, detail="Item not found")
+    write_items(new_items)
+    return {"message": "Item deleted successfully"}

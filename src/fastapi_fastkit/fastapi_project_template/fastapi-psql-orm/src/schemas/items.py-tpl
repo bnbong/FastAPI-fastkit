@@ -1,0 +1,54 @@
+# --------------------------------------------------------------------------
+# Item schema module
+# --------------------------------------------------------------------------
+from typing import Optional
+
+from sqlmodel import Field, SQLModel
+
+
+class ItemBase(SQLModel, table=True):
+    """
+    Base Item model that serves both as a SQLModel table definition and a Pydantic model.
+
+    Attributes:
+        name: The name of the item
+        description: Optional description of the item
+        price: The price of the item
+        category: The category the item belongs to
+
+    Notes:
+        This model can be extended with additional fields as needed for your specific
+        application requirements.
+    """
+    __tablename__ = "items"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    name: str
+    description: Optional[str] = None
+    price: float
+    category: str
+
+
+class ItemCreate(SQLModel):
+    """
+    Item creation model for API requests.
+
+    Use this model to validate incoming data when creating new items.
+    """
+    name: str
+    description: Optional[str] = None
+    price: float
+    category: str
+
+
+class ItemResponse(SQLModel):
+    """
+    Item response model for API responses.
+
+    This model defines the structure of data returned to clients.
+    """
+    id: int
+    name: str
+    description: Optional[str] = None
+    price: float
+    category: str

@@ -1,0 +1,12 @@
+[flake8]
+ignore = E501, E305
+
+[isort]
+line_length=100
+virtual_env=venv
+
+[tool:pytest]
+testpaths = tests
+addopts = -ra -q
+asyncio_mode = auto
+asyncio_default_fixture_loop_scope=session

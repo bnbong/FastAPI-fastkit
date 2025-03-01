@@ -1,0 +1,19 @@
+from typing import Optional
+
+from pydantic import BaseModel, ConfigDict
+
+
+class ItemBase(BaseModel):
+    name: str
+    description: Optional[str] = None
+    price: float
+    category: str
+
+
+class ItemCreate(ItemBase):
+    pass
+
+
+class ItemResponse(ItemBase):
+    id: int
+    model_config = ConfigDict(from_attributes=True)

@@ -1,0 +1,63 @@
+# --------------------------------------------------------------------------
+# pytest runtime configuration module
+# --------------------------------------------------------------------------
+import json
+import os
+from collections.abc import Generator
+from typing import Dict, List
+
+import pytest
+from fastapi.testclient import TestClient
+from sqlmodel import Session, SQLModel, delete, select
+
+from src.core.db import engine, init_db
+from src.main import app
+from src.schemas.items import ItemBase
+
+
+@pytest.fixture(scope="session", autouse=True)
+def db() -> Generator[Session, None, None]:
+    """
+    Session-scoped database fixture that sets up the test database
+    and cleans it up after all tests are done.
+
+    This fixture:
+    1. Initializes the database with test data
+    2. Yields the session for test use
+    3. Cleans up all data after tests complete
+
+    The autouse=True parameter ensures this fixture runs automatically
+    for all tests in the session.
+    """
+    with Session(engine) as session:
+        # Initialize database with test data
+        init_db(session)
+        yield session
+
+        # Clean up - delete all records from tables after tests
+        statement = delete(ItemBase)
+        session.execute(statement)
+        session.commit()
+
+
+@pytest.fixture(name="client")
+def client_fixture(db: Session):
+    """
+    Create a FastAPI test client with dependency overrides.
+
+    Args:
+        db: Test database session from the db fixture
+
+    Yields:
+        FastAPI TestClient
+    """
+    def get_session_override():
+        return db
+
+    app.dependency_overrides = {}
+    # Override the get_db dependency in routes to use the test session
+    from src.api.routes.items import get_db
+    app.dependency_overrides[get_db] = get_session_override
+
+    with TestClient(app) as client:
+        yield client

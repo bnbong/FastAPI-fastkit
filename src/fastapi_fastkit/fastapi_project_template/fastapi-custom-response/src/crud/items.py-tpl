@@ -1,0 +1,21 @@
+# --------------------------------------------------------------------------
+# Item CRUD method module
+# --------------------------------------------------------------------------
+import json
+import os
+from typing import List
+
+import aiofiles  # type: ignore
+
+MOCK_FILE = os.path.join(os.path.dirname(__file__), "../mocks/mock_items.json")
+
+
+async def read_items():
+    async with aiofiles.open(MOCK_FILE, mode="r") as file:
+        contents = await file.read()
+        return json.loads(contents)
+
+
+async def write_items(items: List[dict]):
+    async with aiofiles.open(MOCK_FILE, mode="w") as file:
+        await file.write(json.dumps(items, indent=2))

@@ -1,0 +1,156 @@
+# Async Item Management API with Custom Response System
+
+A FastAPI-based REST API demonstrating asynchronous processing and standardized response handling.
+
+## Tech Stack
+
+- Python 3.12+
+- FastAPI + uvicorn
+- Pydantic 2 & pydantic-settings
+- pytest, pytest-asyncio
+- mypy + black + isort
+- aiofiles (async file handling)
+
+## Project Structure
+
+```
+.
+├── src/
+│   ├── core
+│   │   └── config.py
+│   └── api
+│   │   ├── api.py
+│   │   └── routes
+│   │       └── items.py
+│   ├── schemas
+│   │   ├── base.py # Base response schema
+│   │   └── items.py
+│   ├── helper
+│   │   ├── exceptions.py # Exception handlers
+│   │   └── pagination.py # Paginator
+│   ├── crud
+│   │   └── items.py
+│   ├── mocks
+│   │   └── mock_items.json
+│   └── utils
+│       └── documents.py # custom OpenAPI docs generator
+└── tests
+    ├── __init__.py
+    ├── test_items.py
+    └── conftest.py
+```
+
+## How to Run
+
+Run in virtual environment:
+
+```bash
+# Install dependencies
+$ pip install -r requirements.txt
+
+# Start development server (using script)
+$ bash scripts/run-server.sh
+
+# Manual run
+$ uvicorn src.main:app --reload
+```
+
+Access API documentation after server starts:
+
+```bash
+<domain:port>/docs  # Swagger format
+<domain:port>/redoc  # ReDoc format
+
+# example
+http://127.0.0.1:8000/docs
+```
+
+## API Endpoints
+
+| Method | Endpoint         | Description                |
+|--------|------------------|----------------------------|
+| GET    | `/items/`        | List all items             |
+| GET    | `/items/{id}`    | Get single item            |
+| POST   | `/items/`        | Create new item            |
+| PUT    | `/items/{id}`    | Update existing item       |
+| DELETE | `/items/{id}`    | Delete item                |
+
+## Key Features
+
+### 1. Custom Response System
+- **Standardized Response Format** (`schemas/base.py`):
+  ```python
+  class ResponseSchema(BaseModel, Generic[T]):
+      timestamp: str  # ISO 8601 format
+      status: int     # HTTP status code
+      code: str       # Custom error code
+      path: str       # Request endpoint
+      message: T      # Response payload/error
+  ```
+- **Exception Handling** (`helper/exceptions.py`):
+  - `InternalException` class with error code mapping
+  - Automatic error response formatting
+  - Custom error codes with HTTP status mapping
+
+#### Response Examples
+
+##### Success Response
+
+```json
+{
+    "timestamp": "2024-02-15T09:30:00.000Z",
+    "status": 200,
+    "code": "HTTP-200",
+    "path": "/items/1",
+    "message": {
+        "id": 1,
+        "name": "Test Item 1",
+        "price": 20.0,
+        "category": "test"
+    }
+}
+```
+
+##### Error Response
+
+```json
+{
+    "timestamp": "2024-02-15T09:30:00.000Z",
+    "status": 404,
+    "code": "DATA-002",
+    "path": "/items/999",
+    "message": "ERROR: Item not found"
+}
+```
+
+### 2. Async Operations
+- Asynchronous CRUD operations with aiofiles
+- Non-blocking I/O for JSON data management
+- Async test client with pytest-asyncio
+
+### 3. Enhanced Documentation
+- Custom OpenAPI tags and descriptions (`utils/documents.py`)
+- Automatic API documentation generation
+- Response schema examples in Swagger/ReDoc
+
+## Running Tests
+
+```bash
+# Run all tests
+$ pytest tests/
+
+# Run specific test file
+$ pytest tests/test_items.py -v
+```
+
+For FastAPI documentation: <https://fastapi.tiangolo.com/>
+
+## Project Origin
+
+This project was created using the [FastAPI-fastkit](https://github.com/bnbong/FastAPI-fastkit) template.
+
+FastAPI-fastkit is an open-source project that helps developers quickly set up FastAPI-based applications with proper structure and tooling.
+
+### Template Information
+- Template author: [bnbong](mailto:bbbong9@gmail.com)
+- Project maintainer: [bnbong](mailto:bbbong9@gmail.com)

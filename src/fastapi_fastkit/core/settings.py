@@ -42,8 +42,16 @@ class FastkitConfig:
 
     # Startproject Options
     PROJECT_STACKS: dict[str, list[str]] = {
-        "minimal": ["fastapi", "uvicorn"],
-        "standard": ["fastapi", "uvicorn", "sqlalchemy", "alembic", "pytest"],
+        "minimal": ["fastapi", "uvicorn", "pydantic", "pydantic-settings"],
+        "standard": [
+            "fastapi",
+            "uvicorn",
+            "sqlalchemy",
+            "alembic",
+            "pytest",
+            "pydantic",
+            "pydantic-settings",
+        ],
         "full": [
             "fastapi",
             "uvicorn",
@@ -52,6 +60,8 @@ class FastkitConfig:
             "pytest",
             "redis",
             "celery",
+            "pydantic",
+            "pydantic-settings",
         ],
     }
 

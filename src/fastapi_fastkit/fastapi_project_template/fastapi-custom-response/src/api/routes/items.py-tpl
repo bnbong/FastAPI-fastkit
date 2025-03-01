@@ -1,0 +1,172 @@
+# --------------------------------------------------------------------------
+# Item CRUD Endpoint
+# --------------------------------------------------------------------------
+from datetime import UTC, datetime
+from typing import Any, List, Union
+
+from fastapi import APIRouter, Request
+
+from src.crud.items import read_items, write_items
+from src.helper.exceptions import ErrorCode, InternalException
+from src.schemas.base import ResponseSchema
+from src.schemas.items import ItemCreate, ItemResponse
+
+router = APIRouter(tags=["items"])
+
+error_responses: dict[Union[int, str], dict[str, Any]] = {
+    404: {"model": ResponseSchema[str], "description": "Item not found"},
+    500: {"model": ResponseSchema[str], "description": "Server error"},
+}
+
+
+@router.get(
+    "/",
+    summary="Get all items",
+    response_model=ResponseSchema[List[ItemResponse]],
+    responses=error_responses,
+)
+async def read_all_items(request: Request):
+    try:
+        items = await read_items()
+        return ResponseSchema(
+            timestamp=datetime.now(UTC)
+            .isoformat(timespec="milliseconds")
+            .replace("+00:00", "Z"),
+            status=200,
+            code="HTTP-200",
+            path=str(request.url),
+            message=items,
+        )
+    except Exception as e:
+        # You can raise any custom exception you want here
+        raise InternalException(
+            message=f"Error retrieving items: {str(e)}",
+            error_code=ErrorCode.UNKNOWN_ERROR,  # Put your custom error code here
+        )
+
+
+@router.get(
+    "/{item_id}",
+    summary="Get item by ID",
+    response_model=ResponseSchema[ItemResponse],
+    responses=error_responses,
+)
+async def read_item(item_id: int, request: Request):
+    try:
+        items = await read_items()
+        item = next((i for i in items if i["id"] == item_id), None)
+        if not item:
+            raise InternalException(
+                message="Item not found", error_code=ErrorCode.NOT_FOUND
+            )
+        return ResponseSchema(
+            timestamp=datetime.now(UTC)
+            .isoformat(timespec="milliseconds")
+            .replace("+00:00", "Z"),
+            status=200,
+            code="HTTP-200",
+            path=str(request.url),
+            message=item,
+        )
+    except InternalException as e:
+        raise e
+    except Exception as e:
+        raise InternalException(
+            message=f"Error retrieving item: {str(e)}",
+            error_code=ErrorCode.UNKNOWN_ERROR,
+        )
+
+
+@router.post(
+    "/",
+    summary="Create new item",
+    response_model=ResponseSchema[ItemResponse],
+    status_code=201,
+    responses=error_responses,
+)
+async def create_item(item: ItemCreate, request: Request):
+    try:
+        items = await read_items()
+        new_id = max(i["id"] for i in items) + 1 if items else 1
+        new_item = {**item.model_dump(), "id": new_id}
+        items.append(new_item)
+        await write_items(items)
+        return ResponseSchema(
+            timestamp=datetime.now(UTC)
+            .isoformat(timespec="milliseconds")
+            .replace("+00:00", "Z"),
+            status=201,
+            code="HTTP-201",
+            path=str(request.url),
+            message=new_item,
+        )
+    except Exception as e:
+        raise InternalException(
+            message=f"Error creating item: {str(e)}", error_code=ErrorCode.UNKNOWN_ERROR
+        )
+
+
+@router.put(
+    "/{item_id}",
+    summary="Update item",
+    response_model=ResponseSchema[ItemResponse],
+    responses=error_responses,
+)
+async def update_item(item_id: int, item: ItemCreate, request: Request):
+    try:
+        items = await read_items()
+        index = next((i for i, v in enumerate(items) if v["id"] == item_id), None)
+        if index is None:
+            raise InternalException(
+                message="Item not found", error_code=ErrorCode.NOT_FOUND
+            )
+        updated_item = {**item.model_dump(), "id": item_id}
+        items[index] = updated_item
+        await write_items(items)
+        return ResponseSchema(
+            timestamp=datetime.now(UTC)
+            .isoformat(timespec="milliseconds")
+            .replace("+00:00", "Z"),
+            status=200,
+            code="HTTP-200",
+            path=str(request.url),
+            message=updated_item,
+        )
+    except InternalException as e:
+        raise e
+    except Exception as e:
+        raise InternalException(
+            message=f"Error updating item: {str(e)}", error_code=ErrorCode.UNKNOWN_ERROR
+        )
+
+
+@router.delete(
+    "/{item_id}",
+    summary="Delete item",
+    response_model=ResponseSchema[str],
+    responses=error_responses,
+)
+async def delete_item(item_id: int, request: Request):
+    try:
+        items = await read_items()
+        new_items = [i for i in items if i["id"] != item_id]
+        if len(new_items) == len(items):
+            raise InternalException(
+                message="Item not found", error_code=ErrorCode.NOT_FOUND
+            )
+        await write_items(new_items)
+        return ResponseSchema(
+            timestamp=datetime.now(UTC)
+            .isoformat(timespec="milliseconds")
+            .replace("+00:00", "Z"),
+            status=200,
+            code="HTTP-200",
+            path=str(request.url),
+            message="Item deleted successfully",
+        )
+    except InternalException as e:
+        raise e
+    except Exception as e:
+        raise InternalException(
+            message=f"Error deleting item: {str(e)}", error_code=ErrorCode.UNKNOWN_ERROR
+        )

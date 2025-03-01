@@ -1,0 +1,16 @@
+#! /usr/bin/env bash
+
+set -e
+set -x
+
+# Let the DB start
+python src/utils/backend_pre_start.py
+
+# Ensure tables exist
+python -c "from src.core.db import create_db_and_tables; create_db_and_tables()"
+
+# Run migrations
+alembic upgrade head
+
+# Create initial data in DB
+python src/utils/init_data.py

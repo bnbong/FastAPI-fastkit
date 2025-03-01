@@ -1,0 +1,53 @@
+# --------------------------------------------------------------------------
+# Database configuration module
+# --------------------------------------------------------------------------
+from sqlmodel import Session, SQLModel, create_engine, select
+
+from src.core.config import settings
+from src.schemas.items import ItemBase
+
+engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
+
+
+# make sure all SQLModel models are imported (src.schemas) before initializing DB
+# otherwise, SQLModel might fail to initialize relationships properly
+
+
+def init_db(session: Session) -> None:
+    """
+    Initialize the database with sample data.
+
+    This function can be used to seed the database with initial data for testing or
+    demonstration purposes. Modify the sample data as needed for your application.
+
+    Args:
+        session: Database session
+    """
+    # Check if we already have items
+    statement = select(ItemBase)
+    results = session.exec(statement).all()
+    if results:
+        return  # Database already has data
+
+    # Add sample items
+    sample_items = [
+        {"name": "Test Item 1", "description": "This is a test item", "price": 19.99, "category": "test"},
+        {"name": "Test Item 2", "description": "Another test item", "price": 29.99, "category": "test"},
+    ]
+
+    for item_data in sample_items:
+        item = ItemBase(**item_data)
+        session.add(item)
+
+    session.commit()
+
+
+def create_db_and_tables():
+    """
+    Create database tables.
+
+    This function creates all tables defined via SQLModel. In production,
+    use Alembic migrations instead of this function.
+    """
+    # SQLModel.metadata.create_all(engine)
+    pass

@@ -1,0 +1,25 @@
+# --------------------------------------------------------------------------
+# package setup module
+# --------------------------------------------------------------------------
+from setuptools import find_packages, setup
+
+install_requires: list[str] = [
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "pydantic-settings",
+    "python-dotenv",
+    "sqlmodel",
+    "SQLAlchemy",
+    "alembic",
+]
+
+setup(
+    name="<project_name>",
+    description="[FastAPI-fastkit templated] <description>",
+    author="<author>",
+    author_email=f"<author_email>",
+    packages=find_packages(where="src"),
+    requires=["python (>=3.12)"],
+    install_requires=install_requires,
+)

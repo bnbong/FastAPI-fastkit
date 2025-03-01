@@ -1,0 +1,72 @@
+# --------------------------------------------------------------------------
+# The module defines paginatable object schemas' helper methods.
+# --------------------------------------------------------------------------
+from typing import Generic, List, Optional, TypeVar
+
+from fastapi import Request
+from pydantic import AnyHttpUrl, BaseModel, Field
+
+T = TypeVar("T")
+
+
+class PaginatedResponse(BaseModel, Generic[T]):
+    count: int = Field(
+        ..., title="Count", description="Indicates the total number of imported items."
+    )
+    next: Optional[AnyHttpUrl] = Field(
+        None,
+        title="Next",
+        description="Indicates the URL of the next page to import the data.",
+    )
+    previous: Optional[AnyHttpUrl] = Field(
+        None,
+        title="Previous",
+        description="Indicates the URL of the previous page from which the data was imported.",
+    )
+    results: List[T] = Field(
+        ...,
+        title="Results",
+        description="Lists the information of the imported items.",
+    )
+
+
+class Paginator:
+    def __init__(self, data: List[T], page: int, per_page: int, request: Request):
+        self.data = data
+        self.page = page
+        self.page_size = per_page
+        self.limit = per_page
+        self.offset = (page - 1) * per_page
+        self.request = request
+        self.number_of_pages = self._get_number_of_pages(len(data))
+
+    def _get_next_page(self) -> Optional[str]:
+        if self.page >= self.number_of_pages:
+            return None
+        url = self.request.url.include_query_params(page=self.page + 1)
+        return str(url)
+
+    def _get_previous_page(self) -> Optional[str]:
+        if self.page == 1:
+            return None
+        url = self.request.url.include_query_params(page=self.page - 1)
+        return str(url)
+
+    def get_response(self) -> dict:
+        paginated_data = self.data[self.offset : self.offset + self.limit]
+        return {
+            "count": len(self.data),
+            "next": self._get_next_page(),
+            "previous": self._get_previous_page(),
+            "results": paginated_data,
+        }
+
+    def _get_number_of_pages(self, count: int) -> int:
+        rest = count % self.page_size
+        quotient = count // self.page_size
+        return quotient if not rest else quotient + 1
+
+
+def paginate(data: List[T], page: int, page_size: int, request: Request) -> dict:
+    paginator = Paginator(data, page, page_size, request)
+    return paginator.get_response()

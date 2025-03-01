@@ -1,0 +1,64 @@
+# --------------------------------------------------------------------------
+# <new_route> CRUD Endpoint
+# --------------------------------------------------------------------------
+from fastapi import APIRouter
+
+from src.crud.<new_route> import *
+from src.schemas.<new_route> import *
+
+router = APIRouter()
+
+
+@router.get("/")
+def get_route():
+    result = read_crud()
+
+    # Add Presentation Layer logics here
+
+    return result
+
+
+@router.post("/")
+def post_route():
+    result = create_crud()
+
+    # Add Presentation Layer logics here
+
+    return result
+
+
+@router.put("/")
+def put_route():
+    result = edit_crud()
+
+    # Add Presentation Layer logics here
+
+    return result
+
+
+@router.patch("/")
+def patch_route():
+    result = edit_crud()
+
+    # Add Presentation Layer logics here
+
+    return result
+
+
+@router.delete("/")
+def delete_route():
+    result = remove_crud()
+
+    # Add Presentation Layer logics here
+
+    return result
+
+
+"""Add other routers here
+
+For more information, please refer to the following link:
+
+https://fastapi.tiangolo.com/tutorial/first-steps/#operation
+https://fastapi.tiangolo.com/tutorial/bigger-applications/?h=apirouter#another-module-with-apirouter
+https://fastapi.tiangolo.com/tutorial/body/?h=pydantic
+"""

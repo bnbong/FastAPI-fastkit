@@ -1,0 +1,61 @@
+# --------------------------------------------------------------------------
+# Item endpoint testcases
+# --------------------------------------------------------------------------
+import pytest
+
+
+@pytest.mark.asyncio
+async def test_read_all_items(client):
+    response = await client.get("/items/")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == 200
+    assert data["code"] == "HTTP-200"
+    assert isinstance(data["message"], list)
+
+
+@pytest.mark.asyncio
+async def test_get_item_success(client):
+    response = await client.get("/items/1")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["message"]["id"] == 1
+    assert data["message"]["name"] == "Test Item 1"
+
+
+@pytest.mark.asyncio
+async def test_get_item_not_found(client):
+    response = await client.get("/items/999")
+    assert response.status_code == 404
+    data = response.json()
+    assert data["code"] == "HTTP-002"
+    assert "Item not found" in data["message"]
+
+
+@pytest.mark.asyncio
+async def test_create_item(client):
+    test_item = {"name": "New Item", "price": 30.0, "category": "test"}
+    response = await client.post("/items/", json=test_item)
+    assert response.status_code == 201
+    data = response.json()
+    assert data["message"]["id"] == 2
+
+
+@pytest.mark.asyncio
+async def test_update_item(client):
+    update_data = {"name": "Updated Item", "price": 25.0, "category": "test"}
+    response = await client.put("/items/1", json=update_data)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["message"]["name"] == "Updated Item"
+
+
+@pytest.mark.asyncio
+async def test_delete_item(client):
+    # First delete
+    response = await client.delete("/items/1")
+    assert response.status_code == 200
+
+    # Verify deletion
+    verify_response = await client.get("/items/1")
+    assert verify_response.status_code == 404

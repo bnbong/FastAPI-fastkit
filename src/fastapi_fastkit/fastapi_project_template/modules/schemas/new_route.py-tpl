@@ -1,0 +1,23 @@
+# --------------------------------------------------------------------------
+# <new_route> schema module
+# --------------------------------------------------------------------------
+from pydantic import BaseModel
+
+
+class <new_route>Base(BaseModel):
+    """Add fields here"""
+    pass
+
+
+class <new_route>Response(<new_route>Base):
+    """Add fields here"""
+    pass
+
+
+"""Add other schemas here
+
+For more information, please refer to the following link:
+
+https://fastapi.tiangolo.com/tutorial/query-param-models/
+https://fastapi.tiangolo.com/tutorial/response-model/
+"""

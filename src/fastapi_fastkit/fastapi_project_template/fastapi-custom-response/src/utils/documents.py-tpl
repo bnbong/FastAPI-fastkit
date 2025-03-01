@@ -1,0 +1,20 @@
+# --------------------------------------------------------------------------
+# The module defines API docs content that OpenAPI generator can read.
+# --------------------------------------------------------------------------
+from fastapi import FastAPI
+
+
+def add_description_at_api_tags(app: FastAPI):
+    tag_descriptions = {
+        "items": "Item API. Performs item CRUD operations...",
+        # put routers' description here after create and connect them.
+    }
+
+    openapi_tags = [
+        {"name": tag, "description": desc} for tag, desc in tag_descriptions.items()
+    ]
+
+    if app.openapi_tags:
+        app.openapi_tags.extend(openapi_tags)
+    else:
+        app.openapi_tags = openapi_tags
