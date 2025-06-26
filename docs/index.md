@@ -101,15 +101,15 @@ Installing dependencies...
 
 ---> 100%
 
-╭─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── Success ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ ✨ Dependencies installed successfully                                                                                                                                                                                                                                                │
-╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-╭─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── Success ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ ✨ FastAPI project '<your-project-name>' has been created successfully and saved to '<your-project-path>'!                                                                                                                                                     │
-╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── Info ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ ℹ To start your project, run 'fastkit runserver' at newly created FastAPI project directory                                                                                                                                                                                           │
-╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭───────────────────────────── Success ──────────────────────────────╮
+│ ✨ Dependencies installed successfully                             │
+╰────────────────────────────────────────────────────────────────────╯
+╭───────────────────────────── Success ──────────────────────────────╮
+│ ✨ FastAPI project '<your-project-name>' has been created successfully and saved to '<your-project-path>'!                                                                                                                                          │
+╰────────────────────────────────────────────────────────────────────╯
+╭─────────────────────────────── Info ───────────────────────────────╮
+│ ℹ To start your project, run 'fastkit runserver' at newly created FastAPI project directory                                                                                                                                                                          │
+╰────────────────────────────────────────────────────────────────────╯
 ```
 
 </div>
@@ -129,12 +129,12 @@ $ fastkit addroute <your-project-name> <new-route-name>
 
 ---> 100%
 
-╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── Info ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ ℹ Updated main.py to include the API router                                                                                                                                                                                                                                           │
-╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-╭─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── Success ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ ✨ Successfully added new route '<new-route-name>' to project '<your-project-name>'.                                                                                                                                                                                                                                   │
-╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─────────────────────────────── Info ───────────────────────────────╮
+│ ℹ Updated main.py to include the API router                        │
+╰────────────────────────────────────────────────────────────────────╯
+╭───────────────────────────── Success ──────────────────────────────╮
+│ ✨ Successfully added new route '<new-route-name>' to project '<your-project-name>'.                  │
+╰────────────────────────────────────────────────────────────────────╯
 ```
 
 </div>
@@ -151,33 +151,45 @@ Place a structured FastAPI demo project immediately with:
 
 ```console
 $ fastkit startdemo
-Enter the project name: <your-project-name>
-Enter the author name: <your-name>
-Enter the author email: <your-email>
-Enter the project description: <your-project-description>
+Enter the project name: my-awesome-demo
+Enter the author name: John Doe
+Enter the author email: john@example.com
+Enter the project description: My awesome FastAPI demo
 Deploying FastAPI project using 'fastapi-default' template
 Template path:
-/<fastapi_fastkit-package-path>/fastapi_project_template/fastapi-defau
-lt
+/~fastapi_fastkit-package-path~/fastapi_project_template/fastapi-default
 
 
-                    Project Information
-┌──────────────┬──────────────────────────────────────────┐
-│ Project Name │ <your-project-name>                      │
-│ Author       │ <your-name>                              │
-│ Author Email │ <your-email>                             │
-│ Description  │ <your-project-description>               │
-└──────────────┴──────────────────────────────────────────┘
+           Project Information
+┌──────────────┬─────────────────────────┐
+│ Project Name │ my-awesome-demo         │
+│ Author       │ John Doe                │
+│ Author Email │ john@example.com        │
+│ Description  │ My awesome FastAPI demo │
+└──────────────┴─────────────────────────┘
+
+
+       Template Dependencies
+┌──────────────┬───────────────────┐
+│ Dependency 1 │ fastapi           │
+│ Dependency 2 │ uvicorn           │
+│ Dependency 3 │ pydantic          │
+│ Dependency 4 │ pydantic-settings │
+│ Dependency 5 │ python-dotenv     │
+└──────────────┴───────────────────┘
 
 Do you want to proceed with project creation? [y/N]: y
-FastAPI template project will deploy at '<your-project-path>'
+FastAPI template project will deploy at '~your-project-path~'
 
 ---> 100%
 
-╭─────────────────────────────────────────────────────────────────── Success ────────────────────────────────────────────────────────────────────╮
-│ ✨ FastAPI project '<your-project-name>' from 'fastapi-default' has been created and saved to                                                  │
-│ <your-project-path>!                                                                                                                           │
-╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭────────────────────────── Success ──────────────────────────╮
+│ ✨ Dependencies installed successfully                      │
+╰─────────────────────────────────────────────────────────────╯
+╭────────────────────────── Success ──────────────────────────╮
+│ ✨ FastAPI project 'my-awesome-demo' from 'fastapi-default' │
+│ has been created and saved to ~your-project-path~!          │
+╰─────────────────────────────────────────────────────────────╯
 ```
 
 </div>
@@ -188,6 +200,18 @@ To view the list of available FastAPI demos, check with:
 
 ```console
 $ fastkit list-templates
+                      Available Templates
+┌─────────────────────────┬───────────────────────────────────┐
+│ fastapi-custom-response │ Async Item Management API with    │
+│                         │ Custom Response System            │
+│ fastapi-dockerized      │ Dockerized FastAPI Item           │
+│                         │ Management API                    │
+│ fastapi-empty           │ No description                    │
+│ fastapi-async-crud      │ Async Item Management API Server  │
+│ fastapi-psql-orm        │ Dockerized FastAPI Item           │
+│                         │ Management API with PostgreSQL    │
+│ fastapi-default         │ Simple FastAPI Project            │
+└─────────────────────────┴───────────────────────────────────┘
 ```
 
 </div>
