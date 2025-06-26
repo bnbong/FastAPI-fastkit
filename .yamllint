@@ -1,0 +1,21 @@
+extends: default
+
+rules:
+  line-length:
+    max: 120
+    level: warning
+
+  truthy:
+    allowed-values: ['true', 'false']
+    check-keys: false
+
+  comments:
+    min-spaces-from-content: 1
+
+  empty-values:
+    forbid-in-block-mappings: false
+    forbid-in-flow-mappings: false
+
+ignore: |
+  .github/dependabot.yml
+  .github/release-drafter.yml

@@ -1,0 +1,41 @@
+{
+  "yaml.schemas": {
+    "https://json.schemastore.org/github-workflow.json": [
+      ".github/workflows/*.yml",
+      ".github/workflows/*.yaml"
+    ],
+    "https://json.schemastore.org/dependabot-2.0.json": [
+      ".github/dependabot.yml",
+      ".github/dependabot.yaml"
+    ]
+  },
+  "yaml.customTags": [
+    "!And",
+    "!Base64",
+    "!Cidr",
+    "!Equals",
+    "!FindInMap",
+    "!GetAtt",
+    "!GetAZs",
+    "!If",
+    "!ImportValue",
+    "!Join",
+    "!Not",
+    "!Or",
+    "!Ref",
+    "!Select",
+    "!Split",
+    "!Sub",
+    "!Transform"
+  ],
+  "[yaml]": {
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2,
+    "editor.autoIndent": "advanced"
+  },
+  "yaml.validate": true,
+  "yaml.format.enable": true,
+  "yaml.completion": true,
+  "yaml.hover": true,
+  "yaml.schemaStore.enable": false
+}

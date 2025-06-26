@@ -1,3 +1,4 @@
+# ignore this just for now - when Pypi package release feature added at Github, this workflow will be used.
 name: release package to github
 on:
   pull_request:
