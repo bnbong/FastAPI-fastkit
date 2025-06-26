@@ -51,65 +51,100 @@ Create a new FastAPI project workspace immediately with:
 
 ```console
 $ fastkit init
-Enter the project name: <your-project-name>
-Enter the author name: <your-name>
-Enter the author email: <your-email>
-Enter the project description: <your-project-description>
+Enter the project name: my-awesome-project
+Enter the author name: John Doe
+Enter the author email: john@example.com
+Enter the project description: My awesome FastAPI project
+
+
+             Project Information
+┌──────────────┬────────────────────────────┐
+│ Project Name │ my-awesome-project         │
+│ Author       │ John Doe                   │
+│ Author Email │ john@example.com           │
+│ Description  │ My awesome FastAPI project │
+└──────────────┴────────────────────────────┘
 
 Available Stacks and Dependencies:
-      MINIMAL Stack
-┌──────────────┬─────────┐
-│ Dependency 1 │ fastapi │
-│ Dependency 2 │ uvicorn │
-└──────────────┴─────────┘
+           MINIMAL Stack
+┌──────────────┬───────────────────┐
+│ Dependency 1 │ fastapi           │
+│ Dependency 2 │ uvicorn           │
+│ Dependency 3 │ pydantic          │
+│ Dependency 4 │ pydantic-settings │
+└──────────────┴───────────────────┘
 
 
-       STANDARD Stack
-┌──────────────┬────────────┐
-│ Dependency 1 │ fastapi    │
-│ Dependency 2 │ uvicorn    │
-│ Dependency 3 │ sqlalchemy │
-│ Dependency 4 │ alembic    │
-│ Dependency 5 │ pytest     │
-└──────────────┴────────────┘
+           STANDARD Stack
+┌──────────────┬───────────────────┐
+│ Dependency 1 │ fastapi           │
+│ Dependency 2 │ uvicorn           │
+│ Dependency 3 │ sqlalchemy        │
+│ Dependency 4 │ alembic           │
+│ Dependency 5 │ pytest            │
+│ Dependency 6 │ pydantic          │
+│ Dependency 7 │ pydantic-settings │
+└──────────────┴───────────────────┘
 
 
-           FULL Stack
-┌──────────────┬────────────────┐
-│ Dependency 1 │ fastapi        │
-│ Dependency 2 │ uvicorn        │
-│ Dependency 3 │ sqlalchemy     │
-│ Dependency 4 │ alembic        │
-│ Dependency 5 │ pytest         │
-│ Dependency 6 │ redis          │
-│ Dependency 7 │ celery         │
-│ Dependency 8 │ docker-compose │
-└──────────────┴────────────────┘
+             FULL Stack
+┌──────────────┬───────────────────┐
+│ Dependency 1 │ fastapi           │
+│ Dependency 2 │ uvicorn           │
+│ Dependency 3 │ sqlalchemy        │
+│ Dependency 4 │ alembic           │
+│ Dependency 5 │ pytest            │
+│ Dependency 6 │ redis             │
+│ Dependency 7 │ celery            │
+│ Dependency 8 │ pydantic          │
+│ Dependency 9 │ pydantic-settings │
+└──────────────┴───────────────────┘
 
 
 Select stack (minimal, standard, full): minimal
-  Creating Project:
- new-fastapi-project
-┌───────────┬────────┐
-│ Component │ Status │
-│ fastapi   │ ✓      │
-│ uvicorn   │ ✓      │
-└───────────┴────────┘
+Do you want to proceed with project creation? [y/N]: y
+FastAPI project will deploy at '~your-project-path~'
+╭─────────────────────────── Info ────────────────────────────╮
+│ ℹ Injected metadata into setup.py                           │
+╰─────────────────────────────────────────────────────────────╯
+╭─────────────────────────── Info ────────────────────────────╮
+│ ℹ Injected metadata into config file                        │
+╰─────────────────────────────────────────────────────────────╯
+        Creating Project:
+       my-awesome-project
+┌───────────────────┬───────────┐
+│ Component         │ Collected │
+│ fastapi           │ ✓         │
+│ uvicorn           │ ✓         │
+│ pydantic          │ ✓         │
+│ pydantic-settings │ ✓         │
+└───────────────────┴───────────┘
 Creating virtual environment...
+╭─────────────────────────── Info ────────────────────────────╮
+│ ℹ venv created at                                           │
+│ ~your-project-path~/my-awesome-project/.venv                │
+│ To activate the virtual environment, run:                   │
+│                                                             │
+│     source                                                  │
+│ ~your-project-path~/my-awesome-project/.venv/bin/activate   │
+╰─────────────────────────────────────────────────────────────╯
 Installing dependencies...
 ⠙ Setting up project environment...Collecting <packages~>
 
 ---> 100%
 
-╭───────────────────────────── Success ──────────────────────────────╮
-│ ✨ Dependencies installed successfully                             │
-╰────────────────────────────────────────────────────────────────────╯
-╭───────────────────────────── Success ──────────────────────────────╮
-│ ✨ FastAPI project '<your-project-name>' has been created successfully and saved to '<your-project-path>'!                                                                                                                                          │
-╰────────────────────────────────────────────────────────────────────╯
-╭─────────────────────────────── Info ───────────────────────────────╮
-│ ℹ To start your project, run 'fastkit runserver' at newly created FastAPI project directory                                                                                                                                                                          │
-╰────────────────────────────────────────────────────────────────────╯
+╭────────────────────────── Success ──────────────────────────╮
+│ ✨ Dependencies installed successfully                      │
+╰─────────────────────────────────────────────────────────────╯
+╭────────────────────────── Success ──────────────────────────╮
+│ ✨ FastAPI project 'my-awesome-project' has been created    │
+│ successfully and saved to                                   │
+│ ~your-project-path~!                                        │
+╰─────────────────────────────────────────────────────────────╯
+╭─────────────────────────── Info ────────────────────────────╮
+│ ℹ To start your project, run 'fastkit runserver' at newly   │
+│ created FastAPI project directory                           │
+╰─────────────────────────────────────────────────────────────╯
 ```
 
 </div>
@@ -125,16 +160,22 @@ Add a new route endpoint to your FastAPI project with:
 <div class="termy">
 
 ```console
-$ fastkit addroute <your-project-name> <new-route-name>
+$ fastkit addroute my-awesome-project user
+                       Adding New Route
+┌──────────────────┬──────────────────────────────────────────┐
+│ Project          │ my-awesome-project                       │
+│ Route Name       │ user                                     │
+│ Target Directory │ ~your-project-path~                      │
+└──────────────────┴──────────────────────────────────────────┘
 
----> 100%
-
-╭─────────────────────────────── Info ───────────────────────────────╮
-│ ℹ Updated main.py to include the API router                        │
-╰────────────────────────────────────────────────────────────────────╯
-╭───────────────────────────── Success ──────────────────────────────╮
-│ ✨ Successfully added new route '<new-route-name>' to project '<your-project-name>'.                  │
-╰────────────────────────────────────────────────────────────────────╯
+Do you want to add route 'user' to project 'my-awesome-project'? [Y/n]: y
+╭─────────────────────────── Info ────────────────────────────╮
+│ ℹ Updated main.py to include the API router                 │
+╰─────────────────────────────────────────────────────────────╯
+╭────────────────────────── Success ──────────────────────────╮
+│ ✨ Successfully added new route 'user' to project           │
+│ `my-awesome-project`                                        │
+╰─────────────────────────────────────────────────────────────╯
 ```
 
 </div>
