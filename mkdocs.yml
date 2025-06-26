@@ -1,0 +1,69 @@
+site_name: FastAPI-fastkit
+site_description: Fast, easy-to-use starter kit for new users of Python and FastAPI
+site_url: https://bnbong.github.io/FastAPI-fastkit/
+repo_name: bnbong/FastAPI-fastkit
+repo_url: https://github.com/bnbong/FastAPI-fastkit
+theme:
+  custom_dir: overrides
+  name: material
+  font:
+    text: JetBrains Mono
+  # Light and Dark Theme Toggle
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: brown
+      toggle:
+        icon: material/brightness-7  # current mode : light
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: brown
+      toggle:
+        icon: material/brightness-4  # current mode : dark
+        name: Switch to light mode
+  features:
+    - navigation.indexes
+    - navigation.footer
+    - navigation.top
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.expand
+    - search.highlight
+    - search.share
+    - search.suggest
+    - announce.dismiss
+    - toc.follow
+  logo: img/FastAPI-fastkit_logo.png
+  favicon: img/FastAPI-fastkit_logo.png
+  language: en
+plugins:
+  # Material for MkDocs
+  - search
+
+markdown_extensions:
+  # Python Markdown
+  - abbr
+  - attr_list
+  - footnotes
+  - md_in_html
+  - mdx_include
+  # PyMdown Extensions
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+
+extra_css:
+  - css/termynal.css
+  - css/custom.css
+
+extra_javascript:
+  - js/termynal.js
+  - js/custom.js

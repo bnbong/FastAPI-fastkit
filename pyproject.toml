@@ -52,3 +52,10 @@ disable_error_code = ["func-returns-value"]
 module = "fastapi_fastkit.core"
 ignore_missing_imports = true
 check_untyped_defs = false
+
+[dependency-groups]
+docs = [
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.6.14",
+    "mdx-include>=1.4.2",
+]

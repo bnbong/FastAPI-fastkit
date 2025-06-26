@@ -1,0 +1,55 @@
+name: Build Docs
+on:
+  push:
+    branches:
+      - main
+permissions:
+  contents: write
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      docs: ${{ steps.filter.outputs.docs }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            docs:
+              - README.md
+              - docs/**
+  build-docs:
+    needs:
+      - changes
+    if: ${{ needs.changes.outputs.docs == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure Git Credentials
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12.4"
+      - uses: pdm-project/setup-pdm@v4
+      - name: Install docs dependencies
+        run: |
+          echo "Attempting to install docs dependencies with PDM..."
+          if pdm install --group docs --no-default; then
+            echo "PDM install succeeded"
+          else
+            echo "PDM install failed or PDM not available, falling back to requirements-docs.txt"
+            echo "Installing dependencies via pip..."
+            pip install -r requirements-docs.txt
+            echo "Fallback installation completed"
+          fi
+      - run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV
+      - uses: actions/cache@v4
+        with:
+            key: mkdocs-material-${{ env.cache_id }}
+            path: .cache
+            restore-keys: |
+              mkdocs-material-
+      - run: mkdocs gh-deploy --force
