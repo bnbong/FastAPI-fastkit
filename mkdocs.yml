@@ -44,6 +44,10 @@ plugins:
   # Material for MkDocs
   - search
 
+nav:
+  - Home: index.md
+  - Changelog: changelog.md
+
 markdown_extensions:
   # Python Markdown
   - abbr
@@ -52,13 +56,13 @@ markdown_extensions:
   - md_in_html
   - mdx_include
   # PyMdown Extensions
-  - pymdownx.highlight:
+  - pymdownx.highlight:  # necessary for code blocks & termynal
       anchor_linenums: true
       line_spans: __span
       pygments_lang_class: true
-  - pymdownx.inlinehilite
-  - pymdownx.snippets
-  - pymdownx.superfences
+  - pymdownx.inlinehilite  # necessary for code blocks & termynal
+  - pymdownx.snippets  # necessary for code blocks & termynal
+  - pymdownx.superfences  # necessary for code blocks & termynal
 
 extra_css:
   - css/termynal.css

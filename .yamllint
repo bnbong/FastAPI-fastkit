@@ -19,3 +19,4 @@ rules:
 ignore: |
   .github/dependabot.yml
   .github/release-drafter.yml
+  .github/changelog-ci-config.yaml

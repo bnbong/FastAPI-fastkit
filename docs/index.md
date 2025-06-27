@@ -56,8 +56,7 @@ Enter the author name: John Doe
 Enter the author email: john@example.com
 Enter the project description: My awesome FastAPI project
 
-
-             Project Information
+           Project Information
 ┌──────────────┬────────────────────────────┐
 │ Project Name │ my-awesome-project         │
 │ Author       │ John Doe                   │
@@ -74,7 +73,6 @@ Available Stacks and Dependencies:
 │ Dependency 4 │ pydantic-settings │
 └──────────────┴───────────────────┘
 
-
            STANDARD Stack
 ┌──────────────┬───────────────────┐
 │ Dependency 1 │ fastapi           │
@@ -85,7 +83,6 @@ Available Stacks and Dependencies:
 │ Dependency 6 │ pydantic          │
 │ Dependency 7 │ pydantic-settings │
 └──────────────┴───────────────────┘
-
 
              FULL Stack
 ┌──────────────┬───────────────────┐
@@ -100,16 +97,17 @@ Available Stacks and Dependencies:
 │ Dependency 9 │ pydantic-settings │
 └──────────────┴───────────────────┘
 
-
 Select stack (minimal, standard, full): minimal
 Do you want to proceed with project creation? [y/N]: y
 FastAPI project will deploy at '~your-project-path~'
-╭─────────────────────────── Info ────────────────────────────╮
-│ ℹ Injected metadata into setup.py                           │
-╰─────────────────────────────────────────────────────────────╯
-╭─────────────────────────── Info ────────────────────────────╮
-│ ℹ Injected metadata into config file                        │
-╰─────────────────────────────────────────────────────────────╯
+
+╭──────────────────────── Info ────────────────────────╮
+│ ℹ Injected metadata into setup.py                    │
+╰──────────────────────────────────────────────────────╯
+╭──────────────────────── Info ────────────────────────╮
+│ ℹ Injected metadata into config file                 │
+╰──────────────────────────────────────────────────────╯
+
         Creating Project:
        my-awesome-project
 ┌───────────────────┬───────────┐
@@ -119,32 +117,36 @@ FastAPI project will deploy at '~your-project-path~'
 │ pydantic          │ ✓         │
 │ pydantic-settings │ ✓         │
 └───────────────────┴───────────┘
+
 Creating virtual environment...
-╭─────────────────────────── Info ────────────────────────────╮
-│ ℹ venv created at                                           │
-│ ~your-project-path~/my-awesome-project/.venv                │
-│ To activate the virtual environment, run:                   │
-│                                                             │
-│     source                                                  │
-│ ~your-project-path~/my-awesome-project/.venv/bin/activate   │
-╰─────────────────────────────────────────────────────────────╯
+
+╭──────────────────────── Info ────────────────────────╮
+│ ℹ venv created at                                    │
+│ ~your-project-path~/my-awesome-project/.venv         │
+│ To activate the virtual environment, run:            │
+│                                                      │
+│     source                                           │
+│ ~your-project-path~/my-awesome-project/.venv/bin/act │
+│ ivate                                                │
+╰──────────────────────────────────────────────────────╯
+
 Installing dependencies...
 ⠙ Setting up project environment...Collecting <packages~>
 
 ---> 100%
 
-╭────────────────────────── Success ──────────────────────────╮
-│ ✨ Dependencies installed successfully                      │
-╰─────────────────────────────────────────────────────────────╯
-╭────────────────────────── Success ──────────────────────────╮
-│ ✨ FastAPI project 'my-awesome-project' has been created    │
-│ successfully and saved to                                   │
-│ ~your-project-path~!                                        │
-╰─────────────────────────────────────────────────────────────╯
-╭─────────────────────────── Info ────────────────────────────╮
-│ ℹ To start your project, run 'fastkit runserver' at newly   │
-│ created FastAPI project directory                           │
-╰─────────────────────────────────────────────────────────────╯
+╭─────────────────────── Success ───────────────────────╮
+│ ✨ Dependencies installed successfully                │
+╰───────────────────────────────────────────────────────╯
+╭─────────────────────── Success ───────────────────────╮
+│ ✨ FastAPI project 'my-awesome-project' has been      │
+│ created successfully and saved to                     │
+│ ~your-project-path~!                                  │
+╰───────────────────────────────────────────────────────╯
+╭──────────────────────── Info ────────────────────────╮
+│ ℹ To start your project, run 'fastkit runserver' at  │
+│ newly created FastAPI project directory              │
+╰──────────────────────────────────────────────────────╯
 ```
 
 </div>
@@ -169,13 +171,14 @@ $ fastkit addroute my-awesome-project user
 └──────────────────┴──────────────────────────────────────────┘
 
 Do you want to add route 'user' to project 'my-awesome-project'? [Y/n]: y
-╭─────────────────────────── Info ────────────────────────────╮
-│ ℹ Updated main.py to include the API router                 │
-╰─────────────────────────────────────────────────────────────╯
-╭────────────────────────── Success ──────────────────────────╮
-│ ✨ Successfully added new route 'user' to project           │
-│ `my-awesome-project`                                        │
-╰─────────────────────────────────────────────────────────────╯
+
+╭──────────────────────── Info ────────────────────────╮
+│ ℹ Updated main.py to include the API router          │
+╰──────────────────────────────────────────────────────╯
+╭─────────────────────── Success ───────────────────────╮
+│ ✨ Successfully added new route 'user' to project     │
+│ `my-awesome-project`                                  │
+╰───────────────────────────────────────────────────────╯
 ```
 
 </div>
@@ -200,7 +203,6 @@ Deploying FastAPI project using 'fastapi-default' template
 Template path:
 /~fastapi_fastkit-package-path~/fastapi_project_template/fastapi-default
 
-
            Project Information
 ┌──────────────┬─────────────────────────┐
 │ Project Name │ my-awesome-demo         │
@@ -208,7 +210,6 @@ Template path:
 │ Author Email │ john@example.com        │
 │ Description  │ My awesome FastAPI demo │
 └──────────────┴─────────────────────────┘
-
 
        Template Dependencies
 ┌──────────────┬───────────────────┐
@@ -224,13 +225,14 @@ FastAPI template project will deploy at '~your-project-path~'
 
 ---> 100%
 
-╭────────────────────────── Success ──────────────────────────╮
-│ ✨ Dependencies installed successfully                      │
-╰─────────────────────────────────────────────────────────────╯
-╭────────────────────────── Success ──────────────────────────╮
-│ ✨ FastAPI project 'my-awesome-demo' from 'fastapi-default' │
-│ has been created and saved to ~your-project-path~!          │
-╰─────────────────────────────────────────────────────────────╯
+╭─────────────────────── Success ───────────────────────╮
+│ ✨ Dependencies installed successfully                │
+╰───────────────────────────────────────────────────────╯
+╭─────────────────────── Success ───────────────────────╮
+│ ✨ FastAPI project 'my-awesome-demo' from             │
+│ 'fastapi-default' has been created and saved to       │
+│ ~your-project-path~!                                  │
+╰───────────────────────────────────────────────────────╯
 ```
 
 </div>
