@@ -13,6 +13,12 @@ requires-python = ">=3.12"
 readme = "README.md"
 license = {text = "MIT"}
 
+[project.urls]
+Homepage = "https://github.com/bnbong/FastAPI-kit"
+Repository = "https://github.com/bnbong/FastAPI-kit"
+Documentation = "https://bnbong.github.io/FastAPI-fastkit/"
+Changelog = "https://bnbong.github.io/FastAPI-fastkit/changelog/"
+
 [project.optional-dependencies]
 dev = [
     "pytest>=8.3.3",

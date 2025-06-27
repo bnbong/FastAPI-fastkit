@@ -20,52 +20,151 @@ This document will also be a good indicator for you to gain insight into the dir
 
 FastAPI-fastkit uses following stacks:
 
-- Python 3.12.4
-- click 8.1.7
-- rich 13.9.2
+- Python 3.12+
+- click 8.1.7+
+- rich 13.9.2+
 - pre-commit
+- pytest for testing
+- black for code formatting
+- isort for import sorting
+- mypy for static type checking
 
-### Local dev configuration
+### Quick Setup with Makefile
+
+The easiest way to set up your development environment is using our Makefile:
 
 1. Clone repository:
 
 ```bash
 git clone https://github.com/bnbong/FastAPI-fastkit.git
+cd FastAPI-fastkit
 ```
 
-2. Set up virtual environment & Install dependencies:
+2. Set up complete development environment:
 
 ```bash
-cd FastAPI-fastkit
+make dev-setup
+```
 
+This single command will:
+- Upgrade pip to the latest version
+- Install the package in development mode with all dev dependencies
+- Install documentation dependencies
+- Set up pre-commit hooks
+- Create a ready-to-use development environment
+
+### Manual Setup (Alternative)
+
+If you prefer manual setup or need more control:
+
+1. Create and activate virtual environment:
+
+```bash
 python -m venv .venv
 source .venv/bin/activate # for Windows, use: .venv\Scripts\activate
-
-pip install -r requirements.txt
 ```
+
+2. Install development dependencies:
+
+```bash
+make install-dev
+```
+
+### Available Development Commands
+
+Use `make help` to see all available development commands:
+
+```bash
+make help
+```
+
+Key commands for contributors:
+
+#### Development Workflow
+- `make dev-setup` - Complete development environment setup
+- `make dev-check` - Run all development checks (format, lint, test)
+- `make dev-fix` - Fix formatting and run tests
+- `make quick-test` - Quick test after code changes
+
+#### Code Quality
+- `make format` - Format code using black and isort
+- `make format-check` - Check code formatting without making changes
+- `make lint` - Run all linting checks (isort, black, mypy)
+
+#### Testing
+- `make test` - Run all tests
+- `make test-verbose` - Run tests with verbose output
+- `make test-coverage` - Run tests with coverage report
+
+#### Installation and Building
+- `make install-test` - Install package for testing (uninstall + reinstall)
+- `make clean` - Clean build artifacts and cache files
+- `make build` - Build the package
+
+#### Documentation
+- `make build-docs` - Build documentation
+- `make serve-docs` - Serve documentation locally
+
+### Development Workflow
+
+1. **Before making changes:**
+   ```bash
+   make dev-setup  # First time only
+   make dev-check  # Ensure everything is working
+   ```
+
+2. **During development:**
+   ```bash
+   make quick-test  # After making changes
+   ```
+
+3. **Before committing:**
+   ```bash
+   make dev-check  # Final verification
+   ```
 
 ### Linting & Formatting
 
-Use these tools for code quality:
+Code quality is maintained using these tools:
 
-1. Black: Code formatting
+1. **Black**: Code formatting
+   ```bash
+   make format
+   ```
 
-```bash
-bash scripts/format.sh
-```
+2. **isort**: Import sorting (integrated with black profile)
+   ```bash
+   # Included in make format
+   ```
 
-2. isort: Import sorting
+3. **mypy**: Static type checking
+   ```bash
+   make lint
+   ```
 
-```bash
-bash scripts/sort.sh
-```
+4. **All checks together**:
+   ```bash
+   make dev-check
+   ```
 
-3. mypy: Static type checking
+### Testing
 
-```bash
-bash scripts/lint.sh
-```
+Run tests using these commands:
 
+1. **Basic test run:**
+   ```bash
+   make test
+   ```
+
+2. **Verbose output:**
+   ```bash
+   make test-verbose
+   ```
+
+3. **Coverage report:**
+   ```bash
+   make test-coverage
+   ```
 
 ### Making PRs
 
@@ -91,16 +190,19 @@ Example:
 
 #### Pre-commit
 
-You can use pre-commit to automatically run linting, formatting, and type checking before committing.
+Pre-commit hooks are automatically installed with `make dev-setup`. The hooks will run automatically when you commit and include:
+
+- Code formatting (black, isort)
+- Linting checks
+- Type checking (mypy)
+
+If pre-commit finds issues, fix them and commit again:
 
 ```bash
-# Install pre-commit hooks
-pre-commit install
+make dev-fix  # Fix common issues
+git add .
+git commit -m "Your commit message"
 ```
-
-After installing pre-commit hooks, the pre-commit hooks will be run automatically when you commit.
-
-Check the pre-commit's output when you making new commit, and fix the code if there are any errors.
 
 ## Documentation
 
@@ -108,22 +210,6 @@ Follow these documentation guidelines:
 
 1. Docstring for all functions/classes (not necessary, but recommended)
 2. Except for translations and typographical corrections, modifications to the core [README.md](README.md), [SECURITY.md](SECURITY.md), [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) files of the FastAPI-fastkit project itself are prohibited.
-
-## Testing
-
-After writing new tests or modifying existing tests, run these commands to ensure the tests pass:
-
-1. Run tests:
-
-```bash
-pytest tests/
-```
-
-2. Check coverage:
-
-```bash
-pytest --cov=src tests/
-```
 
 ## Adding new FastAPI-based template project
 
@@ -201,30 +287,44 @@ template-name/
 
 ### Submission Process
 
-1. Initial Setup:
-   - Clone or Fork the repository
-   - Create a new branch for your template
-   - Follow the template structure
+1. **Initial Setup:**
+   ```bash
+   git clone https://github.com/bnbong/FastAPI-fastkit.git
+   cd FastAPI-fastkit
+   make dev-setup
+   ```
 
-2. Development:
-   - Implement required features
-   - Add comprehensive tests
-   - Document all components
-   - Run inspector.py validation
+2. **Development:**
+   ```bash
+   # Create new branch
+   git checkout -b feature/new-template-name
 
-3. Pre-submission Checklist:
+   # Implement your template
+   # ...
+
+   # Run development checks
+   make dev-check
+   ```
+
+3. **Pre-submission Checklist:**
+   ```bash
+   make dev-check  # Must pass all checks
+   ```
    - [ ] All files use .py-tpl extension
    - [ ] FastAPI-fastkit dependency included
    - [ ] Security requirements met
    - [ ] Tests implemented and passing
    - [ ] Documentation complete
    - [ ] inspector.py validation passes
+   - [ ] All make dev-check tests pass
 
-4. Pull Request:
+4. **Pull Request:**
    - Provide detailed description
-   - Include test results
+   - Include test results from `make test-coverage`
    - Document any special requirements
    - Reference related issues
+
+<br>
 
 For more detailed information about security requirements and project guidelines, please refer to:
 - [SECURITY.md](SECURITY.md) for security guidelines

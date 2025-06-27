@@ -239,6 +239,41 @@ $ fastkit list-templates
 └─────────────────────────┴───────────────────────────────────┘
 ```
 
+## Contributing
+
+We welcome contributions from the community! FastAPI-fastkit is designed to help newcomers to Python and FastAPI, and your contributions can make a significant impact.
+
+### For Contributors
+
+If you want to contribute to this project, we've made it easy to get started:
+
+1. **Quick Development Setup:**
+   ```bash
+   git clone https://github.com/bnbong/FastAPI-fastkit.git
+   cd FastAPI-fastkit
+   make dev-setup
+   ```
+
+2. **Available Development Commands:**
+   ```bash
+   make help  # See all available commands
+   make dev-check  # Run all checks before submitting
+   make quick-test  # Quick test after changes
+   ```
+
+3. **Read our contribution guidelines:**
+   - [CONTRIBUTING.md](CONTRIBUTING.md) - Detailed contribution guide
+   - [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) - Project principles
+   - [SECURITY.md](SECURITY.md) - Security guidelines
+
+### What You Can Contribute
+
+- 🚀 **New FastAPI templates** - Add templates for different use cases
+- 🐛 **Bug fixes** - Help us improve stability and reliability
+- 📚 **Documentation** - Improve guides, examples, and translations
+- 🧪 **Tests** - Increase test coverage and add integration tests
+- 💡 **Features** - Suggest and implement new CLI features
+
 ## Significance of FastAPI-fastkit
 
 FastAPI-fastkit aims to provide a fast and easy-to-use starter kit for new users of Python and FastAPI.

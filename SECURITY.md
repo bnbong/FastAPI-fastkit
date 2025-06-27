@@ -27,13 +27,71 @@ If you discover a security vulnerability:
 ## Security Checks
 
 All template projects must pass these automated security checks:
+
+### Required Checks
 - Template validation through inspector.py
 - Code quality and security static analysis
-- Dependency vulnerability scanning through GitHub Actions (this is done by Github Actions during the new package version deployment phase for the entire project template.)
+- Dependency vulnerability scanning through GitHub Actions
+
+## Security Best Practices for Contributors
+
+### Template Development
+1. **Environment Variables**: Always use `.env` files for sensitive data
+2. **Authentication**: Implement proper authentication mechanisms
+3. **Input Validation**: Validate all user inputs
+4. **Error Handling**: Don't expose sensitive information in error messages
+5. **Dependencies**: Keep dependencies minimal and up-to-date
+
+### Code Security
+1. **No hardcoded secrets**: Use environment variables
+2. **SQL Injection Prevention**: Use parameterized queries
+3. **XSS Prevention**: Properly sanitize outputs
+4. **CSRF Protection**: Implement CSRF tokens where needed
+
+### Development Practices
+```bash
+# Before committing changes
+make dev-check  # Runs code checks
+
+# Regular dependency updates
+pip list --outdated
+make clean && make dev-setup  # Refresh environment
+```
+
+## Template Security Checklist
+
+Before submitting a new template, ensure:
+
+- [ ] All sensitive data uses environment variables
+- [ ] Authentication/authorization implemented
+- [ ] CORS properly configured
+- [ ] Input validation in place
+- [ ] Error handling doesn't expose sensitive data
+- [ ] Dependencies are up-to-date and secure
+- [ ] `make dev-check` passes all tests
+- [ ] No hardcoded secrets or credentials
+- [ ] SQL queries use parameterization
+- [ ] Proper logging configuration
+
+## Automated Security Monitoring
+
+This project uses:
+- **GitHub Dependabot**: Automatic dependency updates
+- **GitHub Actions**: Security scanning on PRs
+- **Code scanning**: Static analysis for vulnerabilities (will be added soon)
+
+## Security Updates
+
+All security updates are documented in:
+- [GitHub Releases](https://github.com/bnbong/FastAPI-fastkit/releases)
+- [Changelog](https://bnbong.github.io/FastAPI-fastkit/changelog/)
 
 ## Discussion
 
-For security-related discussions, please use the Security category in GitHub Discussions.
+For security-related discussions, please use:
+- GitHub Security Advisories (for vulnerabilities)
+- GitHub Discussions - Security category (for general security topics)
+- Direct email contact for sensitive matters
 
 ---
 @author bnbong bbbong9@gmail.com
