@@ -22,7 +22,7 @@ Changelog = "https://bnbong.github.io/FastAPI-fastkit/changelog/"
 [project.optional-dependencies]
 dev = [
     "pytest>=8.3.3",
-    "pytest-cov>=5.0.0",
+    "pytest-cov>=6.2.1",
     "black>=24.10.0",
     "pre-commit>=4.0.1",
     "mypy>=1.12.0",
@@ -41,8 +41,13 @@ version = { source = "file", path = "src/fastapi_fastkit/__init__.py" }
 distribution = true
 
 [tool.pytest.ini_options]
-testpaths = ["test"]
+testpaths = ["tests"]
 python_files = "test_*.py"
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--disable-warnings",
+]
 
 [tool.isort]
 profile = "black"
@@ -65,3 +70,37 @@ docs = [
     "mkdocs-material>=9.6.14",
     "mdx-include>=1.4.2",
 ]
+
+[tool.coverage.run]
+source = ["src/fastapi_fastkit"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/.*",
+    "*/venv/*",
+    "*/.venv/*",
+    "*/site-packages/*",
+    "*/fastapi_project_template/*",
+    "*/__main__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+show_missing = true
+precision = 2
+fail_under = 70
+
+[tool.coverage.html]
+directory = "htmlcov"

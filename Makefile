@@ -30,7 +30,10 @@ test-verbose: ## Run tests with verbose output
 	pytest -v -s
 
 test-coverage: ## Run tests with coverage report
-	pytest --cov=src/fastapi_fastkit --cov-report=html --cov-report=term
+	./scripts/coverage.sh
+
+coverage: ## Alias for test-coverage
+	$(MAKE) test-coverage
 
 # Code quality commands
 lint: ## Run all linting checks
@@ -65,6 +68,7 @@ clean: ## Clean build artifacts and cache files
 	find . -type f -name "*.pyo" -delete
 	find . -type f -name ".coverage" -delete
 	rm -rf htmlcov/
+	rm -rf coverage.xml
 
 build: clean ## Build the package
 	python -m build

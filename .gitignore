@@ -1,6 +1,13 @@
 # test workspace
 tests/temp_test_workspace/
 
+# Coverage reports
+htmlcov/
+.coverage
+coverage.xml
+.coverage.*
+coverage/
+
 .pdm-python
 ### VisualStudioCode template
 .vscode/*

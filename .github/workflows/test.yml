@@ -1,5 +1,5 @@
-# TODO : add test job - using coverage
-name: test sources before publish
+name: Test and Coverage
+
 on:
   push:
     branches:
@@ -25,13 +25,28 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+
       - name: Setup PDM
         uses: pdm-project/setup-pdm@v4
+
       - name: Install dependencies
         run: pdm install -G dev
-      - name: Run tests
-        run: pdm run pytest
+
+      - name: Run tests with coverage
+        run: |
+          pdm run pytest --cov=src/fastapi_fastkit --cov-report=term-missing --cov-report=xml --cov-fail-under=70
+
+      - name: Upload coverage to Codecov
+        if: matrix.python-version == '3.12'
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
