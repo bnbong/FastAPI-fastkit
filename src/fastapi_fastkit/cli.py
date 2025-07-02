@@ -3,9 +3,11 @@
 #
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
+import atexit
 import os
 import shutil
 import subprocess
+import sys
 from typing import Union
 
 import click
@@ -24,7 +26,7 @@ from fastapi_fastkit.backend.main import (
 from fastapi_fastkit.backend.transducer import copy_and_convert_template
 from fastapi_fastkit.core.exceptions import CLIExceptions
 from fastapi_fastkit.core.settings import FastkitConfig
-from fastapi_fastkit.utils.logging import setup_logging
+from fastapi_fastkit.utils.logging import get_logger, setup_logging
 from fastapi_fastkit.utils.main import (
     create_info_table,
     is_fastkit_project,
@@ -61,7 +63,26 @@ def fastkit_cli(ctx: Context, debug: bool) -> Union["BaseCommand", None]:
 
     ctx.obj["settings"] = settings
 
-    setup_logging(settings=settings)
+    # Setup logging and get debug capture if debug mode is enabled
+    debug_capture = setup_logging(settings=settings)
+    ctx.obj["debug_capture"] = debug_capture
+
+    # If debug mode is enabled, start capturing output
+    if debug_capture:
+        debug_capture.__enter__()
+        # Log CLI invocation
+        logger = get_logger()
+        logger.info(f"CLI invoked with debug mode: {' '.join(sys.argv)}")
+
+        # Register cleanup function for when the CLI exits
+        def cleanup_debug_capture() -> None:
+            try:
+                debug_capture.__exit__(None, None, None)
+                logger.info("FastAPI-fastkit CLI session ended")
+            except Exception:
+                pass  # Fail silently during cleanup
+
+        atexit.register(cleanup_debug_capture)
 
     return None
 
@@ -242,6 +263,8 @@ def startdemo(
         )
 
     except Exception as e:
+        logger = get_logger()
+        logger.exception(f"Error during project creation in startdemo: {str(e)}")
         print_error(f"Error during project creation: {str(e)}")
 
 
@@ -372,6 +395,8 @@ def init(
         )
 
     except Exception as e:
+        logger = get_logger()
+        logger.exception(f"Error during project creation in init: {str(e)}")
         print_error(f"Error during project creation: {str(e)}")
         if os.path.exists(project_dir):
             shutil.rmtree(project_dir, ignore_errors=True)
@@ -447,6 +472,8 @@ def addroute(ctx: Context, project_name: str, route_name: str) -> None:
         )
 
     except Exception as e:
+        logger = get_logger()
+        logger.exception(f"Error during route addition: {str(e)}")
         print_error(f"Error during route addition: {str(e)}")
 
 
@@ -486,6 +513,8 @@ def deleteproject(ctx: Context, project_name: str) -> None:
         print_success(f"Project '{project_name}' has been deleted successfully!")
 
     except Exception as e:
+        logger = get_logger()
+        logger.exception(f"Error during project deletion: {e}")
         print_error(f"Error during project deletion: {e}")
 
 
@@ -619,8 +648,12 @@ def runserver(
         # Run the server with the configured environment
         subprocess.run(command, check=True, env=env)
     except subprocess.CalledProcessError as e:
+        logger = get_logger()
+        logger.exception(f"Failed to start FastAPI server: {e}")
         print_error(f"Failed to start FastAPI server.\n{e}")
-    except FileNotFoundError:
+    except FileNotFoundError as e:
+        logger = get_logger()
+        logger.exception(f"FileNotFoundError when starting server: {e}")
         if venv_python:
             print_error(
                 f"Failed to run Python from the virtual environment. Make sure uvicorn is installed in the project's virtual environment."

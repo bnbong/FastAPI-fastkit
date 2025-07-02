@@ -17,6 +17,7 @@ from rich.text import Text
 
 from fastapi_fastkit import console
 from fastapi_fastkit.core.settings import settings
+from fastapi_fastkit.utils.logging import get_logger
 
 REGEX = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b"
 
@@ -33,6 +34,11 @@ def print_error(
     error_text.append(message)
     console.print(Panel(error_text, border_style="red", title=title))
 
+    # Log error if debug mode is enabled
+    if settings.DEBUG_MODE:
+        logger = get_logger()
+        logger.error(f"Error: {message}")
+
     if show_traceback and settings.DEBUG_MODE:
         console.print("[bold yellow]Stack trace:[/bold yellow]")
         console.print(traceback.format_exc())
@@ -46,6 +52,11 @@ def handle_exception(e: Exception, message: Optional[str] = None) -> None:
     :param message: Optional custom error message
     """
     error_msg = message or f"Error: {str(e)}"
+
+    # Log exception if debug mode is enabled
+    if settings.DEBUG_MODE:
+        logger = get_logger()
+        logger.exception(f"Exception occurred: {error_msg}", exc_info=e)
 
     # Show traceback if in debug mode
     print_error(error_msg, show_traceback=True)
