@@ -248,6 +248,9 @@ We welcome contributions from the community! FastAPI-fastkit is designed to help
 If you want to contribute to this project, we've made it easy to get started:
 
 1. **Quick Development Setup:**
+
+fork or clone this repository:
+
    ```bash
    git clone https://github.com/bnbong/FastAPI-fastkit.git
    cd FastAPI-fastkit
@@ -255,6 +258,11 @@ If you want to contribute to this project, we've made it easy to get started:
    ```
 
 2. **Available Development Commands:**
+
+This project uses [Makefile](https://www.gnu.org/software/make/) to manage the development process.
+
+You can use the following commands to help you get started:
+
    ```bash
    make help  # See all available commands
    make dev-check  # Run all checks before submitting
@@ -262,6 +270,9 @@ If you want to contribute to this project, we've made it easy to get started:
    ```
 
 3. **Read our contribution guidelines:**
+
+For other contribution guidelines, please refer to the following files:
+
    - [CONTRIBUTING.md](CONTRIBUTING.md) - Detailed contribution guide
    - [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) - Project principles
    - [SECURITY.md](SECURITY.md) - Security guidelines
