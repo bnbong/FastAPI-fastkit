@@ -1,9 +1,9 @@
 name: Distribute source to pypi package
 
 on:
-  push:
-    tags:
-      - '*'
+  release:
+    types:
+      - created
 
 
 jobs:
