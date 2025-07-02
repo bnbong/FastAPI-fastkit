@@ -2,8 +2,7 @@ name: Distribute source to pypi package
 
 on:
   release:
-    types:
-      - created
+    types: [published]
 
 
 jobs:
