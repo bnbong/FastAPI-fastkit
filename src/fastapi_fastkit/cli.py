@@ -206,7 +206,12 @@ def startdemo(
     template_dir = settings.FASTKIT_TEMPLATE_ROOT
     click.echo(f"Deploying FastAPI project using '{template}' template")
     target_template = os.path.join(template_dir, template)
-    print(f"Template path: {target_template}")
+
+    if settings.DEBUG_MODE:
+        logger = get_logger()
+        logger.info(f"Template path: {target_template}")
+
+    click.echo(f"Template path: {target_template}")
 
     if not os.path.exists(target_template):
         print_error(f"Template '{template}' does not exist in '{template_dir}'.")
@@ -263,8 +268,9 @@ def startdemo(
         )
 
     except Exception as e:
-        logger = get_logger()
-        logger.exception(f"Error during project creation in startdemo: {str(e)}")
+        if settings.DEBUG_MODE:
+            logger = get_logger()
+            logger.exception(f"Error during project creation in startdemo: {str(e)}")
         print_error(f"Error during project creation: {str(e)}")
 
 
@@ -395,8 +401,9 @@ def init(
         )
 
     except Exception as e:
-        logger = get_logger()
-        logger.exception(f"Error during project creation in init: {str(e)}")
+        if settings.DEBUG_MODE:
+            logger = get_logger()
+            logger.exception(f"Error during project creation in init: {str(e)}")
         print_error(f"Error during project creation: {str(e)}")
         if os.path.exists(project_dir):
             shutil.rmtree(project_dir, ignore_errors=True)

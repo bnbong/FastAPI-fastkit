@@ -3,9 +3,14 @@
 #
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
+
+
 class CLIExceptions(Exception):
     """
-    Exceptions occurs from CLI operations
+    Custom exception class for CLI operations.
+
+    Raised when errors occur during CLI command execution,
+    such as invalid arguments, missing files, or command failures.
     """
 
     pass
@@ -13,7 +18,10 @@ class CLIExceptions(Exception):
 
 class TemplateExceptions(Exception):
     """
-    Exceptions occurs from deploying FastAPI templates
+    Custom exception class for FastAPI template operations.
+
+    Raised when errors occur during template deployment, validation,
+    or file processing operations.
     """
 
     pass
@@ -21,7 +29,10 @@ class TemplateExceptions(Exception):
 
 class BackendExceptions(Exception):
     """
-    Exceptions occurs from fastkit backend
+    Custom exception class for fastkit backend operations.
+
+    Raised when errors occur in the backend logic, such as
+    project creation, dependency installation, or file manipulation.
     """
 
     pass

@@ -6,7 +6,7 @@
 import os
 import re
 import traceback
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 
 import click
 from click.core import Context
@@ -28,7 +28,14 @@ def print_error(
     console: Console = console,
     show_traceback: bool = False,
 ) -> None:
-    """Print an error message with specified output style."""
+    """
+    Print an error message with specified output style.
+
+    :param message: Error message to display
+    :param title: Title for the error panel
+    :param console: Rich console instance
+    :param show_traceback: Whether to show stack trace in debug mode
+    """
     error_text = Text()
     error_text.append("❌ ", style="bold red")
     error_text.append(message)
@@ -65,7 +72,13 @@ def handle_exception(e: Exception, message: Optional[str] = None) -> None:
 def print_success(
     message: str, title: str = "Success", console: Console = console
 ) -> None:
-    """Print a success message with specified output style."""
+    """
+    Print a success message with specified output style.
+
+    :param message: Success message to display
+    :param title: Title for the success panel
+    :param console: Rich console instance
+    """
     success_text = Text()
     success_text.append("✨ ", style="bold yellow")
     success_text.append(message, style="bold green")
@@ -75,7 +88,13 @@ def print_success(
 def print_warning(
     message: str, title: str = "Warning", console: Console = console
 ) -> None:
-    """Print a warning message with specified output style."""
+    """
+    Print a warning message with specified output style.
+
+    :param message: Warning message to display
+    :param title: Title for the warning panel
+    :param console: Rich console instance
+    """
     warning_text = Text()
     warning_text.append("⚠️ ", style="bold yellow")
     warning_text.append(message)
@@ -83,7 +102,13 @@ def print_warning(
 
 
 def print_info(message: str, title: str = "Info", console: Console = console) -> None:
-    """Print an info message with specified output style."""
+    """
+    Print an info message with specified output style.
+
+    :param message: Info message to display
+    :param title: Title for the info panel
+    :param console: Rich console instance
+    """
     info_text = Text()
     info_text.append("ℹ ", style="bold blue")
     info_text.append(message)
@@ -92,11 +117,19 @@ def print_info(message: str, title: str = "Info", console: Console = console) ->
 
 def create_info_table(
     title: str,
-    data: Optional[dict[str, str]] = None,
+    data: Optional[Dict[str, str]] = None,
     show_header: bool = False,
     console: Console = console,
 ) -> Table:
-    """Create a table for displaying information."""
+    """
+    Create a table for displaying information.
+
+    :param title: Title for the table
+    :param data: Dictionary of data to populate the table
+    :param show_header: Whether to show table headers
+    :param console: Rich console instance
+    :return: Configured Rich Table instance
+    """
     table = Table(title=title, show_header=show_header, title_style="bold magenta")
     table.add_column("Field", style="cyan")
     table.add_column("Value", style="green")
@@ -109,7 +142,15 @@ def create_info_table(
 
 
 def validate_email(ctx: Context, param: Any, value: Any) -> Any:
-    """Validate email format."""
+    """
+    Validate email format using regex pattern.
+
+    :param ctx: Click context
+    :param param: Click parameter
+    :param value: Email value to validate
+    :return: Validated email value
+    :raises ValueError: If email format is invalid
+    """
     try:
         if not re.match(REGEX, value):
             raise ValueError(value)
@@ -123,9 +164,9 @@ def validate_email(ctx: Context, param: Any, value: Any) -> Any:
 def is_fastkit_project(project_dir: str) -> bool:
     """
     Check if the project was created with fastkit.
-    Inspects the contents of the setup.py file.
+    Inspects the contents of the setup.py file for FastAPI-fastkit markers.
 
-    :param project_dir: Project directory
+    :param project_dir: Path to the project directory
     :return: True if the project was created with fastkit, False otherwise
     """
     setup_py = os.path.join(project_dir, "setup.py")
@@ -133,8 +174,8 @@ def is_fastkit_project(project_dir: str) -> bool:
         return False
 
     try:
-        with open(setup_py, "r") as f:
+        with open(setup_py, "r", encoding="utf-8") as f:
             content = f.read()
             return "FastAPI-fastkit" in content
-    except:
+    except (OSError, UnicodeDecodeError):
         return False

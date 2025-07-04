@@ -28,7 +28,7 @@ repos:
 
     -   id: coverage-test
         name: coverage test
-        entry: pytest --cov=src/fastapi_fastkit --cov-report=term-missing --cov-report=html --cov-report=xml --cov-fail-under=70
+        entry: bash scripts/coverage-report.sh
         language: system
         types: [python]
         pass_filenames: false

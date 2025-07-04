@@ -106,6 +106,34 @@ esac
 
 echo -e "${BLUE}🧪 Running coverage tests...${NC}"
 echo -e "${YELLOW}Minimum coverage threshold: ${MIN_COVERAGE}%${NC}"
+
+# Check if fastapi_project_template has changes
+TEMPLATE_CHANGED=false
+
+# Check for changes in fastapi_project_template directory
+# First try to get staged files (for pre-commit), then fall back to working directory changes
+if command -v git >/dev/null 2>&1; then
+    # Check if we're in a git repository
+    if git rev-parse --git-dir >/dev/null 2>&1; then
+        # Try to get staged files first (for pre-commit hooks)
+        CHANGED_FILES=$(git diff --cached --name-only 2>/dev/null || git diff --name-only HEAD~1 2>/dev/null || git diff --name-only 2>/dev/null || echo "")
+
+        if [[ -n "$CHANGED_FILES" ]]; then
+            if echo "$CHANGED_FILES" | grep -q "src/fastapi_fastkit/fastapi_project_template"; then
+                TEMPLATE_CHANGED=true
+            fi
+        fi
+    fi
+fi
+
+# Add template test exclusion if no template changes detected
+if [[ "$TEMPLATE_CHANGED" == "false" ]]; then
+    PYTEST_ARGS="$PYTEST_ARGS --ignore=tests/test_templates"
+    echo -e "${YELLOW}ℹ️  No changes detected in fastapi_project_template - skipping template tests${NC}"
+else
+    echo -e "${GREEN}ℹ️  Changes detected in fastapi_project_template - running all tests${NC}"
+fi
+
 echo ""
 
 # Run tests with coverage

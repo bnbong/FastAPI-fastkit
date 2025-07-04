@@ -1,7 +1,6 @@
 # --------------------------------------------------------------------------
-# The Module inspect FastAPI template is appropriate
-#
-# This module will be read by Github Action when contributor
+# The Module defines FastAPI template inspector for template validation.
+# This module will be used by maintainers of FastAPI-fastkit when anyone
 #   makes a PR of adding new FastAPI template.
 #
 # First, check a FastAPI template is formed a valid template form with .py-tpl extension
@@ -33,6 +32,8 @@ from fastapi_fastkit.backend.main import (
     install_dependencies,
 )
 from fastapi_fastkit.backend.transducer import copy_and_convert_template
+from fastapi_fastkit.core.settings import settings
+from fastapi_fastkit.utils.logging import get_logger
 from fastapi_fastkit.utils.main import print_error, print_success, print_warning
 
 
@@ -50,7 +51,14 @@ class TemplateInspector:
     def __del__(self) -> None:
         """Cleanup temp directory when inspector is destroyed."""
         if os.path.exists(self.temp_dir):
-            shutil.rmtree(self.temp_dir)
+            try:
+                shutil.rmtree(self.temp_dir)
+            except OSError as e:
+                if settings.DEBUG_MODE:
+                    logger = get_logger(__name__)
+                    logger.warning(
+                        f"Failed to cleanup temp directory {self.temp_dir}: {e}"
+                    )
 
     def inspect_template(self) -> bool:
         """Inspect the template is valid FastAPI application."""
@@ -102,29 +110,37 @@ class TemplateInspector:
             self.errors.append("setup.py-tpl not found")
             return False
 
-        with open(req_path) as f:
-            deps = f.read().splitlines()
-            package_names = [dep.split("==")[0] for dep in deps if dep]
-            if "fastapi" not in package_names:
-                self.errors.append(
-                    "FastAPI dependency not found in requirements.txt-tpl"
-                )
-                return False
+        try:
+            with open(req_path, encoding="utf-8") as f:
+                deps = f.read().splitlines()
+                package_names = [dep.split("==")[0] for dep in deps if dep]
+                if "fastapi" not in package_names:
+                    self.errors.append(
+                        "FastAPI dependency not found in requirements.txt-tpl"
+                    )
+                    return False
+        except (OSError, UnicodeDecodeError) as e:
+            self.errors.append(f"Error reading requirements.txt-tpl: {e}")
+            return False
         return True
 
     def _check_fastapi_implementation(self) -> bool:
         """Check if the template has a proper FastAPI server implementation."""
-        core_modules = find_template_core_modules(self.temp_dir)
+        try:
+            core_modules = find_template_core_modules(self.temp_dir)
 
-        if not core_modules["main"]:
-            self.errors.append("main.py not found in template")
-            return False
-
-        with open(core_modules["main"]) as f:
-            content = f.read()
-            if "FastAPI" not in content or "app" not in content:
-                self.errors.append("FastAPI app creation not found in main.py")
+            if not core_modules["main"]:
+                self.errors.append("main.py not found in template")
                 return False
+
+            with open(core_modules["main"], encoding="utf-8") as f:
+                content = f.read()
+                if "FastAPI" not in content or "app" not in content:
+                    self.errors.append("FastAPI app creation not found in main.py")
+                    return False
+        except (OSError, UnicodeDecodeError) as e:
+            self.errors.append(f"Error checking FastAPI implementation: {e}")
+            return False
         return True
 
     def _test_template(self) -> bool:
@@ -152,13 +168,17 @@ class TemplateInspector:
                 capture_output=True,
                 text=True,
                 cwd=self.temp_dir,
+                timeout=300,  # 5 minute timeout
             )
 
             if result.returncode != 0:
                 self.errors.append(f"Tests failed: {result.stderr}")
                 return False
 
-        except Exception as e:
+        except subprocess.TimeoutExpired:
+            self.errors.append("Tests timed out after 5 minutes")
+            return False
+        except (OSError, subprocess.SubprocessError) as e:
             self.errors.append(f"Error running tests: {e}")
             return False
 
@@ -169,7 +189,7 @@ def inspect_template(template_path: str) -> Dict[str, Any]:
     """Run the template inspection and return the result."""
     inspector = TemplateInspector(template_path)
     is_valid = inspector.inspect_template()
-    result: dict[str, Any] = {
+    result: Dict[str, Any] = {
         "valid": is_valid,
         "errors": inspector.errors,
         "warnings": inspector.warnings,
@@ -196,7 +216,7 @@ def inspect_template(template_path: str) -> Dict[str, Any]:
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: python inspector.py <template_dir>")
+        print_error("Usage: python inspector.py <template_dir>")
         sys.exit(1)
 
     template_dir = sys.argv[1]

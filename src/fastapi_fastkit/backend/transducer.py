@@ -8,6 +8,10 @@
 # --------------------------------------------------------------------------
 import os
 import shutil
+from typing import Dict, Optional
+
+from fastapi_fastkit.core.settings import settings
+from fastapi_fastkit.utils.logging import get_logger
 
 
 def _convert_tpl_to_real_extension(file_path: str) -> str:
@@ -21,8 +25,16 @@ def _convert_tpl_to_real_extension(file_path: str) -> str:
     # Remove the '-tpl' suffix from any file extension
     if file_path.endswith("-tpl"):
         new_file_path = file_path.replace("-tpl", "")
-        os.rename(file_path, new_file_path)
-        return new_file_path
+        try:
+            os.rename(file_path, new_file_path)
+            return new_file_path
+        except OSError as e:
+            if settings.DEBUG_MODE:
+                logger = get_logger(__name__)
+                logger.error(
+                    f"Failed to rename file {file_path} to {new_file_path}: {e}"
+                )
+            return file_path
     return file_path
 
 
@@ -38,34 +50,61 @@ def copy_and_convert_template(
     :type template_dir: str
     :param target_dir: The destination directory where files will be copied.
     :type target_dir: str
+    :raises OSError: If directory operations fail
+    :raises PermissionError: If file access is denied
     """
-    template_name = os.path.basename(template_dir)
-    if project_name is None:
-        project_name = template_name
-    target_path = os.path.join(target_dir, project_name)
-    os.makedirs(target_path, exist_ok=True)
+    # If project_name is provided, create a subdirectory
+    # Otherwise, copy directly to target_dir
+    if project_name:
+        target_path = os.path.join(target_dir, project_name)
+    else:
+        target_path = target_dir
+
+    try:
+        os.makedirs(target_path, exist_ok=True)
+    except OSError as e:
+        if settings.DEBUG_MODE:
+            logger = get_logger(__name__)
+            logger.error(f"Failed to create target directory {target_path}: {e}")
+        raise
 
     for root, dirs, files in os.walk(template_dir):
         relative_path = os.path.relpath(root, template_dir)
-        destination_dir = os.path.join(target_path, relative_path)
 
-        if not os.path.exists(destination_dir):
-            os.makedirs(destination_dir)
+        # Handle the root directory case
+        if relative_path == ".":
+            destination_dir = target_path
+        else:
+            destination_dir = os.path.join(target_path, relative_path)
+
+        try:
+            if not os.path.exists(destination_dir):
+                os.makedirs(destination_dir)
+        except OSError as e:
+            if settings.DEBUG_MODE:
+                logger = get_logger(__name__)
+                logger.error(f"Failed to create directory {destination_dir}: {e}")
+            continue
 
         for file in files:
             src_file = os.path.join(root, file)
 
-            if file.endswith("-tpl"):
-                dst_file = os.path.join(destination_dir, file.replace("-tpl", ""))
-                shutil.copy2(src_file, dst_file)
-                _convert_tpl_to_real_extension(dst_file)
-            else:
-                dst_file = os.path.join(destination_dir, file)
-                shutil.copy2(src_file, dst_file)
+            try:
+                if file.endswith("-tpl"):
+                    dst_file = os.path.join(destination_dir, file.replace("-tpl", ""))
+                    shutil.copy2(src_file, dst_file)
+                else:
+                    dst_file = os.path.join(destination_dir, file)
+                    shutil.copy2(src_file, dst_file)
+            except (OSError, PermissionError) as e:
+                if settings.DEBUG_MODE:
+                    logger = get_logger(__name__)
+                    logger.error(f"Failed to copy file {src_file} to {dst_file}: {e}")
+                continue
 
 
 def copy_and_convert_template_file(
-    source_file: str, target_file: str, replacements: dict = None  # type: ignore
+    source_file: str, target_file: str, replacements: Optional[Dict[str, str]] = None
 ) -> bool:
     """
     Copies a single template file to the target location, converting it from .*-tpl
@@ -78,10 +117,13 @@ def copy_and_convert_template_file(
     """
     try:
         if not os.path.exists(source_file):
+            if settings.DEBUG_MODE:
+                logger = get_logger(__name__)
+                logger.warning(f"Source template file not found: {source_file}")
             return False
 
         # Read a single source content (with .py-tpl extension)
-        with open(source_file, "r") as src_file:
+        with open(source_file, "r", encoding="utf-8") as src_file:
             content = src_file.read()
 
         if replacements and isinstance(replacements, dict):
@@ -91,16 +133,32 @@ def copy_and_convert_template_file(
         target_dir = os.path.dirname(target_file)
         os.makedirs(target_dir, exist_ok=True)
 
-        with open(target_file, "w") as tgt_file:
+        with open(target_file, "w", encoding="utf-8") as tgt_file:
             tgt_file.write(content)
 
+        if settings.DEBUG_MODE:
+            logger = get_logger(__name__)
+            logger.debug(
+                f"Successfully copied template file from {source_file} to {target_file}"
+            )
         return True
-    except Exception as e:
-        print(f"Error copying template file: {e}")
+
+    except (OSError, PermissionError) as e:
+        if settings.DEBUG_MODE:
+            logger = get_logger(__name__)
+            logger.error(
+                f"Error copying template file from {source_file} to {target_file}: {e}"
+            )
+        return False
+    except UnicodeDecodeError as e:
+        if settings.DEBUG_MODE:
+            logger = get_logger(__name__)
+            logger.error(
+                f"Error reading template file {source_file} (encoding issue): {e}"
+            )
         return False
 
 
-def _convert_real_extension_to_tpl() -> None:
-    # TODO : impl this for converting runnable FastAPI app code to template - debugging operation for contributors
-    # this will be used at inspector module, not package user's runtime.
-    pass
+# Note: _convert_real_extension_to_tpl function was removed as it was not implemented
+# and not used in the current codebase. If needed in the future for debugging
+# operations, it can be re-implemented in the inspector module.

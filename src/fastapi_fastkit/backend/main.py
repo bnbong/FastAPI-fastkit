@@ -4,13 +4,15 @@
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
 import os
+import re
 import subprocess
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from fastapi_fastkit import console
 from fastapi_fastkit.backend.transducer import copy_and_convert_template_file
 from fastapi_fastkit.core.exceptions import BackendExceptions, TemplateExceptions
-from fastapi_fastkit.core.settings import settings
+from fastapi_fastkit.core.settings import FastkitConfig, settings
+from fastapi_fastkit.utils.logging import get_logger
 from fastapi_fastkit.utils.main import (
     handle_exception,
     print_error,
@@ -18,6 +20,9 @@ from fastapi_fastkit.utils.main import (
     print_success,
     print_warning,
 )
+
+settings = FastkitConfig()
+logger = get_logger(__name__)
 
 # ------------------------------------------------------------
 # Template Discovery Functions
@@ -33,27 +38,28 @@ def find_template_core_modules(project_dir: str) -> Dict[str, str]:
     :return: Dictionary with paths to core modules
     """
     core_modules = {"main": "", "setup": "", "config": ""}
-    template_config = settings.TEMPLATE_PATHS["config"]
+    template_paths = settings.TEMPLATE_PATHS
 
     # Find main.py
-    for path in settings.TEMPLATE_PATHS["main"]:
-        full_path = os.path.join(project_dir, path)
+    for main_path in template_paths["main"]:
+        full_path = os.path.join(project_dir, main_path)
         if os.path.exists(full_path):
             core_modules["main"] = full_path
             break
 
     # Find setup.py
-    for path in settings.TEMPLATE_PATHS["setup"]:
-        full_path = os.path.join(project_dir, path)
+    for setup_path in template_paths["setup"]:
+        full_path = os.path.join(project_dir, setup_path)
         if os.path.exists(full_path):
             core_modules["setup"] = full_path
             break
 
-    # Find config files
-    if isinstance(template_config, dict):
-        for config_file in template_config.get("files", []):
-            for base_path in template_config.get("paths", []):
-                full_path = os.path.join(project_dir, base_path, config_file)
+    # Find config file
+    config_info = template_paths["config"]
+    if isinstance(config_info, dict):
+        for config_path in config_info["paths"]:
+            for config_file in config_info["files"]:
+                full_path = os.path.join(project_dir, config_path, config_file)
                 if os.path.exists(full_path):
                     core_modules["config"] = full_path
                     break
@@ -65,37 +71,68 @@ def find_template_core_modules(project_dir: str) -> Dict[str, str]:
 
 def read_template_stack(template_path: str) -> List[str]:
     """
-    Read the install_requires from setup.py-tpl in the template directory.
-    Returns a list of required packages.
+    Read dependencies from template requirements.txt-tpl file or setup.py-tpl file.
 
     :param template_path: Path to the template directory
-    :return: List of required packages
+    :return: List of dependencies
     """
-    setup_path = os.path.join(template_path, "setup.py-tpl")
-    if not os.path.exists(setup_path):
-        return []
-
-    try:
-        with open(setup_path, "r") as f:
-            content = f.read()
-            # Find the install_requires section using proper string matching
-            if "install_requires: list[str] = [" in content:
-                start_idx = content.find("install_requires: list[str] = [") + len(
-                    "install_requires: list[str] = ["
+    # First try requirements.txt-tpl
+    req_file = os.path.join(template_path, "requirements.txt-tpl")
+    if os.path.exists(req_file):
+        try:
+            with open(req_file, "r", encoding="utf-8") as f:
+                deps = [dep.strip() for dep in f.readlines() if dep.strip()]
+                return deps
+        except (OSError, UnicodeDecodeError) as e:
+            if settings.DEBUG_MODE:
+                logger = get_logger()
+                logger.error(
+                    f"Error reading template dependencies from {req_file}: {e}"
                 )
-                end_idx = content.find("]", start_idx)
-                if start_idx != -1 and end_idx != -1:
-                    deps_str = content[start_idx:end_idx]
-                    # Clean and parse the dependencies
+
+    # Fallback: try to read from setup.py-tpl for legacy templates
+    setup_file = os.path.join(template_path, "setup.py-tpl")
+    if os.path.exists(setup_file):
+        try:
+            with open(setup_file, "r", encoding="utf-8") as f:
+                content = f.read()
+
+                # First try to find install_requires with list[str] type annotation (new format)
+                list_match = re.search(
+                    r"install_requires:\s*list\[str\]\s*=\s*\[(.*?)\]",
+                    content,
+                    re.DOTALL,
+                )
+                if list_match:
+                    deps_str = list_match.group(1)
+                    # Split by lines and commas, clean up quotes
+                    deps = []
+                    for line in deps_str.split("\n"):
+                        line = line.strip()
+                        if line and not line.startswith("#"):
+                            # Remove quotes and trailing commas
+                            line = line.strip(" \",'")
+                            if line:
+                                deps.append(line)
+                    return [dep for dep in deps if dep]  # Remove empty strings
+
+                # Fallback to original install_requires parsing
+                match = re.search(
+                    r"install_requires\s*=\s*\[(.*?)\]", content, re.DOTALL
+                )
+                if match:
+                    deps_str = match.group(1).replace("\n", "").replace(" ", "")
                     deps = [
                         dep.strip().strip("'").strip('"')
                         for dep in deps_str.split(",")
                         if dep.strip() and not dep.isspace()
                     ]
                     return [dep for dep in deps if dep]  # Remove empty strings
-    except Exception as e:
-        handle_exception(e, "Error reading template dependencies")
-        return []
+
+        except (OSError, UnicodeDecodeError) as e:
+            if settings.DEBUG_MODE:
+                logger = get_logger()
+                logger.error(f"Error reading setup.py template: {e}")
 
     return []
 
@@ -121,48 +158,75 @@ def inject_project_metadata(
         config_py = core_modules.get("config", "")
 
         if setup_py and os.path.exists(setup_py):
-            with open(setup_py, "r") as f:
-                content = f.read()
+            try:
+                with open(setup_py, "r", encoding="utf-8") as f:
+                    content = f.read()
 
-            # Replace placeholders
-            content = content.replace("<project_name>", project_name)
-            content = content.replace("<author>", author)
-            content = content.replace("<author_email>", author_email)
-            content = content.replace("<description>", description)
+                # Replace placeholders
+                content = content.replace("<project_name>", project_name)
+                content = content.replace("<author>", author)
+                content = content.replace("<author_email>", author_email)
+                content = content.replace("<description>", description)
 
-            with open(setup_py, "w") as f:
-                f.write(content)
-            print_info("Injected metadata into setup.py")
+                with open(setup_py, "w", encoding="utf-8") as f:
+                    f.write(content)
+                if settings.DEBUG_MODE:
+                    logger = get_logger()
+                    logger.info("Injected metadata into setup.py")
+                print_info("Injected metadata into setup.py")
+            except (OSError, UnicodeDecodeError) as e:
+                if settings.DEBUG_MODE:
+                    logger = get_logger()
+                    logger.error(f"Error processing setup.py: {e}")
 
         if config_py and os.path.exists(config_py):
-            with open(config_py, "r") as f:
-                content = f.read()
+            try:
+                with open(config_py, "r", encoding="utf-8") as f:
+                    content = f.read()
 
-            content = content.replace("<project_name>", project_name)
+                content = content.replace("<project_name>", project_name)
 
-            with open(config_py, "w") as f:
-                f.write(content)
-            print_info("Injected metadata into config file")
+                with open(config_py, "w", encoding="utf-8") as f:
+                    f.write(content)
+                if settings.DEBUG_MODE:
+                    logger = get_logger()
+                    logger.info("Injected metadata into config file")
+                print_info("Injected metadata into config file")
+            except (OSError, UnicodeDecodeError) as e:
+                if settings.DEBUG_MODE:
+                    logger = get_logger()
+                    logger.error(f"Error processing config file: {e}")
 
         # Try to find the readme file
         readme_files = ["README.md", "Readme.md", "readme.md"]
         for readme in readme_files:
             readme_path = os.path.join(target_dir, readme)
             if os.path.exists(readme_path):
-                with open(readme_path, "r") as f:
-                    content = f.read()
+                try:
+                    with open(readme_path, "r", encoding="utf-8") as f:
+                        content = f.read()
 
-                content = content.replace(
-                    "{FASTAPI TEMPLATE PROJECT NAME}", project_name
-                )
-                content = content.replace("{fill here}", author)
+                    content = content.replace(
+                        "{FASTAPI TEMPLATE PROJECT NAME}", project_name
+                    )
+                    content = content.replace("{fill here}", author)
 
-                with open(readme_path, "w") as f:
-                    f.write(content)
-                print_info("Injected metadata into README.md")
-                break
+                    with open(readme_path, "w", encoding="utf-8") as f:
+                        f.write(content)
+                    if settings.DEBUG_MODE:
+                        logger = get_logger()
+                        logger.info("Injected metadata into README.md")
+                    print_info("Injected metadata into README.md")
+                    break
+                except (OSError, UnicodeDecodeError) as e:
+                    if settings.DEBUG_MODE:
+                        logger = get_logger()
+                        logger.error(f"Error processing README file: {e}")
 
     except Exception as e:
+        if settings.DEBUG_MODE:
+            logger = get_logger()
+            logger.exception(f"Failed to inject project metadata: {e}")
         handle_exception(e, "Failed to inject project metadata")
         raise BackendExceptions("Failed to inject project metadata")
 
@@ -173,7 +237,15 @@ def create_venv(project_dir: str) -> str:
         with console.status("[bold green]Setting up project environment..."):
             console.print("[yellow]Creating virtual environment...[/yellow]")
             venv_path = os.path.join(project_dir, ".venv")
-            subprocess.run(["python", "-m", "venv", venv_path], check=True)
+            result = subprocess.run(
+                ["python", "-m", "venv", venv_path],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            if settings.DEBUG_MODE:
+                logger = get_logger()
+                logger.info(f"Virtual environment created at {venv_path}")
 
         if os.name == "nt":
             activate_venv = f"    {os.path.join(venv_path, 'Scripts', 'activate.bat')}"
@@ -188,7 +260,16 @@ def create_venv(project_dir: str) -> str:
         )
         return venv_path
 
-    except Exception as e:
+    except subprocess.CalledProcessError as e:
+        if settings.DEBUG_MODE:
+            logger = get_logger()
+            logger.error(f"Error during venv creation: {e.stderr}")
+        print_error(f"Error during venv creation: {e}")
+        raise BackendExceptions("Failed to create venv")
+    except OSError as e:
+        if settings.DEBUG_MODE:
+            logger = get_logger()
+            logger.error(f"System error during venv creation: {e}")
         print_error(f"Error during venv creation: {e}")
         raise BackendExceptions("Failed to create venv")
 
@@ -203,6 +284,9 @@ def install_dependencies(project_dir: str, venv_path: str) -> None:
     """
     try:
         if not os.path.exists(venv_path):
+            if settings.DEBUG_MODE:
+                logger = get_logger()
+                logger.warning("Virtual environment does not exist. Creating it first.")
             print_error("Virtual environment does not exist. Creating it first.")
             venv_path = create_venv(project_dir)
             if not venv_path:
@@ -210,6 +294,9 @@ def install_dependencies(project_dir: str, venv_path: str) -> None:
 
         requirements_path = os.path.join(project_dir, "requirements.txt")
         if not os.path.exists(requirements_path):
+            if settings.DEBUG_MODE:
+                logger = get_logger()
+                logger.error(f"Requirements file not found at {requirements_path}")
             print_error(f"Requirements file not found at {requirements_path}")
             raise BackendExceptions("Requirements file not found")
 
@@ -227,20 +314,31 @@ def install_dependencies(project_dir: str, venv_path: str) -> None:
         )
 
         with console.status("[bold green]Installing dependencies..."):
-            subprocess.run(
+            result = subprocess.run(
                 [pip_path, "install", "-r", "requirements.txt"],
                 cwd=project_dir,
                 check=True,
+                capture_output=True,
+                text=True,
             )
+            if settings.DEBUG_MODE:
+                logger = get_logger()
+                logger.info("Dependencies installed successfully")
 
         print_success("Dependencies installed successfully")
 
     except subprocess.CalledProcessError as e:
+        if settings.DEBUG_MODE:
+            logger = get_logger()
+            logger.error(f"Error during dependency installation: {e.stderr}")
         handle_exception(e, f"Error during dependency installation: {str(e)}")
         if hasattr(e, "stderr"):
             print_error(f"Error details: {e.stderr}")
         raise BackendExceptions("Failed to install dependencies")
-    except Exception as e:
+    except OSError as e:
+        if settings.DEBUG_MODE:
+            logger = get_logger()
+            logger.error(f"System error during dependency installation: {e}")
         handle_exception(e, f"Error during dependency installation: {str(e)}")
         raise BackendExceptions(f"Failed to install dependencies: {str(e)}")
 
@@ -454,7 +552,7 @@ def add_new_route(project_dir: str, route_name: str) -> None:
 
     :param project_dir: Path to the project directory
     :param route_name: Name of the new route to add
-    :return: None
+    :raises BackendExceptions: If route addition fails
     """
     try:
         # Setup paths
@@ -477,6 +575,22 @@ def add_new_route(project_dir: str, route_name: str) -> None:
         # Update main application
         _update_main_app(src_dir, route_name)
 
+        if settings.DEBUG_MODE:
+            logger = get_logger()
+            logger.info(f"Successfully added new route: {route_name}")
+
+    except (OSError, PermissionError) as e:
+        if settings.DEBUG_MODE:
+            logger = get_logger()
+            logger.error(f"File system error while adding route {route_name}: {e}")
+        handle_exception(e, f"Error adding new route: {str(e)}")
+        raise BackendExceptions(f"Failed to add new route: {str(e)}")
+    except BackendExceptions:
+        # Re-raise our own exceptions
+        raise
     except Exception as e:
+        if settings.DEBUG_MODE:
+            logger = get_logger()
+            logger.exception(f"Unexpected error while adding route {route_name}: {e}")
         handle_exception(e, f"Error adding new route: {str(e)}")
         raise BackendExceptions(f"Failed to add new route: {str(e)}")

@@ -10,7 +10,7 @@ import logging
 import os
 import sys
 from datetime import datetime
-from typing import Union
+from typing import Optional, Union
 
 from rich.console import Console
 from rich.logging import RichHandler
@@ -32,8 +32,11 @@ class DebugFileHandler(logging.Handler):
             log_entry = self.format(record)
             with open(self.log_file_path, "a", encoding="utf-8") as f:
                 f.write(f"{log_entry}\n")
-        except Exception:
+        except (OSError, PermissionError, UnicodeError) as e:
+            # More specific exception handling
             self.handleError(record)
+            # Optionally log the error to stderr if it's critical
+            print(f"Logging error: {e}", file=sys.stderr)
 
 
 class DebugOutputCapture:
@@ -57,8 +60,11 @@ class DebugOutputCapture:
             def write(self, text: str) -> None:
                 # Write to original stream
                 if hasattr(self.original, "write") and hasattr(self.original, "flush"):
-                    self.original.write(text)
-                    self.original.flush()
+                    try:
+                        self.original.write(text)
+                        self.original.flush()
+                    except (OSError, UnicodeError):
+                        pass  # Fail silently for original stream errors
 
                 # Write to log file with timestamp and stream type
                 if text.strip():  # Only log non-empty lines
@@ -68,12 +74,15 @@ class DebugOutputCapture:
                             f.write(f"[{timestamp}] [{self.stream_type}] {text}")
                             if not text.endswith("\n"):
                                 f.write("\n")
-                    except Exception:
+                    except (OSError, PermissionError, UnicodeError):
                         pass  # Fail silently if logging fails
 
             def flush(self) -> None:
                 if hasattr(self.original, "flush"):
-                    self.original.flush()
+                    try:
+                        self.original.flush()
+                    except (OSError, UnicodeError):
+                        pass  # Fail silently
 
         sys.stdout = TeeWriter(self.original_stdout, self.log_file_path, "STDOUT")
         sys.stderr = TeeWriter(self.original_stderr, self.log_file_path, "STDERR")
@@ -85,8 +94,8 @@ class DebugOutputCapture:
 
 
 def setup_logging(
-    settings: FastkitConfig, terminal_width: Union[int, None] = None
-) -> Union[DebugOutputCapture, None]:
+    settings: FastkitConfig, terminal_width: Optional[int] = None
+) -> Optional[DebugOutputCapture]:
     """
     Setup logging for fastapi-fastkit.
 
@@ -118,26 +127,31 @@ def setup_logging(
     # If debug mode is enabled, add file logging
     debug_capture = None
     if settings.DEBUG_MODE:
-        # Create logs directory in the package source
-        logs_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "logs")
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        log_file_path = os.path.join(logs_dir, f"fastkit_debug_{timestamp}.log")
+        try:
+            # Create logs directory in the package source
+            logs_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "logs")
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            log_file_path = os.path.join(logs_dir, f"fastkit_debug_{timestamp}.log")
 
-        # Add file handler for logger
-        file_handler = DebugFileHandler(log_file_path)
-        file_formatter = logging.Formatter(
-            "[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S",
-        )
-        file_handler.setFormatter(file_formatter)
-        logger.addHandler(file_handler)
+            # Add file handler for logger
+            file_handler = DebugFileHandler(log_file_path)
+            file_formatter = logging.Formatter(
+                "[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s",
+                datefmt="%Y-%m-%d %H:%M:%S",
+            )
+            file_handler.setFormatter(file_formatter)
+            logger.addHandler(file_handler)
 
-        # Create output capture for stdout/stderr
-        debug_capture = DebugOutputCapture(log_file_path)
+            # Create output capture for stdout/stderr
+            debug_capture = DebugOutputCapture(log_file_path)
 
-        # Log the start of debug session
-        logger.info(f"Debug mode enabled. Logging to: {log_file_path}")
-        logger.info(f"FastAPI-fastkit CLI session started at {datetime.now()}")
+            # Log the start of debug session
+            logger.info(f"Debug mode enabled. Logging to: {log_file_path}")
+            logger.info(f"FastAPI-fastkit CLI session started at {datetime.now()}")
+
+        except (OSError, PermissionError) as e:
+            logger.warning(f"Failed to setup debug logging: {e}")
+            # Continue without debug capture
 
     return debug_capture
 
