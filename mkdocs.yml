@@ -46,6 +46,21 @@ plugins:
 
 nav:
   - Home: index.md
+  - User Guide:
+    - Installation: user-guide/installation.md
+    - Quick Start: user-guide/quick-start.md
+    - Creating Projects: user-guide/creating-projects.md
+    - Adding Routes: user-guide/adding-routes.md
+    - Using Templates: user-guide/using-templates.md
+    - CLI Reference: user-guide/cli-reference.md
+  - Tutorial:
+    - Getting Started: tutorial/getting-started.md
+    - Your First Project: tutorial/first-project.md
+  - Contributing:
+    - Development Setup: contributing/development-setup.md
+    - Code Guidelines: contributing/code-guidelines.md
+  - Reference:
+    - FAQ: reference/faq.md
   - Changelog: changelog.md
 
 markdown_extensions:
@@ -55,6 +70,8 @@ markdown_extensions:
   - footnotes
   - md_in_html
   - mdx_include
+  - admonition
+  - pymdownx.details
   # PyMdown Extensions
   - pymdownx.highlight:  # necessary for code blocks & termynal
       anchor_linenums: true

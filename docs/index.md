@@ -267,6 +267,35 @@ This idea was initiated with the aim of full fill to help FastAPI newcomers to l
 
 As one person who has been using and loving FastAPI for a long time, I wanted to develop a project that could help me a little bit to practice [the wonderful motivation](https://github.com/fastapi/fastapi/pull/11522#issuecomment-2264639417) that FastAPI developer [tiangolo](https://github.com/tiangolo) has.
 
+## Next Steps
+
+Ready to get started with FastAPI-fastkit? Follow these next steps:
+
+### 🚀 Quick Start
+
+1. **[Installation](user-guide/installation.md)**: Install FastAPI-fastkit
+2. **[Quick Start](user-guide/quick-start.md)**: Create your first project in 5 minutes
+3. **[Getting Started Tutorial](tutorial/getting-started.md)**: Step-by-step detailed tutorial
+
+### 📚 Advanced Learning
+
+- **[Creating Projects](user-guide/creating-projects.md)**: Create projects with different stacks
+- **[Adding Routes](user-guide/adding-routes.md)**: Add API endpoints to your project
+- **[Using Templates](user-guide/using-templates.md)**: Use pre-built project templates
+
+### 🛠️ Contributing
+
+Want to contribute to FastAPI-fastkit?
+
+- **[Development Setup](contributing/development-setup.md)**: Set up your development environment
+- **[Contributing Guidelines](https://github.com/bnbong/FastAPI-fastkit/blob/main/CONTRIBUTING.md)**: Contribution guidelines
+
+### 🔍 Reference
+
+- **[CLI Reference](user-guide/cli-reference.md)**: Complete CLI command reference
+- **[FAQ](reference/faq.md)**: Frequently asked questions
+- **[GitHub Repository](https://github.com/bnbong/FastAPI-fastkit)**: Source code and issue tracking
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](https://github.com/bnbong/FastAPI-fastkit/blob/main/LICENSE) file for details.
