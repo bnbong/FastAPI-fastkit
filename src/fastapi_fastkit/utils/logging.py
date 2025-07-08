@@ -10,7 +10,8 @@ import logging
 import os
 import sys
 from datetime import datetime
-from typing import Optional, Union
+from functools import lru_cache
+from typing import Dict, Optional
 
 from rich.console import Console
 from rich.logging import RichHandler
@@ -93,6 +94,9 @@ class DebugOutputCapture:
         sys.stderr = self.original_stderr
 
 
+_logger_cache: Dict[str, logging.Logger] = {}
+
+
 def setup_logging(
     settings: FastkitConfig, terminal_width: Optional[int] = None
 ) -> Optional[DebugOutputCapture]:
@@ -120,42 +124,60 @@ def setup_logging(
     logger.setLevel(settings.LOGGING_LEVEL)
     logger.propagate = False
 
-    # Clear existing handlers
+    # Clear existing handlers to avoid duplicates
     logger.handlers.clear()
     logger.addHandler(rich_handler)
 
     # If debug mode is enabled, add file logging
     debug_capture = None
     if settings.DEBUG_MODE:
-        try:
-            # Create logs directory in the package source
-            logs_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "logs")
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            log_file_path = os.path.join(logs_dir, f"fastkit_debug_{timestamp}.log")
+        file_handler = DebugFileHandler(settings.LOG_FILE_PATH)
+        file_handler.setFormatter(
+            logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+        )
+        logger.addHandler(file_handler)
 
-            # Add file handler for logger
-            file_handler = DebugFileHandler(log_file_path)
-            file_formatter = logging.Formatter(
-                "[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s",
-                datefmt="%Y-%m-%d %H:%M:%S",
-            )
-            file_handler.setFormatter(file_formatter)
-            logger.addHandler(file_handler)
-
-            # Create output capture for stdout/stderr
-            debug_capture = DebugOutputCapture(log_file_path)
-
-            # Log the start of debug session
-            logger.info(f"Debug mode enabled. Logging to: {log_file_path}")
-            logger.info(f"FastAPI-fastkit CLI session started at {datetime.now()}")
-
-        except (OSError, PermissionError) as e:
-            logger.warning(f"Failed to setup debug logging: {e}")
-            # Continue without debug capture
+        # Create debug capture for stdout/stderr
+        debug_capture = DebugOutputCapture(settings.LOG_FILE_PATH)
 
     return debug_capture
 
 
+@lru_cache(maxsize=128)
 def get_logger(name: str = "fastapi-fastkit") -> logging.Logger:
-    """Get a logger instance."""
-    return logging.getLogger(name)
+    """
+    Get a logger instance with caching for better performance.
+
+    :param name: Logger name
+    :return: Logger instance
+    """
+    # Double-check with cache dictionary for additional caching layer
+    if name not in _logger_cache:
+        _logger_cache[name] = logging.getLogger(name)
+    return _logger_cache[name]
+
+
+def debug_log(
+    message: str, level: str = "info", logger_name: str = "fastapi-fastkit"
+) -> None:
+    """
+    Centralized debug logging function to reduce code duplication.
+
+    :param message: Message to log
+    :param level: Log level (info, warning, error, debug)
+    :param logger_name: Logger name to use
+    """
+    from fastapi_fastkit.core.settings import settings
+
+    if settings.DEBUG_MODE:
+        logger = get_logger(logger_name)
+        log_method = getattr(logger, level.lower(), logger.info)
+        log_method(message)
+
+
+def clear_logger_cache() -> None:
+    """Clear the logger cache (useful for testing)."""
+    global _logger_cache
+    _logger_cache.clear()
+    # Also clear LRU cache
+    get_logger.cache_clear()

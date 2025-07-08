@@ -24,7 +24,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Callable, Dict, List, Tuple
 
 from fastapi_fastkit.backend.main import (
     create_venv,
@@ -33,46 +33,77 @@ from fastapi_fastkit.backend.main import (
 )
 from fastapi_fastkit.backend.transducer import copy_and_convert_template
 from fastapi_fastkit.core.settings import settings
-from fastapi_fastkit.utils.logging import get_logger
+from fastapi_fastkit.utils.logging import debug_log, get_logger
 from fastapi_fastkit.utils.main import print_error, print_success, print_warning
+
+logger = get_logger(__name__)
 
 
 class TemplateInspector:
+    """
+    Template inspector for validating FastAPI templates.
+
+    Uses context manager protocol for proper resource cleanup.
+    """
+
     def __init__(self, template_path: str):
         self.template_path = Path(template_path)
         self.errors: List[str] = []
         self.warnings: List[str] = []
         self.temp_dir = os.path.join(os.path.dirname(__file__), "temp")
+        self._cleanup_needed = False
 
-        # Create temp directory and copy template
-        os.makedirs(self.temp_dir, exist_ok=True)
-        copy_and_convert_template(str(self.template_path), self.temp_dir)
+    def __enter__(self) -> "TemplateInspector":
+        """Enter context manager - create temp directory and copy template."""
+        try:
+            os.makedirs(self.temp_dir, exist_ok=True)
+            copy_and_convert_template(str(self.template_path), self.temp_dir)
+            self._cleanup_needed = True
+            debug_log(f"Created temporary directory at {self.temp_dir}", "debug")
+            return self
+        except Exception as e:
+            debug_log(f"Failed to setup template inspector: {e}", "error")
+            self._cleanup()
+            raise
 
-    def __del__(self) -> None:
-        """Cleanup temp directory when inspector is destroyed."""
-        if os.path.exists(self.temp_dir):
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        """Exit context manager - cleanup temp directory."""
+        self._cleanup()
+
+    def _cleanup(self) -> None:
+        """Cleanup temp directory if it exists and cleanup is needed."""
+        if self._cleanup_needed and os.path.exists(self.temp_dir):
             try:
                 shutil.rmtree(self.temp_dir)
+                debug_log(f"Cleaned up temp directory {self.temp_dir}", "debug")
             except OSError as e:
-                if settings.DEBUG_MODE:
-                    logger = get_logger(__name__)
-                    logger.warning(
-                        f"Failed to cleanup temp directory {self.temp_dir}: {e}"
-                    )
+                debug_log(
+                    f"Failed to cleanup temp directory {self.temp_dir}: {e}", "warning"
+                )
+            finally:
+                self._cleanup_needed = False
 
     def inspect_template(self) -> bool:
-        """Inspect the template is valid FastAPI application."""
-        checks = [
-            self._check_file_structure,
-            self._check_file_extensions,
-            self._check_dependencies,
-            self._check_fastapi_implementation,
-            self._test_template,
+        """
+        Inspect the template to validate it's a proper FastAPI application.
+
+        :return: True if template is valid, False otherwise
+        """
+        checks: List[Tuple[str, Callable[[], bool]]] = [
+            ("File Structure", self._check_file_structure),
+            ("File Extensions", self._check_file_extensions),
+            ("Dependencies", self._check_dependencies),
+            ("FastAPI Implementation", self._check_fastapi_implementation),
+            ("Template Tests", self._test_template),
         ]
 
-        for check in checks:
-            if not check():
+        for check_name, check_func in checks:
+            debug_log(f"Running check: {check_name}", "info")
+            if not check_func():
+                debug_log(f"Check failed: {check_name}", "error")
                 return False
+            debug_log(f"Check passed: {check_name}", "info")
+
         return True
 
     def _check_file_structure(self) -> bool:
@@ -144,74 +175,85 @@ class TemplateInspector:
         return True
 
     def _test_template(self) -> bool:
-        """Run the tests in the converted template directory."""
-        test_dir = Path(self.temp_dir) / "tests"
-        if not test_dir.exists():
-            self.errors.append("Tests directory not found")
-            return False
+        """Run tests on the template if they exist."""
+        test_dir = os.path.join(self.temp_dir, "tests")
+        if not os.path.exists(test_dir):
+            self.warnings.append("No tests directory found")
+            return True
 
         try:
-            # Create virtual environment
+            # Create virtual environment for testing
             venv_path = create_venv(self.temp_dir)
-
-            # Install dependencies
             install_dependencies(self.temp_dir, venv_path)
 
-            # Run tests using the venv's pytest
+            # Run tests
             if os.name == "nt":  # Windows
-                pytest_path = os.path.join(venv_path, "Scripts", "pytest")
-            else:  # Linux/Mac
-                pytest_path = os.path.join(venv_path, "bin", "pytest")
+                python_executable = os.path.join(venv_path, "Scripts", "python")
+            else:  # Unix-based
+                python_executable = os.path.join(venv_path, "bin", "python")
 
             result = subprocess.run(
-                [pytest_path, str(test_dir)],
+                [python_executable, "-m", "pytest", test_dir, "-v"],
+                cwd=self.temp_dir,
                 capture_output=True,
                 text=True,
-                cwd=self.temp_dir,
-                timeout=300,  # 5 minute timeout
+                timeout=300,  # 5 minutes timeout
             )
 
             if result.returncode != 0:
                 self.errors.append(f"Tests failed: {result.stderr}")
                 return False
 
+            debug_log("All tests passed successfully", "info")
+            return True
+
         except subprocess.TimeoutExpired:
             self.errors.append("Tests timed out after 5 minutes")
             return False
-        except (OSError, subprocess.SubprocessError) as e:
+        except subprocess.CalledProcessError as e:
             self.errors.append(f"Error running tests: {e}")
             return False
+        except Exception as e:
+            self.errors.append(f"Unexpected error during testing: {e}")
+            return False
 
-        return True
+    def get_report(self) -> Dict[str, Any]:
+        """
+        Get inspection report with errors and warnings.
+
+        :return: Dictionary containing inspection results
+        """
+        return {
+            "template_path": str(self.template_path),
+            "errors": self.errors,
+            "warnings": self.warnings,
+            "is_valid": len(self.errors) == 0,
+        }
 
 
-def inspect_template(template_path: str) -> Dict[str, Any]:
-    """Run the template inspection and return the result."""
-    inspector = TemplateInspector(template_path)
-    is_valid = inspector.inspect_template()
-    result: Dict[str, Any] = {
-        "valid": is_valid,
-        "errors": inspector.errors,
-        "warnings": inspector.warnings,
-    }
+def inspect_fastapi_template(template_path: str) -> Dict[str, Any]:
+    """
+    Convenience function to inspect a FastAPI template.
 
-    if result["valid"]:
-        print_success("Template inspection passed successfully! ✨")
-    elif result["errors"]:
-        error_messages = [str(error) for error in result["errors"]]
-        print_error(
-            "Template inspection failed with following errors:\n"
-            + "\n".join(f"- {error}" for error in error_messages)
-        )
+    :param template_path: Path to the template to inspect
+    :return: Inspection report dictionary
+    """
+    with TemplateInspector(template_path) as inspector:
+        is_valid = inspector.inspect_template()
+        report = inspector.get_report()
 
-    if result["warnings"]:
-        warning_messages = [str(warning) for warning in result["warnings"]]
-        print_warning(
-            "Template has following warnings:\n"
-            + "\n".join(f"- {warning}" for warning in warning_messages)
-        )
+        if is_valid:
+            print_success(f"Template {template_path} is valid!")
+        else:
+            print_error(f"Template {template_path} validation failed")
+            for error in inspector.errors:
+                print_error(f"  - {error}")
 
-    return result
+        if inspector.warnings:
+            for warning in inspector.warnings:
+                print_warning(f"  - {warning}")
+
+    return report
 
 
 if __name__ == "__main__":
@@ -220,4 +262,4 @@ if __name__ == "__main__":
         sys.exit(1)
 
     template_dir = sys.argv[1]
-    inspect_template(template_dir)
+    inspect_fastapi_template(template_dir)
