@@ -61,6 +61,7 @@ nav:
     - Code Guidelines: contributing/code-guidelines.md
   - Reference:
     - FAQ: reference/faq.md
+    - Template Quality Assurance: reference/template-quality-assurance.md
   - Changelog: changelog.md
 
 markdown_extensions:

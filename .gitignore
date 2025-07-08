@@ -1,6 +1,9 @@
 # test workspace
 tests/temp_test_workspace/
 
+# Template inspection results
+template_inspection_results.json
+
 # Coverage reports
 htmlcov/
 .coverage
