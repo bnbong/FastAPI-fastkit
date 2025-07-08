@@ -35,6 +35,21 @@ test-coverage: ## Run tests with coverage report
 coverage: ## Alias for test-coverage
 	$(MAKE) test-coverage
 
+# Template inspection commands
+inspect-templates: ## Run template inspection on all templates
+	python scripts/inspect-templates.py
+
+inspect-templates-verbose: ## Run template inspection with verbose output
+	python scripts/inspect-templates.py --verbose
+
+inspect-template: ## Inspect specific template(s) - Usage: make inspect-template TEMPLATES="template-name"
+	@if [ -z "$(TEMPLATES)" ]; then \
+		echo "Usage: make inspect-template TEMPLATES=\"template-name1,template-name2\""; \
+		echo "Example: make inspect-template TEMPLATES=\"fastapi-default,fastapi-async-crud\""; \
+		exit 1; \
+	fi
+	python scripts/inspect-templates.py --templates "$(TEMPLATES)"
+
 # Code quality commands
 lint: ## Run all linting checks
 	@echo "Running isort check..."

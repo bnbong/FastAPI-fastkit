@@ -1,7 +1,8 @@
-"""
-Test cases for backend/main.py module.
-"""
-
+# --------------------------------------------------------------------------
+# Testcases of backend main module.
+#
+# @author bnbong bbbong9@gmail.com
+# --------------------------------------------------------------------------
 import os
 import subprocess
 import tempfile

@@ -54,7 +54,6 @@ def fastkit_cli(ctx: Context, debug: bool) -> Union["BaseCommand", None]:
     :return: None(will be wrapped with click.core.BaseCommand via @click decorator)
     """
     settings = FastkitConfig()
-
     ctx.ensure_object(dict)
 
     if debug:

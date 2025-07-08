@@ -1,6 +1,11 @@
+# --------------------------------------------------------------------------
+# Testcases of fastapi-dockerized template.
+#
+# @author bnbong bbbong9@gmail.com
+# --------------------------------------------------------------------------
 import os
-import shutil
 from pathlib import Path
+from typing import Any, Generator
 
 import pytest
 from click.testing import CliRunner
@@ -10,16 +15,16 @@ from fastapi_fastkit.utils.main import is_fastkit_project
 
 
 class TestFastAPIDockerized:
-    runner = CliRunner()
+    runner: CliRunner = CliRunner()
 
     @pytest.fixture
-    def temp_dir(self, tmpdir):
-        os.chdir(tmpdir)
+    def temp_dir(self, tmpdir: Any) -> Generator[str, None, None]:
+        os.chdir(str(tmpdir))
         yield str(tmpdir)
         # Clean up
         os.chdir(os.path.expanduser("~"))
 
-    def test_startdemo_fastapi_dockerized(self, temp_dir):
+    def test_startdemo_fastapi_dockerized(self, temp_dir: str) -> None:
         # given
         project_name = "test-dockerized"
         author = "test-author"

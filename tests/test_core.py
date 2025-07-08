@@ -1,7 +1,8 @@
-"""
-Test cases for core modules.
-"""
-
+# --------------------------------------------------------------------------
+# Testcases of core modules.
+#
+# @author bnbong bbbong9@gmail.com
+# --------------------------------------------------------------------------
 import pytest
 
 from fastapi_fastkit.core.exceptions import BackendExceptions, TemplateExceptions

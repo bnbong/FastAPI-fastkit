@@ -1,7 +1,8 @@
-"""
-Extended test cases for CLI operations to improve coverage.
-"""
-
+# --------------------------------------------------------------------------
+# Testcases of CLI extended operations (extended test cases).
+#
+# @author bnbong bbbong9@gmail.com
+# --------------------------------------------------------------------------
 import os
 import tempfile
 from pathlib import Path
@@ -160,25 +161,32 @@ setup(
         ]
 
         for template in templates_to_test:
-            with self.runner.isolated_filesystem():
-                # when
-                result = self.runner.invoke(
-                    fastkit_cli,
-                    ["startdemo", template],
-                    input="\n".join(
-                        [
-                            f"test-{template}",
-                            "Test Author",
-                            "test@example.com",
-                            f"Test project for {template}",
-                            "Y",
-                        ]
-                    ),
-                )
+            # Create a subdirectory for each template test
+            template_test_dir = Path(temp_dir) / f"test_{template}"
+            template_test_dir.mkdir(exist_ok=True)
+            os.chdir(template_test_dir)
 
-                # then
-                # Should not crash, even if template doesn't exist
-                assert result.exit_code in [0, 1]
+            # when
+            result = self.runner.invoke(
+                fastkit_cli,
+                ["startdemo", template],
+                input="\n".join(
+                    [
+                        f"test-{template}",
+                        "Test Author",
+                        "test@example.com",
+                        f"Test project for {template}",
+                        "Y",
+                    ]
+                ),
+            )
+
+            # then
+            # Should not crash, even if template doesn't exist
+            assert result.exit_code in [0, 1]
+
+            # Return to temp_dir for next iteration
+            os.chdir(temp_dir)
 
     def test_runserver_command(self, temp_dir: str) -> None:
         """Test runserver command."""
@@ -310,14 +318,14 @@ def read_root():
         # Should handle existing directory appropriately
         assert result.exit_code in [0, 1]
 
-    @patch("fastapi_fastkit.backend.inspector.inspect_template")
+    @patch("fastapi_fastkit.backend.inspector.inspect_fastapi_template")
     def test_inspect_command_if_exists(
         self, mock_inspect: MagicMock, temp_dir: str
     ) -> None:
         """Test inspect command if it exists in CLI."""
         # given
         os.chdir(temp_dir)
-        mock_inspect.return_value = {"valid": True, "errors": [], "warnings": []}
+        mock_inspect.return_value = {"is_valid": True, "errors": [], "warnings": []}
 
         # Create a dummy template directory
         template_dir = Path(temp_dir) / "test-template"

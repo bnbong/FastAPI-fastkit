@@ -21,9 +21,11 @@ This project was inspired by the `SpringBoot initializer` & Python Django's `dja
 
 ## Key Features
 
-- **Immediate FastAPI project creation** : Super-fast FastAPI workspace & project creation via CLI, inspired by `django-admin`feature of [Python Django](https://github.com/django/django)
-- **Prettier CLI outputs** : beautiful CLI experiment ([rich library](https://github.com/Textualize/rich) feature)
-- **Standards-based FastAPI project template** : All FastAPI-fastkit templates are based on Python standards and FastAPI's common use
+- **⚡ Immediate FastAPI project creation** : Super-fast FastAPI workspace & project creation via CLI, inspired by `django-admin` feature of [Python Django](https://github.com/django/django)
+- **🎨 Prettier CLI outputs** : Beautiful CLI experience powered by [rich library](https://github.com/Textualize/rich)
+- **📋 Standards-based FastAPI project templates** : All FastAPI-fastkit templates are based on Python standards and FastAPI's common use patterns
+- **🔍 Automated template quality assurance** : Weekly automated testing ensures all templates remain functional and up-to-date
+- **🚀 Multiple project templates** : Choose from various pre-configured templates for different use cases (async CRUD, Docker, PostgreSQL, etc.)
 
 ## Installation
 
@@ -259,13 +261,51 @@ $ fastkit list-templates
 
 </div>
 
+## Documentation
+
+For comprehensive guides and detailed usage instructions, explore our documentation:
+
+- 📚 **[User Guide](user-guide/quick-start.md)** - Detailed installation and usage guides
+- 🎯 **[Tutorial](tutorial/getting-started.md)** - Step-by-step tutorials for beginners
+- 📖 **[CLI Reference](user-guide/cli-reference.md)** - Complete command reference
+- 🔍 **[Template Quality Assurance](reference/template-quality-assurance.md)** - Automated testing and quality standards
+
+## Contributing
+
+We welcome contributions from the community! FastAPI-fastkit is designed to help newcomers to Python and FastAPI, and your contributions can make a significant impact.
+
+### What You Can Contribute
+
+- 🚀 **New FastAPI templates** - Add templates for different use cases
+- 🐛 **Bug fixes** - Help us improve stability and reliability
+- 📚 **Documentation** - Improve guides, examples, and translations
+- 🧪 **Tests** - Increase test coverage and add integration tests
+- 💡 **Features** - Suggest and implement new CLI features
+
+### Getting Started with Contributing
+
+To get started with contributing to FastAPI-fastkit, please refer to our comprehensive guides:
+
+- **[Development Setup](contributing/development-setup.md)** - Complete guide for setting up your development environment
+- **[Code Guidelines](contributing/code-guidelines.md)** - Coding standards and best practices
+- **[CONTRIBUTING.md](https://github.com/bnbong/FastAPI-fastkit/blob/main/CONTRIBUTING.md)** - Comprehensive contribution guide
+- **[CODE_OF_CONDUCT.md](https://github.com/bnbong/FastAPI-fastkit/blob/main/CODE_OF_CONDUCT.md)** - Project principles and community standards
+- **[SECURITY.md](https://github.com/bnbong/FastAPI-fastkit/blob/main/SECURITY.md)** - Security guidelines and reporting
+
 ## Significance of FastAPI-fastkit
 
 FastAPI-fastkit aims to provide a fast and easy-to-use starter kit for new users of Python and FastAPI.
 
-This idea was initiated with the aim of full fill to help FastAPI newcomers to learn from the beginning, which is the production significance of the FastAPI-cli package added with the [FastAPI 0.111.0 version update](https://github.com/fastapi/fastapi/releases/tag/0.111.0).
+This idea was initiated with the aim of helping FastAPI newcomers learn from the beginning, which aligns with the production significance of the FastAPI-cli package added with the [FastAPI 0.111.0 version update](https://github.com/fastapi/fastapi/releases/tag/0.111.0).
 
-As one person who has been using and loving FastAPI for a long time, I wanted to develop a project that could help me a little bit to practice [the wonderful motivation](https://github.com/fastapi/fastapi/pull/11522#issuecomment-2264639417) that FastAPI developer [tiangolo](https://github.com/tiangolo) has.
+As someone who has been using and loving FastAPI for a long time, I wanted to develop a project that could help fulfill [the wonderful motivation](https://github.com/fastapi/fastapi/pull/11522#issuecomment-2264639417) that FastAPI developer [tiangolo](https://github.com/tiangolo) has expressed.
+
+FastAPI-fastkit bridges the gap between getting started and building production-ready applications by providing:
+
+- **Immediate productivity** for newcomers who might be overwhelmed by setup complexity
+- **Best practices** built into every template, helping users learn proper FastAPI patterns
+- **Scalable foundations** that grow with users as they advance from beginners to experts
+- **Community-driven templates** that reflect real-world FastAPI usage patterns
 
 ## Next Steps
 
@@ -288,11 +328,13 @@ Ready to get started with FastAPI-fastkit? Follow these next steps:
 Want to contribute to FastAPI-fastkit?
 
 - **[Development Setup](contributing/development-setup.md)**: Set up your development environment
-- **[Contributing Guidelines](https://github.com/bnbong/FastAPI-fastkit/blob/main/CONTRIBUTING.md)**: Contribution guidelines
+- **[Code Guidelines](contributing/code-guidelines.md)**: Follow our coding standards and best practices
+- **[Contributing Guidelines](https://github.com/bnbong/FastAPI-fastkit/blob/main/CONTRIBUTING.md)**: Comprehensive contribution guide
 
 ### 🔍 Reference
 
 - **[CLI Reference](user-guide/cli-reference.md)**: Complete CLI command reference
+- **[Template Quality Assurance](reference/template-quality-assurance.md)**: Automated testing and quality standards
 - **[FAQ](reference/faq.md)**: Frequently asked questions
 - **[GitHub Repository](https://github.com/bnbong/FastAPI-fastkit)**: Source code and issue tracking
 
