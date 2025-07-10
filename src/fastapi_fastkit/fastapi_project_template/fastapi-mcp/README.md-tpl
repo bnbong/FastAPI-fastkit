@@ -1,0 +1,249 @@
+# FastAPI MCP Project
+
+A FastAPI application with Model Context Protocol (MCP) integration, providing authenticated API endpoints exposed as MCP tools.
+
+## Features
+
+- **FastAPI Integration**: Modern, fast web framework for building APIs
+- **MCP Support**: Expose API endpoints as Model Context Protocol tools
+- **Authentication**: JWT-based authentication with OAuth2 support
+- **Authorization**: Role-based access control for API endpoints
+- **Auto-generated Documentation**: Swagger UI and ReDoc integration
+- **Type Safety**: Full type hints and Pydantic models
+- **Testing**: Comprehensive test suite with pytest
+- **Code Quality**: Black, isort, and mypy integration
+
+## Project Structure
+
+```
+├── src/
+│   ├── api/                 # API endpoints
+│   │   ├── routes/          # Route handlers
+│   │   └── api.py          # Main API router
+│   ├── auth/               # Authentication logic
+│   ├── core/               # Core settings and config
+│   ├── mcp/                # MCP integration
+│   ├── schemas/            # Pydantic models
+│   └── main.py             # FastAPI application
+├── tests/                  # Test files
+├── scripts/                # Development scripts
+├── requirements.txt        # Dependencies
+└── README.md              # This file
+```
+
+## Installation
+
+1. Create a virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+2. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+3. Set up environment variables:
+```bash
+# Edit .env with your configuration
+```
+
+### Environment Variables
+
+The `.env` file contains the following configuration options:
+
+```env
+# Application Settings
+PROJECT_NAME=FastAPI MCP Project
+VERSION=0.1.0
+API_V1_STR=/api/v1
+
+# Server Settings
+HOST=0.0.0.0
+PORT=8000
+DEBUG=false
+
+# CORS Settings
+# Comma-separated list of allowed origins
+BACKEND_CORS_ORIGINS=http://localhost:3000,http://localhost:8080
+
+# MCP (Model Context Protocol) Settings
+MCP_ENABLED=true
+MCP_MOUNT_PATH=/mcp
+MCP_TITLE=FastAPI MCP Server
+MCP_DESCRIPTION=FastAPI endpoints exposed as MCP tools
+
+# Authentication Settings
+SECRET_KEY=changethis
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+# MCP API Key (optional, for additional MCP endpoint security)
+# MCP_API_KEY=your-mcp-api-key-here
+```
+
+### Important Security Notes
+
+- **Always change `SECRET_KEY`** in production
+- Use a strong, random secret key (minimum 32 characters)
+- Set `DEBUG=false` in production
+- Configure `BACKEND_CORS_ORIGINS` appropriately for your frontend domains
+
+## Usage
+
+### Development Server
+
+Start the development server:
+```bash
+# Using the script
+./scripts/run-server.sh
+
+# Or directly with uvicorn
+uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+### Authentication
+
+The application provides several authentication endpoints:
+
+1. **Login**: `POST /api/v1/auth/login`
+2. **OAuth2 Token**: `POST /api/v1/auth/token`
+3. **Current User**: `GET /api/v1/auth/me`
+
+Default users:
+- Username: `user1`, Password: `password123`
+- Username: `user2`, Password: `password456`
+- Username: `admin`, Password: `admin123`
+
+### API Endpoints
+
+- **Items**: CRUD operations for items (`/api/v1/items/`)
+- **Authentication**: User authentication (`/api/v1/auth/`)
+- **Health Check**: Application health (`/health`)
+- **Documentation**: Swagger UI (`/docs`) and ReDoc (`/redoc`)
+
+### MCP Integration
+
+The application exposes API endpoints as MCP tools at `/mcp` and provides additional MCP-specific endpoints.
+
+#### MCP Endpoints
+
+- **Hello World**: `GET /mcp-routes/hello` - Simple MCP hello world endpoint
+- **MCP Status**: `GET /mcp-routes/status` - MCP configuration status
+- **MCP Tools**: `/mcp` - Main MCP protocol endpoint (via fastapi-mcp)
+
+Example MCP usage:
+```bash
+# Test MCP hello endpoint
+curl http://localhost:8000/mcp-routes/hello
+
+# Check MCP status
+curl http://localhost:8000/mcp-routes/status
+
+# Access MCP tools (requires authentication)
+curl -H "Authorization: Bearer YOUR_TOKEN" http://localhost:8000/mcp
+```
+
+## Development
+
+### Code Quality
+
+Format code:
+```bash
+./scripts/format.sh
+```
+
+Lint code:
+```bash
+./scripts/lint.sh
+```
+
+### Testing
+
+Run tests:
+```bash
+./scripts/test.sh
+```
+
+Run specific test:
+```bash
+pytest tests/test_items.py::test_get_items -v
+```
+
+### Type Checking
+
+```bash
+mypy src/
+```
+
+## API Documentation
+
+Once the server is running, visit:
+
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
+- **OpenAPI JSON**: http://localhost:8000/api/v1/openapi.json
+
+## MCP Tools
+
+The application exposes the following tools and endpoints via MCP:
+
+### MCP-Specific Endpoints
+- **mcp_hello**: Simple hello world endpoint (`/mcp-routes/hello`)
+- **mcp_status**: MCP configuration status (`/mcp-routes/status`)
+
+### API Endpoints via MCP
+- **get_items**: List items with pagination
+- **get_item**: Get specific item by ID
+- **create_item**: Create new item (requires auth)
+- **update_item**: Update existing item (requires auth)
+- **delete_item**: Delete item (requires auth)
+- **login**: Authenticate user
+- **get_current_user**: Get current user info
+
+## Deployment
+
+### Production Settings
+
+For production deployment:
+
+1. Set `DEBUG=False` in environment
+2. Use a secure `SECRET_KEY`
+3. Configure proper CORS origins
+4. Set up SSL/TLS certificates
+5. Use a production WSGI server like Gunicorn
+
+### Docker Support
+
+```dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+COPY src/ src/
+COPY scripts/ scripts/
+
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests and linting
+5. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License.
+
+## Support
+
+For support and questions:
+- Create an issue in the repository
+- Check the FastAPI documentation: https://fastapi.tiangolo.com/
+- Check the FastAPI-MCP documentation: https://github.com/tadata-org/fastapi_mcp

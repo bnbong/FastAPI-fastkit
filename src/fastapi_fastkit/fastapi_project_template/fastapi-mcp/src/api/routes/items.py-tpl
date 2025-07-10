@@ -1,0 +1,189 @@
+"""
+Item-related API endpoints.
+"""
+from typing import List, Optional
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+
+from src.auth.dependencies import get_current_active_user, optional_auth
+from src.schemas.items import (
+    ItemCreate,
+    ItemResponse,
+    ItemUpdate,
+    ItemListResponse,
+)
+
+router = APIRouter()
+
+# Mock database
+mock_items = [
+    {
+        "id": 1,
+        "name": "Laptop",
+        "description": "High-performance laptop",
+        "price": 999.99,
+        "tax": 99.99,
+        "owner_id": "user1",
+    },
+    {
+        "id": 2,
+        "name": "Mouse",
+        "description": "Wireless mouse",
+        "price": 29.99,
+        "tax": 2.99,
+        "owner_id": "user1",
+    },
+    {
+        "id": 3,
+        "name": "Keyboard",
+        "description": "Mechanical keyboard",
+        "price": 79.99,
+        "tax": 7.99,
+        "owner_id": "user2",
+    },
+]
+
+
+@router.get("/", response_model=ItemListResponse, summary="Get all items")
+def get_items(
+    page: int = Query(1, ge=1, description="Page number"),
+    page_size: int = Query(10, ge=1, le=100, description="Items per page"),
+    current_user: Optional[dict] = Depends(optional_auth),
+):
+    """
+    Get a list of items with pagination.
+
+    This endpoint can be used without authentication to get public items,
+    or with authentication to get user-specific items.
+    """
+    # Calculate pagination
+    start_idx = (page - 1) * page_size
+    end_idx = start_idx + page_size
+
+    # Filter items if user is authenticated
+    if current_user:
+        user_items = [item for item in mock_items if item["owner_id"] == current_user["user_id"]]
+        items = user_items[start_idx:end_idx]
+        total = len(user_items)
+    else:
+        items = mock_items[start_idx:end_idx]
+        total = len(mock_items)
+
+    return ItemListResponse(
+        items=items,
+        total=total,
+        page=page,
+        page_size=page_size,
+    )
+
+
+@router.get("/{item_id}", response_model=ItemResponse, summary="Get item by ID")
+def get_item(item_id: int, current_user: Optional[dict] = Depends(optional_auth)):
+    """
+    Get a specific item by ID.
+
+    Returns the item if it exists and the user has access to it.
+    """
+    item = next((item for item in mock_items if item["id"] == item_id), None)
+    if not item:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Item not found"
+        )
+
+    # Check if user has access to this item
+    if current_user and item["owner_id"] != current_user["user_id"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to access this item"
+        )
+
+    return ItemResponse(**item)
+
+
+@router.post("/", response_model=ItemResponse, status_code=status.HTTP_201_CREATED, summary="Create new item")
+def create_item(
+    item: ItemCreate,
+    current_user: dict = Depends(get_current_active_user),
+):
+    """
+    Create a new item.
+
+    Requires authentication. The item will be owned by the authenticated user.
+    """
+    # Generate new ID
+    new_id = max([item["id"] for item in mock_items]) + 1 if mock_items else 1
+
+    # Create new item
+    new_item = {
+        "id": new_id,
+        "owner_id": current_user["user_id"],
+        **item.model_dump(),
+    }
+
+    mock_items.append(new_item)
+
+    return ItemResponse(**new_item)
+
+
+@router.put("/{item_id}", response_model=ItemResponse, summary="Update item")
+def update_item(
+    item_id: int,
+    item_update: ItemUpdate,
+    current_user: dict = Depends(get_current_active_user),
+):
+    """
+    Update an existing item.
+
+    Requires authentication. Users can only update their own items.
+    """
+    item = next((item for item in mock_items if item["id"] == item_id), None)
+    if not item:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Item not found"
+        )
+
+    # Check ownership
+    if item["owner_id"] != current_user["user_id"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to update this item"
+        )
+
+    # Update item
+    update_data = item_update.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        item[field] = value
+
+    return ItemResponse(**item)
+
+
+@router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Delete item")
+def delete_item(
+    item_id: int,
+    current_user: dict = Depends(get_current_active_user),
+):
+    """
+    Delete an item.
+
+    Requires authentication. Users can only delete their own items.
+    """
+    item_idx = next((i for i, item in enumerate(mock_items) if item["id"] == item_id), None)
+    if item_idx is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Item not found"
+        )
+
+    item = mock_items[item_idx]
+
+    # Check ownership
+    if item["owner_id"] != current_user["user_id"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to delete this item"
+        )
+
+    mock_items.pop(item_idx)
+    return None

@@ -1,0 +1,24 @@
+name: "FastAPI PostgreSQL ORM"
+description: "FastAPI application with PostgreSQL database using SQLModel ORM"
+category: "database"
+requires_docker: true
+
+# Testing configuration
+testing:
+  strategy: "docker-compose"
+  compose_file: "docker-compose.yml"
+  health_check_timeout: 180
+  test_command: "pytest tests/ -v"
+
+# Alternative testing for environments without Docker
+fallback_testing:
+  strategy: "sqlite-mock"
+  database_url: "sqlite:///:memory:"
+  test_command: "pytest tests/ -v"
+
+# Default values for testing
+test_env_defaults:
+  POSTGRES_USER: "test_user"
+  POSTGRES_PASSWORD: "test_password"
+  POSTGRES_DB: "test_db"
+  ENVIRONMENT: "development"

@@ -59,6 +59,7 @@ nav:
   - Contributing:
     - Development Setup: contributing/development-setup.md
     - Code Guidelines: contributing/code-guidelines.md
+    - Template Creation Guide: contributing/template-creation-guide.md
   - Reference:
     - FAQ: reference/faq.md
     - Template Quality Assurance: reference/template-quality-assurance.md

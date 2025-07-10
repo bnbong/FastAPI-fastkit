@@ -1,0 +1,88 @@
+"""
+Authentication dependencies for API and MCP endpoints.
+"""
+from typing import Optional
+
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from jose import JWTError, jwt
+
+from src.core.config import settings
+
+security = HTTPBearer(auto_error=False)
+
+
+def verify_token(token: str) -> dict:
+    """Verify JWT token and return payload."""
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        return payload
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+def get_current_user(credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)):
+    """Get current authenticated user from JWT token."""
+    if not credentials:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    payload = verify_token(credentials.credentials)
+    user_id = payload.get("sub")
+    if user_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return {"user_id": user_id, "username": payload.get("username")}
+
+
+def get_current_active_user(current_user: dict = Depends(get_current_user)):
+    """Get current active user."""
+    if not current_user.get("active", True):
+        raise HTTPException(status_code=400, detail="Inactive user")
+    return current_user
+
+
+def verify_mcp_access(credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)):
+    """Verify MCP access permissions."""
+    if settings.MCP_API_KEY:
+        # Use API key authentication for MCP
+        if not credentials or credentials.credentials != settings.MCP_API_KEY:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid MCP API key",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+    else:
+        # Use JWT authentication for MCP
+        if not credentials:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="MCP authentication required",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        verify_token(credentials.credentials)
+
+    return True
+
+
+def optional_auth(credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)):
+    """Optional authentication for endpoints that work with or without auth."""
+    if not credentials:
+        return None
+
+    try:
+        payload = verify_token(credentials.credentials)
+        return {"user_id": payload.get("sub"), "username": payload.get("username")}
+    except HTTPException:
+        return None

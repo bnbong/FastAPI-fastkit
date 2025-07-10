@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Run tests with pytest
+echo "Running tests..."
+
+# Run pytest with coverage
+pytest tests/ -v --cov=src --cov-report=html --cov-report=term-missing
+
+echo "Tests completed!"

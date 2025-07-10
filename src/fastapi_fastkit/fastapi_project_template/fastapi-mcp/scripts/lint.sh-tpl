@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Lint code using black, isort, and mypy
+echo "Linting code..."
+
+# Check formatting with black
+echo "Checking code formatting with black..."
+black --check src/ tests/
+
+# Check import sorting with isort
+echo "Checking import sorting with isort..."
+isort --check-only src/ tests/
+
+# Type checking with mypy
+echo "Running type checking with mypy..."
+mypy src/
+
+echo "Linting completed!"

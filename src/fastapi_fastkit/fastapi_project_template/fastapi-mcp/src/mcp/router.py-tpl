@@ -1,0 +1,100 @@
+"""
+MCP router configuration and setup.
+"""
+from typing import Any, Dict, Optional, Union
+
+from fastapi import APIRouter, FastAPI
+from fastapi_mcp import FastApiMCP
+
+from src.core.config import settings
+
+
+# Create MCP specific router
+mcp_router = APIRouter()
+
+
+@mcp_router.get("/hello")
+async def mcp_hello() -> Dict[str, Union[str, bool]]:
+    """Simple MCP hello world endpoint.
+
+    Returns:
+        Dict with hello world message
+    """
+    return {
+        "message": "Hello from MCP!",
+        "status": "success",
+        "mcp_enabled": settings.MCP_ENABLED
+    }
+
+
+@mcp_router.get("/status")
+async def mcp_status() -> Dict[str, Union[str, bool]]:
+    """MCP status endpoint.
+
+    Returns:
+        Dict with MCP status information
+    """
+    return {
+        "mcp_enabled": settings.MCP_ENABLED,
+        "mcp_mount_path": settings.MCP_MOUNT_PATH,
+        "mcp_title": settings.MCP_TITLE,
+        "mcp_description": settings.MCP_DESCRIPTION
+    }
+
+
+def create_mcp_router(app: FastAPI) -> FastApiMCP:
+    """Create and configure MCP router for the FastAPI application.
+
+    Args:
+        app: FastAPI application instance
+
+    Returns:
+        FastApiMCP instance configured
+    """
+    # Include MCP specific routes in the main app
+    app.include_router(mcp_router, prefix="/mcp-routes", tags=["mcp"])
+
+    # Create MCP instance with app
+    mcp = FastApiMCP(app)
+
+    return mcp
+
+
+def configure_mcp_tools(mcp: FastApiMCP) -> None:
+    """Configure specific MCP tools and their permissions.
+
+    Args:
+        mcp: FastApiMCP instance to configure
+    """
+    # Example: Configure specific endpoints for MCP exposure
+    # This can be used to customize which endpoints are exposed via MCP
+    # and with what permissions
+
+    # Include all API endpoints by default
+    # You can add filters or custom tool configurations here
+
+    pass
+
+
+def setup_mcp_server(app: FastAPI) -> Optional[FastApiMCP]:
+    """Setup MCP server for the FastAPI application.
+
+    Args:
+        app: FastAPI application instance
+
+    Returns:
+        FastApiMCP instance if MCP is enabled, None otherwise
+    """
+    if not settings.MCP_ENABLED:
+        return None
+
+    # Create MCP router
+    mcp = create_mcp_router(app)
+
+    # Configure MCP tools
+    configure_mcp_tools(mcp)
+
+    # Mount MCP server
+    mcp.mount()
+
+    return mcp

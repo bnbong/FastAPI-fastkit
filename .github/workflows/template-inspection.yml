@@ -31,7 +31,7 @@ jobs:
 
       - name: Run template inspection
         run: |
-          python scripts/inspect-templates.py --templates "${{ github.event.inputs.templates }}" --output template_inspection_results.json
+          pdm run python scripts/inspect-templates.py --templates "${{ github.event.inputs.templates }}" --output template_inspection_results.json
 
       - name: Upload inspection results
         uses: actions/upload-artifact@v4

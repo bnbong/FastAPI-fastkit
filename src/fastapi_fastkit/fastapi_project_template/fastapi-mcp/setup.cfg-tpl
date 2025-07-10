@@ -1,0 +1,90 @@
+[metadata]
+name = fastapi-mcp-project
+version = 0.1.0
+description = FastAPI project with Model Context Protocol (MCP) integration
+long_description = file: README.md
+long_description_content_type = text/markdown
+url = https://github.com/yourusername/fastapi-mcp-project
+author = Your Name
+author_email = your.email@example.com
+license = MIT
+classifiers =
+    Development Status :: 3 - Alpha
+    Intended Audience :: Developers
+    License :: OSI Approved :: MIT License
+    Operating System :: OS Independent
+    Programming Language :: Python :: 3
+    Programming Language :: Python :: 3.10
+    Programming Language :: Python :: 3.11
+    Programming Language :: Python :: 3.12
+    Framework :: FastAPI
+
+[options]
+packages = find:
+python_requires = >=3.10
+install_requires =
+    fastapi>=0.115.8
+    fastapi-mcp>=0.3.4
+    uvicorn>=0.34.0
+    pydantic>=2.10.6
+    pydantic-settings>=2.7.1
+    python-dotenv>=1.0.1
+    python-jose>=3.3.0
+    passlib>=1.7.4
+    bcrypt>=4.1.2
+    python-multipart>=0.0.17
+
+[options.extras_require]
+dev =
+    pytest>=8.3.4
+    pytest-cov>=4.0.0
+    black>=25.1.0
+    isort>=6.0.0
+    mypy>=1.15.0
+    httpx>=0.28.1
+
+[options.entry_points]
+console_scripts =
+    run-server = src.main:start_server
+
+[tool:pytest]
+testpaths = tests
+python_files = test_*.py
+addopts = -v --tb=short --strict-markers
+
+[coverage:run]
+source = src
+omit =
+    */tests/*
+    */test_*
+    */conftest.py
+
+[coverage:report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise AssertionError
+    raise NotImplementedError
+    if __name__ == .__main__.:
+
+[mypy]
+python_version = 3.10
+warn_return_any = True
+warn_unused_configs = True
+check_untyped_defs = True
+no_implicit_optional = True
+warn_redundant_casts = True
+warn_unused_ignores = True
+
+[mypy-tests.*]
+disallow_untyped_defs = False
+
+[isort]
+profile = black
+multi_line_output = 3
+line_length = 88
+known_first_party = src
+
+[black]
+line-length = 88
+target-version = ['py310']

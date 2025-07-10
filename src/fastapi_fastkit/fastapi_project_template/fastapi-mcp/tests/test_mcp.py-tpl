@@ -1,0 +1,81 @@
+"""
+Tests for MCP (Model Context Protocol) functionality.
+"""
+import pytest
+from fastapi.testclient import TestClient
+
+
+def test_mcp_hello_endpoint(client: TestClient):
+    """Test MCP hello world endpoint."""
+    response = client.get("/mcp-routes/hello")
+    assert response.status_code == 200
+    data = response.json()
+
+    assert "message" in data
+    assert data["message"] == "Hello from MCP!"
+    assert data["status"] == "success"
+    assert "mcp_enabled" in data
+
+
+def test_mcp_status_endpoint(client: TestClient):
+    """Test MCP status endpoint."""
+    response = client.get("/mcp-routes/status")
+    assert response.status_code == 200
+    data = response.json()
+
+    assert "mcp_enabled" in data
+    assert "mcp_mount_path" in data
+    assert "mcp_title" in data
+    assert "mcp_description" in data
+
+
+# def test_mcp_endpoint_exists(client: TestClient):
+#     """Test that MCP endpoint is available."""
+#     response = client.get("/mcp")
+#     # MCP endpoint should be available (mounted by fastapi-mcp)
+#     # The exact response depends on fastapi-mcp implementation
+#     # This test verifies the endpoint exists and doesn't return 404
+#     assert response.status_code != 404
+
+
+def test_mcp_with_auth_token(client: TestClient):
+    """Test MCP access with authentication token."""
+    # First, get an auth token
+    login_data = {"username": "user1", "password": "password123"}
+    login_response = client.post("/api/v1/auth/login", json=login_data)
+
+    if login_response.status_code == 200:
+        token = login_response.json()["access_token"]
+        headers = {"Authorization": f"Bearer {token}"}
+
+        # Test MCP hello endpoint with token
+        response = client.get("/mcp-routes/hello", headers=headers)
+        assert response.status_code == 200
+
+        # Test MCP status endpoint with token
+        response = client.get("/mcp-routes/status", headers=headers)
+        assert response.status_code == 200
+
+
+def test_root_endpoint_shows_mcp_info(client: TestClient):
+    """Test that root endpoint shows MCP information."""
+    response = client.get("/")
+    assert response.status_code == 200
+    data = response.json()
+
+    # Root endpoint should show MCP status
+    assert "mcp_enabled" in data
+    assert "mcp_endpoint" in data
+
+    # If MCP is enabled, endpoint should be provided
+    if data["mcp_enabled"]:
+        assert data["mcp_endpoint"] is not None
+
+
+def test_health_check_endpoint(client: TestClient):
+    """Test health check endpoint."""
+    response = client.get("/health")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "healthy"
+    assert "version" in data

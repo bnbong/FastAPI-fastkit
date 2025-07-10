@@ -1,0 +1,85 @@
+# <project_name>
+
+> Minimal FastAPI template for rapid prototyping
+
+A minimal FastAPI template that provides the basic structure for building FastAPI applications. Perfect for getting started quickly or as a foundation for more complex projects.
+
+## Features
+
+- FastAPI with basic CORS support
+- Basic configuration management
+- Environment variable support
+- Simple project structure
+- Ready for development
+
+## Stack
+
+- FastAPI 0.115+
+- Python 3.8+
+- Pydantic (data validation)
+- Uvicorn (ASGI server)
+
+## Project Tree
+
+```
+.
+├── README.md
+├── requirements.txt
+├── setup.py
+├── src/
+│   ├── main.py              # FastAPI application
+│   ├── core/                # Core configuration
+│   │   └── config.py        # Settings management
+│   └── __init__.py
+├── tests/                   # Test code
+│   ├── conftest.py         # pytest configuration
+│   ├── test_main.py        # Main application tests
+│   └── __init__.py
+└── .env                     # Environment variables
+```
+
+## Environment settings
+
+1. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+2. Run server:
+```bash
+uvicorn src.main:app --reload
+```
+
+The application will be available at http://localhost:8000
+
+## API Documentation
+
+After running the server, check API documentation at:
+- Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
+
+## Testing
+
+```bash
+pytest tests/ -v
+```
+
+## Extending the Template
+
+This minimal template can be extended with:
+- API routes and endpoints
+- Database integration
+- Authentication
+- Middleware
+- Background tasks
+
+For more complex requirements, consider using other FastAPI-fastkit templates like `fastapi-default` or `fastapi-psql-orm`.
+
+# Origin of this project
+
+The source of this project was created based on the template of the [FastAPI-fastkit](https://github.com/bnbong/FastAPI-fastkit) project.
+
+### Template information
+
+- Template creator : FastAPI-fastkit Team
+- FastAPI-fastkit project owner : [bnbong](mailto:bbbong9@gmail.com)

@@ -1,0 +1,66 @@
+"""
+Main FastAPI application with MCP integration.
+"""
+import uvicorn
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from src.api.api import api_router
+from src.core.config import settings
+from src.mcp.router import setup_mcp_server
+
+# Create FastAPI application
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    version=settings.VERSION,
+    description="FastAPI application with Model Context Protocol (MCP) integration",
+    openapi_url=f"{settings.API_V1_STR}/openapi.json",
+)
+
+# Set up CORS middleware
+if settings.all_cors_origins:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[str(origin) for origin in settings.all_cors_origins],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+# Include API routes
+app.include_router(api_router, prefix=settings.API_V1_STR)
+
+# Setup MCP server
+mcp_server = setup_mcp_server(app)
+
+# Root endpoint
+@app.get("/", tags=["root"])
+async def root():
+    """Root endpoint with application information."""
+    return {
+        "message": "FastAPI MCP Project",
+        "version": settings.VERSION,
+        "mcp_enabled": settings.MCP_ENABLED,
+        "mcp_endpoint": settings.MCP_MOUNT_PATH if settings.MCP_ENABLED else None,
+        "docs_url": "/docs",
+        "redoc_url": "/redoc",
+    }
+
+# Health check endpoint
+@app.get("/health", tags=["health"])
+async def health_check():
+    """Health check endpoint."""
+    return {"status": "healthy", "version": settings.VERSION}
+
+def start_server():
+    """Start the server programmatically."""
+    uvicorn.run(
+        "src.main:app",
+        host=settings.HOST,
+        port=settings.PORT,
+        reload=settings.DEBUG,
+        log_level="info" if not settings.DEBUG else "debug",
+    )
+
+if __name__ == "__main__":
+    start_server()

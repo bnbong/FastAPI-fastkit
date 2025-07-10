@@ -1,0 +1,101 @@
+"""
+Tests for authentication API endpoints.
+"""
+import pytest
+from fastapi.testclient import TestClient
+
+
+def test_login_valid_credentials(client: TestClient):
+    """Test login with valid credentials."""
+    login_data = {"username": "user1", "password": "password123"}
+    response = client.post("/api/v1/auth/login", json=login_data)
+    assert response.status_code == 200
+    data = response.json()
+    assert "access_token" in data
+    assert "token_type" in data
+    assert data["token_type"] == "bearer"
+
+
+def test_login_invalid_credentials(client: TestClient):
+    """Test login with invalid credentials."""
+    login_data = {"username": "user1", "password": "wrongpassword"}
+    response = client.post("/api/v1/auth/login", json=login_data)
+    assert response.status_code == 401
+
+
+def test_login_nonexistent_user(client: TestClient):
+    """Test login with nonexistent user."""
+    login_data = {"username": "nonexistent", "password": "password123"}
+    response = client.post("/api/v1/auth/login", json=login_data)
+    assert response.status_code == 401
+
+
+def test_oauth2_token_valid_credentials(client: TestClient):
+    """Test OAuth2 token endpoint with valid credentials."""
+    token_data = {"username": "user1", "password": "password123"}
+    response = client.post("/api/v1/auth/token", data=token_data)
+    assert response.status_code == 200
+    data = response.json()
+    assert "access_token" in data
+    assert "token_type" in data
+    assert data["token_type"] == "bearer"
+
+
+def test_oauth2_token_invalid_credentials(client: TestClient):
+    """Test OAuth2 token endpoint with invalid credentials."""
+    token_data = {"username": "user1", "password": "wrongpassword"}
+    response = client.post("/api/v1/auth/token", data=token_data)
+    assert response.status_code == 401
+
+
+def test_get_current_user_without_token(client: TestClient):
+    """Test getting current user without authentication token."""
+    response = client.get("/api/v1/auth/me")
+    assert response.status_code == 401
+
+
+def test_get_current_user_with_token(client: TestClient):
+    """Test getting current user with valid token."""
+    # First, login to get a token
+    login_data = {"username": "user1", "password": "password123"}
+    login_response = client.post("/api/v1/auth/login", json=login_data)
+    token = login_response.json()["access_token"]
+
+    # Then, use the token to get current user
+    headers = {"Authorization": f"Bearer {token}"}
+    response = client.get("/api/v1/auth/me", headers=headers)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["username"] == "user1"
+    assert data["user_id"] == "user1"
+    assert data["active"] == True
+
+
+def test_get_current_user_with_invalid_token(client: TestClient):
+    """Test getting current user with invalid token."""
+    headers = {"Authorization": "Bearer invalid_token"}
+    response = client.get("/api/v1/auth/me", headers=headers)
+    assert response.status_code == 401
+
+
+def test_get_users_without_auth(client: TestClient):
+    """Test getting users without authentication."""
+    response = client.get("/api/v1/auth/users")
+    assert response.status_code == 401
+
+
+def test_get_users_with_auth(client: TestClient):
+    """Test getting users with authentication."""
+    # First, login to get a token
+    login_data = {"username": "user1", "password": "password123"}
+    login_response = client.post("/api/v1/auth/login", json=login_data)
+    token = login_response.json()["access_token"]
+
+    # Then, use the token to get users
+    headers = {"Authorization": f"Bearer {token}"}
+    response = client.get("/api/v1/auth/users", headers=headers)
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, list)
+    assert len(data) > 0
+    assert all("username" in user for user in data)
