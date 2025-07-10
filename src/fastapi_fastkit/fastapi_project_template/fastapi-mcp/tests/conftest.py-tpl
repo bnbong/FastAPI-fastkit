@@ -1,0 +1,49 @@
+"""
+Test configuration and fixtures.
+"""
+import pytest
+from fastapi.testclient import TestClient
+from src.main import app
+from src.api.routes.auth import create_access_token
+
+
+@pytest.fixture
+def client():
+    """Create test client."""
+    return TestClient(app)
+
+
+@pytest.fixture
+def test_user():
+    """Test user data."""
+    return {
+        "user_id": "test_user",
+        "username": "testuser",
+        "password": "testpass123",
+    }
+
+
+@pytest.fixture
+def auth_token(test_user):
+    """Create authentication token for test user."""
+    token = create_access_token(
+        data={"sub": test_user["user_id"], "username": test_user["username"]}
+    )
+    return token
+
+
+@pytest.fixture
+def auth_headers(auth_token):
+    """Create authorization headers."""
+    return {"Authorization": f"Bearer {auth_token}"}
+
+
+@pytest.fixture
+def test_item():
+    """Test item data."""
+    return {
+        "name": "Test Item",
+        "description": "This is a test item",
+        "price": 99.99,
+        "tax": 9.99,
+    }

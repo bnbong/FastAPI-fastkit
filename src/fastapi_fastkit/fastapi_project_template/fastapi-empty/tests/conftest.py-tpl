@@ -1,0 +1,16 @@
+# --------------------------------------------------------------------------
+# pytest runtime configuration module
+# --------------------------------------------------------------------------
+from collections.abc import Generator
+
+import pytest
+from fastapi.testclient import TestClient
+
+from src.main import app
+
+
+@pytest.fixture(scope="module")
+def client() -> Generator[TestClient, None, None]:
+    """Create test client for FastAPI app."""
+    with TestClient(app) as c:
+        yield c

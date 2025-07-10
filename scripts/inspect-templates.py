@@ -13,7 +13,7 @@ import argparse
 import json
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -60,7 +60,7 @@ def inspect_template(template_name: str) -> Dict[str, Any]:
     try:
         result = inspect_fastapi_template(str(template_path))
         result["template_name"] = template_name
-        result["inspection_time"] = datetime.utcnow().isoformat()
+        result["inspection_time"] = datetime.now(timezone.utc).isoformat()
 
         if result.get("is_valid", False):
             print(f"✅ {template_name}: PASSED")
@@ -81,7 +81,7 @@ def inspect_template(template_name: str) -> Dict[str, Any]:
             "is_valid": False,
             "errors": [f"Inspection failed with exception: {str(e)}"],
             "warnings": [],
-            "inspection_time": datetime.utcnow().isoformat(),
+            "inspection_time": datetime.now(timezone.utc).isoformat(),
         }
         print(f"💥 {template_name}: EXCEPTION - {str(e)}")
         return error_result
@@ -137,7 +137,7 @@ def main() -> None:
 
     # Save results
     output_data = {
-        "inspection_date": datetime.utcnow().isoformat(),
+        "inspection_date": datetime.now(timezone.utc).isoformat(),
         "total_templates": len(templates),
         "passed_templates": len(templates) - len(failed_templates),
         "failed_templates": len(failed_templates),

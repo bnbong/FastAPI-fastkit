@@ -1,0 +1,50 @@
+from setuptools import find_packages, setup
+
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
+
+setup(
+    name="fastapi-mcp-project",
+    version="0.1.0",
+    author="Your Name",
+    author_email="your.email@example.com",
+    description="FastAPI project with Model Context Protocol (MCP) integration",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/yourusername/fastapi-mcp-project",
+    packages=find_packages(),
+    classifiers=[
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Framework :: FastAPI",
+    ],
+    python_requires=">=3.10",
+    install_requires=[
+        "fastapi>=0.115.8",
+        "fastapi-mcp>=0.3.4",
+        "uvicorn>=0.34.0",
+        "pydantic>=2.10.6",
+        "pydantic-settings>=2.7.1",
+        "python-dotenv>=1.0.1",
+    ],
+    extras_require={
+        "dev": [
+            "pytest>=8.3.4",
+            "black>=25.1.0",
+            "isort>=6.0.0",
+            "mypy>=1.15.0",
+            "httpx>=0.28.1",
+        ],
+    },
+    entry_points={
+        "console_scripts": [
+            "run-server=src.main:start_server",
+        ],
+    },
+)

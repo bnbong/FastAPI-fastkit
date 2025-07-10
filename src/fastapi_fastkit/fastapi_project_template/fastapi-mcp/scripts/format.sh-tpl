@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Format code using black and isort
+echo "Formatting code with black and isort..."
+
+# Format with black
+black src/ tests/
+
+# Sort imports with isort
+isort src/ tests/
+
+echo "Code formatting completed!"

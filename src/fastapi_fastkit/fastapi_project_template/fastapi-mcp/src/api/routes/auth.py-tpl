@@ -1,0 +1,134 @@
+"""
+Authentication-related API endpoints.
+"""
+from datetime import datetime, timedelta, timezone
+from typing import Optional
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from jose import jwt
+from passlib.context import CryptContext
+
+from src.core.config import settings
+from src.schemas.items import AuthToken, UserLogin, UserInfo
+from src.auth.dependencies import get_current_active_user
+
+router = APIRouter()
+
+# Password hashing
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# OAuth2 scheme
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+# Mock user database
+mock_users = {
+    "user1": {
+        "user_id": "user1",
+        "username": "user1",
+        "hashed_password": pwd_context.hash("password123"),
+        "active": True,
+    },
+    "user2": {
+        "user_id": "user2",
+        "username": "user2",
+        "hashed_password": pwd_context.hash("password456"),
+        "active": True,
+    },
+    "admin": {
+        "user_id": "admin",
+        "username": "admin",
+        "hashed_password": pwd_context.hash("admin123"),
+        "active": True,
+    },
+}
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify a password against its hash."""
+    return pwd_context.verify(plain_password, hashed_password)
+
+
+def get_password_hash(password: str) -> str:
+    """Generate password hash."""
+    return pwd_context.hash(password)
+
+
+def authenticate_user(username: str, password: str) -> Optional[dict]:
+    """Authenticate user with username and password."""
+    user = mock_users.get(username)
+    if not user:
+        return None
+    if not verify_password(password, user["hashed_password"]):
+        return None
+    return user
+
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+    """Create JWT access token."""
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.now(timezone.utc) + expires_delta
+    else:
+        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    return encoded_jwt
+
+
+@router.post("/token", response_model=AuthToken, summary="Get access token")
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+    """
+    OAuth2 compatible token login, get an access token for future requests.
+    """
+    user = authenticate_user(form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user["user_id"], "username": user["username"]},
+        expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.post("/login", response_model=AuthToken, summary="Login with username and password")
+async def login(user_credentials: UserLogin):
+    """
+    Login with username and password to get access token.
+    """
+    user = authenticate_user(user_credentials.username, user_credentials.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+        )
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user["user_id"], "username": user["username"]},
+        expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.get("/me", response_model=UserInfo, summary="Get current user")
+async def read_users_me(current_user: dict = Depends(get_current_active_user)):
+    """
+    Get current user information.
+    """
+    return UserInfo(**current_user)
+
+
+@router.get("/users", response_model=list[UserInfo], summary="Get all users")
+async def get_users(current_user: dict = Depends(get_current_active_user)):
+    """
+    Get all users. Available to authenticated users.
+    """
+    return [
+        UserInfo(user_id=user["user_id"], username=user["username"], active=user["active"])
+        for user in mock_users.values()
+    ]

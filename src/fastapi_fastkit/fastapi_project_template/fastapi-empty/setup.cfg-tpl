@@ -1,0 +1,13 @@
+[mypy]
+warn_unused_configs = true
+ignore_missing_imports = true
+
+[isort]
+profile = black
+line_length=100
+virtual_env=venv
+
+[tool:pytest]
+pythonpath = src
+testpaths = tests
+python_files = test_*.py

@@ -1,0 +1,14 @@
+"""
+Main API router configuration.
+"""
+from fastapi import APIRouter
+
+from src.api.routes import auth, items
+
+api_router = APIRouter()
+
+# Include authentication routes
+api_router.include_router(auth.router, prefix="/auth", tags=["authentication"])
+
+# Include items routes
+api_router.include_router(items.router, prefix="/items", tags=["items"])

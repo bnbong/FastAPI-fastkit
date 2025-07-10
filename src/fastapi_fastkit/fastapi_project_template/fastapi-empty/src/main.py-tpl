@@ -22,6 +22,18 @@ if settings.all_cors_origins:
     )
 
 
+@app.get("/")
+async def root():
+    """Root endpoint."""
+    return {"message": "Hello from FastAPI Empty Template!"}
+
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint."""
+    return {"status": "healthy"}
+
+
 """Add your FastAPI application main routine here
 
 You can attach customized middlewares, api routes, etc.
