@@ -2,7 +2,6 @@ name: "FastAPI PostgreSQL ORM"
 description: "FastAPI application with PostgreSQL database using SQLModel ORM"
 category: "database"
 requires_docker: true
-test_strategy: "docker-compose"
 
 # Testing configuration
 testing:
