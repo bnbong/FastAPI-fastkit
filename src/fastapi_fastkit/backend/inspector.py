@@ -219,16 +219,24 @@ class TemplateInspector:
 
         for path in required_paths:
             if not (self.template_path / path).exists():
-                self.errors.append(f"Missing required path: {path}")
+                error_msg = f"Missing required path: {path}"
+                self.errors.append(error_msg)
+                debug_log(f"File structure check failed: {error_msg}", "error")
                 return False
+
+        debug_log("File structure check passed", "info")
         return True
 
     def _check_file_extensions(self) -> bool:
         """Check all Python files have .py-tpl extension."""
         for path in self.template_path.rglob("*"):
             if path.is_file() and path.suffix == ".py":
-                self.errors.append(f"Found .py file instead of .py-tpl: {path}")
+                error_msg = f"Found .py file instead of .py-tpl: {path}"
+                self.errors.append(error_msg)
+                debug_log(f"File extension check failed: {error_msg}", "error")
                 return False
+
+        debug_log("File extension check passed", "info")
         return True
 
     def _check_dependencies(self) -> bool:
@@ -237,50 +245,73 @@ class TemplateInspector:
         setup_path = self.template_path / "setup.py-tpl"
 
         if not req_path.exists():
-            self.errors.append("requirements.txt-tpl not found")
+            error_msg = "requirements.txt-tpl not found"
+            self.errors.append(error_msg)
+            debug_log(f"Dependencies check failed: {error_msg}", "error")
             return False
         if not setup_path.exists():
-            self.errors.append("setup.py-tpl not found")
+            error_msg = "setup.py-tpl not found"
+            self.errors.append(error_msg)
+            debug_log(f"Dependencies check failed: {error_msg}", "error")
             return False
 
         try:
             with open(req_path, encoding="utf-8") as f:
                 deps = f.read().splitlines()
                 package_names = [dep.split("==")[0] for dep in deps if dep]
+                debug_log(f"Found dependencies: {package_names}", "debug")
                 if "fastapi" not in package_names:
-                    self.errors.append(
-                        "FastAPI dependency not found in requirements.txt-tpl"
-                    )
+                    error_msg = "FastAPI dependency not found in requirements.txt-tpl"
+                    self.errors.append(error_msg)
+                    debug_log(f"Dependencies check failed: {error_msg}", "error")
                     return False
         except (OSError, UnicodeDecodeError) as e:
-            self.errors.append(f"Error reading requirements.txt-tpl: {e}")
+            error_msg = f"Error reading requirements.txt-tpl: {e}"
+            self.errors.append(error_msg)
+            debug_log(f"Dependencies check failed: {error_msg}", "error")
             return False
+
+        debug_log("Dependencies check passed", "info")
         return True
 
     def _check_fastapi_implementation(self) -> bool:
         """Check if the template has a proper FastAPI server implementation."""
         try:
             core_modules = find_template_core_modules(self.temp_dir)
+            debug_log(f"Found core modules: {core_modules}", "debug")
 
             if not core_modules["main"]:
-                self.errors.append("main.py not found in template")
+                error_msg = "main.py not found in template"
+                self.errors.append(error_msg)
+                debug_log(f"FastAPI implementation check failed: {error_msg}", "error")
                 return False
 
             with open(core_modules["main"], encoding="utf-8") as f:
                 content = f.read()
                 if "FastAPI" not in content or "app" not in content:
-                    self.errors.append("FastAPI app creation not found in main.py")
+                    error_msg = "FastAPI app creation not found in main.py"
+                    self.errors.append(error_msg)
+                    debug_log(
+                        f"FastAPI implementation check failed: {error_msg}", "error"
+                    )
+                    debug_log(f"main.py content preview: {content[:200]}...", "debug")
                     return False
         except (OSError, UnicodeDecodeError) as e:
-            self.errors.append(f"Error checking FastAPI implementation: {e}")
+            error_msg = f"Error checking FastAPI implementation: {e}"
+            self.errors.append(error_msg)
+            debug_log(f"FastAPI implementation check failed: {error_msg}", "error")
             return False
+
+        debug_log("FastAPI implementation check passed", "info")
         return True
 
     def _test_template(self) -> bool:
         """Run tests on the template using appropriate strategy based on configuration."""
         test_dir = os.path.join(self.temp_dir, "tests")
         if not os.path.exists(test_dir):
-            self.warnings.append("No tests directory found")
+            warning_msg = "No tests directory found"
+            self.warnings.append(warning_msg)
+            debug_log(f"Template warning: {warning_msg}", "warning")
             return True
 
         # Determine test strategy based on template configuration
@@ -295,9 +326,9 @@ class TemplateInspector:
 
         if not docker_available:
             debug_log("Docker not available, trying fallback strategy", "warning")
-            self.warnings.append(
-                "Docker not available, using fallback testing strategy"
-            )
+            warning_msg = "Docker not available, using fallback testing strategy"
+            self.warnings.append(warning_msg)
+            debug_log(f"Template warning: {warning_msg}", "warning")
             return self._test_with_fallback_strategy()
 
         try:
@@ -374,7 +405,13 @@ class TemplateInspector:
                 result = self._run_pytest_directly(venv_path)
 
             if result.returncode != 0:
-                self.errors.append(f"Tests failed: {result.stderr}")
+                error_msg = f"Tests failed with return code {result.returncode}\n"
+                if result.stderr:
+                    error_msg += f"STDERR:\n{result.stderr}\n"
+                if result.stdout:
+                    error_msg += f"STDOUT:\n{result.stdout}\n"
+                self.errors.append(error_msg)
+                debug_log(f"Standard strategy tests failed: {error_msg}", "error")
                 return False
 
             debug_log("All tests passed successfully", "info")
@@ -549,13 +586,23 @@ class TemplateInspector:
                 result = self._run_pytest_with_env(venv_path, env, fallback_config)
 
             if result.returncode != 0:
-                self.errors.append(f"Fallback tests failed: {result.stderr}")
+                error_msg = (
+                    f"Fallback tests failed with return code {result.returncode}\n"
+                )
+                if result.stderr:
+                    error_msg += f"STDERR:\n{result.stderr}\n"
+                if result.stdout:
+                    error_msg += f"STDOUT:\n{result.stdout}\n"
+                self.errors.append(error_msg)
+                debug_log(f"Fallback strategy tests failed: {error_msg}", "error")
                 return False
 
             debug_log("Fallback tests passed successfully", "info")
-            self.warnings.append(
+            warning_msg = (
                 "Tests passed using fallback strategy (SQLite instead of PostgreSQL)"
             )
+            self.warnings.append(warning_msg)
+            debug_log(f"Template warning: {warning_msg}", "warning")
             return True
 
         except Exception as e:
@@ -799,7 +846,15 @@ class TemplateInspector:
                 )
 
             if result.returncode != 0:
-                self.errors.append(f"Docker tests failed: {result.stderr}")
+                error_msg = (
+                    f"Docker tests failed with return code {result.returncode}\n"
+                )
+                if result.stderr:
+                    error_msg += f"STDERR:\n{result.stderr}\n"
+                if result.stdout:
+                    error_msg += f"STDOUT:\n{result.stdout}\n"
+                self.errors.append(error_msg)
+                debug_log(f"Docker strategy tests failed: {error_msg}", "error")
                 return False
 
             debug_log("Docker tests passed successfully", "info")
@@ -868,7 +923,15 @@ class TemplateInspector:
                 )
 
             if result.returncode != 0:
-                self.errors.append(f"Docker exec tests failed: {result.stderr}")
+                error_msg = (
+                    f"Docker exec tests failed with return code {result.returncode}\n"
+                )
+                if result.stderr:
+                    error_msg += f"STDERR:\n{result.stderr}\n"
+                if result.stdout:
+                    error_msg += f"STDOUT:\n{result.stdout}\n"
+                self.errors.append(error_msg)
+                debug_log(f"Docker exec strategy tests failed: {error_msg}", "error")
                 debug_log(f"Docker exec test stderr: {result.stderr}", "error")
                 debug_log(f"Docker exec test stdout: {result.stdout}", "info")
                 return False
@@ -904,11 +967,38 @@ class TemplateInspector:
 
         :return: Dictionary containing inspection results
         """
+        is_valid = len(self.errors) == 0
+        template_name = self.template_path.name
+
+        # Log final inspection results
+        if is_valid:
+            debug_log(
+                f"Template inspection completed successfully for {template_name}",
+                "info",
+            )
+            if self.warnings:
+                debug_log(
+                    f"Template {template_name} has {len(self.warnings)} warnings: {self.warnings}",
+                    "warning",
+                )
+        else:
+            debug_log(
+                f"Template inspection failed for {template_name} with {len(self.errors)} errors",
+                "error",
+            )
+            for i, error in enumerate(self.errors, 1):
+                debug_log(f"Error {i}: {error}", "error")
+            if self.warnings:
+                debug_log(
+                    f"Template {template_name} also has {len(self.warnings)} warnings: {self.warnings}",
+                    "warning",
+                )
+
         return {
             "template_path": str(self.template_path),
             "errors": self.errors,
             "warnings": self.warnings,
-            "is_valid": len(self.errors) == 0,
+            "is_valid": is_valid,
         }
 
 
@@ -919,21 +1009,38 @@ def inspect_fastapi_template(template_path: str) -> Dict[str, Any]:
     :param template_path: Path to the template to inspect
     :return: Inspection report dictionary
     """
+    template_name = Path(template_path).name
+    debug_log(
+        f"Starting template inspection for {template_name} at {template_path}", "info"
+    )
+
     with TemplateInspector(template_path) as inspector:
         is_valid = inspector.inspect_template()
         report = inspector.get_report()
 
         if is_valid:
             print_success(f"Template {template_path} is valid!")
+            debug_log(
+                f"Template inspection completed successfully for {template_name}",
+                "info",
+            )
         else:
             print_error(f"Template {template_path} validation failed")
+            debug_log(f"Template inspection failed for {template_name}", "error")
             for error in inspector.errors:
                 print_error(f"  - {error}")
 
         if inspector.warnings:
+            debug_log(
+                f"Template inspection for {template_name} has warnings", "warning"
+            )
             for warning in inspector.warnings:
                 print_warning(f"  - {warning}")
 
+    debug_log(
+        f"Template inspection completed for {template_name}. Valid: {is_valid}, Errors: {len(inspector.errors)}, Warnings: {len(inspector.warnings)}",
+        "info",
+    )
     return report
 
 

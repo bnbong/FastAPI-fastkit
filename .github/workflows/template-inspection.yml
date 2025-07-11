@@ -10,6 +10,10 @@ on:
         required: false
         default: ""
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   inspect-templates:
     runs-on: ubuntu-latest
@@ -29,9 +33,20 @@ jobs:
       - name: Install dependencies
         run: pdm install -G dev
 
+      - name: Set up Docker Compose
+        run: |
+          if ! command -v docker-compose &> /dev/null; then
+            echo "Installing Docker Compose..."
+            sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+          fi
+
+          docker --version
+          docker-compose --version
+
       - name: Run template inspection
         run: |
-          pdm run python scripts/inspect-templates.py --templates "${{ github.event.inputs.templates }}" --output template_inspection_results.json
+          pdm run python scripts/inspect-templates.py --templates "${{ github.event.inputs.templates }}" --output template_inspection_results.json --verbose
 
       - name: Upload inspection results
         uses: actions/upload-artifact@v4
