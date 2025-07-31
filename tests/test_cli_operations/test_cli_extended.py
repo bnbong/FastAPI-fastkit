@@ -48,8 +48,12 @@ class TestCLIExtended:
     @patch("fastapi_fastkit.backend.transducer.copy_and_convert_template_file")
     @patch("fastapi_fastkit.backend.main.create_venv")
     @patch("fastapi_fastkit.backend.main.install_dependencies")
+    @patch(
+        "fastapi_fastkit.backend.package_managers.pip_manager.PipManager.is_available"
+    )
     def test_init_standard_stack(
         self,
+        mock_pip_available: MagicMock,
         mock_install: MagicMock,
         mock_venv: MagicMock,
         mock_copy: MagicMock,
@@ -60,6 +64,7 @@ class TestCLIExtended:
         # given
         os.chdir(temp_dir)
         mock_venv.return_value = "/fake/venv"
+        mock_pip_available.return_value = True
 
         # when
         result = self.runner.invoke(

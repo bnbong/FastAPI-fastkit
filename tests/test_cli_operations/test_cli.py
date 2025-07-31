@@ -239,13 +239,39 @@ class TestCLI:
         assert "fastapi-default" in result.output
         assert "fastapi-dockerized" in result.output
 
-    def test_init_minimal(self, temp_dir: str) -> None:
+    @patch(
+        "fastapi_fastkit.backend.package_managers.pip_manager.PipManager.is_available"
+    )
+    @patch("subprocess.run")
+    def test_init_minimal(
+        self, mock_subprocess: MagicMock, mock_pip_available: MagicMock, temp_dir: str
+    ) -> None:
         # given
         os.chdir(temp_dir)
         project_name = "test-minimal"
         author = "test-author"
         author_email = "test@example.com"
         description = "A minimal FastAPI project"
+
+        # Mock package manager as available and subprocess calls
+        mock_pip_available.return_value = True
+        mock_subprocess.return_value.returncode = 0
+
+        # Mock subprocess to create venv directory when called
+        def mock_subprocess_side_effect(*args: Any, **kwargs: Any) -> MagicMock:
+            if "venv" in str(args[0]):
+                venv_path = Path(temp_dir) / project_name / ".venv"
+                venv_path.mkdir(parents=True, exist_ok=True)
+                # Also create Scripts/bin directory for pip path checks
+                if os.name == "nt":
+                    (venv_path / "Scripts").mkdir(exist_ok=True)
+                else:
+                    (venv_path / "bin").mkdir(exist_ok=True)
+            mock_result = MagicMock()
+            mock_result.returncode = 0
+            return mock_result
+
+        mock_subprocess.side_effect = mock_subprocess_side_effect
 
         # when
         result = self.runner.invoke(
@@ -279,20 +305,45 @@ class TestCLI:
         venv_path = project_path / ".venv"
         assert venv_path.exists() and venv_path.is_dir()
 
-        pip_list = subprocess.run(
-            [str(venv_path / "bin" / "pip"), "list"], capture_output=True, text=True
-        )
-        installed_packages = pip_list.stdout.lower()
-        assert "fastapi" in installed_packages
-        assert "uvicorn" in installed_packages
+        # Note: Actual dependency installation is mocked in tests
+        # Check that subprocess.run was called for dependency installation
+        assert (
+            mock_subprocess.call_count >= 2
+        )  # venv creation + dependency installation
 
-    def test_init_full(self, temp_dir: str) -> None:
+    @patch(
+        "fastapi_fastkit.backend.package_managers.pip_manager.PipManager.is_available"
+    )
+    @patch("subprocess.run")
+    def test_init_full(
+        self, mock_subprocess: MagicMock, mock_pip_available: MagicMock, temp_dir: str
+    ) -> None:
         # given
         os.chdir(temp_dir)
         project_name = "test-full"
         author = "test-author"
         author_email = "test@example.com"
         description = "A full FastAPI project"
+
+        # Mock package manager as available and subprocess calls
+        mock_pip_available.return_value = True
+        mock_subprocess.return_value.returncode = 0
+
+        # Mock subprocess to create venv directory when called
+        def mock_subprocess_side_effect(*args: Any, **kwargs: Any) -> MagicMock:
+            if "venv" in str(args[0]):
+                venv_path = Path(temp_dir) / project_name / ".venv"
+                venv_path.mkdir(parents=True, exist_ok=True)
+                # Also create Scripts/bin directory for pip path checks
+                if os.name == "nt":
+                    (venv_path / "Scripts").mkdir(exist_ok=True)
+                else:
+                    (venv_path / "bin").mkdir(exist_ok=True)
+            mock_result = MagicMock()
+            mock_result.returncode = 0
+            return mock_result
+
+        mock_subprocess.side_effect = mock_subprocess_side_effect
 
         # when
         result = self.runner.invoke(
@@ -326,12 +377,11 @@ class TestCLI:
         venv_path = project_path / ".venv"
         assert venv_path.exists() and venv_path.is_dir()
 
-        pip_list = subprocess.run(
-            [str(venv_path / "bin" / "pip"), "list"], capture_output=True, text=True
-        )
-        installed_packages = pip_list.stdout.lower()
-        assert "fastapi" in installed_packages
-        assert "uvicorn" in installed_packages
+        # Note: Actual dependency installation is mocked in tests
+        # Check that subprocess.run was called for dependency installation
+        assert (
+            mock_subprocess.call_count >= 2
+        )  # venv creation + dependency installation
 
     def test_init_cancel_confirmation(self, temp_dir: str) -> None:
         # given

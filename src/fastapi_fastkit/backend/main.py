@@ -5,11 +5,10 @@
 # --------------------------------------------------------------------------
 import os
 import re
-import subprocess
-import sys
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 from fastapi_fastkit import console
+from fastapi_fastkit.backend.package_managers import PackageManagerFactory
 from fastapi_fastkit.backend.transducer import copy_and_convert_template_file
 from fastapi_fastkit.core.exceptions import BackendExceptions, TemplateExceptions
 from fastapi_fastkit.core.settings import settings
@@ -246,99 +245,94 @@ def _process_config_file(config_py: str, project_name: str) -> None:
         raise BackendExceptions(f"Failed to process config file: {e}")
 
 
+def create_venv_with_manager(project_dir: str, manager_type: str = "pip") -> str:
+    """
+    Create a virtual environment using the specified package manager.
+
+    :param project_dir: Path to the project directory
+    :param manager_type: Type of package manager to use
+    :return: Path to the virtual environment
+    :raises: BackendExceptions if virtual environment creation fails
+    """
+    try:
+        package_manager = PackageManagerFactory.create_manager(
+            manager_type, project_dir, auto_detect=True
+        )
+        return package_manager.create_virtual_environment()
+    except Exception as e:
+        debug_log(
+            f"Error creating virtual environment with {manager_type}: {e}", "error"
+        )
+        raise BackendExceptions(f"Failed to create virtual environment: {str(e)}")
+
+
 def create_venv(project_dir: str) -> str:
     """
     Create a Python virtual environment in the project directory.
 
+    This is a backward compatibility wrapper that uses pip by default.
+
     :param project_dir: Path to the project directory
     :return: Path to the virtual environment
     """
-    venv_path = os.path.join(project_dir, ".venv")
+    return create_venv_with_manager(project_dir, "pip")
 
+
+def install_dependencies_with_manager(
+    project_dir: str, venv_path: str, manager_type: str = "pip"
+) -> None:
+    """
+    Install dependencies using the specified package manager.
+
+    :param project_dir: Path to the project directory
+    :param venv_path: Path to the virtual environment
+    :param manager_type: Type of package manager to use
+    :return: None
+    :raises: BackendExceptions if dependency installation fails
+    """
     try:
-        with console.status("[bold green]Creating virtual environment..."):
-            subprocess.run(
-                [sys.executable, "-m", "venv", venv_path],
-                check=True,
-                capture_output=True,
-                text=True,
-            )
-
-        debug_log(f"Virtual environment created at {venv_path}", "info")
-        print_success("Virtual environment created successfully")
-        return venv_path
-
-    except subprocess.CalledProcessError as e:
-        debug_log(f"Error creating virtual environment: {e.stderr}", "error")
-        handle_exception(e, f"Error creating virtual environment: {str(e)}")
-        raise BackendExceptions("Failed to create venv")
-    except OSError as e:
-        debug_log(f"System error creating virtual environment: {e}", "error")
-        handle_exception(e, f"Error creating virtual environment: {str(e)}")
-        raise BackendExceptions(f"Failed to create venv: {str(e)}")
+        package_manager = PackageManagerFactory.create_manager(
+            manager_type, project_dir, auto_detect=True
+        )
+        package_manager.install_dependencies(venv_path)
+    except Exception as e:
+        debug_log(f"Error installing dependencies with {manager_type}: {e}", "error")
+        raise BackendExceptions(f"Failed to install dependencies: {str(e)}")
 
 
 def install_dependencies(project_dir: str, venv_path: str) -> None:
     """
     Install dependencies in the virtual environment.
 
+    This is a backward compatibility wrapper that uses pip by default.
+
     :param project_dir: Path to the project directory
     :param venv_path: Path to the virtual environment
     :return: None
     """
+    install_dependencies_with_manager(project_dir, venv_path, "pip")
+
+
+def generate_dependency_file_with_manager(
+    project_dir: str, dependencies: List[str], manager_type: str = "pip"
+) -> None:
+    """
+    Generate a dependency file using the specified package manager.
+
+    :param project_dir: Path to the project directory
+    :param dependencies: List of dependency specifications
+    :param manager_type: Type of package manager to use
+    :return: None
+    :raises: BackendExceptions if dependency file generation fails
+    """
     try:
-        if not os.path.exists(venv_path):
-            debug_log(
-                "Virtual environment does not exist. Creating it first.", "warning"
-            )
-            print_error("Virtual environment does not exist. Creating it first.")
-            venv_path = create_venv(project_dir)
-            if not venv_path:
-                raise BackendExceptions("Failed to create venv")
-
-        requirements_path = os.path.join(project_dir, "requirements.txt")
-        if not os.path.exists(requirements_path):
-            debug_log(f"Requirements file not found at {requirements_path}", "error")
-            print_error(f"Requirements file not found at {requirements_path}")
-            raise BackendExceptions("Requirements file not found")
-
-        # Determine pip path based on OS
-        if os.name == "nt":  # Windows
-            pip_path = os.path.join(venv_path, "Scripts", "pip")
-        else:  # Unix-based
-            pip_path = os.path.join(venv_path, "bin", "pip")
-
-        # Upgrade pip first
-        subprocess.run(
-            [pip_path, "install", "--upgrade", "pip"],
-            check=True,
-            capture_output=True,
-            text=True,
+        package_manager = PackageManagerFactory.create_manager(
+            manager_type, project_dir, auto_detect=True
         )
-
-        # Install dependencies
-        with console.status("[bold green]Installing dependencies..."):
-            subprocess.run(
-                [pip_path, "install", "-r", "requirements.txt"],
-                cwd=project_dir,
-                check=True,
-                capture_output=True,
-                text=True,
-            )
-
-        debug_log("Dependencies installed successfully", "info")
-        print_success("Dependencies installed successfully")
-
-    except subprocess.CalledProcessError as e:
-        debug_log(f"Error during dependency installation: {e.stderr}", "error")
-        handle_exception(e, f"Error during dependency installation: {str(e)}")
-        if hasattr(e, "stderr"):
-            print_error(f"Error details: {e.stderr}")
-        raise BackendExceptions("Failed to install dependencies")
-    except OSError as e:
-        debug_log(f"System error during dependency installation: {e}", "error")
-        handle_exception(e, f"Error during dependency installation: {str(e)}")
-        raise BackendExceptions(f"Failed to install dependencies: {str(e)}")
+        package_manager.generate_dependency_file(dependencies)
+    except Exception as e:
+        debug_log(f"Error generating dependency file with {manager_type}: {e}", "error")
+        raise BackendExceptions(f"Failed to generate dependency file: {str(e)}")
 
 
 # ------------------------------------------------------------

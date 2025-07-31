@@ -65,6 +65,32 @@ class FastkitConfig:
         ],
     }
 
+    # Package Manager Options
+    DEFAULT_PACKAGE_MANAGER: str = "pip"
+    SUPPORTED_PACKAGE_MANAGERS: list[str] = ["pip", "uv", "pdm", "poetry"]
+    PACKAGE_MANAGER_CONFIG: dict[str, dict[str, str]] = {
+        "pip": {
+            "dependency_file": "requirements.txt",
+            "executable": "pip",
+            "description": "Standard Python package manager",
+        },
+        "uv": {
+            "dependency_file": "pyproject.toml",
+            "executable": "uv",
+            "description": "Fast Python package manager",
+        },
+        "pdm": {
+            "dependency_file": "pyproject.toml",
+            "executable": "pdm",
+            "description": "Modern Python dependency management",
+        },
+        "poetry": {
+            "dependency_file": "pyproject.toml",
+            "executable": "poetry",
+            "description": "Python dependency management and packaging",
+        },
+    }
+
     # Testing Options
     TEST_SERVER_PORT: int = 8000
     TEST_DEFAULT_TERMINAL_WIDTH: int = 80

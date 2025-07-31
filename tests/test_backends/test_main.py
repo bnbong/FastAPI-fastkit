@@ -52,7 +52,8 @@ class TestBackendMain:
         # then
         expected_venv_path = str(self.project_path / ".venv")
         assert result == expected_venv_path
-        mock_subprocess.assert_called_once()
+        # 2 calls: is_available() check, venv creation
+        assert mock_subprocess.call_count == 2
 
     @patch("subprocess.run")
     def test_create_venv_failure(self, mock_subprocess: MagicMock) -> None:
@@ -63,7 +64,9 @@ class TestBackendMain:
         )
 
         # when & then
-        with pytest.raises(BackendExceptions, match="Failed to create venv"):
+        with pytest.raises(
+            BackendExceptions, match="Failed to create virtual environment"
+        ):
             create_venv(str(self.project_path))
 
     @patch("subprocess.run")
@@ -73,7 +76,9 @@ class TestBackendMain:
         mock_subprocess.side_effect = OSError("Permission denied")
 
         # when & then
-        with pytest.raises(BackendExceptions, match="Failed to create venv"):
+        with pytest.raises(
+            BackendExceptions, match="Failed to create virtual environment"
+        ):
             create_venv(str(self.project_path))
 
     def test_find_template_core_modules(self) -> None:
@@ -132,8 +137,8 @@ class TestBackendMain:
         install_dependencies(str(self.project_path), venv_path)
 
         # then
-        # Should be called twice: pip upgrade and install requirements
-        assert mock_subprocess.call_count == 2
+        # Should be called 3 times: is_available check, pip upgrade, and install requirements
+        assert mock_subprocess.call_count == 3
 
     @patch("subprocess.run")
     def test_install_dependencies_pip_upgrade_failure(
