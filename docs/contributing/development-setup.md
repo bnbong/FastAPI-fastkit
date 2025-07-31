@@ -161,21 +161,6 @@ Success: no issues found in 12 source files
 
 </div>
 
-### Security Scanning
-
-**bandit** - Security issue detection:
-
-<div class="termy">
-
-```console
-$ bandit -r src/
-[main]  INFO    profile include tests: None
-[main]  INFO    profile exclude tests: None
-No issues identified.
-```
-
-</div>
-
 ## Available Make Commands
 
 The project Makefile provides convenient commands for common development tasks:

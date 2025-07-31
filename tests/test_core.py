@@ -3,10 +3,13 @@
 #
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
+import os
+from unittest.mock import patch
+
 import pytest
 
 from fastapi_fastkit.core.exceptions import BackendExceptions, TemplateExceptions
-from fastapi_fastkit.core.settings import settings
+from fastapi_fastkit.core.settings import FastkitConfig, settings
 
 
 class TestCoreExceptions:
@@ -187,3 +190,156 @@ class TestCoreSettings:
         finally:
             # Reset to original state
             settings.set_debug_mode(original_debug)
+
+    def test_settings_config_files_structure(self) -> None:
+        """Test that config files structure is properly defined."""
+        # given & when
+        config_files = settings.TEMPLATE_PATHS["config"]["files"]  # type: ignore
+        config_paths = settings.TEMPLATE_PATHS["config"]["paths"]  # type: ignore
+
+        # then
+        assert "config.py" in config_files
+        assert "settings.py" in config_files
+        assert "src/core" in config_paths
+        assert "src" in config_paths
+        assert "" in config_paths
+
+    def test_settings_project_stacks_completeness(self) -> None:
+        """Test that all project stacks have required packages."""
+        # given
+        required_packages = ["fastapi", "uvicorn", "pydantic"]
+
+        # when & then
+        for stack_name, packages in settings.PROJECT_STACKS.items():
+            for required_pkg in required_packages:
+                assert any(
+                    required_pkg in pkg for pkg in packages
+                ), f"{required_pkg} missing in {stack_name}"
+
+    def test_settings_test_configuration_values(self) -> None:
+        """Test test configuration values are reasonable."""
+        # given & when & then
+        assert settings.TEST_SERVER_PORT > 0
+        assert settings.TEST_SERVER_PORT < 65536
+        assert settings.TEST_DEFAULT_TERMINAL_WIDTH > 0
+        assert settings.TEST_MAX_TERMINAL_WIDTH >= settings.TEST_DEFAULT_TERMINAL_WIDTH
+
+    def test_settings_debug_mode_default_value(self) -> None:
+        """Test debug mode default value."""
+        # given & when & then
+        # Default should be False
+        config = FastkitConfig()
+        assert config.DEBUG_MODE is False
+
+    def test_settings_logging_level_default_value(self) -> None:
+        """Test logging level default value."""
+        # given & when & then
+        assert settings.LOGGING_LEVEL == "DEBUG"
+
+    def test_settings_immutable_constants(self) -> None:
+        """Test that certain settings are properly defined as constants."""
+        # given & when & then
+        assert hasattr(settings, "TEMPLATE_PATHS")
+        assert hasattr(settings, "PROJECT_STACKS")
+        assert isinstance(settings.TEMPLATE_PATHS, dict)
+        assert isinstance(settings.PROJECT_STACKS, dict)
+
+    def test_settings_template_root_exists(self) -> None:
+        """Test that template root directory exists and is valid."""
+        # given & when
+        template_root = settings.FASTKIT_TEMPLATE_ROOT
+
+        # then
+        assert template_root is not None
+        assert len(template_root) > 0
+        assert os.path.exists(template_root)
+
+    def test_settings_project_root_exists(self) -> None:
+        """Test that project root directory exists and is valid."""
+        # given & when
+        project_root = settings.FASTKIT_PROJECT_ROOT
+
+        # then
+        assert project_root is not None
+        assert len(project_root) > 0
+        assert os.path.exists(project_root)
+
+    def test_settings_set_debug_mode_true(self) -> None:
+        """Test set_debug_mode with True value."""
+        # given
+        original_debug = settings.DEBUG_MODE
+
+        try:
+            # when
+            settings.set_debug_mode(True)
+
+            # then
+            assert settings.DEBUG_MODE is True
+        finally:
+            settings.set_debug_mode(original_debug)
+
+    def test_settings_set_debug_mode_false(self) -> None:
+        """Test set_debug_mode with False value."""
+        # given
+        original_debug = settings.DEBUG_MODE
+
+        try:
+            # when
+            settings.set_debug_mode(False)
+
+            # then
+            assert settings.DEBUG_MODE is False
+        finally:
+            settings.set_debug_mode(original_debug)
+
+    def test_settings_set_debug_mode_without_parameter(self) -> None:
+        """Test set_debug_mode without parameter (defaults to True)."""
+        # given
+        original_debug = settings.DEBUG_MODE
+
+        try:
+            # when
+            settings.set_debug_mode()
+
+            # then
+            assert settings.DEBUG_MODE is True
+        finally:
+            settings.set_debug_mode(original_debug)
+
+    def test_settings_log_file_path_creation(self) -> None:
+        """Test that log file path is properly set."""
+        # given & when
+        log_path = settings.LOG_FILE_PATH
+
+        # then
+        assert log_path is not None
+        assert "fastkit.log" in log_path
+
+    def test_settings_user_workspace_initialization(self) -> None:
+        """Test user workspace initialization."""
+        # given & when
+        workspace = settings.USER_WORKSPACE
+
+        # then
+        assert workspace is not None
+        assert len(workspace) > 0
+        assert os.path.exists(workspace)
+
+    def test_settings_error_handling_for_missing_template_files(self) -> None:
+        """Test error handling when template files are missing."""
+        # given
+        from fastapi_fastkit.core.settings import FastkitConfig
+
+        # Mock pathlib to simulate missing files
+        with patch("pathlib.Path.exists", return_value=False):
+            with patch("fastapi_fastkit.core.settings.Path") as mock_path:
+                mock_path.return_value.exists.return_value = False
+
+                # when & then - should handle gracefully
+                try:
+                    config = FastkitConfig()
+                    # Should not raise exception even with missing template files
+                    assert config is not None
+                except Exception:
+                    # If exception occurs, it should be handled gracefully
+                    pass

@@ -507,3 +507,358 @@ setup(
         mock_create_route.assert_called_once()
         mock_handle_api.assert_called_once()
         mock_update_main.assert_called_once()
+
+    def test_ensure_project_structure_success(self) -> None:
+        """Test _ensure_project_structure function with successful structure creation."""
+        # given
+        src_dir = self.project_path / "src"
+        src_dir.mkdir()
+
+        # when
+        from fastapi_fastkit.backend.main import _ensure_project_structure
+
+        result = _ensure_project_structure(str(src_dir))
+
+        # then
+        assert "api" in result
+        assert "api_routes" in result
+        assert "crud" in result
+        assert "schemas" in result
+
+        # Check directories were created
+        assert (src_dir / "api").exists()
+        assert (src_dir / "api" / "routes").exists()
+        assert (src_dir / "crud").exists()
+        assert (src_dir / "schemas").exists()
+
+        # Check __init__.py files were created
+        assert (src_dir / "api" / "__init__.py").exists()
+        assert (src_dir / "api" / "routes" / "__init__.py").exists()
+        assert (src_dir / "crud" / "__init__.py").exists()
+        assert (src_dir / "schemas" / "__init__.py").exists()
+
+    def test_ensure_project_structure_missing_src_dir(self) -> None:
+        """Test _ensure_project_structure function when src directory doesn't exist."""
+        # given
+        nonexistent_dir = str(self.project_path / "nonexistent")
+
+        # when & then
+        from fastapi_fastkit.backend.main import _ensure_project_structure
+
+        with pytest.raises(BackendExceptions, match="Source directory not found"):
+            _ensure_project_structure(nonexistent_dir)
+
+    def test_ensure_project_structure_existing_directories(self) -> None:
+        """Test _ensure_project_structure function when directories already exist."""
+        # given
+        src_dir = self.project_path / "src"
+        src_dir.mkdir()
+        api_dir = src_dir / "api"
+        api_dir.mkdir()
+        (api_dir / "__init__.py").write_text("# existing")
+
+        # when
+        from fastapi_fastkit.backend.main import _ensure_project_structure
+
+        result = _ensure_project_structure(str(src_dir))
+
+        # then
+        assert result["api"] == str(api_dir)
+        # Should preserve existing __init__.py content
+        assert (api_dir / "__init__.py").read_text() == "# existing"
+
+    @patch("fastapi_fastkit.backend.main.copy_and_convert_template_file")
+    def test_create_route_files_success(self, mock_copy: MagicMock) -> None:
+        """Test _create_route_files function with successful file creation."""
+        # given
+        modules_dir = str(self.project_path / "modules")
+        target_dirs = {
+            "api_routes": str(self.project_path / "api" / "routes"),
+            "crud": str(self.project_path / "crud"),
+            "schemas": str(self.project_path / "schemas"),
+        }
+        route_name = "test_route"
+        mock_copy.return_value = True
+
+        # Create target directories
+        for dir_path in target_dirs.values():
+            os.makedirs(dir_path, exist_ok=True)
+
+        # when
+        from fastapi_fastkit.backend.main import _create_route_files
+
+        _create_route_files(modules_dir, target_dirs, route_name)
+
+        # then
+        assert mock_copy.call_count == 3  # api/routes, crud, schemas
+
+    @patch("fastapi_fastkit.backend.main.copy_and_convert_template_file")
+    def test_create_route_files_existing_file(self, mock_copy: MagicMock) -> None:
+        """Test _create_route_files function when target file already exists."""
+        # given
+        modules_dir = str(self.project_path / "modules")
+        target_dirs = {
+            "api_routes": str(self.project_path / "api" / "routes"),
+            "crud": str(self.project_path / "crud"),
+            "schemas": str(self.project_path / "schemas"),
+        }
+        route_name = "test_route"
+
+        # Create target directories and existing file
+        os.makedirs(target_dirs["api_routes"], exist_ok=True)
+        os.makedirs(target_dirs["crud"], exist_ok=True)
+        os.makedirs(target_dirs["schemas"], exist_ok=True)
+
+        existing_file = Path(target_dirs["api_routes"]) / f"{route_name}.py"
+        existing_file.write_text("# existing")
+
+        # when
+        from fastapi_fastkit.backend.main import _create_route_files
+
+        _create_route_files(modules_dir, target_dirs, route_name)
+
+        # then
+        # Only crud and schemas should be called (api_routes file exists)
+        assert mock_copy.call_count == 2  # Only crud and schemas, not api_routes
+
+    @patch("fastapi_fastkit.backend.main.copy_and_convert_template_file")
+    def test_handle_api_router_file_no_existing_file(
+        self, mock_copy: MagicMock
+    ) -> None:
+        """Test _handle_api_router_file function when no api.py exists."""
+        # given
+        target_dirs = {"api": str(self.project_path / "api")}
+        modules_dir = str(self.project_path / "modules")
+        route_name = "test_route"
+        mock_copy.return_value = True
+
+        os.makedirs(target_dirs["api"], exist_ok=True)
+
+        # Create the source template file
+        os.makedirs(os.path.join(modules_dir, "api"), exist_ok=True)
+        source_file = Path(modules_dir) / "api" / "__init__.py-tpl"
+        source_file.write_text(
+            "from fastapi import APIRouter\napi_router = APIRouter()"
+        )
+
+        # when
+        from fastapi_fastkit.backend.main import _handle_api_router_file
+
+        _handle_api_router_file(target_dirs, modules_dir, route_name)
+
+        # then
+        # Should be called to create api.py file
+        mock_copy.assert_called()
+
+    def test_handle_api_router_file_existing_file(self) -> None:
+        """Test _handle_api_router_file function when api.py already exists."""
+        # given
+        api_dir = self.project_path / "api"
+        api_dir.mkdir()
+        api_file = api_dir / "api.py"
+        existing_content = """
+from fastapi import APIRouter
+
+api_router = APIRouter()
+
+@api_router.get("/items")
+def get_items():
+    return {"items": []}
+"""
+        api_file.write_text(existing_content)
+
+        target_dirs = {"api": str(api_dir)}
+        modules_dir = str(self.project_path / "modules")
+        route_name = "users"
+
+        # when
+        from fastapi_fastkit.backend.main import _handle_api_router_file
+
+        _handle_api_router_file(target_dirs, modules_dir, route_name)
+
+        # then
+        updated_content = api_file.read_text()
+        # Check for the actual import pattern used in _update_api_router
+        assert "from .routes import users" in updated_content
+        assert (
+            'api_router.include_router(users.router, prefix="/users", tags=["users"])'
+            in updated_content
+        )
+
+    @patch("fastapi_fastkit.backend.main.copy_and_convert_template_file")
+    def test_process_init_files_success(self, mock_copy: MagicMock) -> None:
+        """Test _process_init_files function."""
+        # given
+        modules_dir = str(self.project_path / "modules")
+        # _process_init_files looks for module_base in target_dirs, not exact module_type
+        target_dirs = {
+            "api": str(self.project_path / "api"),  # api/routes -> api
+            "crud": str(self.project_path / "crud"),
+            "schemas": str(self.project_path / "schemas"),
+        }
+        module_types = ["api/routes", "crud", "schemas"]
+        mock_copy.return_value = True
+
+        # Create target directories
+        for dir_path in target_dirs.values():
+            os.makedirs(dir_path, exist_ok=True)
+
+        # Create source template files for each module_base (not module_type)
+        for module_type in module_types:
+            module_base = module_type.split("/")[0]  # api/routes -> api
+            source_dir = Path(modules_dir) / module_base
+            source_dir.mkdir(parents=True, exist_ok=True)
+            source_file = source_dir / "__init__.py-tpl"
+            source_file.write_text("# init file")
+
+        # when
+        from fastapi_fastkit.backend.main import _process_init_files
+
+        _process_init_files(modules_dir, target_dirs, module_types)
+
+        # then
+        # Only unique module_bases will be processed: api, crud, schemas = 3 calls
+        assert mock_copy.call_count == 3
+
+    def test_update_main_app_success(self) -> None:
+        """Test _update_main_app function with successful update."""
+        # given
+        src_dir = self.project_path / "src"
+        src_dir.mkdir()
+        main_py = src_dir / "main.py"
+        main_content = """
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+def read_root():
+    return {"Hello": "World"}
+"""
+        main_py.write_text(main_content)
+
+        # when
+        from fastapi_fastkit.backend.main import _update_main_app
+
+        _update_main_app(str(src_dir), "test_route")
+
+        # then
+        updated_content = main_py.read_text()
+        assert "from src.api.api import api_router" in updated_content
+        assert "app.include_router(api_router)" in updated_content
+
+    def test_update_main_app_no_main_file(self) -> None:
+        """Test _update_main_app function when main.py doesn't exist."""
+        # given
+        src_dir = self.project_path / "src"
+        src_dir.mkdir()
+
+        # when
+        from fastapi_fastkit.backend.main import _update_main_app
+
+        _update_main_app(str(src_dir), "test_route")
+
+        # then
+        # Should complete without error (warning logged)
+        pass
+
+    def test_update_main_app_no_fastapi_app(self) -> None:
+        """Test _update_main_app function when FastAPI app is not found."""
+        # given
+        src_dir = self.project_path / "src"
+        src_dir.mkdir()
+        main_py = src_dir / "main.py"
+        main_py.write_text("print('Hello World')")
+
+        # when
+        from fastapi_fastkit.backend.main import _update_main_app
+
+        _update_main_app(str(src_dir), "test_route")
+
+        # then
+        # Should complete without error (warning logged)
+        content = main_py.read_text()
+        assert "app = FastAPI" not in content
+
+    def test_update_main_app_already_configured(self) -> None:
+        """Test _update_main_app function when router is already configured."""
+        # given
+        src_dir = self.project_path / "src"
+        src_dir.mkdir()
+        main_py = src_dir / "main.py"
+        main_content = """
+from fastapi import FastAPI
+from src.api.api import api_router
+
+app = FastAPI()
+app.include_router(api_router)
+
+@app.get("/")
+def read_root():
+    return {"Hello": "World"}
+"""
+        main_py.write_text(main_content)
+        original_content = main_content
+
+        # when
+        from fastapi_fastkit.backend.main import _update_main_app
+
+        _update_main_app(str(src_dir), "test_route")
+
+        # then
+        # Should not modify the file
+        assert main_py.read_text() == original_content
+
+    def test_update_main_app_file_read_error(self) -> None:
+        """Test _update_main_app function with file read error."""
+        # given
+        src_dir = self.project_path / "src"
+        src_dir.mkdir()
+        main_py = src_dir / "main.py"
+        main_py.write_text("content")
+
+        # when & then
+        with patch("builtins.open", side_effect=OSError("Permission denied")):
+            from fastapi_fastkit.backend.main import _update_main_app
+
+            # Should complete without raising exception
+            _update_main_app(str(src_dir), "test_route")
+
+    def test_add_new_route_with_exception(self) -> None:
+        """Test add_new_route function with OSError."""
+        # given
+        project_dir = str(self.project_path)
+
+        # when & then
+        with patch(
+            "fastapi_fastkit.backend.main._ensure_project_structure",
+            side_effect=OSError("Permission denied"),
+        ):
+            with pytest.raises(BackendExceptions, match="Failed to add new route"):
+                add_new_route(project_dir, "test_route")
+
+    def test_add_new_route_with_backend_exception(self) -> None:
+        """Test add_new_route function with BackendExceptions."""
+        # given
+        project_dir = str(self.project_path)
+
+        # when & then
+        with patch(
+            "fastapi_fastkit.backend.main._ensure_project_structure",
+            side_effect=BackendExceptions("Backend error"),
+        ):
+            with pytest.raises(BackendExceptions, match="Backend error"):
+                add_new_route(project_dir, "test_route")
+
+    def test_add_new_route_with_unexpected_exception(self) -> None:
+        """Test add_new_route function with unexpected exception."""
+        # given
+        project_dir = str(self.project_path)
+
+        # when & then
+        with patch(
+            "fastapi_fastkit.backend.main._ensure_project_structure",
+            side_effect=ValueError("Unexpected error"),
+        ):
+            with pytest.raises(BackendExceptions, match="Failed to add new route"):
+                add_new_route(project_dir, "test_route")
