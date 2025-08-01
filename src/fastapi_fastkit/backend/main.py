@@ -314,7 +314,13 @@ def install_dependencies(project_dir: str, venv_path: str) -> None:
 
 
 def generate_dependency_file_with_manager(
-    project_dir: str, dependencies: List[str], manager_type: str = "pip"
+    project_dir: str,
+    dependencies: List[str],
+    manager_type: str = "pip",
+    project_name: str = "",
+    author: str = "",
+    author_email: str = "",
+    description: str = "",
 ) -> None:
     """
     Generate a dependency file using the specified package manager.
@@ -322,6 +328,10 @@ def generate_dependency_file_with_manager(
     :param project_dir: Path to the project directory
     :param dependencies: List of dependency specifications
     :param manager_type: Type of package manager to use
+    :param project_name: Name of the project
+    :param author: Author name
+    :param author_email: Author email
+    :param description: Project description
     :return: None
     :raises: BackendExceptions if dependency file generation fails
     """
@@ -329,7 +339,9 @@ def generate_dependency_file_with_manager(
         package_manager = PackageManagerFactory.create_manager(
             manager_type, project_dir, auto_detect=True
         )
-        package_manager.generate_dependency_file(dependencies)
+        package_manager.generate_dependency_file(
+            dependencies, project_name, author, author_email, description
+        )
     except Exception as e:
         debug_log(f"Error generating dependency file with {manager_type}: {e}", "error")
         raise BackendExceptions(f"Failed to generate dependency file: {str(e)}")

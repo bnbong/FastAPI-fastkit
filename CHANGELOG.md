@@ -1,5 +1,52 @@
 # Changelog
 
+## v1.1.0 (2025-01-15)
+
+### Features
+
+- **Package Manager Support**: Add comprehensive support for multiple Python package managers
+  - Support for UV (default), PDM, Poetry, and PIP package managers
+  - Interactive package manager selection in `fastkit init` and `fastkit startdemo` commands
+  - `--package-manager` CLI option for non-interactive usage
+  - Automatic generation of appropriate dependency files (`pyproject.toml` for UV/PDM/Poetry, `requirements.txt` for PIP)
+  - PEP 621 compliant project metadata for modern package managers
+
+- **Automated Template Testing System**: Revolutionary zero-configuration template testing
+  - Dynamic template discovery - new templates are automatically tested
+  - Comprehensive end-to-end testing with actual project creation
+  - Multi-package manager compatibility testing
+  - Virtual environment creation and dependency installation validation
+  - Project structure and FastAPI integration verification
+  - Parameterized testing with pytest for scalable test execution
+
+### Improvements
+
+- **Enhanced CLI Experience**: Package manager selection with interactive prompts and helpful descriptions
+- **Better Template Quality Assurance**: Multi-layer quality assurance with static inspection and dynamic testing
+- **Improved Developer Experience**: Zero boilerplate test configuration for template contributors
+- **Cross-Platform Compatibility**: Enhanced support for different package manager workflows
+
+### Documentation
+
+- Updated all user guides with package manager selection examples
+- Enhanced CLI reference with comprehensive package manager documentation
+- Updated contributing guidelines with new automated testing system
+- Improved template creation guide with zero-configuration testing instructions
+- Enhanced template quality assurance documentation
+
+### Technical
+
+- Implemented BasePackageManager abstract class with concrete implementations
+- Added PackageManagerFactory for dynamic package manager instantiation
+- Enhanced project metadata injection for all package managers
+- Improved test infrastructure with dynamic template discovery
+- Updated CI/CD pipelines for multi-package manager testing
+
+### Breaking Changes
+
+- **Default Package Manager**: Changed from PIP to UV for better performance
+- **CLI Prompts**: Added package manager selection step in interactive commands
+
 ## v1.0.2 (2025-07-02)
 
 ### Features

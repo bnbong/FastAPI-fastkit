@@ -6,9 +6,8 @@
 import logging
 import os
 import sys
-import tempfile
 from io import StringIO
-from pathlib import Path
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -32,13 +31,13 @@ class TestCLI:
         self.old_stdout = sys.stdout
         sys.stdout = self.stdout
 
-    def teardown_method(self, console) -> None:
+    def teardown_method(self, console: Any) -> None:
         os.chdir(self.current_workspace)
         sys.stdout = self.old_stdout
 
-    def test_success_message(self, console) -> None:
+    def test_success_message(self, console: Any) -> None:
         # given
-        from src.fastapi_fastkit.utils.main import print_success
+        from fastapi_fastkit.utils.main import print_success
 
         test_message = "this is success test"
 
@@ -49,9 +48,9 @@ class TestCLI:
         # then
         assert "Success" in output and test_message in output
 
-    def test_error_message(self, console) -> None:
+    def test_error_message(self, console: Any) -> None:
         # given
-        from src.fastapi_fastkit.utils.main import print_error
+        from fastapi_fastkit.utils.main import print_error
 
         test_message = "this is error test"
 
@@ -62,9 +61,9 @@ class TestCLI:
         # then
         assert "Error" in output and test_message in output
 
-    def test_warning_message(self, console) -> None:
+    def test_warning_message(self, console: Any) -> None:
         # given
-        from src.fastapi_fastkit.utils.main import print_warning
+        from fastapi_fastkit.utils.main import print_warning
 
         test_message = "this is warning test"
 
@@ -75,9 +74,9 @@ class TestCLI:
         # then
         assert "Warning" in output and test_message in output
 
-    def test_info_message(self, console) -> None:
+    def test_info_message(self, console: Any) -> None:
         # given
-        from src.fastapi_fastkit.utils.main import print_info
+        from fastapi_fastkit.utils.main import print_info
 
         test_message = "this is info test"
 

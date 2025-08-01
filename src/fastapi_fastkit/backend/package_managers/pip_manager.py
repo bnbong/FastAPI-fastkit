@@ -129,11 +129,22 @@ class PipManager(BasePackageManager):
             handle_exception(e, f"Error during dependency installation: {str(e)}")
             raise BackendExceptions(f"Failed to install dependencies: {str(e)}")
 
-    def generate_dependency_file(self, dependencies: List[str]) -> None:
+    def generate_dependency_file(
+        self,
+        dependencies: List[str],
+        project_name: str = "",
+        author: str = "",
+        author_email: str = "",
+        description: str = "",
+    ) -> None:
         """
         Generate a requirements.txt file with the given dependencies.
 
         :param dependencies: List of dependency specifications
+        :param project_name: Name of the project (not used for pip)
+        :param author: Author name (not used for pip)
+        :param author_email: Author email (not used for pip)
+        :param description: Project description (not used for pip)
         """
         requirements_path = self.get_dependency_file_path()
 

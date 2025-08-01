@@ -158,11 +158,22 @@ build-backend = "poetry.core.masonry.api"
                 f"Failed to install dependencies with Poetry: {str(e)}"
             )
 
-    def generate_dependency_file(self, dependencies: List[str]) -> None:
+    def generate_dependency_file(
+        self,
+        dependencies: List[str],
+        project_name: str = "",
+        author: str = "",
+        author_email: str = "",
+        description: str = "",
+    ) -> None:
         """
-        Generate a pyproject.toml file with the given dependencies.
+        Generate a pyproject.toml file with the given dependencies and metadata.
 
         :param dependencies: List of dependency specifications
+        :param project_name: Name of the project
+        :param author: Author name
+        :param author_email: Author email
+        :param description: Project description
         """
         pyproject_path = self.get_dependency_file_path()
 
@@ -179,12 +190,13 @@ build-backend = "poetry.core.masonry.api"
 
             # Create basic pyproject.toml content for Poetry
             pyproject_content = f"""[tool.poetry]
-name = ""
+name = "{project_name or 'fastapi-project'}"
 version = "0.1.0"
-description = ""
-authors = ["Author <author@example.com>"]
+description = "{description or 'A FastAPI project'}"
+authors = ["{author or 'Author'} <{author_email or 'author@example.com'}>"]
 readme = "README.md"
 license = "MIT"
+packages = [{{include = "src"}}]
 
 [tool.poetry.dependencies]
 python = "^3.8"

@@ -120,11 +120,22 @@ class PdmManager(BasePackageManager):
                 f"Failed to install dependencies with PDM: {str(e)}"
             )
 
-    def generate_dependency_file(self, dependencies: List[str]) -> None:
+    def generate_dependency_file(
+        self,
+        dependencies: List[str],
+        project_name: str = "",
+        author: str = "",
+        author_email: str = "",
+        description: str = "",
+    ) -> None:
         """
-        Generate a pyproject.toml file with the given dependencies.
+        Generate a pyproject.toml file with the given dependencies and metadata.
 
         :param dependencies: List of dependency specifications
+        :param project_name: Name of the project
+        :param author: Author name
+        :param author_email: Author email
+        :param description: Project description
         """
         pyproject_path = self.get_dependency_file_path()
 
@@ -137,11 +148,11 @@ class PdmManager(BasePackageManager):
 
             # Create basic pyproject.toml content as string
             pyproject_content = f"""[project]
-name = ""
+name = "{project_name or 'fastapi-project'}"
 version = "0.1.0"
-description = ""
+description = "{description or 'A FastAPI project'}"
 authors = [
-    {{name = "", email = ""}},
+    {{name = "{author or 'Author'}", email = "{author_email or 'author@example.com'}"}},
 ]
 dependencies = {deps_toml}
 requires-python = ">=3.8"
@@ -151,6 +162,9 @@ license = {{text = "MIT"}}
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
 
 [tool.pdm]
 """
@@ -241,6 +255,9 @@ license = {{text = "MIT"}}
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
 
 [tool.pdm]
 """

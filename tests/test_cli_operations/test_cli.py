@@ -5,7 +5,6 @@
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
 import os
-import subprocess
 from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
@@ -45,7 +44,14 @@ class TestCLI:
             fastkit_cli,
             ["startdemo", "fastapi-default"],
             input="\n".join(
-                ["test-project", "bnbong", "bbbong9@gmail.com", "test project", "Y"]
+                [
+                    "test-project",
+                    "bnbong",
+                    "bbbong9@gmail.com",
+                    "test project",
+                    "uv",
+                    "Y",
+                ]
             ),
         )
 
@@ -106,7 +112,14 @@ class TestCLI:
             fastkit_cli,
             ["startdemo", "invalid-template"],
             input="\n".join(
-                ["test-project", "bnbong", "bbbong9@gmail.com", "test project", "Y"]
+                [
+                    "test-project",
+                    "bnbong",
+                    "bbbong9@gmail.com",
+                    "test project",
+                    "uv",
+                    "Y",
+                ]
             ),
         )
 
@@ -150,6 +163,7 @@ class TestCLI:
                     "bnbong",
                     "bbbong9@gmail.com",
                     "test project",
+                    "uv",
                     "Y",
                 ]
             ),
@@ -168,7 +182,7 @@ class TestCLI:
             fastkit_cli,
             ["startdemo", "fastapi-default"],
             input="\n".join(
-                [project_name, "bnbong", "bbbong9@gmail.com", "test project", "Y"]
+                [project_name, "bnbong", "bbbong9@gmail.com", "test project", "uv", "Y"]
             ),
         )
         project_path = Path(temp_dir) / project_name
@@ -194,7 +208,7 @@ class TestCLI:
             fastkit_cli,
             ["startdemo", "fastapi-default"],
             input="\n".join(
-                [project_name, "bnbong", "bbbong9@gmail.com", "test project", "Y"]
+                [project_name, "bnbong", "bbbong9@gmail.com", "test project", "uv", "Y"]
             ),
         )
         project_path = Path(temp_dir) / project_name
@@ -239,12 +253,10 @@ class TestCLI:
         assert "fastapi-default" in result.output
         assert "fastapi-dockerized" in result.output
 
-    @patch(
-        "fastapi_fastkit.backend.package_managers.pip_manager.PipManager.is_available"
-    )
+    @patch("fastapi_fastkit.backend.package_managers.uv_manager.UvManager.is_available")
     @patch("subprocess.run")
     def test_init_minimal(
-        self, mock_subprocess: MagicMock, mock_pip_available: MagicMock, temp_dir: str
+        self, mock_subprocess: MagicMock, mock_uv_available: MagicMock, temp_dir: str
     ) -> None:
         # given
         os.chdir(temp_dir)
@@ -254,7 +266,7 @@ class TestCLI:
         description = "A minimal FastAPI project"
 
         # Mock package manager as available and subprocess calls
-        mock_pip_available.return_value = True
+        mock_uv_available.return_value = True
         mock_subprocess.return_value.returncode = 0
 
         # Mock subprocess to create venv directory when called
@@ -278,7 +290,7 @@ class TestCLI:
             fastkit_cli,
             ["init"],
             input="\n".join(
-                [project_name, author, author_email, description, "minimal", "Y"]
+                [project_name, author, author_email, description, "minimal", "uv", "Y"]
             ),
         )
 
@@ -296,11 +308,19 @@ class TestCLI:
                 assert author_email in content
                 assert description in content
 
-        with open(project_path / "requirements.txt", "r") as f:
-            content = f.read()
-            assert "fastapi" in content
-            assert "uvicorn" in content
-            assert "sqlalchemy" not in content
+        # Check dependency file (pyproject.toml for uv)
+        if (project_path / "pyproject.toml").exists():
+            with open(project_path / "pyproject.toml", "r") as f:
+                content = f.read()
+                assert "fastapi" in content
+                assert "uvicorn" in content
+                assert "sqlalchemy" not in content
+        else:
+            with open(project_path / "requirements.txt", "r") as f:
+                content = f.read()
+                assert "fastapi" in content
+                assert "uvicorn" in content
+                assert "sqlalchemy" not in content
 
         venv_path = project_path / ".venv"
         assert venv_path.exists() and venv_path.is_dir()
@@ -311,12 +331,10 @@ class TestCLI:
             mock_subprocess.call_count >= 2
         )  # venv creation + dependency installation
 
-    @patch(
-        "fastapi_fastkit.backend.package_managers.pip_manager.PipManager.is_available"
-    )
+    @patch("fastapi_fastkit.backend.package_managers.uv_manager.UvManager.is_available")
     @patch("subprocess.run")
     def test_init_full(
-        self, mock_subprocess: MagicMock, mock_pip_available: MagicMock, temp_dir: str
+        self, mock_subprocess: MagicMock, mock_uv_available: MagicMock, temp_dir: str
     ) -> None:
         # given
         os.chdir(temp_dir)
@@ -326,7 +344,7 @@ class TestCLI:
         description = "A full FastAPI project"
 
         # Mock package manager as available and subprocess calls
-        mock_pip_available.return_value = True
+        mock_uv_available.return_value = True
         mock_subprocess.return_value.returncode = 0
 
         # Mock subprocess to create venv directory when called
@@ -350,7 +368,7 @@ class TestCLI:
             fastkit_cli,
             ["init"],
             input="\n".join(
-                [project_name, author, author_email, description, "full", "Y"]
+                [project_name, author, author_email, description, "full", "uv", "Y"]
             ),
         )
 
@@ -368,11 +386,19 @@ class TestCLI:
                 assert author_email in content
                 assert description in content
 
-        with open(project_path / "requirements.txt", "r") as f:
-            content = f.read()
-            assert "fastapi" in content
-            assert "uvicorn" in content
-            assert "sqlalchemy" in content
+        # Check dependency file (pyproject.toml for uv)
+        if (project_path / "pyproject.toml").exists():
+            with open(project_path / "pyproject.toml", "r") as f:
+                content = f.read()
+                assert "fastapi" in content
+                assert "uvicorn" in content
+                assert "sqlalchemy" in content
+        else:
+            with open(project_path / "requirements.txt", "r") as f:
+                content = f.read()
+                assert "fastapi" in content
+                assert "uvicorn" in content
+                assert "sqlalchemy" in content
 
         venv_path = project_path / ".venv"
         assert venv_path.exists() and venv_path.is_dir()
@@ -427,6 +453,7 @@ class TestCLI:
                     "email@example.com",
                     "description",
                     "minimal",
+                    "uv",
                     "Y",
                 ]
             ),
@@ -473,7 +500,7 @@ class TestCLI:
             fastkit_cli,
             ["startdemo", "fastapi-default"],
             input="\n".join(
-                [project_name, "bnbong", "bbbong9@gmail.com", "test project", "Y"]
+                [project_name, "bnbong", "bbbong9@gmail.com", "test project", "uv", "Y"]
             ),
         )
         project_path = Path(temp_dir) / project_name
@@ -506,7 +533,7 @@ class TestCLI:
             fastkit_cli,
             ["startdemo", "fastapi-default"],
             input="\n".join(
-                [project_name, "bnbong", "bbbong9@gmail.com", "test project", "Y"]
+                [project_name, "bnbong", "bbbong9@gmail.com", "test project", "uv", "Y"]
             ),
         )
         project_path = Path(temp_dir) / project_name
@@ -547,7 +574,7 @@ class TestCLI:
             fastkit_cli,
             ["startdemo", "fastapi-default"],
             input="\n".join(
-                [project_name, "bnbong", "bbbong9@gmail.com", "test project", "Y"]
+                [project_name, "bnbong", "bbbong9@gmail.com", "test project", "uv", "Y"]
             ),
         )
         project_path = Path(temp_dir) / project_name
@@ -587,7 +614,7 @@ class TestCLI:
             fastkit_cli,
             ["startdemo", "fastapi-default"],
             input="\n".join(
-                [project_name, "bnbong", "bbbong9@gmail.com", "test project", "Y"]
+                [project_name, "bnbong", "bbbong9@gmail.com", "test project", "uv", "Y"]
             ),
         )
         project_path = Path(temp_dir) / project_name

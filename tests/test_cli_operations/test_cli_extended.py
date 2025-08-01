@@ -4,11 +4,9 @@
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
 import os
-import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pytest
 from click.testing import CliRunner
 
 from fastapi_fastkit.cli import fastkit_cli
@@ -46,14 +44,14 @@ class TestCLIExtended:
 
     @patch("fastapi_fastkit.backend.main.inject_project_metadata")
     @patch("fastapi_fastkit.backend.transducer.copy_and_convert_template_file")
-    @patch("fastapi_fastkit.backend.main.create_venv")
-    @patch("fastapi_fastkit.backend.main.install_dependencies")
-    @patch(
-        "fastapi_fastkit.backend.package_managers.pip_manager.PipManager.is_available"
-    )
+    @patch("fastapi_fastkit.backend.main.create_venv_with_manager")
+    @patch("fastapi_fastkit.backend.main.install_dependencies_with_manager")
+    @patch("fastapi_fastkit.backend.main.generate_dependency_file_with_manager")
+    @patch("fastapi_fastkit.backend.package_managers.uv_manager.UvManager.is_available")
     def test_init_standard_stack(
         self,
-        mock_pip_available: MagicMock,
+        mock_uv_available: MagicMock,
+        mock_generate_dependency: MagicMock,
         mock_install: MagicMock,
         mock_venv: MagicMock,
         mock_copy: MagicMock,
@@ -64,7 +62,7 @@ class TestCLIExtended:
         # given
         os.chdir(temp_dir)
         mock_venv.return_value = "/fake/venv"
-        mock_pip_available.return_value = True
+        mock_uv_available.return_value = True
 
         # when
         result = self.runner.invoke(
@@ -77,6 +75,7 @@ class TestCLIExtended:
                     "test@example.com",
                     "Standard FastAPI project",
                     "standard",
+                    "uv",
                     "Y",
                 ]
             ),

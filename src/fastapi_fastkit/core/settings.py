@@ -66,7 +66,7 @@ class FastkitConfig:
     }
 
     # Package Manager Options
-    DEFAULT_PACKAGE_MANAGER: str = "pip"
+    DEFAULT_PACKAGE_MANAGER: str = "uv"
     SUPPORTED_PACKAGE_MANAGERS: list[str] = ["pip", "uv", "pdm", "poetry"]
     PACKAGE_MANAGER_CONFIG: dict[str, dict[str, str]] = {
         "pip": {

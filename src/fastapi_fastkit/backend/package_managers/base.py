@@ -65,11 +65,22 @@ class BasePackageManager(ABC):
         pass
 
     @abstractmethod
-    def generate_dependency_file(self, dependencies: List[str]) -> None:
+    def generate_dependency_file(
+        self,
+        dependencies: List[str],
+        project_name: str = "",
+        author: str = "",
+        author_email: str = "",
+        description: str = "",
+    ) -> None:
         """
-        Generate a dependency file with the given dependencies.
+        Generate a dependency file with the given dependencies and metadata.
 
         :param dependencies: List of dependency specifications
+        :param project_name: Name of the project
+        :param author: Author name
+        :param author_email: Author email
+        :param description: Project description
         """
         pass
 

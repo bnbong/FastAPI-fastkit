@@ -17,10 +17,11 @@ from rich.panel import Panel
 
 from fastapi_fastkit.backend.main import (
     add_new_route,
-    create_venv,
+    create_venv_with_manager,
     find_template_core_modules,
+    generate_dependency_file_with_manager,
     inject_project_metadata,
-    install_dependencies,
+    install_dependencies_with_manager,
     read_template_stack,
 )
 from fastapi_fastkit.backend.transducer import copy_and_convert_template
@@ -47,11 +48,6 @@ from . import __version__, console
 def fastkit_cli(ctx: Context, debug: bool) -> Union["BaseCommand", None]:
     """
     main FastAPI-fastkit CLI operation group
-
-    :param ctx: context of passing configurations (NOT specify it at CLI)
-    :type ctx: <Object click.Context>
-    :param debug: parameter from CLI
-    :return: None(will be wrapped with click.core.BaseCommand via @click decorator)
     """
     settings = FastkitConfig()
     ctx.ensure_object(dict)
@@ -91,10 +87,6 @@ def fastkit_cli(ctx: Context, debug: bool) -> Union["BaseCommand", None]:
 def echo(ctx: Context) -> None:
     """
     About FastAPI-fastkit
-
-    :param ctx: context of passing configurations (NOT specify it at CLI)
-    :type ctx: <Object click.Context>
-    :return: None
     """
     fastkit_info = f"""
     ⚡️ FastAPI fastkit - fastest [bold]FastAPI[/bold] initializer. ⚡️
@@ -180,6 +172,12 @@ def list_templates(ctx: Context) -> None:
     prompt="Enter the project description",
     help="The description of the new FastAPI project.",
 )
+@click.option(
+    "--package-manager",
+    help="Package manager to use for the project.",
+    type=click.Choice(["pip", "uv", "pdm", "poetry"]),
+    default=None,
+)
 @click.pass_context
 def startdemo(
     ctx: Context,
@@ -188,17 +186,10 @@ def startdemo(
     author: str,
     author_email: str,
     description: str,
+    package_manager: str,
 ) -> None:
     """
     Create a new FastAPI project from templates and inject metadata.
-
-    :param ctx: Click context object
-    :param template: Template name
-    :param project_name: Project name for the new project
-    :param author: Author name
-    :param author_email: Author email
-    :param description: Project description
-    :return: None
     """
     settings = ctx.obj["settings"]
 
@@ -239,6 +230,27 @@ def startdemo(
         console.print("\n")
         console.print(deps_table)
 
+    # Package manager selection
+    if not package_manager:
+        console.print("\n[bold]Available Package Managers:[/bold]")
+        package_manager_table = create_info_table(
+            "Package Managers",
+            {
+                f"{manager.upper()}": config["description"]
+                for manager, config in settings.PACKAGE_MANAGER_CONFIG.items()
+            },
+        )
+        console.print(package_manager_table)
+        console.print("\n")
+
+        package_manager = click.prompt(
+            "Select package manager",
+            type=click.Choice(settings.SUPPORTED_PACKAGE_MANAGERS),
+            default=settings.DEFAULT_PACKAGE_MANAGER,
+            show_choices=True,
+            show_default=True,
+        )
+
     confirm = click.confirm(
         "\nDo you want to proceed with project creation?", default=False
     )
@@ -254,13 +266,13 @@ def startdemo(
 
         copy_and_convert_template(target_template, user_local, project_name)
 
-        venv_path = create_venv(project_dir)
-
         inject_project_metadata(
             project_dir, project_name, author, author_email, description
         )
 
-        install_dependencies(project_dir, venv_path)
+        # Create virtual environment and install dependencies with selected package manager
+        venv_path = create_venv_with_manager(project_dir, package_manager)
+        install_dependencies_with_manager(project_dir, venv_path, package_manager)
 
         print_success(
             f"FastAPI project '{project_name}' from '{template}' has been created and saved to {user_local}!"
@@ -294,22 +306,26 @@ def startdemo(
     prompt="Enter the project description",
     help="The description of the new FastAPI project.",
 )
+@click.option(
+    "--package-manager",
+    help="Package manager to use for the project.",
+    type=click.Choice(["pip", "uv", "pdm", "poetry"]),
+    default=None,
+)
 @click.pass_context
 def init(
-    ctx: Context, project_name: str, author: str, author_email: str, description: str
+    ctx: Context,
+    project_name: str,
+    author: str,
+    author_email: str,
+    description: str,
+    package_manager: str,
 ) -> None:
     """
     Start a empty FastAPI project setup.
     This command will automatically create a new FastAPI project directory and a python virtual environment.
     Dependencies will be automatically installed based on the selected stack at venv.
     Project metadata will be injected to the project files.
-
-    :param ctx: Click context object
-    :param project_name: Project name for the new project
-    :param author: Author name
-    :param author_email: Author email
-    :param description: Project description
-    :return: None
     """
     settings = ctx.obj["settings"]
     project_dir = os.path.join(settings.USER_WORKSPACE, project_name)
@@ -348,6 +364,27 @@ def init(
         show_choices=True,
     )
 
+    # Package manager selection
+    if not package_manager:
+        console.print("\n[bold]Available Package Managers:[/bold]")
+        package_manager_table = create_info_table(
+            "Package Managers",
+            {
+                f"{manager.upper()}": config["description"]
+                for manager, config in settings.PACKAGE_MANAGER_CONFIG.items()
+            },
+        )
+        console.print(package_manager_table)
+        console.print("\n")
+
+        package_manager = click.prompt(
+            "Select package manager",
+            type=click.Choice(settings.SUPPORTED_PACKAGE_MANAGERS),
+            default=settings.DEFAULT_PACKAGE_MANAGER,
+            show_choices=True,
+            show_default=True,
+        )
+
     template = "fastapi-empty"
     template_dir = settings.FASTKIT_TEMPLATE_ROOT
     target_template = os.path.join(template_dir, template)
@@ -381,15 +418,26 @@ def init(
             f"Creating Project: {project_name}", {"Component": "Collected"}
         )
 
-        with open(os.path.join(project_dir, "requirements.txt"), "w") as f:
-            for dep in settings.PROJECT_STACKS[stack]:
-                f.write(f"{dep}\n")
-                deps_table.add_row(dep, "✓")
+        # Generate dependency file using selected package manager
+        dependencies = settings.PROJECT_STACKS[stack]
+        generate_dependency_file_with_manager(
+            project_dir,
+            dependencies,
+            package_manager,
+            project_name,
+            author,
+            author_email,
+            description,
+        )
+
+        for dep in dependencies:
+            deps_table.add_row(dep, "✓")
 
         console.print(deps_table)
 
-        venv_path = create_venv(project_dir)
-        install_dependencies(project_dir, venv_path)
+        # Create virtual environment and install dependencies with selected package manager
+        venv_path = create_venv_with_manager(project_dir, package_manager)
+        install_dependencies_with_manager(project_dir, venv_path, package_manager)
 
         print_success(
             f"FastAPI project '{project_name}' has been created successfully and saved to {user_local}!"
@@ -415,11 +463,6 @@ def init(
 def addroute(ctx: Context, project_name: str, route_name: str) -> None:
     """
     Add a new route to the FastAPI project.
-
-    :param ctx: Click context object
-    :param project_name: Project name
-    :param route_name: Name of the new route to add
-    :return: None
     """
     settings = ctx.obj["settings"]
     user_local = settings.USER_WORKSPACE
@@ -489,10 +532,6 @@ def addroute(ctx: Context, project_name: str, route_name: str) -> None:
 def deleteproject(ctx: Context, project_name: str) -> None:
     """
     Delete a FastAPI project.
-
-    :param ctx: Click context object
-    :param project_name: Project name
-    :return: None
     """
     settings = ctx.obj["settings"]
     user_local = settings.USER_WORKSPACE
@@ -559,13 +598,6 @@ def runserver(
 ) -> None:
     """
     Run the FastAPI server for the current project.
-
-    :param ctx: Click context object
-    :param host: Host address to bind the server to
-    :param port: Port number to bind the server to
-    :param reload: Enable or disable auto-reload
-    :param workers: Number of worker processes
-    :return: None
     """
     settings = ctx.obj["settings"]
     project_dir = settings.USER_WORKSPACE
