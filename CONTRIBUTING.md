@@ -273,17 +273,61 @@ template-name/
 
 ### Testing
 
-1. Required Tests:
-   - Basic CRUD operations
-   - Authentication/Authorization
+FastAPI-fastkit includes **automated template testing** that provides comprehensive validation:
+
+#### ✅ Automatic Template Testing
+
+**Zero Configuration Required:**
+- 🚀 New templates are **automatically discovered** and tested
+- ⚡ No manual test file creation needed
+- 🛡️ Consistent quality standards applied
+
+**Comprehensive Test Coverage:**
+- ✅ **Project Creation**: Template copying and metadata injection
+- ✅ **Package Manager Support**: UV, PDM, Poetry, and PIP compatibility
+- ✅ **Virtual Environment**: Creation and dependency installation
+- ✅ **Project Structure**: File and directory validation
+- ✅ **FastAPI Integration**: Project identification and functionality
+
+**Test Execution:**
+```bash
+# Test all templates automatically
+$ pytest tests/test_templates/test_all_templates.py -v
+
+# Test your specific template
+$ pytest tests/test_templates/test_all_templates.py::TestAllTemplates::test_template_creation[your-template-name] -v
+
+# Test with PDM environment
+$ pdm run pytest tests/test_templates/test_all_templates.py -v
+```
+
+#### ✅ Template-Specific Testing
+
+While basic functionality is automatically tested, you should include template-specific tests:
+
+1. **Required Template Tests:**
+   - Basic CRUD operations (if applicable)
+   - Authentication/Authorization (if implemented)
    - Error handling
    - API endpoints
    - Configuration validation
 
-2. Test Coverage:
-   - Minimum 80% code coverage
-   - Include integration tests
-   - API testing examples
+2. **Test Coverage Goals:**
+   - Minimum 80% code coverage for template-specific logic
+   - Include integration tests for external services
+   - API testing examples in template documentation
+
+#### ✅ Package Manager Testing
+
+Test your template with all supported package managers:
+
+```bash
+# Test with different package managers
+$ fastkit startdemo your-template-name --package-manager uv
+$ fastkit startdemo your-template-name --package-manager pdm
+$ fastkit startdemo your-template-name --package-manager poetry
+$ fastkit startdemo your-template-name --package-manager pip
+```
 
 ### Submission Process
 
@@ -313,10 +357,12 @@ template-name/
    - [ ] All files use .py-tpl extension
    - [ ] FastAPI-fastkit dependency included
    - [ ] Security requirements met
-   - [ ] Tests implemented and passing
    - [ ] Documentation complete
    - [ ] inspector.py validation passes
    - [ ] All make dev-check tests pass
+   - [ ] **Automatic template tests pass** (new templates tested automatically)
+   - [ ] **Package manager compatibility verified** (tested with UV, PDM, Poetry, PIP)
+   - [ ] **Template-specific functionality tested** (if applicable)
 
 4. **Pull Request:**
    - Provide detailed description

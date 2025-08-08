@@ -57,6 +57,17 @@ Available Stacks and Dependencies:
 └──────────────┴───────────────────┘
 
 Select stack (minimal, standard, full): minimal
+
+Available Package Managers:
+                   Package Managers
+┌────────┬────────────────────────────────────────────┐
+│ PIP    │ Standard Python package manager            │
+│ UV     │ Fast Python package manager                │
+│ PDM    │ Modern Python dependency management        │
+│ POETRY │ Python dependency management and packaging │
+└────────┴────────────────────────────────────────────┘
+
+Select package manager (pip, uv, pdm, poetry) [uv]: uv
 Do you want to proceed with project creation? [y/N]: y
 
 ✨ FastAPI project 'my-first-app' has been created successfully!
@@ -248,7 +259,69 @@ my-first-app/
 └── README.md               # Project documentation
 ```
 
-## 8. What's Next?
+## 8. Package Manager Options
+
+FastAPI-fastkit supports multiple Python package managers to suit your preferences:
+
+### Available Package Managers
+
+| Manager | Description | Best For |
+|---------|-------------|----------|
+| **UV** | Fast Python package manager (default) | Speed and performance |
+| **PDM** | Modern Python dependency management | Advanced dependency resolution |
+| **Poetry** | Python dependency management and packaging | Poetry-based workflows |
+| **PIP** | Standard Python package manager | Traditional Python development |
+
+### Specifying Package Manager
+
+You can specify your preferred package manager in several ways:
+
+#### 1. Interactive Selection (Default)
+
+When you run `fastkit init` or `fastkit startdemo`, you'll be prompted to choose:
+
+<div class="termy">
+
+```console
+$ fastkit init
+# ... after project details and stack selection ...
+
+Available Package Managers:
+                   Package Managers
+┌────────┬────────────────────────────────────────────┐
+│ PIP    │ Standard Python package manager            │
+│ UV     │ Fast Python package manager                │
+│ PDM    │ Modern Python dependency management        │
+│ POETRY │ Python dependency management and packaging │
+└────────┴────────────────────────────────────────────┘
+
+Select package manager (pip, uv, pdm, poetry) [uv]: uv
+```
+
+</div>
+
+#### 2. Command Line Option
+
+Skip the interactive prompt by specifying the package manager directly:
+
+<div class="termy">
+
+```console
+$ fastkit init --package-manager poetry
+$ fastkit startdemo --package-manager pdm
+```
+
+</div>
+
+### Dependency Files Generated
+
+Each package manager creates its appropriate dependency files:
+
+- **UV/PDM**: `pyproject.toml` (PEP 621 format)
+- **Poetry**: `pyproject.toml` (Poetry format)
+- **PIP**: `requirements.txt`
+
+## 9. What's Next?
 
 Congratulations! You've successfully:
 
