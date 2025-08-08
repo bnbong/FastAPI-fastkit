@@ -1,0 +1,122 @@
+# NOTE: I'm on decision making to adjust this with test_config_based_templates.py for better opensource contribution
+# # Template test configurations
+# # This file defines test parameters for each FastAPI template
+
+# templates:
+#   fastapi-default:
+#     description: "Simple CRUD API application using FastAPI"
+#     expected_files:
+#       - "setup.py"
+#       - "README.md"
+#       - "src/main.py"
+#       - "src/api/api.py"
+#       - "src/schemas/items.py"
+#       - "src/crud/items.py"
+#       - "requirements.txt"
+#     required_dirs:
+#       - "src"
+#       - "tests"
+#       - "src/api"
+#       - "src/schemas"
+#       - "src/crud"
+#     package_manager: "uv"
+#     test_endpoints:
+#       - "/items/"
+#       - "/docs"
+
+#   fastapi-async-crud:
+#     description: "Async CRUD operations with FastAPI"
+#     expected_files:
+#       - "setup.py"
+#       - "README.md"
+#       - "src/main.py"
+#       - "src/database.py"
+#       - "src/models.py"
+#     required_dirs:
+#       - "src"
+#       - "tests"
+#     package_manager: "uv"
+
+#   fastapi-custom-response:
+#     description: "FastAPI with customized response handling"
+#     expected_files:
+#       - "setup.py"
+#       - "README.md"
+#       - "src/main.py"
+#       - "src/response_models.py"
+#     required_dirs:
+#       - "src"
+#       - "tests"
+#     package_manager: "uv"
+
+#   fastapi-dockerized:
+#     description: "FastAPI with Docker support"
+#     expected_files:
+#       - "setup.py"
+#       - "README.md"
+#       - "src/main.py"
+#       - "Dockerfile"
+#       - "docker-compose.yml"
+#       - ".dockerignore"
+#     required_dirs:
+#       - "src"
+#       - "tests"
+#     package_manager: "uv"
+#     docker_enabled: true
+
+#   fastapi-empty:
+#     description: "Minimal FastAPI template for rapid prototyping"
+#     expected_files:
+#       - "setup.py"
+#       - "README.md"
+#       - "src/main.py"
+#       - "src/core/config.py"
+#     required_dirs:
+#       - "src"
+#       - "tests"
+#       - "src/core"
+#     package_manager: "uv"
+
+#   fastapi-mcp:
+#     description: "FastAPI with Model Context Protocol integration"
+#     expected_files:
+#       - "setup.py"
+#       - "README.md"
+#       - "src/main.py"
+#       - "src/mcp"
+#       - "src/auth"
+#     required_dirs:
+#       - "src"
+#       - "tests"
+#       - "src/mcp"
+#       - "src/auth"
+#     package_manager: "uv"
+#     has_auth: true
+
+#   fastapi-psql-orm:
+#     description: "FastAPI with PostgreSQL and ORM"
+#     expected_files:
+#       - "setup.py"
+#       - "README.md"
+#       - "src/main.py"
+#       - "alembic.ini"
+#       - "src/database.py"
+#       - "src/models"
+#     required_dirs:
+#       - "src"
+#       - "tests"
+#       - "alembic"
+#       - "src/models"
+#     package_manager: "uv"
+#     has_database: true
+#     database_type: "postgresql"
+
+# # Global test settings
+# global_settings:
+#   default_package_manager: "uv"
+#   test_timeout: 30
+#   default_author: "test-author"
+#   default_email: "test@example.com"
+#   excluded_dirs:
+#     - "__pycache__"
+#     - "modules"  # modules is not a regular template

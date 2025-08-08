@@ -60,6 +60,7 @@ $ fastkit init [OPTIONS]
 
 | Option | Description | Default |
 |--------|-------------|---------|
+| `--package-manager` | Package manager to use (pip, uv, pdm, poetry) | uv |
 | `--help` | Show command help | - |
 
 #### Interactive Prompts
@@ -71,6 +72,7 @@ The `init` command will prompt you for:
 3. **Author email**: Contact email for package
 4. **Project description**: Brief description of the project
 5. **Stack selection**: Choose from minimal, standard, or full
+6. **Package manager selection**: Choose from pip, uv, pdm, or poetry (unless specified with `--package-manager`)
 
 #### Stack Options
 
@@ -106,6 +108,7 @@ Enter the author email: john@example.com
 Enter the project description: My awesome API
 
 Select stack (minimal, standard, full): standard
+Select package manager (pip, uv, pdm, poetry) [uv]: uv
 Do you want to proceed with project creation? [y/N]: y
 
 ✨ FastAPI project 'my-api' has been created successfully!
@@ -227,6 +230,7 @@ $ fastkit startdemo [OPTIONS]
 
 | Option | Description | Default |
 |--------|-------------|---------|
+| `--package-manager` | Package manager to use (pip, uv, pdm, poetry) | uv |
 | `--help` | Show command help | - |
 
 #### Interactive Prompts
@@ -237,7 +241,7 @@ The `startdemo` command will prompt you for:
 2. **Author name**: Package author information
 3. **Author email**: Contact email
 4. **Project description**: Brief description
-5. **Template selection**: Choose from available templates
+5. **Package manager selection**: Choose from pip, uv, pdm, or poetry (unless specified with `--package-manager`)
 
 #### Available Templates
 
@@ -255,13 +259,13 @@ The `startdemo` command will prompt you for:
 <div class="termy">
 
 ```console
-$ fastkit startdemo
+$ fastkit startdemo fastapi-psql-orm
 Enter the project name: my-blog
 Enter the author name: Jane Smith
 Enter the author email: jane@example.com
 Enter the project description: Blog API with PostgreSQL
 
-Select template: fastapi-psql-orm
+Select package manager (pip, uv, pdm, poetry) [uv]: poetry
 Do you want to proceed with project creation? [y/N]: y
 
 ✨ FastAPI project 'my-blog' from 'fastapi-psql-orm' has been created!
@@ -671,6 +675,135 @@ jobs:
         cd test-project
         source .venv/bin/activate
         python -m pytest
+```
+
+## Package Manager Support
+
+FastAPI-fastkit supports multiple Python package managers, allowing you to choose the one that best fits your workflow.
+
+### Supported Package Managers
+
+| Manager | Description | Dependency File | Best For |
+|---------|-------------|----------------|----------|
+| **UV** (default) | Fast Python package manager | `pyproject.toml` | Speed and performance |
+| **PDM** | Modern Python dependency management | `pyproject.toml` | Advanced dependency resolution |
+| **Poetry** | Python dependency management and packaging | `pyproject.toml` | Poetry-based workflows |
+| **PIP** | Standard Python package manager | `requirements.txt` | Traditional Python development |
+
+### Specifying Package Manager
+
+#### Global Configuration
+
+You can set your preferred package manager for all projects:
+
+```console
+# Using command line options
+$ fastkit init --package-manager poetry
+$ fastkit startdemo --package-manager pdm
+```
+
+#### Project-specific Selection
+
+Each project can use a different package manager. The choice is made during project creation and affects:
+
+- **Dependency file format**: Each manager creates its appropriate files
+- **Virtual environment management**: Different activation methods
+- **Dependency installation**: Manager-specific commands
+
+### Package Manager Features
+
+#### UV (Default)
+- **Fast**: Rust-based, extremely fast dependency resolution
+- **Compatible**: Drop-in replacement for pip and pip-tools
+- **Modern**: Support for PEP 621 project metadata
+
+<div class="termy">
+
+```console
+$ fastkit init --package-manager uv
+# Creates pyproject.toml with UV configuration
+```
+
+</div>
+
+#### PDM
+- **Modern**: PEP 582 and PEP 621 support
+- **Advanced**: Sophisticated dependency resolution
+- **Flexible**: Multiple project layouts
+
+<div class="termy">
+
+```console
+$ fastkit init --package-manager pdm
+# Creates pyproject.toml with PDM configuration
+```
+
+</div>
+
+#### Poetry
+- **Established**: Mature and widely adopted
+- **Integrated**: Build and publish support
+- **Lockfile**: poetry.lock for reproducible builds
+
+<div class="termy">
+
+```console
+$ fastkit init --package-manager poetry
+# Creates pyproject.toml with Poetry configuration
+```
+
+</div>
+
+#### PIP
+- **Standard**: Built into Python
+- **Compatible**: Works everywhere
+- **Simple**: Straightforward dependency management
+
+<div class="termy">
+
+```console
+$ fastkit init --package-manager pip
+# Creates requirements.txt
+```
+
+</div>
+
+### Working with Projects
+
+After creating a project with a specific package manager:
+
+#### UV Projects
+```console
+cd my-project
+uv sync          # Install dependencies
+uv add requests  # Add new dependency
+uv run pytest   # Run commands in environment
+```
+
+#### PDM Projects
+```console
+cd my-project
+pdm install      # Install dependencies
+pdm add requests # Add new dependency
+pdm run pytest  # Run commands in environment
+```
+
+#### Poetry Projects
+```console
+cd my-project
+poetry install      # Install dependencies
+poetry add requests # Add new dependency
+poetry run pytest  # Run commands in environment
+```
+
+#### PIP Projects
+```console
+cd my-project
+source .venv/bin/activate  # Linux/macOS
+.venv\Scripts\activate     # Windows
+pip install -r requirements.txt
+pip install requests
+pytest
 ```
 
 ## Next Steps

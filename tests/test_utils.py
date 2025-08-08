@@ -148,3 +148,168 @@ class TestUtilsLogging:
             # Just check that logging was configured
             mock_get_logger.assert_called()
             mock_logger.setLevel.assert_called_once_with("DEBUG")
+
+    def test_is_fastkit_project_function_with_setup_py(self, temp_dir: str) -> None:
+        """Test is_fastkit_project function with setup.py containing fastkit metadata."""
+        # given
+        from fastapi_fastkit.utils.main import is_fastkit_project
+
+        project_path = Path(temp_dir) / "fastkit-project"
+        project_path.mkdir()
+        setup_py = project_path / "setup.py"
+        setup_py.write_text(
+            """
+from setuptools import setup
+setup(
+    name="test-project",
+    description="Created with FastAPI-fastkit"
+)
+"""
+        )
+
+        # when & then
+        assert is_fastkit_project(str(project_path)) is True
+
+    def test_is_fastkit_project_function_invalid_path(self) -> None:
+        """Test is_fastkit_project function with invalid path."""
+        # given
+        from fastapi_fastkit.utils.main import is_fastkit_project
+
+        nonexistent_path = "/nonexistent/path"
+
+        # when & then
+        assert is_fastkit_project(nonexistent_path) is False
+
+    def test_print_error_with_traceback(self) -> None:
+        """Test print_error function with traceback enabled."""
+        # given
+        import io
+
+        from rich.console import Console
+
+        from fastapi_fastkit.core.settings import settings
+        from fastapi_fastkit.utils.main import print_error
+
+        # Setup console to capture output
+        string_io = io.StringIO()
+        test_console = Console(file=string_io, force_terminal=True, width=80)
+        original_debug = settings.DEBUG_MODE
+
+        try:
+            settings.set_debug_mode(True)
+
+            # when
+            print_error("Test error message", console=test_console, show_traceback=True)
+
+            # then
+            output = string_io.getvalue()
+            assert "Test error message" in output
+
+        finally:
+            settings.set_debug_mode(original_debug)
+
+    def test_print_success_function(self) -> None:
+        """Test print_success function."""
+        # given
+        import io
+
+        from rich.console import Console
+
+        from fastapi_fastkit.utils.main import print_success
+
+        # Setup console to capture output
+        string_io = io.StringIO()
+        test_console = Console(file=string_io, force_terminal=True, width=80)
+
+        # when
+        print_success("Test success message", console=test_console)
+
+        # then
+        output = string_io.getvalue()
+        assert "Test success message" in output
+
+    def test_print_warning_function(self) -> None:
+        """Test print_warning function."""
+        # given
+        import io
+
+        from rich.console import Console
+
+        from fastapi_fastkit.utils.main import print_warning
+
+        # Setup console to capture output
+        string_io = io.StringIO()
+        test_console = Console(file=string_io, force_terminal=True, width=80)
+
+        # when
+        print_warning("Test warning message", console=test_console)
+
+        # then
+        output = string_io.getvalue()
+        assert "Test warning message" in output
+
+    def test_print_info_function(self) -> None:
+        """Test print_info function."""
+        # given
+        import io
+
+        from rich.console import Console
+
+        from fastapi_fastkit.utils.main import print_info
+
+        # Setup console to capture output
+        string_io = io.StringIO()
+        test_console = Console(file=string_io, force_terminal=True, width=80)
+
+        # when
+        print_info("Test info message", console=test_console)
+
+        # then
+        output = string_io.getvalue()
+        assert "Test info message" in output
+
+    def test_handle_exception_function(self) -> None:
+        """Test handle_exception function."""
+        # given
+        from fastapi_fastkit.utils.main import handle_exception
+
+        # when & then
+        # Should not raise exception
+        handle_exception(ValueError("Test exception"), "Custom error message")
+
+    def test_handle_exception_function_no_message(self) -> None:
+        """Test handle_exception function without custom message."""
+        # given
+        from fastapi_fastkit.utils.main import handle_exception
+
+        # when & then
+        # Should not raise exception
+        handle_exception(ValueError("Test exception"))
+
+    def test_create_info_table_function(self) -> None:
+        """Test create_info_table function."""
+        # given
+        from fastapi_fastkit.utils.main import create_info_table
+
+        # when
+        table = create_info_table(
+            "Test Information",
+            {
+                "Key 1": "Value 1",
+                "Key 2": "Value 2",
+            },
+        )
+
+        # then
+        assert table.title == "Test Information"
+
+    def test_create_info_table_function_empty_data(self) -> None:
+        """Test create_info_table function with empty data."""
+        # given
+        from fastapi_fastkit.utils.main import create_info_table
+
+        # when
+        table = create_info_table("Empty Table", {})
+
+        # then
+        assert table.title == "Empty Table"

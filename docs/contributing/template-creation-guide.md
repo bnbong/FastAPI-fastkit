@@ -313,6 +313,60 @@ The inspector automatically validates the following items:
 - [ ] Dependencies installation successful
 - [ ] All pytest tests pass
 
+#### ✅ Automated Template Testing
+
+FastAPI-fastkit includes **automated template testing** that runs comprehensive tests for all templates:
+
+**Test Coverage:**
+- ✅ Template creation process
+- ✅ Project metadata injection
+- ✅ Virtual environment setup
+- ✅ Dependency installation (all package managers)
+- ✅ Basic project structure validation
+- ✅ FastAPI project identification
+
+**Test Execution:**
+```console
+# Test all templates automatically
+$ pytest tests/test_templates/test_all_templates.py -v
+
+# Test specific template
+$ pytest tests/test_templates/test_all_templates.py::TestAllTemplates::test_template_creation[your-template-name] -v
+```
+
+**Template Test Discovery:**
+New templates are **automatically discovered** and tested without manual configuration:
+
+1. ✅ **Zero Configuration**: Add template → automatic testing
+2. ✅ **Consistent Testing**: Same quality standards for all templates
+3. ✅ **Multiple Package Managers**: Tests with UV, PDM, Poetry, and PIP
+4. ✅ **Comprehensive Validation**: Structure, metadata, and functionality checks
+
+**What This Means for You:**
+- 🚀 **No Additional Test Files**: Your template is tested automatically
+- ⚡ **Faster Development**: Focus on template content, not test setup
+- 🛡️ **Quality Assurance**: Consistent testing across all templates
+- 🔄 **CI/CD Integration**: Automatic testing in pull requests
+
+**Manual Testing Still Required:**
+- 🧪 **Template-specific functionality**: Business logic and custom features
+- 🔧 **Integration testing**: External services and complex workflows
+- 📱 **End-to-end scenarios**: Complete user workflows
+
+**Testing Best Practices:**
+```console
+# 1. Test your template locally
+$ fastkit startdemo your-template-name
+
+# 2. Run automated tests
+$ pytest tests/test_templates/test_all_templates.py::TestAllTemplates::test_template_creation[your-template-name] -v
+
+# 3. Test with different package managers
+$ fastkit startdemo your-template-name --package-manager poetry
+$ fastkit startdemo your-template-name --package-manager pdm
+$ fastkit startdemo your-template-name --package-manager uv
+```
+
 ### Manual Validation Checklist
 
 In addition to automated validation, manually check the following items:

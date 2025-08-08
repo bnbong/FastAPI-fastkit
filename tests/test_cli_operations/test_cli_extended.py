@@ -4,11 +4,9 @@
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
 import os
-import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pytest
 from click.testing import CliRunner
 
 from fastapi_fastkit.cli import fastkit_cli
@@ -44,22 +42,36 @@ class TestCLIExtended:
         # Version command might not exist, but shouldn't crash
         assert result.exit_code in [0, 2]  # 0 for success, 2 for no such option
 
-    @patch("fastapi_fastkit.backend.main.inject_project_metadata")
-    @patch("fastapi_fastkit.backend.transducer.copy_and_convert_template_file")
-    @patch("fastapi_fastkit.backend.main.create_venv")
-    @patch("fastapi_fastkit.backend.main.install_dependencies")
+    @patch("subprocess.run")
+    @patch("fastapi_fastkit.backend.package_managers.uv_manager.UvManager.is_available")
     def test_init_standard_stack(
         self,
-        mock_install: MagicMock,
-        mock_venv: MagicMock,
-        mock_copy: MagicMock,
-        mock_inject: MagicMock,
+        mock_uv_available: MagicMock,
+        mock_subprocess: MagicMock,
         temp_dir: str,
     ) -> None:
         """Test init command with standard stack."""
         # given
         os.chdir(temp_dir)
-        mock_venv.return_value = "/fake/venv"
+        mock_uv_available.return_value = True
+
+        # Mock subprocess.run to simulate venv creation and dependency installation
+        def mock_subprocess_side_effect(*args, **kwargs) -> MagicMock:  # type: ignore
+            cmd = args[0] if args else kwargs.get("args", [])
+            if isinstance(cmd, list) and len(cmd) > 0:
+                # Simulate venv creation by creating the directory
+                if cmd[0] == "uv" and "venv" in cmd:
+                    venv_path = Path(temp_dir) / "test-standard" / ".venv"
+                    venv_path.mkdir(parents=True, exist_ok=True)
+                    # Create bin directory for Unix-like systems
+                    (venv_path / "bin").mkdir(exist_ok=True)
+                    (venv_path / "Scripts").mkdir(
+                        exist_ok=True
+                    )  # For Windows compatibility
+
+            return MagicMock(returncode=0, stdout="", stderr="")
+
+        mock_subprocess.side_effect = mock_subprocess_side_effect
 
         # when
         result = self.runner.invoke(
@@ -72,6 +84,7 @@ class TestCLIExtended:
                     "test@example.com",
                     "Standard FastAPI project",
                     "standard",
+                    "uv",
                     "Y",
                 ]
             ),
@@ -81,6 +94,9 @@ class TestCLIExtended:
         project_path = Path(temp_dir) / "test-standard"
         assert project_path.exists()
         assert "Success" in result.output
+
+        # Verify that subprocess.run was called for venv and dependency operations
+        assert mock_subprocess.call_count >= 2
 
     def test_addroute_command(self, temp_dir: str) -> None:
         """Test addroute command behavior."""

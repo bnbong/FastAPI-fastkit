@@ -173,6 +173,16 @@ Select template (fastapi-default, fastapi-async-crud, fastapi-custom-response, f
 │ Dependency 7 │ pytest            │
 └──────────────┴───────────────────┘
 
+Available Package Managers:
+                   Package Managers
+┌────────┬────────────────────────────────────────────┐
+│ PIP    │ Standard Python package manager            │
+│ UV     │ Fast Python package manager                │
+│ PDM    │ Modern Python dependency management        │
+│ POETRY │ Python dependency management and packaging │
+└────────┴────────────────────────────────────────────┘
+
+Select package manager (pip, uv, pdm, poetry) [uv]: uv
 Do you want to proceed with project creation? [y/N]: y
 
 ✨ FastAPI project 'my-blog-api' from 'fastapi-psql-orm' has been created successfully!

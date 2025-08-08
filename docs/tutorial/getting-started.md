@@ -15,7 +15,7 @@ Before we begin, make sure you have:
 
 First, let's install FastAPI-fastkit. We recommend using a virtual environment to keep your projects isolated.
 
-### Option A: Using pip (Recommended)
+### Option A: Using pip (Traditional)
 
 <div class="termy">
 
@@ -27,7 +27,25 @@ Successfully installed fastapi-fastkit
 
 </div>
 
-### Option B: Using a Virtual Environment
+### Option B: Using UV (Recommended - Faster)
+
+UV is a fast Python package manager. If you don't have UV installed:
+
+<div class="termy">
+
+```console
+# Install UV first
+$ curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Then install FastAPI-fastkit
+$ uv pip install fastapi-fastkit
+---> 100%
+Successfully installed fastapi-fastkit
+```
+
+</div>
+
+### Option C: Using a Virtual Environment
 
 <div class="termy">
 
@@ -94,6 +112,17 @@ Available Stacks and Dependencies:
 └──────────────┴───────────────────┘
 
 Select stack (minimal, standard, full): minimal
+
+Available Package Managers:
+                   Package Managers
+┌────────┬────────────────────────────────────────────┐
+│ PIP    │ Standard Python package manager            │
+│ UV     │ Fast Python package manager                │
+│ PDM    │ Modern Python dependency management        │
+│ POETRY │ Python dependency management and packaging │
+└────────┴────────────────────────────────────────────┘
+
+Select package manager (pip, uv, pdm, poetry) [uv]: uv
 Do you want to proceed with project creation? [y/N]: y
 
 Creating virtual environment...

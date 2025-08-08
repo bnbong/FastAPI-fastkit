@@ -76,6 +76,17 @@ Available Stacks and Dependencies:
 └──────────────┴───────────────────┘
 
 Select stack (minimal, standard, full): standard
+
+Available Package Managers:
+                   Package Managers
+┌────────┬────────────────────────────────────────────┐
+│ PIP    │ Standard Python package manager            │
+│ UV     │ Fast Python package manager                │
+│ PDM    │ Modern Python dependency management        │
+│ POETRY │ Python dependency management and packaging │
+└────────┴────────────────────────────────────────────┘
+
+Select package manager (pip, uv, pdm, poetry) [uv]: uv
 Do you want to proceed with project creation? [y/N]: y
 
 ✨ FastAPI project 'blog-api' has been created successfully!

@@ -142,6 +142,134 @@ my-awesome-api/
 └── README.md                 # Project documentation
 ```
 
+### 3. Package Manager Selection
+
+FastAPI-fastkit supports multiple Python package managers. Choose the one that best fits your development workflow:
+
+#### Available Package Managers
+
+<div class="termy">
+
+```console
+Available Package Managers:
+                   Package Managers
+┌────────┬────────────────────────────────────────────┐
+│ PIP    │ Standard Python package manager            │
+│ UV     │ Fast Python package manager                │
+│ PDM    │ Modern Python dependency management        │
+│ POETRY │ Python dependency management and packaging │
+└────────┴────────────────────────────────────────────┘
+
+Select package manager (pip, uv, pdm, poetry) [uv]: uv
+```
+
+</div>
+
+Each package manager has its advantages:
+
+#### UV (Default - Recommended)
+
+**Fast Rust-based package manager**
+
+- ⚡ **Ultra-fast**: 10-100x faster than pip
+- 🔧 **Drop-in replacement**: Compatible with pip workflows
+- 📦 **Modern**: Full PEP 621 support
+- 🛠️ **Reliable**: Deterministic resolution
+
+**Generated files:**
+- `pyproject.toml` (PEP 621 format)
+- `uv.lock` (lockfile)
+
+**Usage after creation:**
+```console
+cd my-project
+uv sync              # Install dependencies
+uv add requests      # Add new dependency
+uv run pytest       # Run tests
+```
+
+#### PDM
+
+**Modern Python dependency management**
+
+- 🚀 **Modern**: PEP 582 and PEP 621 support
+- 🧠 **Smart**: Advanced dependency resolution
+- 💼 **Professional**: Workspace and multi-project support
+- 📊 **Analytics**: Dependency analysis tools
+
+**Generated files:**
+- `pyproject.toml` (PEP 621 format)
+- `pdm.lock` (lockfile)
+
+**Usage after creation:**
+```console
+cd my-project
+pdm install          # Install dependencies
+pdm add requests     # Add new dependency
+pdm run pytest      # Run tests
+```
+
+#### Poetry
+
+**Mature dependency management and packaging**
+
+- ✅ **Established**: Mature and widely adopted
+- 📦 **Integrated**: Build and publish support
+- 🔒 **Reproducible**: poetry.lock for exact versions
+- 🏗️ **Complete**: Full project lifecycle management
+
+**Generated files:**
+- `pyproject.toml` (Poetry format)
+- `poetry.lock` (lockfile)
+
+**Usage after creation:**
+```console
+cd my-project
+poetry install       # Install dependencies
+poetry add requests  # Add new dependency
+poetry run pytest   # Run tests
+```
+
+#### PIP
+
+**Standard Python package manager**
+
+- 🏠 **Built-in**: Included with Python
+- 🌍 **Universal**: Works everywhere
+- 📚 **Familiar**: Most developers know it
+- 🔧 **Simple**: Straightforward workflow
+
+**Generated files:**
+- `requirements.txt`
+
+**Usage after creation:**
+```console
+cd my-project
+source .venv/bin/activate    # Linux/macOS
+.venv\Scripts\activate       # Windows
+pip install -r requirements.txt
+pip install requests
+pytest
+```
+
+#### Specifying Package Manager
+
+You can specify your preferred package manager:
+
+**Interactive selection (default):**
+```console
+$ fastkit init
+# ... prompts for package manager selection
+```
+
+**Command line option:**
+```console
+$ fastkit init --package-manager poetry
+$ fastkit init --package-manager pdm
+$ fastkit init --package-manager uv
+$ fastkit init --package-manager pip
+```
+
 ### Understanding Each Directory
 
 #### `src/` Directory

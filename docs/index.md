@@ -26,6 +26,7 @@ This project was inspired by the `SpringBoot initializer` & Python Django's `dja
 - **📋 Standards-based FastAPI project templates** : All FastAPI-fastkit templates are based on Python standards and FastAPI's common use patterns
 - **🔍 Automated template quality assurance** : Weekly automated testing ensures all templates remain functional and up-to-date
 - **🚀 Multiple project templates** : Choose from various pre-configured templates for different use cases (async CRUD, Docker, PostgreSQL, etc.)
+- **📦 Multiple package manager support** : Choose your preferred Python package manager (pip, uv, pdm, poetry) for dependency management
 
 ## Installation
 
@@ -100,6 +101,17 @@ Available Stacks and Dependencies:
 └──────────────┴───────────────────┘
 
 Select stack (minimal, standard, full): minimal
+
+Available Package Managers:
+                   Package Managers
+┌────────┬────────────────────────────────────────────┐
+│ PIP    │ Standard Python package manager            │
+│ UV     │ Fast Python package manager                │
+│ PDM    │ Modern Python dependency management        │
+│ POETRY │ Python dependency management and packaging │
+└────────┴────────────────────────────────────────────┘
+
+Select package manager (pip, uv, pdm, poetry) [uv]: uv
 Do you want to proceed with project creation? [y/N]: y
 FastAPI project will deploy at '~your-project-path~'
 
@@ -222,6 +234,16 @@ Template path:
 │ Dependency 5 │ python-dotenv     │
 └──────────────┴───────────────────┘
 
+Available Package Managers:
+                   Package Managers
+┌────────┬────────────────────────────────────────────┐
+│ PIP    │ Standard Python package manager            │
+│ UV     │ Fast Python package manager                │
+│ PDM    │ Modern Python dependency management        │
+│ POETRY │ Python dependency management and packaging │
+└────────┴────────────────────────────────────────────┘
+
+Select package manager (pip, uv, pdm, poetry) [uv]: uv
 Do you want to proceed with project creation? [y/N]: y
 FastAPI template project will deploy at '~your-project-path~'
 

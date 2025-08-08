@@ -3,16 +3,24 @@ from setuptools import find_packages, setup
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
+install_requires = [
+    "fastapi>=0.115.8",
+    "fastapi-mcp>=0.3.4",
+    "uvicorn>=0.34.0",
+    "pydantic>=2.10.6",
+    "pydantic-settings>=2.7.1",
+    "python-dotenv>=1.0.1",
+]
+
 setup(
-    name="fastapi-mcp-project",
+    name="<project_name>",
     version="0.1.0",
-    author="Your Name",
-    author_email="your.email@example.com",
-    description="FastAPI project with Model Context Protocol (MCP) integration",
+    author="<author>",
+    author_email="<author_email>",
+    description="[FastAPI-fastkit templated] <description>",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/fastapi-mcp-project",
-    packages=find_packages(),
+    packages=find_packages(where="src"),
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
@@ -25,14 +33,7 @@ setup(
         "Framework :: FastAPI",
     ],
     python_requires=">=3.10",
-    install_requires=[
-        "fastapi>=0.115.8",
-        "fastapi-mcp>=0.3.4",
-        "uvicorn>=0.34.0",
-        "pydantic>=2.10.6",
-        "pydantic-settings>=2.7.1",
-        "python-dotenv>=1.0.1",
-    ],
+    install_requires=install_requires,
     extras_require={
         "dev": [
             "pytest>=8.3.4",
