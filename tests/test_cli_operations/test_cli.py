@@ -136,7 +136,14 @@ class TestCLI:
             fastkit_cli,
             ["startdemo", "fastapi-default"],
             input="\n".join(
-                ["test-project", "bnbong", "bbbong9@gmail.com", "test project", "N"]
+                [
+                    "test-project",
+                    "bnbong",
+                    "bbbong9@gmail.com",
+                    "test project",
+                    "uv",
+                    "N",
+                ]
             ),
         )
 
