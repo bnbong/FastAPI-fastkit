@@ -31,7 +31,9 @@ import yaml  # type: ignore
 from fastapi_fastkit.backend.main import (
     create_venv,
     find_template_core_modules,
+    inject_project_metadata,
     install_dependencies,
+    install_dependencies_with_manager,
 )
 from fastapi_fastkit.backend.transducer import copy_and_convert_template
 from fastapi_fastkit.core.settings import settings
@@ -61,6 +63,10 @@ class TemplateInspector:
         try:
             os.makedirs(self.temp_dir, exist_ok=True)
             copy_and_convert_template(str(self.template_path), self.temp_dir)
+
+            # Inject dummy metadata for inspection
+            self._inject_dummy_metadata()
+
             self._cleanup_needed = True
             self.template_config = self._load_template_config()
             debug_log(f"Created temporary directory at {self.temp_dir}", "debug")
@@ -111,6 +117,43 @@ class TemplateInspector:
         except (yaml.YAMLError, OSError, UnicodeDecodeError) as e:
             debug_log(f"Failed to load template configuration: {e}", "warning")
             return None
+
+    def _inject_dummy_metadata(self) -> None:
+        """Inject dummy metadata for template inspection."""
+        try:
+            # Use dummy metadata for inspection
+            dummy_metadata = {
+                "project_name": "test-template",
+                "author": "Template Inspector",
+                "author_email": "inspector@fastapi-fastkit.dev",
+                "description": "Test project for template inspection",
+            }
+
+            inject_project_metadata(
+                self.temp_dir,
+                dummy_metadata["project_name"],
+                dummy_metadata["author"],
+                dummy_metadata["author_email"],
+                dummy_metadata["description"],
+            )
+            debug_log("Injected dummy metadata for template inspection", "info")
+
+        except Exception as e:
+            debug_log(f"Failed to inject dummy metadata: {e}", "warning")
+            self.warnings.append(f"Failed to inject metadata: {str(e)}")
+
+    def _detect_package_manager(self) -> str:
+        """Detect the appropriate package manager for the template."""
+        # Check for pyproject.toml (modern Python packaging)
+        if os.path.exists(os.path.join(self.temp_dir, "pyproject.toml")):
+            return "uv"  # Use UV for pyproject.toml based projects
+
+        # Check for requirements.txt (traditional pip)
+        if os.path.exists(os.path.join(self.temp_dir, "requirements.txt")):
+            return "pip"
+
+        # Default to pip if no dependency file found
+        return "pip"
 
     def _check_docker_available(self) -> bool:
         """Check if Docker and Docker Compose are available."""
@@ -393,7 +436,21 @@ class TemplateInspector:
         try:
             # Create virtual environment for testing
             venv_path = create_venv(self.temp_dir)
-            install_dependencies(self.temp_dir, venv_path)
+
+            # Detect and use appropriate package manager
+            package_manager = self._detect_package_manager()
+            debug_log(f"Using package manager: {package_manager}", "info")
+
+            try:
+                install_dependencies_with_manager(
+                    self.temp_dir, venv_path, package_manager
+                )
+            except Exception as dep_error:
+                # Capture detailed dependency installation error
+                error_msg = f"Failed to install dependencies: {str(dep_error)}"
+                debug_log(f"Dependency installation failed: {dep_error}", "error")
+                self.errors.append(error_msg)
+                return False
 
             # Check if scripts/test.sh exists
             test_script_path = os.path.join(self.temp_dir, "scripts", "test.sh")
@@ -557,7 +614,21 @@ class TemplateInspector:
         try:
             # Create virtual environment for testing
             venv_path = create_venv(self.temp_dir)
-            install_dependencies(self.temp_dir, venv_path)
+
+            # Detect and use appropriate package manager
+            package_manager = self._detect_package_manager()
+            debug_log(f"Using package manager: {package_manager}", "info")
+
+            try:
+                install_dependencies_with_manager(
+                    self.temp_dir, venv_path, package_manager
+                )
+            except Exception as dep_error:
+                # Capture detailed dependency installation error
+                error_msg = f"Failed to install dependencies: {str(dep_error)}"
+                debug_log(f"Dependency installation failed: {dep_error}", "error")
+                self.errors.append(error_msg)
+                return False
 
             # Set up fallback environment (e.g., SQLite database)
             fallback_config = self.template_config["fallback_testing"]
@@ -683,6 +754,14 @@ class TemplateInspector:
                     # Check if all services are running
                     all_running = True
                     for service in services:
+                        # Ensure service is a dictionary before calling .get()
+                        if not isinstance(service, dict):
+                            debug_log(
+                                f"Service info is not a dictionary: {service}",
+                                "warning",
+                            )
+                            continue
+
                         if service.get("State") != "running":
                             all_running = False
                             debug_log(
@@ -738,6 +817,11 @@ class TemplateInspector:
             app_running = False
 
             for service in services:
+                # Ensure service is a dictionary before calling .get()
+                if not isinstance(service, dict):
+                    debug_log(f"Service info is not a dictionary: {service}", "warning")
+                    continue
+
                 service_name = service.get("Name", "")
                 service_state = service.get("State", "")
 

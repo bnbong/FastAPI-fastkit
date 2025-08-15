@@ -33,6 +33,17 @@ jobs:
       - name: Install dependencies
         run: pdm install -G dev
 
+      - name: Install UV package manager
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Verify UV installation
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          uv --version
+          which uv
+
       - name: Set up Docker Compose
         run: |
           if ! command -v docker-compose &> /dev/null; then
@@ -46,6 +57,8 @@ jobs:
 
       - name: Run template inspection
         run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          uv --version  # Verify UV is available
           pdm run python scripts/inspect-templates.py --templates "${{ github.event.inputs.templates }}" --output template_inspection_results.json --verbose
 
       - name: Upload inspection results
@@ -109,8 +122,8 @@ jobs:
               labels: ['bug', 'template-inspection', 'automated']
             });
 
-      - name: Comment on Success
-        if: success()
+      - name: Report Results
+        if: always()
         uses: actions/github-script@v7
         with:
           script: |
@@ -119,11 +132,45 @@ jobs:
             try {
               const results = JSON.parse(fs.readFileSync('template_inspection_results.json', 'utf8'));
 
-              console.log(`✅ Weekly template inspection completed successfully!`);
-              console.log(`📊 Results: ${results.passed_templates}/${results.total_templates} templates passed`);
-              console.log(`📄 Detailed results available in workflow artifacts`);
+              let summary = `## 📊 Template Inspection Summary\n\n`;
+              summary += `**Inspection Date:** ${results.inspection_date}\n`;
+              summary += `**Total Templates:** ${results.total_templates}\n`;
+              summary += `**✅ Passed:** ${results.passed_templates}\n`;
+              summary += `**❌ Failed:** ${results.failed_templates}\n\n`;
+
+              if (results.passed_templates > 0) {
+                summary += `### ✅ Passed Templates:\n`;
+                results.results.forEach(result => {
+                  if (result.is_valid) {
+                    summary += `- ${result.template_name}\n`;
+                  }
+                });
+                summary += `\n`;
+              }
+
+              if (results.failed_templates > 0) {
+                summary += `### ❌ Failed Templates:\n`;
+                results.results.forEach(result => {
+                  if (!result.is_valid) {
+                    summary += `- ${result.template_name}`;
+                    if (result.errors && result.errors.length > 0) {
+                      summary += `: ${result.errors[0]}`;
+                    }
+                    summary += `\n`;
+                  }
+                });
+              }
+
+              console.log(summary);
+
+              if (results.failed_templates === 0) {
+                console.log(`🎉 All templates passed inspection!`);
+              } else {
+                console.log(`⚠️ ${results.failed_templates} template(s) failed inspection`);
+              }
 
             } catch (error) {
-              console.log(`✅ Weekly template inspection completed successfully!`);
+              console.log(`📊 Template inspection completed`);
               console.log(`📄 Results available in workflow artifacts`);
+              console.log(`❌ Error reading results: ${error.message}`);
             }

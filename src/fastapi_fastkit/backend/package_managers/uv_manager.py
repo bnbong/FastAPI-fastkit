@@ -93,15 +93,26 @@ class UvManager(BasePackageManager):
                 print_error(f"pyproject.toml file not found at {pyproject_path}")
                 raise BackendExceptions("pyproject.toml file not found")
 
-            # Install dependencies using UV sync
+            # Install dependencies using UV sync (including dev dependencies)
+            cmd = ["uv", "sync", "--group", "dev"]
+            debug_log(
+                f"Running UV command: {' '.join(cmd)} in {self.project_dir}", "info"
+            )
+
             with console.status("[bold green]Installing dependencies with UV..."):
-                subprocess.run(
-                    ["uv", "sync"],
+                result = subprocess.run(
+                    cmd,
                     cwd=str(self.project_dir),
                     check=True,
                     capture_output=True,
                     text=True,
                 )
+
+                # Log UV output for debugging
+                if result.stdout:
+                    debug_log(f"UV stdout: {result.stdout}", "debug")
+                if result.stderr:
+                    debug_log(f"UV stderr: {result.stderr}", "debug")
 
             debug_log("Dependencies installed successfully with UV", "info")
             print_success("Dependencies installed successfully with UV")

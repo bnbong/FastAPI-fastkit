@@ -32,12 +32,12 @@ logger = get_logger(__name__)
 def find_template_core_modules(project_dir: str) -> Dict[str, str]:
     """
     Find core module files in the template project structure.
-    Returns a dictionary with paths to main.py, setup.py, and config files.
+    Returns a dictionary with paths to main.py, setup.py, pyproject.toml and config files.
 
     :param project_dir: Path to the project directory
     :return: Dictionary with paths to core modules
     """
-    core_modules = {"main": "", "setup": "", "config": ""}
+    core_modules = {"main": "", "setup": "", "pyproject": "", "config": ""}
     template_paths = settings.TEMPLATE_PATHS
 
     # Find main.py
@@ -52,6 +52,13 @@ def find_template_core_modules(project_dir: str) -> Dict[str, str]:
         full_path = os.path.join(project_dir, setup_path)
         if os.path.exists(full_path):
             core_modules["setup"] = full_path
+            break
+
+    # Find pyproject.toml
+    for pyproject_path in template_paths["pyproject"]:
+        full_path = os.path.join(project_dir, pyproject_path)
+        if os.path.exists(full_path):
+            core_modules["pyproject"] = full_path
             break
 
     # Find config file
@@ -166,6 +173,13 @@ def inject_project_metadata(
             author_email,
             description,
         )
+        _process_pyproject_file(
+            core_modules.get("pyproject", ""),
+            project_name,
+            author,
+            author_email,
+            description,
+        )
         _process_config_file(core_modules.get("config", ""), project_name)
 
         print_success("Project metadata injected successfully")
@@ -243,6 +257,51 @@ def _process_config_file(config_py: str, project_name: str) -> None:
     except (OSError, UnicodeDecodeError) as e:
         debug_log(f"Error processing config file: {e}", "error")
         raise BackendExceptions(f"Failed to process config file: {e}")
+
+
+def _process_pyproject_file(
+    pyproject_toml: str,
+    project_name: str,
+    author: str,
+    author_email: str,
+    description: str,
+) -> None:
+    """
+    Process pyproject.toml file and inject metadata.
+
+    :param pyproject_toml: Path to pyproject.toml file
+    :param project_name: Project name
+    :param author: Author name
+    :param author_email: Author email
+    :param description: Project description
+    """
+    if not pyproject_toml or not os.path.exists(pyproject_toml):
+        return
+
+    try:
+        with open(pyproject_toml, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        # Replace placeholders
+        replacements = {
+            "<project_name>": project_name,
+            "<author>": author,
+            "<author_email>": author_email,
+            "<description>": description,
+        }
+
+        for placeholder, value in replacements.items():
+            content = content.replace(placeholder, value)
+
+        with open(pyproject_toml, "w", encoding="utf-8") as f:
+            f.write(content)
+
+        debug_log("Injected metadata into pyproject.toml", "info")
+        print_info("Injected metadata into pyproject.toml")
+
+    except (OSError, UnicodeDecodeError) as e:
+        debug_log(f"Error processing pyproject.toml: {e}", "error")
+        raise BackendExceptions(f"Failed to process pyproject.toml: {e}")
 
 
 def create_venv_with_manager(project_dir: str, manager_type: str = "pip") -> str:

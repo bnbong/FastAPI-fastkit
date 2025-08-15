@@ -30,6 +30,9 @@ class FastkitConfig:
             "setup.py",
             "src/setup.py",
         ],
+        "pyproject": [
+            "pyproject.toml",
+        ],
         "config": {
             "files": ["settings.py", "config.py"],
             "paths": [

@@ -1,7 +1,7 @@
 # --------------------------------------------------------------------------
 # The module defines custom Backend Application Exception class, overrides basic Exception.
 # --------------------------------------------------------------------------
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from enum import Enum
 
 from pydantic import BaseModel, Field
@@ -87,7 +87,7 @@ class ExceptionSchema(BaseModel):
 class InternalException(Exception):
     def __init__(self, message: str, error_code: ErrorCode):
         self.timestamp = (
-            datetime.now(UTC).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+            datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
         )
         self.status = error_code.status_code
         self.error_code = error_code.code
