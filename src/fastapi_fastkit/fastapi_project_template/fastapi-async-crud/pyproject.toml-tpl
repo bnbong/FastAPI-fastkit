@@ -15,7 +15,7 @@ dependencies = [
     "pydantic-settings>=2.7.1",
     "SQLAlchemy>=2.0.38",
     "python-dotenv>=1.0.1",
-    "aiofiles>=23.2.1",
+    "aiofiles>=24.1.0",
 ]
 
 [project.optional-dependencies]
