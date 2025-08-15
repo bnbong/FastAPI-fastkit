@@ -3,17 +3,17 @@
 # --------------------------------------------------------------------------
 import secrets
 import warnings
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any, List, Literal, Union
 
 from pydantic import AnyUrl, BeforeValidator, computed_field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing_extensions import Self
 
 
-def parse_cors(v: Any) -> list[str] | str:
+def parse_cors(v: Any) -> Union[List[str], str]:
     if isinstance(v, str) and not v.startswith("["):
         return [i.strip() for i in v.split(",")]
-    elif isinstance(v, list | str):
+    elif isinstance(v, (list, str)):
         return v
     raise ValueError(v)
 
@@ -30,20 +30,20 @@ class Settings(BaseSettings):
 
     CLIENT_ORIGIN: str = ""
 
-    BACKEND_CORS_ORIGINS: Annotated[list[AnyUrl] | str, BeforeValidator(parse_cors)] = (
+    BACKEND_CORS_ORIGINS: Annotated[Union[List[AnyUrl], str], BeforeValidator(parse_cors)] = (
         []
     )
 
     @computed_field  # type: ignore[prop-decorator]
     @property
-    def all_cors_origins(self) -> list[str]:
+    def all_cors_origins(self) -> List[str]:
         return [str(origin).rstrip("/") for origin in self.BACKEND_CORS_ORIGINS] + [
             self.CLIENT_ORIGIN
         ]
 
     PROJECT_NAME: str = "<project_name>"
 
-    def _check_default_secret(self, var_name: str, value: str | None) -> None:
+    def _check_default_secret(self, var_name: str, value: Union[str, None]) -> None:
         if value == "changethis":
             message = (
                 f'The value of {var_name} is "changethis", '

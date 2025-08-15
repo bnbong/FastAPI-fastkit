@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.1.1 (2025-08-15)
+
+### Improvements
+
+- fix template inspection workflow & script
+  - fixing uv supportation compatibility
+  - for now, template inspection is running with `uv` package manager
+
 ## v1.1.0 (2025-08-08)
 
 ### Features

@@ -219,7 +219,7 @@ def test_example():
         assert any("main.py not found" in error for error in inspector.errors)
 
     @patch("fastapi_fastkit.backend.inspector.create_venv")
-    @patch("fastapi_fastkit.backend.inspector.install_dependencies")
+    @patch("fastapi_fastkit.backend.inspector.install_dependencies_with_manager")
     @patch("subprocess.run")
     def test_test_template_success(
         self,
@@ -238,6 +238,10 @@ def test_example():
             inspector = TemplateInspector(str(self.template_path))
             # Create tests directory in temp_dir
             os.makedirs(os.path.join(inspector.temp_dir, "tests"), exist_ok=True)
+            # Create a requirements.txt file to avoid package manager detection issues
+            requirements_file = os.path.join(inspector.temp_dir, "requirements.txt")
+            with open(requirements_file, "w") as f:
+                f.write("fastapi>=0.100.0\n")
             result = inspector._test_template()
 
         # then
@@ -981,7 +985,7 @@ fallback_testing:
         with (
             patch("fastapi_fastkit.backend.inspector.create_venv") as mock_create_venv,
             patch(
-                "fastapi_fastkit.backend.inspector.install_dependencies"
+                "fastapi_fastkit.backend.inspector.install_dependencies_with_manager"
             ) as mock_install,
             patch.object(inspector, "_run_test_script_with_env") as mock_run_script,
         ):
@@ -999,6 +1003,11 @@ fallback_testing:
             test_script.write_text("#!/bin/bash\necho 'test passed'\n")
 
             inspector.temp_dir = str(self.template_path)
+
+            # Create a requirements.txt file to avoid package manager detection issues
+            requirements_file = os.path.join(inspector.temp_dir, "requirements.txt")
+            with open(requirements_file, "w") as f:
+                f.write("fastapi>=0.100.0\n")
 
             # when
             result = inspector._test_with_fallback_strategy()
@@ -1030,7 +1039,7 @@ fallback_testing:
     # ===== ADDITIONAL TESTS FOR BETTER COVERAGE =====
 
     @patch("fastapi_fastkit.backend.inspector.create_venv")
-    @patch("fastapi_fastkit.backend.inspector.install_dependencies")
+    @patch("fastapi_fastkit.backend.inspector.install_dependencies_with_manager")
     def test_test_with_standard_strategy_success(
         self, mock_install: MagicMock, mock_create_venv: MagicMock
     ) -> None:
@@ -1048,6 +1057,11 @@ fallback_testing:
         test_script.write_text("#!/bin/bash\necho 'test passed'\n")
 
         inspector.temp_dir = str(self.template_path)
+
+        # Create a requirements.txt file to avoid package manager detection issues
+        requirements_file = os.path.join(inspector.temp_dir, "requirements.txt")
+        with open(requirements_file, "w") as f:
+            f.write("fastapi>=0.100.0\n")
 
         # Mock dependencies
         mock_create_venv.return_value = "/fake/venv"
@@ -1069,7 +1083,7 @@ fallback_testing:
             mock_run_script.assert_called_once()
 
     @patch("fastapi_fastkit.backend.inspector.create_venv")
-    @patch("fastapi_fastkit.backend.inspector.install_dependencies")
+    @patch("fastapi_fastkit.backend.inspector.install_dependencies_with_manager")
     def test_test_with_standard_strategy_no_test_script(
         self, mock_install: MagicMock, mock_create_venv: MagicMock
     ) -> None:
@@ -1081,6 +1095,11 @@ fallback_testing:
             inspector = TemplateInspector(str(self.template_path))
 
         inspector.temp_dir = str(self.template_path)
+
+        # Create a requirements.txt file to avoid package manager detection issues
+        requirements_file = os.path.join(inspector.temp_dir, "requirements.txt")
+        with open(requirements_file, "w") as f:
+            f.write("fastapi>=0.100.0\n")
 
         # Mock dependencies
         mock_create_venv.return_value = "/fake/venv"

@@ -1,7 +1,7 @@
 # --------------------------------------------------------------------------
 # Item CRUD Endpoint
 # --------------------------------------------------------------------------
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any, List, Union
 
 from fastapi import APIRouter, Request
@@ -29,7 +29,7 @@ async def read_all_items(request: Request):
     try:
         items = await read_items()
         return ResponseSchema(
-            timestamp=datetime.now(UTC)
+            timestamp=datetime.now(timezone.utc)
             .isoformat(timespec="milliseconds")
             .replace("+00:00", "Z"),
             status=200,
@@ -60,7 +60,7 @@ async def read_item(item_id: int, request: Request):
                 message="Item not found", error_code=ErrorCode.NOT_FOUND
             )
         return ResponseSchema(
-            timestamp=datetime.now(UTC)
+            timestamp=datetime.now(timezone.utc)
             .isoformat(timespec="milliseconds")
             .replace("+00:00", "Z"),
             status=200,
@@ -92,7 +92,7 @@ async def create_item(item: ItemCreate, request: Request):
         items.append(new_item)
         await write_items(items)
         return ResponseSchema(
-            timestamp=datetime.now(UTC)
+            timestamp=datetime.now(timezone.utc)
             .isoformat(timespec="milliseconds")
             .replace("+00:00", "Z"),
             status=201,
@@ -124,7 +124,7 @@ async def update_item(item_id: int, item: ItemCreate, request: Request):
         items[index] = updated_item
         await write_items(items)
         return ResponseSchema(
-            timestamp=datetime.now(UTC)
+            timestamp=datetime.now(timezone.utc)
             .isoformat(timespec="milliseconds")
             .replace("+00:00", "Z"),
             status=200,
@@ -156,7 +156,7 @@ async def delete_item(item_id: int, request: Request):
             )
         await write_items(new_items)
         return ResponseSchema(
-            timestamp=datetime.now(UTC)
+            timestamp=datetime.now(timezone.utc)
             .isoformat(timespec="milliseconds")
             .replace("+00:00", "Z"),
             status=200,
