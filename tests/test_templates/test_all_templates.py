@@ -100,7 +100,8 @@ class TestAllTemplates:
                     author_email,
                     description,
                     metadata["package_manager"],
-                    "Y",
+                    "Y",  # Proceed with project creation
+                    "Y",  # Create new project folder
                 ]
             ),
         )
@@ -162,7 +163,8 @@ class TestAllTemplates:
                     author_email,
                     description,
                     metadata["package_manager"],
-                    "Y",
+                    "Y",  # Proceed with project creation
+                    "Y",  # Create new project folder
                 ]
             ),
         )

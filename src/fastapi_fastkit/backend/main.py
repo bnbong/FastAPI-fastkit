@@ -7,10 +7,15 @@ import os
 import re
 from typing import Dict, List
 
+import click
+
 from fastapi_fastkit import console
 from fastapi_fastkit.backend.package_managers import PackageManagerFactory
-from fastapi_fastkit.backend.transducer import copy_and_convert_template_file
-from fastapi_fastkit.core.exceptions import BackendExceptions, TemplateExceptions
+from fastapi_fastkit.backend.transducer import (
+    copy_and_convert_template,
+    copy_and_convert_template_file,
+)
+from fastapi_fastkit.core.exceptions import BackendExceptions
 from fastapi_fastkit.core.settings import settings
 from fastapi_fastkit.utils.logging import debug_log, get_logger
 from fastapi_fastkit.utils.main import (
@@ -697,3 +702,68 @@ def add_new_route(project_dir: str, route_name: str) -> None:
         debug_log(f"Unexpected error while adding route {route_name}: {e}", "error")
         handle_exception(e, f"Error adding new route: {str(e)}")
         raise BackendExceptions(f"Failed to add new route: {str(e)}")
+
+
+# ------------------------------------------------------------
+# Create Project Folder Functions
+# ------------------------------------------------------------
+
+
+def ask_create_project_folder(project_name: str) -> bool:
+    """
+    Ask user whether to create a new project folder.
+
+    :param project_name: Name of the project
+    :return: True if user wants to create a folder, False otherwise
+    """
+    return click.confirm(
+        f"\nCreate a new project folder named '{project_name}'?\n"
+        f"Yes: Templates will be placed in './{project_name}/'\n"
+        f"No: Templates will be placed in current directory",
+        default=True,
+    )
+
+
+def deploy_template_with_folder_option(
+    target_template: str, user_local: str, project_name: str, create_folder: bool
+) -> tuple[str, str]:
+    """
+    Deploy template based on folder creation option.
+
+    :param target_template: Path to template directory
+    :param user_local: User's workspace directory
+    :param project_name: Name of the project
+    :param create_folder: Whether to create a new folder
+    :return: Tuple of (project_dir, deployment_message)
+    """
+    if create_folder:
+        project_dir = os.path.join(user_local, project_name)
+        deployment_message = f"FastAPI template project will deploy at '{user_local}' in folder '{project_name}'"
+        copy_and_convert_template(target_template, user_local, project_name)
+    else:
+        project_dir = user_local
+        deployment_message = (
+            f"FastAPI template project will deploy directly at '{user_local}'"
+        )
+        copy_and_convert_template(target_template, user_local, "")
+
+    click.echo(deployment_message)
+    return project_dir, deployment_message
+
+
+def get_deployment_success_message(
+    template: str, project_name: str, user_local: str, create_folder: bool
+) -> str:
+    """
+    Get appropriate success message based on deployment option.
+
+    :param template: Template name used
+    :param project_name: Name of the project
+    :param user_local: User's workspace directory
+    :param create_folder: Whether folder was created
+    :return: Success message string
+    """
+    if create_folder:
+        return f"FastAPI project '{project_name}' from '{template}' has been created and saved to {user_local}!"
+    else:
+        return f"FastAPI project '{project_name}' from '{template}' has been deployed directly to {user_local}!"

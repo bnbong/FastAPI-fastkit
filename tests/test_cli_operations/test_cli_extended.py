@@ -85,7 +85,8 @@ class TestCLIExtended:
                     "Standard FastAPI project",
                     "standard",
                     "uv",
-                    "Y",
+                    "Y",  # Proceed with project creation
+                    "Y",  # Create new project folder
                 ]
             ),
         )
@@ -132,7 +133,7 @@ setup(
 
         # when
         result = self.runner.invoke(
-            fastkit_cli, ["addroute", project_name, route_name], input="Y"
+            fastkit_cli, ["addroute", route_name, project_name], input="Y"
         )
 
         # then
@@ -159,7 +160,7 @@ setup(
 
         # when
         result = self.runner.invoke(
-            fastkit_cli, ["addroute", project_name, route_name], input="N"
+            fastkit_cli, ["addroute", route_name, project_name], input="N"
         )
 
         # then
@@ -192,7 +193,8 @@ setup(
                         "Test Author",
                         "test@example.com",
                         f"Test project for {template}",
-                        "Y",
+                        "Y",  # Proceed with project creation
+                        "Y",  # Create new project folder
                     ]
                 ),
             )
@@ -211,7 +213,7 @@ setup(
 
         # Create a minimal project structure
         src_dir = Path(temp_dir) / "src"
-        src_dir.mkdir()
+        src_dir.mkdir(exist_ok=True)
         main_py = src_dir / "main.py"
         main_py.write_text(
             """
@@ -295,7 +297,8 @@ def read_root():
                     "Test Author",
                     "test@example.com",
                     "Test description",
-                    "Y",
+                    "Y",  # Proceed with project creation
+                    "Y",  # Create new project folder
                 ]
             ),
         )
@@ -325,7 +328,8 @@ def read_root():
                     "test@example.com",
                     "Test description",
                     "minimal",
-                    "Y",
+                    "Y",  # Proceed with project creation
+                    "Y",  # Create new project folder
                 ]
             ),
         )

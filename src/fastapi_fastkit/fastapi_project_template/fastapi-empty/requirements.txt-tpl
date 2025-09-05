@@ -7,3 +7,4 @@ httpx==0.28.1
 black==25.1.0
 isort==6.0.0
 mypy==1.15.0
+setuptools==80.9.0

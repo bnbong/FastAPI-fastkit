@@ -29,6 +29,10 @@ FastAPI-fastkit uses following stacks:
 - isort for import sorting
 - mypy for static type checking
 
+### Current Source Structure (Version 1.X.X+)
+
+![fastkit diagram](docs/img/fastkit_diagram.png)
+
 ### Quick Setup with Makefile
 
 The easiest way to set up your development environment is using our Makefile:
