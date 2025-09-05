@@ -1,5 +1,13 @@
 # Changelog
 
+## v.1.1.2 (2025-09-05)
+
+### Improvements
+
+- add a feature of `fastkit init`, `fastkit startdemo` command to define to make a new project folder at current working directory
+- add `setuptools` package at `fastapi-empty` template's dependency list.
+- add a feature of `fastkit addroute`command to recognize current working project (with cmd option `.`).
+
 ## v1.1.1 (2025-08-15)
 
 ### Improvements

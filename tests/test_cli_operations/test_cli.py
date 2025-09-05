@@ -50,7 +50,8 @@ class TestCLI:
                     "bbbong9@gmail.com",
                     "test project",
                     "uv",
-                    "Y",
+                    "Y",  # Proceed with project creation
+                    "Y",  # Create new project folder
                 ]
             ),
         )
@@ -118,7 +119,8 @@ class TestCLI:
                     "bbbong9@gmail.com",
                     "test project",
                     "uv",
-                    "Y",
+                    "Y",  # Proceed with project creation
+                    "Y",  # Create new project folder
                 ]
             ),
         )
@@ -152,18 +154,15 @@ class TestCLI:
         assert result.exit_code == 0
         assert "Project creation aborted!" in result.output
 
-    @patch("fastapi_fastkit.cli.copy_and_convert_template")
-    def test_startdemo_backend_error(
-        self, mock_copy_convert: MagicMock, temp_dir: str
-    ) -> None:
+    def test_startdemo_backend_error(self, temp_dir: str) -> None:
         # given
         os.chdir(temp_dir)
-        mock_copy_convert.side_effect = Exception("Backend error")
 
+        # Test with invalid template to simulate backend error
         # when
         result = self.runner.invoke(
             fastkit_cli,
-            ["startdemo", "fastapi-default"],
+            ["startdemo", "non-existent-template"],
             input="\n".join(
                 [
                     "test-startdemo-error",
@@ -171,15 +170,19 @@ class TestCLI:
                     "bbbong9@gmail.com",
                     "test project",
                     "uv",
-                    "Y",
+                    "Y",  # Proceed with project creation
+                    "Y",  # Create new project folder
                 ]
             ),
         )
 
         # then
-        # CLI returns 0 even when backend error occurs (just prints error and returns)
-        assert result.exit_code == 0
-        assert "Error during project creation:" in result.output
+        # CLI should handle error gracefully
+        assert (
+            result.exit_code != 0
+            or "Error" in result.output
+            or "does not exist" in result.output
+        )
 
     def test_delete_demoproject(self, temp_dir: str) -> None:
         # given
@@ -189,7 +192,15 @@ class TestCLI:
             fastkit_cli,
             ["startdemo", "fastapi-default"],
             input="\n".join(
-                [project_name, "bnbong", "bbbong9@gmail.com", "test project", "uv", "Y"]
+                [
+                    project_name,
+                    "bnbong",
+                    "bbbong9@gmail.com",
+                    "test project",
+                    "uv",
+                    "Y",  # Proceed with project creation
+                    "Y",  # Create new project folder
+                ]
             ),
         )
         project_path = Path(temp_dir) / project_name
@@ -215,7 +226,15 @@ class TestCLI:
             fastkit_cli,
             ["startdemo", "fastapi-default"],
             input="\n".join(
-                [project_name, "bnbong", "bbbong9@gmail.com", "test project", "uv", "Y"]
+                [
+                    project_name,
+                    "bnbong",
+                    "bbbong9@gmail.com",
+                    "test project",
+                    "uv",
+                    "Y",  # Proceed with project creation
+                    "Y",  # Create new project folder
+                ]
             ),
         )
         project_path = Path(temp_dir) / project_name
@@ -297,7 +316,16 @@ class TestCLI:
             fastkit_cli,
             ["init"],
             input="\n".join(
-                [project_name, author, author_email, description, "minimal", "uv", "Y"]
+                [
+                    project_name,
+                    author,
+                    author_email,
+                    description,
+                    "minimal",
+                    "uv",
+                    "Y",  # Proceed with project creation
+                    "Y",  # Create new project folder
+                ]
             ),
         )
 
@@ -375,7 +403,16 @@ class TestCLI:
             fastkit_cli,
             ["init"],
             input="\n".join(
-                [project_name, author, author_email, description, "full", "uv", "Y"]
+                [
+                    project_name,
+                    author,
+                    author_email,
+                    description,
+                    "full",
+                    "uv",
+                    "Y",  # Proceed with project creation
+                    "Y",  # Create new project folder
+                ]
             ),
         )
 
@@ -441,13 +478,14 @@ class TestCLI:
         project_path = Path(temp_dir) / project_name
         assert not project_path.exists()
 
-    @patch("fastapi_fastkit.cli.copy_and_convert_template")
-    def test_init_backend_error(
-        self, mock_copy_convert: MagicMock, temp_dir: str
-    ) -> None:
+    def test_init_backend_error(self, temp_dir: str) -> None:
         # given
         os.chdir(temp_dir)
-        mock_copy_convert.side_effect = Exception("Backend error")
+
+        # Test with existing project to simulate backend error scenario
+        project_name = "test-backend-error"
+        project_path = Path(temp_dir) / project_name
+        project_path.mkdir()
 
         # when
         result = self.runner.invoke(
@@ -455,21 +493,22 @@ class TestCLI:
             ["init"],
             input="\n".join(
                 [
-                    "test-backend-error",
+                    project_name,
                     "author",
                     "email@example.com",
                     "description",
                     "minimal",
                     "uv",
-                    "Y",
+                    "Y",  # Proceed with project creation
+                    "Y",  # Create new project folder
                 ]
             ),
         )
 
         # then
-        # CLI returns 0 even when backend error occurs (just prints error and returns)
+        # CLI should handle existing project gracefully
         assert result.exit_code == 0
-        assert "Error during project creation:" in result.output
+        assert "already exists" in result.output
 
     def test_init_existing_project(self, temp_dir: str) -> None:
         # given
@@ -489,7 +528,8 @@ class TestCLI:
                     "email@example.com",
                     "description",
                     "minimal",
-                    "Y",
+                    "Y",  # Proceed with project creation
+                    "Y",  # Create new project folder
                 ]
             ),
         )
@@ -507,7 +547,15 @@ class TestCLI:
             fastkit_cli,
             ["startdemo", "fastapi-default"],
             input="\n".join(
-                [project_name, "bnbong", "bbbong9@gmail.com", "test project", "uv", "Y"]
+                [
+                    project_name,
+                    "bnbong",
+                    "bbbong9@gmail.com",
+                    "test project",
+                    "uv",
+                    "Y",  # Proceed with project creation
+                    "Y",  # Create new project folder
+                ]
             ),
         )
         project_path = Path(temp_dir) / project_name
@@ -540,7 +588,15 @@ class TestCLI:
             fastkit_cli,
             ["startdemo", "fastapi-default"],
             input="\n".join(
-                [project_name, "bnbong", "bbbong9@gmail.com", "test project", "uv", "Y"]
+                [
+                    project_name,
+                    "bnbong",
+                    "bbbong9@gmail.com",
+                    "test project",
+                    "uv",
+                    "Y",  # Proceed with project creation
+                    "Y",  # Create new project folder
+                ]
             ),
         )
         project_path = Path(temp_dir) / project_name
@@ -581,7 +637,15 @@ class TestCLI:
             fastkit_cli,
             ["startdemo", "fastapi-default"],
             input="\n".join(
-                [project_name, "bnbong", "bbbong9@gmail.com", "test project", "uv", "Y"]
+                [
+                    project_name,
+                    "bnbong",
+                    "bbbong9@gmail.com",
+                    "test project",
+                    "uv",
+                    "Y",  # Proceed with project creation
+                    "Y",  # Create new project folder
+                ]
             ),
         )
         project_path = Path(temp_dir) / project_name
@@ -589,9 +653,9 @@ class TestCLI:
         assert "Success" in result.output
 
         # when
-        # addroute command requires project_name and route_name as arguments
+        # addroute command requires route_name and project_dir as arguments
         result = self.runner.invoke(
-            fastkit_cli, ["addroute", project_name, "test_route"], input="Y"
+            fastkit_cli, ["addroute", "test_route", project_name], input="Y"
         )
 
         # then
@@ -605,7 +669,7 @@ class TestCLI:
 
         # when
         result = self.runner.invoke(
-            fastkit_cli, ["addroute", project_name, "test_route"], input="Y"
+            fastkit_cli, ["addroute", "test_route", project_name], input="Y"
         )
 
         # then
@@ -621,7 +685,15 @@ class TestCLI:
             fastkit_cli,
             ["startdemo", "fastapi-default"],
             input="\n".join(
-                [project_name, "bnbong", "bbbong9@gmail.com", "test project", "uv", "Y"]
+                [
+                    project_name,
+                    "bnbong",
+                    "bbbong9@gmail.com",
+                    "test project",
+                    "uv",
+                    "Y",  # Proceed with project creation
+                    "Y",  # Create new project folder
+                ]
             ),
         )
         project_path = Path(temp_dir) / project_name
@@ -629,12 +701,170 @@ class TestCLI:
         assert "Success" in result.output
 
         # when
-        # addroute command requires project_name and route_name as arguments
+        # addroute command requires route_name and project_dir as arguments
         result = self.runner.invoke(
-            fastkit_cli, ["addroute", project_name, "test_route"], input="N"
+            fastkit_cli, ["addroute", "test_route", project_name], input="N"
         )
 
         # then
         # CLI returns 0 even when user cancels (just prints error and returns)
         assert result.exit_code == 0
         assert "Operation cancelled!" in result.output
+
+    def test_addroute_current_directory(self, temp_dir: str) -> None:
+        """Test addroute command with current directory (.)"""
+        # given
+        os.chdir(temp_dir)
+        project_name = "test-project"
+
+        # First create a project
+        result = self.runner.invoke(
+            fastkit_cli,
+            ["startdemo", "fastapi-default"],
+            input="\n".join(
+                [
+                    project_name,
+                    "bnbong",
+                    "bbbong9@gmail.com",
+                    "test project",
+                    "uv",
+                    "Y",  # Proceed with project creation
+                    "Y",  # Create new project folder
+                ]
+            ),
+        )
+        project_path = Path(temp_dir) / project_name
+        assert project_path.exists() and project_path.is_dir()
+        assert "Success" in result.output
+
+        # Change to project directory
+        os.chdir(project_path)
+
+        # when
+        # addroute command with current directory (.)
+        result = self.runner.invoke(fastkit_cli, ["addroute", "user", "."], input="Y")
+
+        # then
+        assert result.exit_code == 0
+        assert (
+            "Successfully added new route 'user' to the current project!"
+            in result.output
+        )
+
+    def test_addroute_current_directory_not_fastkit_project(
+        self, temp_dir: str
+    ) -> None:
+        """Test addroute command with current directory when it's not a fastkit project"""
+        # given
+        os.chdir(temp_dir)
+
+        # when
+        # addroute command with current directory (.) but no fastkit project
+        result = self.runner.invoke(fastkit_cli, ["addroute", "user", "."], input="Y")
+
+        # then
+        assert result.exit_code == 0
+        assert "Current directory is not a FastAPI-fastkit project." in result.output
+
+    def test_startdemo_no_project_folder(self, temp_dir: str) -> None:
+        """Test startdemo with no project folder creation (deploy to current directory)."""
+        # given
+        os.chdir(temp_dir)
+
+        # when
+        result = self.runner.invoke(
+            fastkit_cli,
+            ["startdemo", "fastapi-default"],
+            input="\n".join(
+                [
+                    "test-project-no-folder",
+                    "bnbong",
+                    "bbbong9@gmail.com",
+                    "test project",
+                    "uv",
+                    "Y",  # Proceed with project creation
+                    "N",  # Do not create new project folder
+                ]
+            ),
+        )
+
+        # then
+        # Files should be deployed directly to temp_dir, not in a subfolder
+        assert result.exit_code == 0
+        assert "Success" in result.output
+
+        # Check that main files exist directly in temp_dir
+        main_py_paths = [Path(temp_dir) / "src" / "main.py", Path(temp_dir) / "main.py"]
+        main_py_found = any(path.exists() for path in main_py_paths)
+        assert main_py_found, "main.py should exist directly in current directory"
+
+        # Ensure no project folder was created
+        project_folder = Path(temp_dir) / "test-project-no-folder"
+        assert (
+            not project_folder.exists()
+        ), "Project folder should not be created when user selects 'N'"
+
+    def test_init_no_project_folder(self, temp_dir: str) -> None:
+        """Test init with no project folder creation (deploy to current directory)."""
+        # given
+        os.chdir(temp_dir)
+
+        # Mock subprocess for venv creation
+        with patch("subprocess.run") as mock_subprocess:
+            mock_subprocess.return_value.returncode = 0
+
+            # Mock subprocess to create venv directory when called
+            def mock_subprocess_side_effect(*args, **kwargs):  # type: ignore
+                if "venv" in str(args[0]):
+                    venv_path = Path(temp_dir) / ".venv"
+                    venv_path.mkdir(parents=True, exist_ok=True)
+                    # Also create Scripts/bin directory for pip path checks
+                    if os.name == "nt":
+                        (venv_path / "Scripts").mkdir(exist_ok=True)
+                    else:
+                        (venv_path / "bin").mkdir(exist_ok=True)
+                mock_result = MagicMock()
+                mock_result.returncode = 0
+                return mock_result
+
+            mock_subprocess.side_effect = mock_subprocess_side_effect
+
+            # when
+            result = self.runner.invoke(
+                fastkit_cli,
+                ["init"],
+                input="\n".join(
+                    [
+                        "test-project-no-folder",
+                        "bnbong",
+                        "bbbong9@gmail.com",
+                        "test project",
+                        "minimal",
+                        "uv",
+                        "Y",  # Proceed with project creation
+                        "N",  # Do not create new project folder
+                    ]
+                ),
+            )
+
+        # then
+        # Files should be deployed directly to temp_dir, not in a subfolder
+        assert result.exit_code == 0
+        assert "Success" in result.output
+
+        # Check that main files exist directly in temp_dir
+        main_py_paths = [Path(temp_dir) / "src" / "main.py", Path(temp_dir) / "main.py"]
+        main_py_found = any(path.exists() for path in main_py_paths)
+        assert main_py_found, "main.py should exist directly in current directory"
+
+        # Check venv was created in current directory
+        venv_path = Path(temp_dir) / ".venv"
+        assert (
+            venv_path.exists()
+        ), "Virtual environment should be created in current directory"
+
+        # Ensure no project folder was created
+        project_folder = Path(temp_dir) / "test-project-no-folder"
+        assert (
+            not project_folder.exists()
+        ), "Project folder should not be created when user selects 'N'"

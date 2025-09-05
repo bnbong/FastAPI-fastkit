@@ -867,3 +867,96 @@ def read_root():
         ):
             with pytest.raises(BackendExceptions, match="Failed to add new route"):
                 add_new_route(project_dir, "test_route")
+
+
+class TestProjectFolderFunctions:
+    """Test cases for project folder creation functions."""
+
+    def test_ask_create_project_folder(self) -> None:
+        """Test ask_create_project_folder function exists and is callable."""
+        from fastapi_fastkit.backend.main import ask_create_project_folder
+
+        # This function uses click.confirm which requires a terminal in real usage
+        # In tests, we verify it exists and is callable
+        assert callable(ask_create_project_folder)
+
+    def test_get_deployment_success_message(self) -> None:
+        """Test get_deployment_success_message function."""
+        from fastapi_fastkit.backend.main import get_deployment_success_message
+
+        # Test with folder creation
+        message_with_folder = get_deployment_success_message(
+            "fastapi-default", "test-project", "/tmp", True
+        )
+        assert "test-project" in message_with_folder
+        assert "fastapi-default" in message_with_folder
+        assert "created and saved" in message_with_folder
+
+        # Test without folder creation
+        message_without_folder = get_deployment_success_message(
+            "fastapi-default", "test-project", "/tmp", False
+        )
+        assert "test-project" in message_without_folder
+        assert "fastapi-default" in message_without_folder
+        assert "deployed directly" in message_without_folder
+
+        # Messages should be different
+        assert message_with_folder != message_without_folder
+
+    @patch("fastapi_fastkit.backend.main.copy_and_convert_template")
+    @patch("click.echo")
+    def test_deploy_template_with_folder_option_create_folder(
+        self, mock_echo: MagicMock, mock_copy_template: MagicMock
+    ) -> None:
+        """Test deploy_template_with_folder_option with folder creation."""
+        from fastapi_fastkit.backend.main import deploy_template_with_folder_option
+
+        # given
+        target_template = "/path/to/template"
+        user_local = "/tmp"  # Use /tmp instead of /user to avoid permission issues
+        project_name = "test-project"
+        create_folder = True
+
+        # when
+        project_dir, deployment_message = deploy_template_with_folder_option(
+            target_template, user_local, project_name, create_folder
+        )
+
+        # then
+        expected_project_dir = "/tmp/test-project"
+        assert project_dir == expected_project_dir
+        assert "test-project" in deployment_message
+        assert "folder" in deployment_message
+
+        # Verify copy_and_convert_template was called with correct params
+        mock_copy_template.assert_called_once_with(
+            target_template, user_local, project_name
+        )
+        mock_echo.assert_called_once()
+
+    @patch("fastapi_fastkit.backend.main.copy_and_convert_template")
+    @patch("click.echo")
+    def test_deploy_template_with_folder_option_no_folder(
+        self, mock_echo: MagicMock, mock_copy_template: MagicMock
+    ) -> None:
+        """Test deploy_template_with_folder_option without folder creation."""
+        from fastapi_fastkit.backend.main import deploy_template_with_folder_option
+
+        # given
+        target_template = "/path/to/template"
+        user_local = "/tmp"  # Use /tmp instead of /user to avoid permission issues
+        project_name = "test-project"
+        create_folder = False
+
+        # when
+        project_dir, deployment_message = deploy_template_with_folder_option(
+            target_template, user_local, project_name, create_folder
+        )
+
+        # then
+        assert project_dir == user_local
+        assert "directly" in deployment_message
+
+        # Verify copy_and_convert_template was called with empty project name
+        mock_copy_template.assert_called_once_with(target_template, user_local, "")
+        mock_echo.assert_called_once()

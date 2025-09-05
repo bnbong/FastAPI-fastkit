@@ -1,3 +1,4 @@
+# TODO : add a feature to automatically fix appropriate fastkit output console size
 # --------------------------------------------------------------------------
 # The Module defines main and core CLI operations for FastAPI-fastkit.
 #
@@ -17,14 +18,16 @@ from rich.panel import Panel
 
 from fastapi_fastkit.backend.main import (
     add_new_route,
+    ask_create_project_folder,
     create_venv_with_manager,
+    deploy_template_with_folder_option,
     find_template_core_modules,
     generate_dependency_file_with_manager,
+    get_deployment_success_message,
     inject_project_metadata,
     install_dependencies_with_manager,
     read_template_stack,
 )
-from fastapi_fastkit.backend.transducer import copy_and_convert_template
 from fastapi_fastkit.core.exceptions import CLIExceptions
 from fastapi_fastkit.core.settings import FastkitConfig
 from fastapi_fastkit.utils.logging import get_logger, setup_logging
@@ -191,6 +194,7 @@ def startdemo(
     """
     Create a new FastAPI project from templates and inject metadata.
     """
+    # TODO : add --template-name option to specify the template name
     settings = ctx.obj["settings"]
 
     template_dir = settings.FASTKIT_TEMPLATE_ROOT
@@ -258,25 +262,27 @@ def startdemo(
         print_error("Project creation aborted!")
         return
 
+    # Ask user whether to create a new project folder
+    create_project_folder = ask_create_project_folder(project_name)
+
     try:
         user_local = settings.USER_WORKSPACE
-        project_dir = os.path.join(user_local, project_name)
 
-        click.echo(f"FastAPI template project will deploy at '{user_local}'")
-
-        copy_and_convert_template(target_template, user_local, project_name)
+        project_dir, _ = deploy_template_with_folder_option(
+            target_template, user_local, project_name, create_project_folder
+        )
 
         inject_project_metadata(
             project_dir, project_name, author, author_email, description
         )
 
-        # Create virtual environment and install dependencies with selected package manager
         venv_path = create_venv_with_manager(project_dir, package_manager)
         install_dependencies_with_manager(project_dir, venv_path, package_manager)
 
-        print_success(
-            f"FastAPI project '{project_name}' from '{template}' has been created and saved to {user_local}!"
+        success_message = get_deployment_success_message(
+            template, project_name, user_local, create_project_folder
         )
+        print_success(success_message)
 
     except Exception as e:
         if settings.DEBUG_MODE:
@@ -323,8 +329,11 @@ def init(
 ) -> None:
     """
     Start a empty FastAPI project setup.
+
     This command will automatically create a new FastAPI project directory and a python virtual environment.
+
     Dependencies will be automatically installed based on the selected stack at venv.
+
     Project metadata will be injected to the project files.
     """
     settings = ctx.obj["settings"]
@@ -402,13 +411,15 @@ def init(
         print_error("Project creation aborted!")
         return
 
+    # Ask user whether to create a new project folder
+    create_project_folder = ask_create_project_folder(project_name)
+
     try:
         user_local = settings.USER_WORKSPACE
-        project_dir = os.path.join(user_local, project_name)
 
-        click.echo(f"FastAPI project will deploy at '{user_local}'")
-
-        copy_and_convert_template(target_template, user_local, project_name)
+        project_dir, _ = deploy_template_with_folder_option(
+            target_template, user_local, project_name, create_project_folder
+        )
 
         inject_project_metadata(
             project_dir, project_name, author, author_email, description
@@ -439,9 +450,10 @@ def init(
         venv_path = create_venv_with_manager(project_dir, package_manager)
         install_dependencies_with_manager(project_dir, venv_path, package_manager)
 
-        print_success(
-            f"FastAPI project '{project_name}' has been created successfully and saved to {user_local}!"
+        success_message = get_deployment_success_message(
+            template, project_name, user_local, create_project_folder
         )
+        print_success(success_message)
 
         print_info(
             "To start your project, run 'fastkit runserver' at newly created FastAPI project directory"
@@ -457,25 +469,43 @@ def init(
 
 
 @fastkit_cli.command()
-@click.argument("project_name")
 @click.argument("route_name")
+@click.argument("project_dir", default=".")
 @click.pass_context
-def addroute(ctx: Context, project_name: str, route_name: str) -> None:
+def addroute(ctx: Context, route_name: str, project_dir: str) -> None:
     """
     Add a new route to the FastAPI project.
+
+    Examples:\n
+        fastkit addroute user .          # Add 'user' route to current directory
+        fastkit addroute user my_project # Add 'user' route to 'my_project' in workspace
     """
     settings = ctx.obj["settings"]
-    user_local = settings.USER_WORKSPACE
-    project_dir = os.path.join(user_local, project_name)
+
+    if project_dir == ".":
+        actual_project_dir = os.getcwd()
+        project_name = os.path.basename(actual_project_dir)
+    else:
+        user_local = settings.USER_WORKSPACE
+        actual_project_dir = os.path.join(user_local, project_dir)
+        project_name = project_dir
 
     # Check if project exists
-    if not os.path.exists(project_dir):
-        print_error(f"Project '{project_name}' does not exist in '{user_local}'.")
+    if not os.path.exists(actual_project_dir):
+        if project_dir == ".":
+            print_error("Current directory is not a valid project directory.")
+        else:
+            print_error(
+                f"Project '{project_dir}' does not exist in '{settings.USER_WORKSPACE}'."
+            )
         return
 
     # Verify it's a fastkit project
-    if not is_fastkit_project(project_dir):
-        print_error(f"'{project_name}' is not a FastAPI-fastkit project.")
+    if not is_fastkit_project(actual_project_dir):
+        if project_dir == ".":
+            print_error("Current directory is not a FastAPI-fastkit project.")
+        else:
+            print_error(f"'{project_dir}' is not a FastAPI-fastkit project.")
         return
 
     # Validate route name
@@ -499,26 +529,34 @@ def addroute(ctx: Context, project_name: str, route_name: str) -> None:
             {
                 "Project": project_name,
                 "Route Name": route_name,
-                "Target Directory": project_dir,
+                "Target Directory": actual_project_dir,
             },
         )
         console.print(table)
 
-        # Confirm before proceeding
-        confirm = click.confirm(
-            f"\nDo you want to add route '{route_name}' to project '{project_name}'?",
-            default=True,
-        )
+        if project_dir == ".":
+            confirm_message = (
+                f"\nDo you want to add route '{route_name}' to the current project?"
+            )
+        else:
+            confirm_message = f"\nDo you want to add route '{route_name}' to project '{project_name}'?"
+
+        confirm = click.confirm(confirm_message, default=True)
         if not confirm:
             print_error("Operation cancelled!")
             return
 
         # Add the new route
-        add_new_route(project_dir, route_name)
+        add_new_route(actual_project_dir, route_name)
 
-        print_success(
-            f"Successfully added new route '{route_name}' to project `{project_name}`"
-        )
+        if project_dir == ".":
+            print_success(
+                f"Successfully added new route '{route_name}' to the current project!"
+            )
+        else:
+            print_success(
+                f"Successfully added new route '{route_name}' to project '{project_name}'!"
+            )
 
     except Exception as e:
         logger = get_logger()
