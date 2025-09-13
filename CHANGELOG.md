@@ -1,6 +1,13 @@
 # Changelog
 
-## v.1.1.2 (2025-09-05)
+## v1.1.3 (2025-09-13)
+
+### Templates
+
+- add `fastapi-single-module` template
+- update `fastapi-psql-orm` template : fix dockerfile & docker-compose.yml scripts errors
+
+## v1.1.2 (2025-09-05)
 
 ### Improvements
 
