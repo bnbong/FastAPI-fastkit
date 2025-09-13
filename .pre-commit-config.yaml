@@ -32,6 +32,13 @@ repos:
         types: [python]
         pass_filenames: false
 
+    -   id: inspect-templates
+        name: inspect changed fastapi templates
+        entry: python scripts/inspect-changed-templates.py
+        language: system
+        pass_filenames: false
+        stages: [commit]
+
 ci:
     autofix_commit_msg: 🎨 [pre-commit.ci] Auto format from pre-commit.com hooks
     autoupdate_commit_msg: ⬆ [pre-commit.ci] pre-commit autoupdate

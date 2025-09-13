@@ -1,0 +1,16 @@
+# --------------------------------------------------------------------------
+# Main endpoint testcases
+# --------------------------------------------------------------------------
+from fastapi.testclient import TestClient
+
+
+def test_root(client: TestClient) -> None:
+    res = client.get("/")
+    assert res.status_code == 200
+    assert res.json()["message"].startswith("Hello from FastAPI Single Module")
+
+
+def test_health(client: TestClient) -> None:
+    res = client.get("/health")
+    assert res.status_code == 200
+    assert res.json() == {"status": "healthy"}

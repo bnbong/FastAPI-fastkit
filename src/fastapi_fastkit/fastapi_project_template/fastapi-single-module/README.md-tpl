@@ -1,0 +1,37 @@
+# FastAPI Single Module Template
+
+This template provides a minimal FastAPI application that runs with a single `main.py` module.
+
+## Structure
+```
+.
+├── README.md
+├── requirements.txt
+├── pyproject.toml
+├── setup.py
+├── setup.cfg
+├── src/
+│   └── main.py
+└── tests/
+    ├── conftest.py
+    └── test_main.py
+```
+
+## Run
+```bash
+uvicorn src.main:app --reload
+```
+
+## Requirements
+- Python >= 3.9
+- FastAPI, Uvicorn
+
+# Project Origin
+
+This project was created based on the template from the [FastAPI-fastkit](https://github.com/bnbong/FastAPI-fastkit) project.
+
+The `FastAPI-fastkit` is an open-source project that helps Python and FastAPI beginners quickly set up a FastAPI-based application development environment in a framework-like structure.
+
+### Template Information
+- Template creator: [bnbong](mailto:bbbong9@gmail.com)
+- FastAPI-fastkit project maintainer: [bnbong](mailto:bbbong9@gmail.com)

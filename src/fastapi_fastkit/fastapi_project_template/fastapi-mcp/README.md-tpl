@@ -190,10 +190,12 @@ Once the server is running, visit:
 The application exposes the following tools and endpoints via MCP:
 
 ### MCP-Specific Endpoints
+
 - **mcp_hello**: Simple hello world endpoint (`/mcp-routes/hello`)
 - **mcp_status**: MCP configuration status (`/mcp-routes/status`)
 
 ### API Endpoints via MCP
+
 - **get_items**: List items with pagination
 - **get_item**: Get specific item by ID
 - **create_item**: Create new item (requires auth)
@@ -229,21 +231,19 @@ COPY scripts/ scripts/
 CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run tests and linting
-5. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License.
-
 ## Support
 
 For support and questions:
 - Create an issue in the repository
 - Check the FastAPI documentation: https://fastapi.tiangolo.com/
 - Check the FastAPI-MCP documentation: https://github.com/tadata-org/fastapi_mcp
+
+# Project Origin
+
+This project was created based on the template from the [FastAPI-fastkit](https://github.com/bnbong/FastAPI-fastkit) project.
+
+The `FastAPI-fastkit` is an open-source project that helps Python and FastAPI beginners quickly set up a FastAPI-based application development environment in a framework-like structure.
+
+### Template Information
+- Template creator: [bnbong](mailto:bbbong9@gmail.com)
+- FastAPI-fastkit project maintainer: [bnbong](mailto:bbbong9@gmail.com)

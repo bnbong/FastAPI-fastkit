@@ -1,0 +1,17 @@
+from setuptools import setup
+
+install_requires: list[str] = [
+    "fastapi",
+    "uvicorn",
+]
+
+description = "[FastAPI-fastkit templated] <description>"
+
+setup(
+    name="<project_name>",
+    description=description,
+    author="<author>",
+    author_email=f"<author_email>",
+    packages=["src"],
+    install_requires=install_requires,
+)

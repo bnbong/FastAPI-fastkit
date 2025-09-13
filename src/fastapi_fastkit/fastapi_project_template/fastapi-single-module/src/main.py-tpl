@@ -1,0 +1,16 @@
+# --------------------------------------------------------------------------
+# Main server application module
+# --------------------------------------------------------------------------
+from fastapi import FastAPI
+
+app = FastAPI(title="<project_name>")
+
+
+@app.get("/")
+async def root() -> dict[str, str]:
+    return {"message": "Hello from FastAPI Single Module!"}
+
+
+@app.get("/health")
+async def health() -> dict[str, str]:
+    return {"status": "healthy"}
