@@ -40,7 +40,7 @@ class TestUtilsMain:
         test_message = "Test message"
 
         # when & then
-        with patch("fastapi_fastkit.console.print") as mock_console_print:
+        with patch("fastapi_fastkit.utils.main.console.print") as mock_console_print:
             print_error(test_message)
             print_info(test_message)
             print_success(test_message)
@@ -55,7 +55,7 @@ class TestUtilsMain:
         error_message = "Critical error occurred"
 
         # when
-        with patch("fastapi_fastkit.console.print") as mock_console_print:
+        with patch("fastapi_fastkit.utils.main.console.print") as mock_console_print:
             print_error(error_message)
 
             # then
@@ -70,7 +70,7 @@ class TestUtilsMain:
         success_message = "Operation completed successfully"
 
         # when
-        with patch("fastapi_fastkit.console.print") as mock_console_print:
+        with patch("fastapi_fastkit.utils.main.console.print") as mock_console_print:
             print_success(success_message)
 
             # then
@@ -85,7 +85,7 @@ class TestUtilsMain:
         warning_message = "This is a warning"
 
         # when
-        with patch("fastapi_fastkit.console.print") as mock_console_print:
+        with patch("fastapi_fastkit.utils.main.console.print") as mock_console_print:
             print_warning(warning_message)
 
             # then
@@ -100,7 +100,7 @@ class TestUtilsMain:
         info_message = "Information message"
 
         # when
-        with patch("fastapi_fastkit.console.print") as mock_console_print:
+        with patch("fastapi_fastkit.utils.main.console.print") as mock_console_print:
             print_info(info_message)
 
             # then

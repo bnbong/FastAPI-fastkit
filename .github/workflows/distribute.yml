@@ -27,8 +27,7 @@ jobs:
         run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
       - name: Update version in __init__.py
-        run: |
-          echo "__version__ = '${{ steps.tag.outputs.TAG_NAME }}'" > src/fastapi_fastkit/__init__.py
+        run: echo "__version__ = '${{ steps.tag.outputs.TAG_NAME }}'" > src/fastapi_fastkit/__init__.py
 
       - name: Build package
         run: pdm build

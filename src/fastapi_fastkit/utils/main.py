@@ -15,7 +15,6 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
-from fastapi_fastkit import console
 from fastapi_fastkit.core.settings import settings
 from fastapi_fastkit.utils.logging import debug_log, get_logger
 
@@ -23,6 +22,66 @@ logger = get_logger(__name__)
 
 # Email validation regex pattern
 REGEX = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b"
+
+
+def get_optimal_console_size() -> tuple[int, int]:
+    """
+    Get optimal console size based on terminal dimensions.
+
+    Returns:
+        tuple: (width, height) - optimal console dimensions
+    """
+    try:
+        # Get terminal size
+        terminal_size = os.get_terminal_size()
+        width = terminal_size.columns
+        height = terminal_size.lines
+
+        # Set minimum and maximum constraints
+        min_width = 80
+        max_width = 120
+        min_height = 24
+
+        # Calculate optimal width (80% of terminal width, but within constraints)
+        optimal_width = max(min_width, min(max_width, int(width * 0.8)))
+        # Calculate optimal height (leave some space for prompt and buffer)
+        optimal_height = max(min_height, height - 5)
+
+        return optimal_width, optimal_height
+    except (OSError, ValueError):
+        # Fallback to default size if terminal size detection fails
+        return 80, 24
+
+
+def create_adaptive_console() -> Console:
+    """
+    Create a console instance with adaptive sizing based on terminal dimensions.
+
+    Returns:
+        Console: Rich console instance with optimal sizing
+    """
+    if "PYTEST_CURRENT_TEST" in os.environ:
+        return Console(no_color=True)
+
+    width, height = get_optimal_console_size()
+    return Console(width=width, height=height)
+
+
+# Initialize console with adaptive sizing
+console = create_adaptive_console()
+
+
+def _get_adaptive_panel_width(message: str) -> int:
+    """
+    Calculate optimal panel width based on message length and terminal size.
+
+    :param message: Message content
+    :return: Optimal panel width
+    """
+    optimal_width, _ = get_optimal_console_size()
+    # Use message length + padding, but constrain to reasonable bounds
+    min_width = min(len(message) + 10, optimal_width - 4)
+    return max(40, min_width)  # Minimum 40 chars, leave margin for borders
 
 
 def print_error(
@@ -42,7 +101,9 @@ def print_error(
     error_text = Text()
     error_text.append("❌ ", style="bold red")
     error_text.append(message)
-    console.print(Panel(error_text, border_style="red", title=title))
+
+    panel_width = _get_adaptive_panel_width(message)
+    console.print(Panel(error_text, border_style="red", title=title, width=panel_width))
 
     # Log error for debugging purposes (internal logging)
     debug_log(f"Error: {message}", "error")
@@ -81,7 +142,11 @@ def print_success(
     success_text = Text()
     success_text.append("✨ ", style="bold yellow")
     success_text.append(message, style="bold green")
-    console.print(Panel(success_text, border_style="green", title=title))
+
+    panel_width = _get_adaptive_panel_width(message)
+    console.print(
+        Panel(success_text, border_style="green", title=title, width=panel_width)
+    )
 
 
 def print_warning(
@@ -97,7 +162,11 @@ def print_warning(
     warning_text = Text()
     warning_text.append("⚠️ ", style="bold yellow")
     warning_text.append(message)
-    console.print(Panel(warning_text, border_style="yellow", title=title))
+
+    panel_width = _get_adaptive_panel_width(message)
+    console.print(
+        Panel(warning_text, border_style="yellow", title=title, width=panel_width)
+    )
 
 
 def print_info(message: str, title: str = "Info", console: Console = console) -> None:
@@ -111,7 +180,9 @@ def print_info(message: str, title: str = "Info", console: Console = console) ->
     info_text = Text()
     info_text.append("ℹ ", style="bold blue")
     info_text.append(message)
-    console.print(Panel(info_text, border_style="blue", title=title))
+
+    panel_width = _get_adaptive_panel_width(message)
+    console.print(Panel(info_text, border_style="blue", title=title, width=panel_width))
 
 
 def create_info_table(
@@ -121,7 +192,7 @@ def create_info_table(
     console: Console = console,
 ) -> Table:
     """
-    Create a table for displaying information.
+    Create a table for displaying information that never truncates text.
 
     :param title: Title for the table
     :param data: Dictionary of data to populate the table
@@ -129,13 +200,53 @@ def create_info_table(
     :param console: Rich console instance
     :return: Configured Rich Table instance
     """
-    table = Table(title=title, show_header=show_header, title_style="bold magenta")
-    table.add_column("Field", style="cyan")
-    table.add_column("Value", style="green")
+    # Calculate exact content lengths if data exists
+    if data:
+        max_field_length = max(len(str(key)) for key in data.keys())
+        max_value_length = max(len(str(value)) for value in data.values())
+
+        # Set column widths to exactly match the longest content
+        # Add small padding to ensure content fits comfortably
+        field_width = max_field_length + 2
+        value_width = max_value_length + 2
+    else:
+        # Default widths for empty tables
+        field_width = 15
+        value_width = 30
+
+    # Create table that prioritizes full text display over terminal fitting
+    table = Table(
+        title=title,
+        show_header=show_header,
+        title_style="bold magenta",
+        expand=False,  # Never expand to terminal width
+        width=None,  # Let table size itself based on content
+        pad_edge=False,  # Reduce padding to save space
+    )
+
+    # Add columns with settings that prevent any truncation
+    table.add_column(
+        "Field",
+        style="cyan",
+        no_wrap=False,  # Allow wrapping instead of truncating
+        width=field_width,  # Exact width for content
+        min_width=field_width,  # Minimum width to prevent shrinking
+        max_width=None,  # No maximum width limit
+        overflow="fold",  # Fold text instead of truncating
+    )
+    table.add_column(
+        "Value",
+        style="green",
+        no_wrap=False,  # Allow wrapping instead of truncating
+        width=value_width,  # Exact width for content
+        min_width=value_width,  # Minimum width to prevent shrinking
+        max_width=None,  # No maximum width limit
+        overflow="fold",  # Fold text instead of truncating
+    )
 
     if data:
         for key, value in data.items():
-            table.add_row(key, value)
+            table.add_row(str(key), str(value))
 
     return table
 
