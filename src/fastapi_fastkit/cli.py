@@ -1,4 +1,3 @@
-# TODO : add a feature to automatically fix appropriate fastkit output console size
 # --------------------------------------------------------------------------
 # The Module defines main and core CLI operations for FastAPI-fastkit.
 #
@@ -31,6 +30,7 @@ from fastapi_fastkit.backend.main import (
 from fastapi_fastkit.core.exceptions import CLIExceptions
 from fastapi_fastkit.core.settings import FastkitConfig
 from fastapi_fastkit.utils.logging import get_logger, setup_logging
+from fastapi_fastkit.utils.main import console as utils_console
 from fastapi_fastkit.utils.main import (
     create_info_table,
     is_fastkit_project,
@@ -41,7 +41,9 @@ from fastapi_fastkit.utils.main import (
     validate_email,
 )
 
-from . import __version__, console
+console = utils_console
+
+from . import __version__
 
 
 @click.group()
@@ -97,6 +99,7 @@ def echo(ctx: Context) -> None:
     Deploy FastAPI app foundation instantly at your local!
 
     ---
+
     - Project Maintainer : [link=mailto:bbbong9@gmail.com]bnbong(JunHyeok Lee)[/link]
     - Current Version : {__version__}
     - Github : [link]https://github.com/bnbong/FastAPI-fastkit[/link]
@@ -135,8 +138,7 @@ def list_templates(ctx: Context) -> None:
         print_warning("No available templates.")
         return
 
-    table = create_info_table("Available Templates")
-
+    template_data = {}
     for template in templates:
         template_path = os.path.join(template_dir, template)
         readme_path = os.path.join(template_path, "README.md-tpl")
@@ -148,8 +150,9 @@ def list_templates(ctx: Context) -> None:
                 if first_line.startswith("# "):
                     description = first_line[2:]
 
-        table.add_row(template, description)
+        template_data[template] = description
 
+    table = create_info_table("Available Templates", template_data)
     console.print(table)
 
 

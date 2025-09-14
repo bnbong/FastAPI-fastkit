@@ -1,5 +1,35 @@
 # Changelog
 
+## v1.1.5 (2025-09-14)
+
+### Improvements
+
+- **Adaptive Console Sizing**: Enhanced terminal output display
+  - Console width is 80% of terminal width, capped at 120 characters
+  - Console height is terminal height minus buffer (5 lines)
+  - Automatic terminal size detection with fallback to default sizes (80x24)
+  - Dynamic sizing based on actual terminal dimensions
+
+### Fixes
+
+- **Text Truncation Prevention**: Completely eliminated text truncation in CLI output
+  - Template names and descriptions are now fully displayed without "..." truncation
+  - Table columns automatically adjust to content length to prevent text cutting
+  - Added `overflow="fold"` and `no_wrap=False` settings to Rich tables
+  - Template listing now shows complete template names (e.g., `fastapi-custom-response` instead of `fastapi-custom-respo...`)
+- **Fixing the object `console` not found error**
+  - this critical error was occurred every version before this version.
+  - this error was occurred because of the mismatched logic between distribute github actions workflow and the top `__init__.py` file of fastkit project package.
+  - This issue was discovered during the development of version 1.1.2, and I spent a lot of time troubleshooting it. I believe this was due to my lack of development experience. I sincerely apologize.
+
+## v1.1.4 (deprecated)
+
+this version was hotfix build, but it is deprecated.
+
+The issues that were being addressed during the development of this version remained unresolved and were fixed in version v1.1.5.
+
+For more details, please refer to the CHANGELOG.md file for v1.1.5.
+
 ## v1.1.3 (2025-09-13)
 
 ### Templates

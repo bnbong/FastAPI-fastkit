@@ -8,10 +8,14 @@ import subprocess
 import sys
 from typing import List
 
-from fastapi_fastkit import console
 from fastapi_fastkit.core.exceptions import BackendExceptions
 from fastapi_fastkit.utils.logging import debug_log, get_logger
-from fastapi_fastkit.utils.main import handle_exception, print_error, print_success
+from fastapi_fastkit.utils.main import (
+    console,
+    handle_exception,
+    print_error,
+    print_success,
+)
 
 from .base import BasePackageManager
 
