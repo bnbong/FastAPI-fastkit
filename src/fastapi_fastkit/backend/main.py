@@ -9,7 +9,6 @@ from typing import Dict, List
 
 import click
 
-from fastapi_fastkit import console
 from fastapi_fastkit.backend.package_managers import PackageManagerFactory
 from fastapi_fastkit.backend.transducer import (
     copy_and_convert_template,
