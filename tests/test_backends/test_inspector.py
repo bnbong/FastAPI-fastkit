@@ -5,7 +5,9 @@
 # --------------------------------------------------------------------------
 import json
 import os
+import subprocess
 import tempfile
+import unittest.mock
 from pathlib import Path
 from unittest.mock import MagicMock, mock_open, patch
 
@@ -80,7 +82,10 @@ def test_example():
         assert inspector.template_path == self.template_path
         assert inspector.errors == []
         assert inspector.warnings == []
-        assert inspector.temp_dir.endswith("temp")
+        # Check that temp_dir uses template name for uniqueness
+        template_name = Path(self.template_path).name
+        expected_temp_dir = f"temp_{template_name}"
+        assert inspector.temp_dir.endswith(expected_temp_dir)
 
     def test_check_file_structure_valid(self) -> None:
         """Test _check_file_structure with valid structure."""
@@ -1409,3 +1414,215 @@ def create_fastapi():
 
         # then
         assert result is False
+
+    def test_context_manager_cleanup_existing_temp_dir(self) -> None:
+        """Test context manager cleans up existing temp directory before creating new one."""
+        # given
+        self.create_valid_template_structure()
+
+        # First, create an inspector to get the temp_dir path
+        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
+            inspector = TemplateInspector(str(self.template_path))
+            temp_dir_path = inspector.temp_dir
+
+            # Create the temp directory manually to simulate existing directory
+            os.makedirs(temp_dir_path, exist_ok=True)
+
+            # Create a file in the temp directory to verify it gets cleaned up
+            test_file = os.path.join(temp_dir_path, "test_file.txt")
+            with open(test_file, "w") as f:
+                f.write("test content")
+
+            assert os.path.exists(test_file)
+
+        # when
+        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
+            with TemplateInspector(str(self.template_path)) as inspector:
+                # Should be properly initialized
+                assert inspector.template_path == self.template_path
+                assert inspector._cleanup_needed is True
+                assert os.path.exists(inspector.temp_dir)
+
+                # The temp directory should be clean (no previous test file)
+                test_file = os.path.join(inspector.temp_dir, "test_file.txt")
+                assert not os.path.exists(test_file)
+
+        # then
+        # The test verifies that existing temp directory gets cleaned up
+        # and new one is created properly
+
+    @patch(
+        "fastapi_fastkit.backend.inspector.TemplateInspector._cleanup_docker_services"
+    )
+    @patch("shutil.rmtree")
+    @patch("time.sleep")
+    def test_cleanup_method_with_retry_mechanism(
+        self,
+        mock_sleep: MagicMock,
+        mock_rmtree: MagicMock,
+        mock_docker_cleanup: MagicMock,
+    ) -> None:
+        """Test _cleanup method with retry mechanism for directory removal."""
+        # given
+        self.create_valid_template_structure()
+
+        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
+            inspector = TemplateInspector(str(self.template_path))
+            inspector._cleanup_needed = True
+
+            # Create mock temp directory
+            import tempfile
+
+            mock_temp_dir = tempfile.mkdtemp()
+            inspector.temp_dir = mock_temp_dir
+
+        # Mock shutil.rmtree to fail twice, then succeed, then succeed again for cleanup
+        mock_rmtree.side_effect = [
+            OSError("Permission denied"),  # First attempt fails
+            OSError("Device busy"),  # Second attempt fails
+            None,  # Third attempt succeeds
+            None,  # Fourth attempt for manual cleanup
+        ]
+
+        # when
+        inspector._cleanup()
+
+        # then
+        assert inspector._cleanup_needed is False
+        assert mock_docker_cleanup.called
+        assert (
+            mock_sleep.call_count == 3
+        )  # Should sleep twice (between retries) + once after Docker cleanup
+        assert mock_rmtree.call_count == 3  # Should try 3 times
+
+        # Manual cleanup for test - this will use the 4th side_effect
+        import shutil
+
+        shutil.rmtree(mock_temp_dir, ignore_errors=True)
+
+    @patch(
+        "fastapi_fastkit.backend.inspector.TemplateInspector._cleanup_docker_services"
+    )
+    @patch("shutil.rmtree")
+    @patch("time.sleep")
+    def test_cleanup_method_max_retries_exceeded(
+        self,
+        mock_sleep: MagicMock,
+        mock_rmtree: MagicMock,
+        mock_docker_cleanup: MagicMock,
+    ) -> None:
+        """Test _cleanup method when max retries are exceeded."""
+        # given
+        self.create_valid_template_structure()
+
+        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
+            inspector = TemplateInspector(str(self.template_path))
+            inspector._cleanup_needed = True
+
+            # Create mock temp directory
+            import tempfile
+
+            mock_temp_dir = tempfile.mkdtemp()
+            inspector.temp_dir = mock_temp_dir
+
+        # Mock shutil.rmtree to always fail, but succeed for manual cleanup
+        mock_rmtree.side_effect = [
+            OSError("Permission denied"),  # First attempt fails
+            OSError("Permission denied"),  # Second attempt fails
+            OSError("Permission denied"),  # Third attempt fails
+            None,  # Manual cleanup succeeds
+        ]
+
+        # when
+        inspector._cleanup()
+
+        # then
+        assert inspector._cleanup_needed is False
+        assert mock_docker_cleanup.called
+        assert (
+            mock_sleep.call_count == 3
+        )  # Should sleep twice (between retries) + once after Docker cleanup
+        assert mock_rmtree.call_count == 3  # Should try 3 times and give up
+
+        # Manual cleanup for test
+        import shutil
+
+        shutil.rmtree(mock_temp_dir, ignore_errors=True)
+
+    @patch("subprocess.run")
+    def test_cleanup_docker_services_success(self, mock_run: MagicMock) -> None:
+        """Test _cleanup_docker_services with successful cleanup."""
+        # given
+        self.create_valid_template_structure()
+
+        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
+            inspector = TemplateInspector(str(self.template_path))
+            inspector.temp_dir = str(self.template_path)
+
+        # Mock successful Docker cleanup commands
+        mock_run.return_value = MagicMock(returncode=0)
+
+        # when
+        inspector._cleanup_docker_services()
+
+        # then
+        # Should call docker-compose down with proper arguments
+        expected_calls = [
+            unittest.mock.call(
+                ["docker-compose", "down", "-v", "--remove-orphans"],
+                cwd=str(self.template_path),
+                capture_output=True,
+                text=True,
+                timeout=60,
+            ),
+            unittest.mock.call(
+                ["docker", "system", "prune", "-f"],
+                capture_output=True,
+                text=True,
+                timeout=30,
+            ),
+        ]
+        mock_run.assert_has_calls(expected_calls)
+
+    @patch("subprocess.run")
+    def test_cleanup_docker_services_with_exception(self, mock_run: MagicMock) -> None:
+        """Test _cleanup_docker_services when Docker commands fail."""
+        # given
+        self.create_valid_template_structure()
+
+        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
+            inspector = TemplateInspector(str(self.template_path))
+            inspector.temp_dir = str(self.template_path)
+
+        # Mock Docker cleanup to raise exception
+        mock_run.side_effect = subprocess.CalledProcessError(1, "docker-compose")
+
+        # when & then (should not raise exception)
+        inspector._cleanup_docker_services()
+
+        # Should have attempted to run the command
+        mock_run.assert_called()
+
+    @patch("subprocess.run")
+    def test_cleanup_docker_services_system_prune_fails(
+        self, mock_run: MagicMock
+    ) -> None:
+        """Test _cleanup_docker_services when system prune fails but main cleanup succeeds."""
+        # given
+        self.create_valid_template_structure()
+
+        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
+            inspector = TemplateInspector(str(self.template_path))
+            inspector.temp_dir = str(self.template_path)
+
+        # Mock first call succeeds, second call (system prune) fails
+        mock_run.side_effect = [
+            MagicMock(returncode=0),  # docker-compose down succeeds
+            subprocess.CalledProcessError(1, "docker"),  # system prune fails
+        ]
+
+        # when & then (should not raise exception)
+        inspector._cleanup_docker_services()
+
+        # Should have attempted both commands
+        assert mock_run.call_count == 2

@@ -54,13 +54,27 @@ class TemplateInspector:
         self.template_path = Path(template_path)
         self.errors: List[str] = []
         self.warnings: List[str] = []
-        self.temp_dir = os.path.join(os.path.dirname(__file__), "temp")
+        # Create unique temp directory for each template to avoid conflicts
+        template_name = Path(template_path).name
+        self.temp_dir = os.path.join(os.path.dirname(__file__), f"temp_{template_name}")
         self._cleanup_needed = False
         self.template_config: Optional[Dict[str, Any]] = None
 
     def __enter__(self) -> "TemplateInspector":
         """Enter context manager - create temp directory and copy template."""
         try:
+            # Clean up any existing temp directory for this template
+            if os.path.exists(self.temp_dir):
+                debug_log(
+                    f"Cleaning up existing temp directory: {self.temp_dir}", "info"
+                )
+                try:
+                    shutil.rmtree(self.temp_dir)
+                except OSError as e:
+                    debug_log(
+                        f"Failed to cleanup existing temp directory: {e}", "warning"
+                    )
+
             os.makedirs(self.temp_dir, exist_ok=True)
             copy_and_convert_template(str(self.template_path), self.temp_dir)
 
@@ -84,11 +98,37 @@ class TemplateInspector:
         """Cleanup temp directory if it exists and cleanup is needed."""
         if self._cleanup_needed and os.path.exists(self.temp_dir):
             try:
-                shutil.rmtree(self.temp_dir)
-                debug_log(f"Cleaned up temp directory {self.temp_dir}", "debug")
-            except OSError as e:
+                # First, try to cleanup any Docker services that might be running
+                self._cleanup_docker_services()
+
+                # Wait a moment for Docker cleanup to complete
+                import time
+
+                time.sleep(2)
+
+                # Remove temp directory with retry mechanism
+                max_retries = 3
+                for attempt in range(max_retries):
+                    try:
+                        shutil.rmtree(self.temp_dir)
+                        debug_log(f"Cleaned up temp directory {self.temp_dir}", "debug")
+                        break
+                    except OSError as e:
+                        if attempt < max_retries - 1:
+                            debug_log(
+                                f"Failed to cleanup temp directory {self.temp_dir} (attempt {attempt + 1}): {e}. Retrying...",
+                                "warning",
+                            )
+                            time.sleep(1)
+                        else:
+                            debug_log(
+                                f"Failed to cleanup temp directory {self.temp_dir} after {max_retries} attempts: {e}",
+                                "warning",
+                            )
+            except Exception as e:
                 debug_log(
-                    f"Failed to cleanup temp directory {self.temp_dir}: {e}", "warning"
+                    f"Unexpected error during cleanup of {self.temp_dir}: {e}",
+                    "warning",
                 )
             finally:
                 self._cleanup_needed = False
@@ -1036,12 +1076,23 @@ class TemplateInspector:
         try:
             debug_log("Cleaning up Docker services", "info")
             subprocess.run(
-                ["docker-compose", "down", "-v"],
+                ["docker-compose", "down", "-v", "--remove-orphans"],
                 cwd=self.temp_dir,
                 capture_output=True,
                 text=True,
                 timeout=60,
             )
+
+            try:
+                subprocess.run(
+                    ["docker", "system", "prune", "-f"],
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                )
+            except Exception:
+                pass
+
         except Exception as e:
             debug_log(f"Failed to cleanup Docker services: {e}", "warning")
 
