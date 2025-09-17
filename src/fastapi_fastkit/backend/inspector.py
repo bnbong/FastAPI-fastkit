@@ -32,7 +32,6 @@ from fastapi_fastkit.backend.main import (
     create_venv,
     find_template_core_modules,
     inject_project_metadata,
-    install_dependencies,
     install_dependencies_with_manager,
 )
 from fastapi_fastkit.backend.transducer import copy_and_convert_template
@@ -95,43 +94,141 @@ class TemplateInspector:
         self._cleanup()
 
     def _cleanup(self) -> None:
-        """Cleanup temp directory if it exists and cleanup is needed."""
+        """Cleanup temp directory."""
         if self._cleanup_needed and os.path.exists(self.temp_dir):
+            temp_dir_path = self.temp_dir
             try:
-                # First, try to cleanup any Docker services that might be running
                 self._cleanup_docker_services()
 
-                # Wait a moment for Docker cleanup to complete
                 import time
 
-                time.sleep(2)
+                time.sleep(3)
 
-                # Remove temp directory with retry mechanism
-                max_retries = 3
-                for attempt in range(max_retries):
-                    try:
-                        shutil.rmtree(self.temp_dir)
-                        debug_log(f"Cleaned up temp directory {self.temp_dir}", "debug")
-                        break
-                    except OSError as e:
-                        if attempt < max_retries - 1:
-                            debug_log(
-                                f"Failed to cleanup temp directory {self.temp_dir} (attempt {attempt + 1}): {e}. Retrying...",
-                                "warning",
-                            )
-                            time.sleep(1)
-                        else:
-                            debug_log(
-                                f"Failed to cleanup temp directory {self.temp_dir} after {max_retries} attempts: {e}",
-                                "warning",
-                            )
+                self._force_cleanup_directory(temp_dir_path)
+
             except Exception as e:
                 debug_log(
-                    f"Unexpected error during cleanup of {self.temp_dir}: {e}",
+                    f"Warning: Unexpected error during cleanup of {temp_dir_path}: {e}",
                     "warning",
                 )
+                try:
+                    self._force_cleanup_directory(temp_dir_path)
+                except Exception:
+                    pass
             finally:
                 self._cleanup_needed = False
+
+    def _force_cleanup_directory(self, directory_path: str) -> None:
+        """Force cleanup of directory with multiple strategies."""
+        import stat
+        import time
+
+        max_retries = 5
+        for attempt in range(max_retries):
+            try:
+                shutil.rmtree(directory_path)
+                debug_log(
+                    f"Successfully cleaned up temp directory: {directory_path}", "info"
+                )
+                return
+            except (OSError, PermissionError) as e:
+                if attempt < max_retries - 1:
+                    debug_log(
+                        f"Attempt {attempt + 1} failed to cleanup {directory_path}: {e}",
+                        "warning",
+                    )
+
+                    try:
+                        self._fix_directory_permissions(directory_path)
+                        shutil.rmtree(directory_path)
+                        debug_log(
+                            f"Successfully cleaned up temp directory after permission fix: {directory_path}",
+                            "info",
+                        )
+                        return
+                    except Exception:
+                        pass
+
+                    try:
+                        self._remove_directory_contents(directory_path)
+                        os.rmdir(directory_path)
+                        debug_log(
+                            f"Successfully cleaned up temp directory by removing contents: {directory_path}",
+                            "info",
+                        )
+                        return
+                    except Exception:
+                        pass
+
+                    time.sleep(2)
+                else:
+                    debug_log(
+                        f"Failed to cleanup temp directory after {max_retries} attempts: {directory_path}",
+                        "warning",
+                    )
+                    try:
+                        import subprocess
+
+                        if os.name == "nt":  # Windows
+                            subprocess.run(
+                                ["rmdir", "/s", "/q", directory_path],
+                                check=False,
+                                shell=True,
+                            )
+                        else:  # Unix-like
+                            subprocess.run(["rm", "-rf", directory_path], check=False)
+                        debug_log(
+                            f"Force cleanup completed for: {directory_path}", "info"
+                        )
+                    except Exception:
+                        debug_log(
+                            f"All cleanup attempts failed for: {directory_path}",
+                            "warning",
+                        )
+
+    def _fix_directory_permissions(self, directory_path: str) -> None:
+        """Fix directory permissions to allow removal."""
+        import os
+        import stat
+
+        def fix_permissions(path: str) -> None:
+            try:
+                os.chmod(path, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
+            except Exception:
+                pass
+
+        # Fix permissions for directory and all contents
+        fix_permissions(directory_path)
+        for root, dirs, files in os.walk(directory_path):
+            fix_permissions(root)
+            for d in dirs:
+                fix_permissions(os.path.join(root, d))
+            for f in files:
+                fix_permissions(os.path.join(root, f))
+
+    def _remove_directory_contents(self, directory_path: str) -> None:
+        """Remove directory contents file by file."""
+        import os
+        import stat
+
+        for root, dirs, files in os.walk(directory_path, topdown=False):
+            # Remove files first
+            for file in files:
+                file_path = os.path.join(root, file)
+                try:
+                    os.chmod(file_path, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
+                    os.remove(file_path)
+                except Exception:
+                    pass
+
+            # Remove directories
+            for dir_name in dirs:
+                dir_path = os.path.join(root, dir_name)
+                try:
+                    os.chmod(dir_path, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
+                    os.rmdir(dir_path)
+                except Exception:
+                    pass
 
     def _load_template_config(self) -> Optional[Dict[str, Any]]:
         """Load template configuration from template-config.yml if available."""

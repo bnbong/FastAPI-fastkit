@@ -1145,7 +1145,7 @@ fallback_testing:
         assert len(inspector.errors) > 0
 
     @patch("fastapi_fastkit.backend.inspector.create_venv")
-    @patch("fastapi_fastkit.backend.inspector.install_dependencies")
+    @patch("fastapi_fastkit.backend.inspector.install_dependencies_with_manager")
     def test_test_with_standard_strategy_dependency_installation_failed(
         self, mock_install: MagicMock, mock_create_venv: MagicMock
     ) -> None:
@@ -1454,12 +1454,14 @@ def create_fastapi():
     @patch(
         "fastapi_fastkit.backend.inspector.TemplateInspector._cleanup_docker_services"
     )
-    @patch("shutil.rmtree")
+    @patch(
+        "fastapi_fastkit.backend.inspector.TemplateInspector._force_cleanup_directory"
+    )
     @patch("time.sleep")
     def test_cleanup_method_with_retry_mechanism(
         self,
         mock_sleep: MagicMock,
-        mock_rmtree: MagicMock,
+        mock_force_cleanup: MagicMock,
         mock_docker_cleanup: MagicMock,
     ) -> None:
         """Test _cleanup method with retry mechanism for directory removal."""
@@ -1476,26 +1478,16 @@ def create_fastapi():
             mock_temp_dir = tempfile.mkdtemp()
             inspector.temp_dir = mock_temp_dir
 
-        # Mock shutil.rmtree to fail twice, then succeed, then succeed again for cleanup
-        mock_rmtree.side_effect = [
-            OSError("Permission denied"),  # First attempt fails
-            OSError("Device busy"),  # Second attempt fails
-            None,  # Third attempt succeeds
-            None,  # Fourth attempt for manual cleanup
-        ]
-
         # when
         inspector._cleanup()
 
         # then
         assert inspector._cleanup_needed is False
         assert mock_docker_cleanup.called
-        assert (
-            mock_sleep.call_count == 3
-        )  # Should sleep twice (between retries) + once after Docker cleanup
-        assert mock_rmtree.call_count == 3  # Should try 3 times
+        assert mock_sleep.call_count == 1  # Should sleep once after Docker cleanup
+        assert mock_force_cleanup.called
 
-        # Manual cleanup for test - this will use the 4th side_effect
+        # Manual cleanup for test
         import shutil
 
         shutil.rmtree(mock_temp_dir, ignore_errors=True)
@@ -1503,12 +1495,14 @@ def create_fastapi():
     @patch(
         "fastapi_fastkit.backend.inspector.TemplateInspector._cleanup_docker_services"
     )
-    @patch("shutil.rmtree")
+    @patch(
+        "fastapi_fastkit.backend.inspector.TemplateInspector._force_cleanup_directory"
+    )
     @patch("time.sleep")
     def test_cleanup_method_max_retries_exceeded(
         self,
         mock_sleep: MagicMock,
-        mock_rmtree: MagicMock,
+        mock_force_cleanup: MagicMock,
         mock_docker_cleanup: MagicMock,
     ) -> None:
         """Test _cleanup method when max retries are exceeded."""
@@ -1525,24 +1519,14 @@ def create_fastapi():
             mock_temp_dir = tempfile.mkdtemp()
             inspector.temp_dir = mock_temp_dir
 
-        # Mock shutil.rmtree to always fail, but succeed for manual cleanup
-        mock_rmtree.side_effect = [
-            OSError("Permission denied"),  # First attempt fails
-            OSError("Permission denied"),  # Second attempt fails
-            OSError("Permission denied"),  # Third attempt fails
-            None,  # Manual cleanup succeeds
-        ]
-
         # when
         inspector._cleanup()
 
         # then
         assert inspector._cleanup_needed is False
         assert mock_docker_cleanup.called
-        assert (
-            mock_sleep.call_count == 3
-        )  # Should sleep twice (between retries) + once after Docker cleanup
-        assert mock_rmtree.call_count == 3  # Should try 3 times and give up
+        assert mock_sleep.call_count == 1  # Should sleep once after Docker cleanup
+        assert mock_force_cleanup.called
 
         # Manual cleanup for test
         import shutil
@@ -1626,3 +1610,162 @@ def create_fastapi():
 
         # Should have attempted both commands
         assert mock_run.call_count == 2
+
+    def test_force_cleanup_directory_success(self) -> None:
+        """Test _force_cleanup_directory with successful cleanup."""
+        # given
+        self.create_valid_template_structure()
+
+        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
+            inspector = TemplateInspector(str(self.template_path))
+
+        # Create a test directory
+        import tempfile
+
+        test_dir = tempfile.mkdtemp()
+
+        try:
+            # Create some test files
+            test_file = os.path.join(test_dir, "test.txt")
+            with open(test_file, "w") as f:
+                f.write("test content")
+
+            # when
+            with patch("fastapi_fastkit.backend.inspector.debug_log"):
+                inspector._force_cleanup_directory(test_dir)
+
+            # then
+            assert not os.path.exists(test_dir)
+        finally:
+            # Cleanup in case test fails
+            if os.path.exists(test_dir):
+                import shutil
+
+                shutil.rmtree(test_dir, ignore_errors=True)
+
+    @patch("shutil.rmtree")
+    @patch("fastapi_fastkit.backend.inspector.debug_log")
+    def test_force_cleanup_directory_with_retry(
+        self, mock_debug_log: MagicMock, mock_rmtree: MagicMock
+    ) -> None:
+        """Test _force_cleanup_directory with retry mechanism."""
+        # given
+        self.create_valid_template_structure()
+
+        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
+            inspector = TemplateInspector(str(self.template_path))
+
+        # Mock rmtree to fail twice, then succeed
+        mock_rmtree.side_effect = [
+            OSError("Permission denied"),  # First attempt fails
+            OSError("Device busy"),  # Second attempt fails
+            None,  # Third attempt succeeds
+        ]
+
+        test_dir = "/fake/temp/dir"
+
+        # when
+        inspector._force_cleanup_directory(test_dir)
+
+        # then
+        assert mock_rmtree.call_count == 3  # Should try 3 times
+
+    @patch("shutil.rmtree")
+    @patch("subprocess.run")
+    @patch("fastapi_fastkit.backend.inspector.debug_log")
+    def test_force_cleanup_directory_fallback_to_subprocess(
+        self,
+        mock_debug_log: MagicMock,
+        mock_subprocess: MagicMock,
+        mock_rmtree: MagicMock,
+    ) -> None:
+        """Test _force_cleanup_directory fallback to subprocess when all else fails."""
+        # given
+        self.create_valid_template_structure()
+
+        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
+            inspector = TemplateInspector(str(self.template_path))
+
+        # Mock rmtree to always fail
+        mock_rmtree.side_effect = OSError("Permission denied")
+
+        test_dir = "/fake/temp/dir"
+
+        # when
+        inspector._force_cleanup_directory(test_dir)
+
+        # then
+        # Should try multiple times (5 main attempts + additional attempts in _fix_directory_permissions)
+        assert mock_rmtree.call_count >= 5  # Should try at least 5 times
+        # Should fallback to subprocess
+        mock_subprocess.assert_called()
+
+    def test_fix_directory_permissions(self) -> None:
+        """Test _fix_directory_permissions method."""
+        # given
+        self.create_valid_template_structure()
+
+        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
+            inspector = TemplateInspector(str(self.template_path))
+
+        # Create a test directory with files
+        import tempfile
+
+        test_dir = tempfile.mkdtemp()
+
+        try:
+            # Create subdirectory and file
+            subdir = os.path.join(test_dir, "subdir")
+            os.makedirs(subdir)
+            test_file = os.path.join(subdir, "test.txt")
+            with open(test_file, "w") as f:
+                f.write("test content")
+
+            # when
+            inspector._fix_directory_permissions(test_dir)
+
+            # then
+            # Should complete without errors
+            assert os.path.exists(test_dir)
+            assert os.path.exists(subdir)
+            assert os.path.exists(test_file)
+        finally:
+            # Cleanup
+            import shutil
+
+            shutil.rmtree(test_dir, ignore_errors=True)
+
+    def test_remove_directory_contents(self) -> None:
+        """Test _remove_directory_contents method."""
+        # given
+        self.create_valid_template_structure()
+
+        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
+            inspector = TemplateInspector(str(self.template_path))
+
+        # Create a test directory with files
+        import tempfile
+
+        test_dir = tempfile.mkdtemp()
+
+        try:
+            # Create subdirectory and file
+            subdir = os.path.join(test_dir, "subdir")
+            os.makedirs(subdir)
+            test_file = os.path.join(subdir, "test.txt")
+            with open(test_file, "w") as f:
+                f.write("test content")
+
+            # when
+            inspector._remove_directory_contents(test_dir)
+
+            # then
+            # Directory should exist but be empty
+            assert os.path.exists(test_dir)
+            assert not os.path.exists(subdir)
+            assert not os.path.exists(test_file)
+        finally:
+            # Cleanup
+            import shutil
+
+            shutil.rmtree(test_dir, ignore_errors=True)
