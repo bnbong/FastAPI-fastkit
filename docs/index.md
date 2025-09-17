@@ -292,6 +292,31 @@ For comprehensive guides and detailed usage instructions, explore our documentat
 - 📖 **[CLI Reference](user-guide/cli-reference.md)** - Complete command reference
 - 🔍 **[Template Quality Assurance](reference/template-quality-assurance.md)** - Automated testing and quality standards
 
+## 🚀 Template-based Tutorials
+
+Learn FastAPI development through practical use cases with our pre-built templates:
+
+### 📖 Core Tutorials
+
+- **[Building a Basic API Server](tutorial/basic-api-server.md)** - Create your first FastAPI server using the `fastapi-default` template
+- **[Building an Asynchronous CRUD API](tutorial/async-crud-api.md)** - Develop a high-performance async API with the `fastapi-async-crud` template
+
+### 🗄️ Database & Infrastructure
+
+- **[Integrating with a Database](tutorial/database-integration.md)** - Utilize PostgreSQL + SQLAlchemy with the `fastapi-psql-orm` template
+- **[Dockerizing and Deploying](tutorial/docker-deployment.md)** - Set up a production deployment environment using the `fastapi-dockerized` template
+
+### ⚡ Advanced Features
+
+- **[Custom Response Handling & Advanced API Design](tutorial/custom-response-handling.md)** - Build enterprise-grade APIs with the `fastapi-custom-response` template
+- **[Integrating with MCP](tutorial/mcp-integration.md)** - Create an API server integrated with AI models using the `fastapi-mcp` template
+
+Each tutorial provides:
+- ✅ **Practical Examples** - Code you can use directly in real projects
+- ✅ **Step-by-Step Guides** - Detailed explanations for beginners to follow easily
+- ✅ **Best Practices** - Industry-standard patterns and security considerations
+- ✅ **Extension Methods** - Guidance for taking your project to the next level
+
 ## Contributing
 
 We welcome contributions from the community! FastAPI-fastkit is designed to help newcomers to Python and FastAPI, and your contributions can make a significant impact.

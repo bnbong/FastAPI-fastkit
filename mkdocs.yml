@@ -56,6 +56,12 @@ nav:
   - Tutorial:
     - Getting Started: tutorial/getting-started.md
     - Your First Project: tutorial/first-project.md
+    - Implementing Basic API Server: tutorial/basic-api-server.md
+    - Implementing Asynchronous CRUD API: tutorial/async-crud-api.md
+    - Database Integration: tutorial/database-integration.md
+    - Docker Deployment: tutorial/docker-deployment.md
+    - Implementing Custom Response Handling: tutorial/custom-response-handling.md
+    - Implementing MCP Server: tutorial/mcp-integration.md
   - Contributing:
     - Development Setup: contributing/development-setup.md
     - Code Guidelines: contributing/code-guidelines.md

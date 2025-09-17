@@ -11,6 +11,9 @@
 <a href="https://github.com/bnbong/FastAPI-fastkit/releases" target="_blank">
     <img src="https://img.shields.io/github/v/release/bnbong/FastAPI-fastkit" alt="GitHub Release">
 </a>
+<a href="https://codecov.io/gh/bnbong/FastAPI-fastkit" >
+    <img src="https://codecov.io/gh/bnbong/FastAPI-fastkit/graph/badge.svg?token=WS0B6WWD8K"/>
+</a>
 </p>
 
 ---
