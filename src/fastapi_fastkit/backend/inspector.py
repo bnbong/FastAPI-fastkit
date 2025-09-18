@@ -49,13 +49,20 @@ class TemplateInspector:
     Uses context manager protocol for proper resource cleanup.
     """
 
-    def __init__(self, template_path: str):
+    def __init__(self, template_path: str, temp_base_dir: Optional[str] = None):
         self.template_path = Path(template_path)
         self.errors: List[str] = []
         self.warnings: List[str] = []
-        # Create unique temp directory for each template to avoid conflicts
         template_name = Path(template_path).name
-        self.temp_dir = os.path.join(os.path.dirname(__file__), f"temp_{template_name}")
+
+        # use temp_base_dir or fall back to backend directory (temp)
+        if temp_base_dir:
+            self.temp_dir = os.path.join(temp_base_dir, f"temp_{template_name}")
+        else:
+            self.temp_dir = os.path.join(
+                os.path.dirname(__file__), f"temp_{template_name}"
+            )
+
         self._cleanup_needed = False
         self.template_config: Optional[Dict[str, Any]] = None
 
@@ -1234,11 +1241,14 @@ class TemplateInspector:
         }
 
 
-def inspect_fastapi_template(template_path: str) -> Dict[str, Any]:
+def inspect_fastapi_template(
+    template_path: str, temp_base_dir: Optional[str] = None
+) -> Dict[str, Any]:
     """
     Convenience function to inspect a FastAPI template.
 
     :param template_path: Path to the template to inspect
+    :param temp_base_dir: Base directory for temporary files (defaults to backend directory)
     :return: Inspection report dictionary
     """
     template_name = Path(template_path).name
@@ -1246,7 +1256,7 @@ def inspect_fastapi_template(template_path: str) -> Dict[str, Any]:
         f"Starting template inspection for {template_name} at {template_path}", "info"
     )
 
-    with TemplateInspector(template_path) as inspector:
+    with TemplateInspector(template_path, temp_base_dir) as inspector:
         is_valid = inspector.inspect_template()
         report = inspector.get_report()
 
