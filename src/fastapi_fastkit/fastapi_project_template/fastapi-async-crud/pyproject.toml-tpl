@@ -7,7 +7,7 @@ authors = [
 ]
 readme = "README.md"
 license = "MIT"
-requires-python = ">=3.9"
+requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115.8",
     "uvicorn[standard]>=0.34.0",
@@ -16,6 +16,7 @@ dependencies = [
     "SQLAlchemy>=2.0.38",
     "python-dotenv>=1.0.1",
     "aiofiles>=24.1.0",
+    "fastapi-fastkit>=1.1.5",
 ]
 
 [project.optional-dependencies]

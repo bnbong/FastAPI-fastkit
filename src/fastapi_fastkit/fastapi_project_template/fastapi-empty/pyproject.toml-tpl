@@ -7,12 +7,13 @@ authors = [
 ]
 readme = "README.md"
 license = "MIT"
-requires-python = ">=3.9"
+requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115.8",
     "uvicorn[standard]>=0.34.0",
     "pydantic>=2.10.6",
     "pydantic-settings>=2.7.1",
+    "fastapi-fastkit>=1.1.5",
 ]
 
 [project.optional-dependencies]

@@ -7,10 +7,11 @@ authors = [
 ]
 readme = "README.md"
 license = "MIT"
-requires-python = ">=3.9"
+requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115.8",
     "uvicorn[standard]>=0.34.0",
+    "fastapi-fastkit>=1.1.5",
 ]
 
 [dependency-groups]

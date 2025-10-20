@@ -34,3 +34,4 @@ uvloop==0.21.0
 watchfiles==1.0.4
 websockets==15.0
 aiofiles>=24.1.0
+FastAPI-fastkit==1.1.5

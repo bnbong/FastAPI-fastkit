@@ -7,7 +7,7 @@ authors = [
 ]
 readme = "README.md"
 license = "MIT"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115.8",
     "uvicorn[standard]>=0.34.0",
@@ -20,6 +20,7 @@ dependencies = [
     "passlib>=1.7.4",
     "python-jose>=3.3.0",
     "python-multipart>=0.0.17",
+    "fastapi-fastkit>=1.1.5",
 ]
 
 [project.optional-dependencies]
