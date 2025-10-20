@@ -20,20 +20,20 @@
 
 This project was created to speed up the configuration of the development environment needed to develop Python-based web apps for new users of Python and [FastAPI](https://github.com/fastapi/fastapi).
 
-This project was inspired by the `SpringBoot initializer` & Python Django's `django-admin` cli operation.
+This project was inspired by the `SpringBoot initializer` & Python Django's `django-admin` CLI operation.
 
 ## Key Features
 
 - **⚡ Immediate FastAPI project creation** : Super-fast FastAPI workspace & project creation via CLI, inspired by `django-admin` feature of [Python Django](https://github.com/django/django)
-- **🎨 Prettier CLI outputs** : Beautiful CLI experience powered by [rich library](https://github.com/Textualize/rich)
-- **📋 Standards-based FastAPI project templates** : All FastAPI-fastkit templates are based on Python standards and FastAPI's common use patterns
+- **🎨 Prettier CLI output** : Beautiful CLI experience powered by [rich library](https://github.com/Textualize/rich)
+- **📋 Standards-based FastAPI project templates** : Templates follow Python standards and common FastAPI patterns.
 - **🔍 Automated template quality assurance** : Weekly automated testing ensures all templates remain functional and up-to-date
 - **🚀 Multiple project templates** : Choose from various pre-configured templates for different use cases (async CRUD, Docker, PostgreSQL, etc.)
 - **📦 Multiple package manager support** : Choose your preferred Python package manager (pip, uv, pdm, poetry) for dependency management
 
 ## Installation
 
-Install `FastAPI-fastkit` at your Python environment.
+Install `FastAPI-fastkit` in your Python environment.
 
 ```console
 $ pip install FastAPI-fastkit
@@ -147,7 +147,7 @@ For detailed contribution guidelines, development setup, and project standards, 
 
 FastAPI-fastkit aims to provide a fast and easy-to-use starter kit for new users of Python and FastAPI.
 
-This idea was initiated with the aim of helping FastAPI newcomers learn from the beginning, which aligns with the production significance of the FastAPI-cli package added with the [FastAPI 0.111.0 version update](https://github.com/fastapi/fastapi/releases/tag/0.111.0).
+This idea was initiated with the aim of helping FastAPI newcomers learn from the beginning, which aligns with the production significance of the FastAPI CLI package added with the [FastAPI 0.111.0 version update](https://github.com/fastapi/fastapi/releases/tag/0.111.0).
 
 As someone who has been using and loving FastAPI for a long time, I wanted to develop a project that could help fulfill [the wonderful motivation](https://github.com/fastapi/fastapi/pull/11522#issuecomment-2264639417) that FastAPI developer [tiangolo](https://github.com/tiangolo) has expressed.
 
