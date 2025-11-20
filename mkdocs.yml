@@ -43,6 +43,77 @@ theme:
 plugins:
   # Material for MkDocs
   - search
+  # Multi-language support
+  - i18n:
+      docs_structure: folder
+      fallback_to_default: true
+      reconfigure_material: true
+      reconfigure_search: true
+      languages:
+        - locale: en
+          default: true
+          name: English
+          build: true
+        - locale: ko
+          name: 한국어
+          build: true
+          nav_translations:
+            Home: 홈
+            User Guide: 사용자 가이드
+            Tutorial: 튜토리얼
+            Contributing: 기여하기
+            Reference: 레퍼런스
+            Changelog: 변경 로그
+        - locale: ja
+          name: 日本語
+          build: true
+          nav_translations:
+            Home: ホーム
+            User Guide: ユーザーガイド
+            Tutorial: チュートリアル
+            Contributing: 貢献
+            Reference: リファレンス
+            Changelog: 変更履歴
+        - locale: zh
+          name: 中文
+          build: true
+          nav_translations:
+            Home: 首页
+            User Guide: 用户指南
+            Tutorial: 教程
+            Contributing: 贡献
+            Reference: 参考
+            Changelog: 更新日志
+        - locale: es
+          name: Español
+          build: true
+          nav_translations:
+            Home: Inicio
+            User Guide: Guía del Usuario
+            Tutorial: Tutorial
+            Contributing: Contribuir
+            Reference: Referencia
+            Changelog: Registro de Cambios
+        - locale: fr
+          name: Français
+          build: true
+          nav_translations:
+            Home: Accueil
+            User Guide: Guide de l'Utilisateur
+            Tutorial: Tutoriel
+            Contributing: Contribuer
+            Reference: Référence
+            Changelog: Journal des Modifications
+        - locale: de
+          name: Deutsch
+          build: true
+          nav_translations:
+            Home: Startseite
+            User Guide: Benutzerhandbuch
+            Tutorial: Tutorial
+            Contributing: Beitragen
+            Reference: Referenz
+            Changelog: Änderungsprotokoll
 
 nav:
   - Home: index.md
@@ -66,6 +137,7 @@ nav:
     - Development Setup: contributing/development-setup.md
     - Code Guidelines: contributing/code-guidelines.md
     - Template Creation Guide: contributing/template-creation-guide.md
+    - Translation Guide: contributing/translation-guide.md
   - Reference:
     - FAQ: reference/faq.md
     - Template Quality Assurance: reference/template-quality-assurance.md

@@ -380,6 +380,207 @@ For more detailed information about security requirements and project guidelines
 - [SECURITY.md](SECURITY.md) for security guidelines
 - [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for project principles
 
+## Contributing Translations
+
+FastAPI-fastkit documentation supports multiple languages. Contributing translations helps users worldwide.
+
+### Supported Languages
+
+- 🇬🇧 English (en) - Default
+- 🇰🇷 Korean (ko)
+- 🇯🇵 Japanese (ja)
+- 🇨🇳 Chinese (zh)
+- 🇪🇸 Spanish (es)
+- 🇫🇷 French (fr)
+- 🇩🇪 German (de)
+
+### Translation Setup
+
+#### 1. Install Dependencies
+
+```bash
+pdm install -G docs -G translation
+# Or: pip install mkdocs mkdocs-material mkdocs-static-i18n openai anthropic
+```
+
+#### 2. Set Up API Key
+
+Get an API key from OpenAI or Anthropic and set it as an environment variable:
+
+```bash
+export TRANSLATION_API_KEY="your-api-key-here"
+```
+
+#### 3. First-Time Setup (Maintainers Only)
+
+If this is the first time setting up the i18n structure:
+
+```bash
+./scripts/setup-i18n-structure.sh
+```
+
+This migrates existing English docs to `docs/en/` and creates language directories.
+
+### Translating Documentation
+
+#### Translate to Specific Language
+
+```bash
+# Translate all docs to Korean
+python scripts/translate.py --target-lang ko --api-provider openai
+
+# Translate specific files (paths relative to docs/en/)
+python scripts/translate.py --target-lang ko --files index.md user-guide/installation.md --api-provider openai
+
+# Translate without creating PR (for local testing)
+python scripts/translate.py --target-lang ko --no-pr --api-provider openai
+```
+
+#### Using GitHub Actions
+
+1. Go to repository → Actions → "Translate Documentation"
+2. Click "Run workflow"
+3. Select target language and options
+4. Wait for automated PR to be created
+5. Review and merge the translation
+
+### Translation Workflow
+
+1. **Write English documentation** in `docs/en/`
+2. **Test locally**: `mkdocs serve`
+3. **Commit English version** to main branch
+4. **Run translation script** or trigger GitHub Actions
+5. **Review PR**: Check formatting, technical terms, links
+6. **Merge** and deploy
+
+### Translation Quality Guidelines
+
+When reviewing translations:
+
+- ✅ Markdown formatting is preserved
+- ✅ Code blocks are unchanged
+- ✅ Technical terms are appropriate
+- ✅ Links work correctly
+- ✅ Grammar and spelling are correct
+
+### Manual Translation
+
+You can also translate manually:
+
+1. Copy file from `docs/en/` to `docs/{lang}/`
+2. Translate the content
+3. Create PR with `[DOCS]` tag
+
+### Adding New Languages
+
+To add support for a new language:
+
+1. **Update `scripts/translation_config.json`**:
+```json
+{
+  "code": "pt",
+  "name": "Portuguese",
+  "native_name": "Português",
+  "enabled": true
+}
+```
+
+2. **Update `mkdocs.yml`**:
+```yaml
+- locale: pt
+  name: Português
+  build: true
+```
+
+3. **Run translation**:
+```bash
+python scripts/translate.py --target-lang pt
+```
+
+### Translation System Architecture
+
+**Core Components:**
+
+- **`scripts/translate.py`**: AI-powered translation script
+  - Supports OpenAI GPT-4 and Anthropic Claude
+  - Preserves markdown formatting and code blocks
+  - Creates GitHub PRs automatically
+
+- **`scripts/setup-i18n-structure.sh`**: Migration tool
+  - Moves docs to language-specific directories
+  - Creates symbolic links for shared assets
+
+- **`scripts/translation_config.json`**: Configuration
+  - Language settings
+  - Translation options
+  - Quality check parameters
+
+- **`.github/workflows/translate-docs.yml`**: GitHub Actions workflow
+  - Automated translation on trigger
+  - Manual workflow dispatch
+
+**Directory Structure:**
+
+```
+docs/
+├── en/                    # English (source)
+├── ko/                    # Korean
+├── ja/                    # Japanese
+├── zh/                    # Chinese
+├── es/                    # Spanish
+├── fr/                    # French
+├── de/                    # German
+├── css/                   # Shared assets
+├── js/
+└── img/
+```
+
+### Troubleshooting
+
+**Import Error:**
+```bash
+pip install openai anthropic
+```
+
+**API Key Error:**
+```bash
+export TRANSLATION_API_KEY="your-key"
+```
+
+**Build Fails:**
+```bash
+# Ensure docs are in language directories
+ls -la docs/en/index.md
+```
+
+For detailed translation guidelines, see [Translation Guide](docs/en/contributing/translation-guide.md).
+
+### Updating Navigation Translations
+
+When you add new documentation pages, update navigation translations:
+
+**Option 1: Automatic Update (Recommended)**
+
+```bash
+# Update all language nav translations automatically
+python scripts/update_nav_translations.py
+
+# With AI translation for missing items
+python scripts/update_nav_translations.py --api-key "your-key"
+```
+
+**Option 2: Manual Update**
+
+Edit `mkdocs.yml` and add translations for each language under `nav_translations`:
+
+```yaml
+- locale: ko
+  nav_translations:
+    New Page Title: 새로운 페이지 제목
+```
+
+**Note:** Korean translations should be kept complete. Other languages use basic translations (Home, User Guide, Tutorial, etc.). Native speakers can contribute more detailed translations via PR.
+
 ## Additional note
 
 If you look at source codes, you will see a commentary at the top of the module that describes about the module.
