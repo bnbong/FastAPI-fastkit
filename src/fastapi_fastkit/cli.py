@@ -11,7 +11,7 @@ import sys
 from typing import Union
 
 import click
-from click.core import BaseCommand, Context
+from click import Command, Context
 from rich import print
 from rich.panel import Panel
 
@@ -50,7 +50,7 @@ from . import __version__
 @click.option("--debug/--no-debug", default=False)
 @click.version_option(__version__, prog_name="fastapi-fastkit")
 @click.pass_context
-def fastkit_cli(ctx: Context, debug: bool) -> Union["BaseCommand", None]:
+def fastkit_cli(ctx: Context, debug: bool) -> Union["Command", None]:
     """
     main FastAPI-fastkit CLI operation group
     """

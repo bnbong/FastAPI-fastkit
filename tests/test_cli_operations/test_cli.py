@@ -603,15 +603,32 @@ class TestCLI:
         assert project_path.exists() and project_path.is_dir()
         assert "Success" in result.output
 
+        venv_path = project_path / ".venv"
+        if not venv_path.exists():
+            print(f"WARNING: Virtual environment not found at {venv_path}")
+            print(f"Project creation output: {result.output}")
+
         os.chdir(project_path)
 
+        venv_exists = venv_path.exists()
+        assert venv_exists, (
+            f"Virtual environment was not created at {venv_path}. "
+            f"This is required for runserver command. "
+            f"Project creation output: {result.output}"
+        )
+
         # when
-        with patch("subprocess.run") as mock_run:
+        with patch("fastapi_fastkit.cli.subprocess.run") as mock_run:
             mock_run.return_value.returncode = 0
             result = self.runner.invoke(fastkit_cli, ["runserver"])
 
         # then
-        assert result.exit_code == 0
+        if result.exit_code != 0:
+            print(f"Command output: {result.output}")
+            print(f"Exception: {result.exception}")
+            print(f"Virtual environment path: {venv_path}")
+        assert result.exit_code == 0, f"runserver failed with output: {result.output}"
+        assert mock_run.called
 
     def test_runserver_no_venv_project(self, temp_dir: str) -> None:
         # given

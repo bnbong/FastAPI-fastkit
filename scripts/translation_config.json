@@ -1,0 +1,69 @@
+{
+  "source_language": "en",
+  "target_languages": [
+    {
+      "code": "ko",
+      "name": "Korean",
+      "native_name": "한국어",
+      "enabled": true
+    },
+    {
+      "code": "ja",
+      "name": "Japanese",
+      "native_name": "日本語",
+      "enabled": true
+    },
+    {
+      "code": "zh",
+      "name": "Chinese",
+      "native_name": "中文",
+      "enabled": true
+    },
+    {
+      "code": "es",
+      "name": "Spanish",
+      "native_name": "Español",
+      "enabled": true
+    },
+    {
+      "code": "fr",
+      "name": "French",
+      "native_name": "Français",
+      "enabled": true
+    },
+    {
+      "code": "de",
+      "name": "German",
+      "native_name": "Deutsch",
+      "enabled": true
+    }
+  ],
+  "translation_settings": {
+    "default_api_provider": "openai",
+    "batch_size": 5,
+    "preserve_formatting": true,
+    "exclude_patterns": [
+      "**/*.png",
+      "**/*.jpg",
+      "**/*.jpeg",
+      "**/*.gif",
+      "**/*.svg",
+      "**/*.ai",
+      "**/css/**",
+      "**/js/**"
+    ]
+  },
+  "github_settings": {
+    "create_pr_by_default": true,
+    "branch_prefix": "translation",
+    "pr_labels": ["documentation", "translation"],
+    "auto_assign_reviewers": []
+  },
+  "quality_checks": {
+    "verify_code_blocks": true,
+    "verify_links": true,
+    "verify_formatting": true,
+    "min_translation_length_ratio": 0.5,
+    "max_translation_length_ratio": 2.0
+  }
+}

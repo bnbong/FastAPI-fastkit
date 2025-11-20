@@ -26,7 +26,7 @@ import sys
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
-import yaml  # type: ignore
+import yaml
 
 from fastapi_fastkit.backend.main import (
     create_venv,

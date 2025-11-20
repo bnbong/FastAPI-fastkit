@@ -15,6 +15,13 @@ coverage.xml
 coverage/
 temp/
 
+# Translation and API keys
+.env
+.env.local
+*.key
+*_api_key.txt
+translation_cache/
+
 .pdm-python
 ### VisualStudioCode template
 .vscode/*
