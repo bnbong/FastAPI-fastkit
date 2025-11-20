@@ -38,11 +38,23 @@ class TranslationConfig:
     target_langs: List[str] = field(
         default_factory=lambda: ["ko", "ja", "zh", "es", "fr", "de"]
     )
-    docs_dir: Path = Path(__file__).parent.parent / "docs" / source_lang
-    api_provider: str = "openai"  # openai, anthropic, etc.
+    _docs_dir: Optional[Path] = field(default=None, repr=False)
+    api_provider: str = "openai"
     api_key: Optional[str] = None
     create_pr: bool = True
     branch_prefix: str = "translation"
+
+    @property
+    def docs_dir(self) -> Path:
+        """Get docs directory path."""
+        if self._docs_dir is None:
+            return Path(__file__).parent.parent / "docs" / self.source_lang
+        return self._docs_dir
+
+    @docs_dir.setter
+    def docs_dir(self, value: Path) -> None:
+        """Set docs directory path."""
+        self._docs_dir = value
 
 
 class TranslationAPI:
