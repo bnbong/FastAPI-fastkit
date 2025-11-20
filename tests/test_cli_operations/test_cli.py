@@ -606,12 +606,16 @@ class TestCLI:
         os.chdir(project_path)
 
         # when
-        with patch("subprocess.run") as mock_run:
+        with patch("fastapi_fastkit.cli.subprocess.run") as mock_run:
             mock_run.return_value.returncode = 0
             result = self.runner.invoke(fastkit_cli, ["runserver"])
 
         # then
-        assert result.exit_code == 0
+        if result.exit_code != 0:
+            print(f"Command output: {result.output}")
+            print(f"Exception: {result.exception}")
+        assert result.exit_code == 0, f"runserver failed with output: {result.output}"
+        assert mock_run.called
 
     def test_runserver_no_venv_project(self, temp_dir: str) -> None:
         # given
