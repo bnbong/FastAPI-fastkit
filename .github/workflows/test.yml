@@ -31,6 +31,12 @@ jobs:
       - name: Setup PDM
         uses: pdm-project/setup-pdm@v4
 
+      - name: Install package managers for tests
+        run: |
+          pip install uv
+          pip install poetry
+          # PDM is already installed via setup-pdm action
+
       - name: Install dependencies
         run: pdm install -G dev
 
