@@ -12,12 +12,12 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.13"  # max
-          - "3.12"
-          - "3.11"
-          - "3.10"
-          - "3.9"
-          - "3.8"  # min
+          - "3.14"  # max
+          - "3.13"
+          - "3.12"  # min requirements
+          - "3.11"  # supported, but full functionality not guaranteed
+          - "3.10"  # supported, but full functionality not guaranteed
+          - "3.9"  # supported, but full functionality not guaranteed
       fail-fast: false
     steps:
       - name: Checkout code
