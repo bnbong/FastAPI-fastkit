@@ -134,8 +134,6 @@ else
     echo -e "${GREEN}ℹ️  Changes detected in fastapi_project_template - running all tests${NC}"
 fi
 
-echo ""
-
 # Run tests with coverage
 if pytest $PYTEST_ARGS; then
     echo ""
