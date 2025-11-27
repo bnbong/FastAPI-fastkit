@@ -8,13 +8,15 @@ import os
 import shutil
 import subprocess
 import sys
-from typing import Union
+from typing import Union, cast
 
 import click
 from click import Command, Context
 from rich import print
 from rich.panel import Panel
 
+from fastapi_fastkit.backend.interactive import InteractiveConfigBuilder
+from fastapi_fastkit.backend.interactive.selectors import display_feature_catalog
 from fastapi_fastkit.backend.main import (
     add_new_route,
     ask_create_project_folder,
@@ -154,6 +156,20 @@ def list_templates(ctx: Context) -> None:
 
     table = create_info_table("Available Templates", template_data)
     console.print(table)
+
+
+@fastkit_cli.command()
+@click.pass_context
+def list_features(ctx: Context) -> None:
+    """
+    Display the list of available features and packages in the catalog.
+
+    Shows all available features that can be selected during interactive
+    project creation, along with their associated packages.
+    """
+    settings = ctx.obj["settings"]
+
+    display_feature_catalog(settings.PACKAGE_CATALOG, settings.FEATURE_DESCRIPTIONS)
 
 
 @fastkit_cli.command(context_settings={"ignore_unknown_options": True})
@@ -296,23 +312,26 @@ def startdemo(
 
 @fastkit_cli.command(context_settings={"ignore_unknown_options": True})
 @click.option(
+    "--interactive",
+    is_flag=True,
+    default=False,
+    help="Enable interactive mode for guided project setup with feature selection.",
+)
+@click.option(
     "--project-name",
-    prompt="Enter the project name",
+    default=None,
     help="The name of the new FastAPI project.",
 )
-@click.option(
-    "--author", prompt="Enter the author name", help="The name of the project author."
-)
+@click.option("--author", default=None, help="The name of the project author.")
 @click.option(
     "--author-email",
-    prompt="Enter the author email",
+    default=None,
     help="The email of the project author.",
     type=str,
-    callback=validate_email,
 )
 @click.option(
     "--description",
-    prompt="Enter the project description",
+    default=None,
     help="The description of the new FastAPI project.",
 )
 @click.option(
@@ -324,6 +343,7 @@ def startdemo(
 @click.pass_context
 def init(
     ctx: Context,
+    interactive: bool,
     project_name: str,
     author: str,
     author_email: str,
@@ -331,15 +351,190 @@ def init(
     package_manager: str,
 ) -> None:
     """
-    Start a empty FastAPI project setup.
+    Start a FastAPI project setup.
 
-    This command will automatically create a new FastAPI project directory and a python virtual environment.
+    Use --interactive for guided setup with dynamic feature selection.
+    Without --interactive, creates an empty project with predefined stacks.
 
-    Dependencies will be automatically installed based on the selected stack at venv.
-
-    Project metadata will be injected to the project files.
+    This command will automatically create a new FastAPI project directory
+    and a python virtual environment. Dependencies will be automatically
+    installed based on the selected features or stack.
     """
     settings = ctx.obj["settings"]
+
+    # Interactive mode - use InteractiveConfigBuilder
+    if interactive:
+        print_info("Starting interactive project setup...")
+
+        builder = InteractiveConfigBuilder(settings)
+        config = builder.run_interactive_flow()
+
+        # User cancelled
+        if not config:
+            return
+
+        # Extract configuration
+        project_name = cast(str, config.get("project_name", ""))
+        author = cast(str, config.get("author", ""))
+        author_email = cast(str, config.get("author_email", ""))
+        description = cast(str, config.get("description", ""))
+        package_manager = config.get(
+            "package_manager", settings.DEFAULT_PACKAGE_MANAGER
+        )
+        all_dependencies = config.get("all_dependencies", [])
+
+        # Check if project already exists
+        project_dir = os.path.join(settings.USER_WORKSPACE, project_name)
+        if os.path.exists(project_dir):
+            print_error(f"Error: Project '{project_name}' already exists.")
+            return
+
+        # Ask user whether to create a new project folder
+        create_project_folder = ask_create_project_folder(project_name)
+
+        try:
+            user_local = settings.USER_WORKSPACE
+
+            # Use fastapi-empty template as base
+            template = "fastapi-empty"
+            template_dir = settings.FASTKIT_TEMPLATE_ROOT
+            target_template = os.path.join(template_dir, template)
+
+            if not os.path.exists(target_template):
+                print_error(
+                    f"Template '{template}' does not exist in '{template_dir}'."
+                )
+                raise CLIExceptions(
+                    f"Template '{template}' does not exist in '{template_dir}'."
+                )
+
+            # Deploy template
+            project_dir, _ = deploy_template_with_folder_option(
+                target_template, user_local, project_name, create_project_folder
+            )
+
+            # Inject project metadata
+            inject_project_metadata(
+                project_dir, project_name, author, author_email, description
+            )
+
+            # Generate dependency file with collected dependencies
+            generate_dependency_file_with_manager(
+                project_dir,
+                all_dependencies,
+                package_manager,
+                project_name,
+                author,
+                author_email,
+                description,
+            )
+
+            # Update setup.py install_requires with selected dependencies
+            from fastapi_fastkit.backend.main import update_setup_py_dependencies
+
+            update_setup_py_dependencies(project_dir, all_dependencies)
+
+            print_success(
+                f"Generated dependency file with {len(all_dependencies)} packages"
+            )
+
+            # Generate stack-specific code and configurations
+            from fastapi_fastkit.backend.project_builder.config_generator import (
+                DynamicConfigGenerator,
+            )
+
+            generator = DynamicConfigGenerator(config, project_dir)
+
+            # Generate main.py with selected features
+            main_py_content = generator.generate_main_py()
+            main_py_path = os.path.join(project_dir, "src", "main.py")
+            if not os.path.exists(main_py_path):
+                main_py_path = os.path.join(project_dir, "main.py")
+
+            with open(main_py_path, "w") as f:
+                f.write(main_py_content)
+
+            # Generate database configuration if selected
+            db_info = config.get("database", {})
+            if isinstance(db_info, dict) and db_info.get("type") != "None":
+                db_config_content = generator.generate_database_config()
+                if db_config_content:
+                    db_config_path = os.path.join(
+                        project_dir, "src", "config", "database.py"
+                    )
+                    os.makedirs(os.path.dirname(db_config_path), exist_ok=True)
+                    with open(db_config_path, "w") as f:
+                        f.write(db_config_content)
+
+            # Generate auth configuration if selected
+            auth_type = config.get("authentication", "None")
+            if auth_type != "None":
+                auth_config_content = generator.generate_auth_config()
+                if auth_config_content:
+                    auth_config_path = os.path.join(
+                        project_dir, "src", "config", "auth.py"
+                    )
+                    os.makedirs(os.path.dirname(auth_config_path), exist_ok=True)
+                    with open(auth_config_path, "w") as f:
+                        f.write(auth_config_content)
+
+            # Generate test configuration if testing selected
+            testing_type = config.get("testing", "None")
+            if testing_type != "None":
+                test_config_content = generator.generate_test_config()
+                if test_config_content:
+                    test_config_path = os.path.join(project_dir, "tests", "conftest.py")
+                    os.makedirs(os.path.dirname(test_config_path), exist_ok=True)
+                    with open(test_config_path, "w") as f:
+                        f.write(test_config_content)
+
+            # Generate Docker files if deployment selected
+            deployment = config.get("deployment", [])
+            if deployment and deployment != ["None"]:
+                generator.generate_docker_files()
+                print_success(f"Generated Docker deployment files")
+
+            print_success(f"Generated configuration files for selected stack")
+
+            # Create virtual environment and install dependencies
+            venv_path = create_venv_with_manager(project_dir, package_manager)
+            install_dependencies_with_manager(project_dir, venv_path, package_manager)
+
+            success_message = get_deployment_success_message(
+                template, project_name, user_local, create_project_folder
+            )
+            print_success(success_message)
+
+            print_info(
+                "To start your project, run 'fastkit runserver' at newly created FastAPI project directory"
+            )
+
+        except Exception as e:
+            if settings.DEBUG_MODE:
+                logger = get_logger()
+                logger.exception(f"Error during project creation in init: {str(e)}")
+            print_error(f"Error during project creation: {str(e)}")
+            if os.path.exists(project_dir):
+                shutil.rmtree(project_dir, ignore_errors=True)
+
+        return
+
+    # Non-interactive mode (original behavior)
+    # Require parameters if not interactive
+    if not project_name:
+        project_name = click.prompt("Enter the project name", type=str)
+    if not author:
+        author = click.prompt("Enter the author name", type=str)
+    if not author_email:
+        while True:
+            author_email = click.prompt("Enter the author email", type=str)
+            # Simple validation
+            if "@" in author_email and "." in author_email:
+                break
+            print_error("Invalid email format. Please try again.")
+    if not description:
+        description = click.prompt("Enter the project description", type=str)
+
     project_dir = os.path.join(settings.USER_WORKSPACE, project_name)
 
     if os.path.exists(project_dir):

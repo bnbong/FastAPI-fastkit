@@ -6,7 +6,7 @@ set -x
 echo "Running tests with coverage..."
 
 # Run tests with coverage
-pytest --cov=src/fastapi_fastkit --cov-report=term-missing --cov-report=html --cov-report=xml --cov-fail-under=70
+pytest --cov=src/fastapi_fastkit --cov-report=term-missing --cov-report=html --cov-report=xml --cov-fail-under=80
 
 coverage_exit_code=$?
 

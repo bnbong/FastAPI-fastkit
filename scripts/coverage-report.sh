@@ -12,7 +12,7 @@ NC='\033[0m' # No Color
 # Script options
 OPEN_HTML=false
 SHOW_MISSING=true
-MIN_COVERAGE=70
+MIN_COVERAGE=80
 OUTPUT_FORMAT="term"
 
 # Help function
