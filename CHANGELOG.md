@@ -1,5 +1,59 @@
 # Changelog
 
+## v1.2.0 (2025-11-27)
+
+### Features
+
+- **(Breaking Change) Add `fastkit init --interactive` feature**: Revolutionary feature-by-feature project builder
+  - `fastkit init --interactive` now provides guided project setup with intelligent feature selection
+  - Always uses Empty project (fastapi-empty template) as base template to prevent conflicts with DynamicConfigGenerator
+  - Interactive project configuration with validation and compatibility warnings
+  - Real-time dependency collection based on selected features
+  - Confirmation summary before project creation
+
+- **Dynamic Code Generation**: Intelligent code generation based on feature selections
+  - Integrated DynamicConfigGenerator for automatic code scaffolding
+  - Generates `main.py` with selected features (auth, database, monitoring, etc.)
+  - Creates database configuration files for PostgreSQL, MySQL, MongoDB, SQLite
+  - Generates authentication setup for JWT, OAuth2, FastAPI-Users
+  - Auto-generates test configuration (pytest with optional coverage)
+  - Docker deployment files (Dockerfile, docker-compose.yml) generation
+
+- **Enhanced Dependency Management**: Multi-format dependency file generation
+  - Automatically generates both package-manager-specific files AND requirements.txt
+  - Ensures pip compatibility regardless of selected package manager
+  - Dependencies correctly reflect all selected stack features
+  - Smart dependency deduplication and version management
+
+### Improvements
+
+- **Interactive CLI Experience**:
+  - Step-by-step feature selection with descriptions. Each selection step proceeds in the following order below:
+    - Database selection (PostgreSQL, MySQL, MongoDB, Redis, SQLite)
+    - Authentication options (JWT, OAuth2, FastAPI-Users, Session-based)
+    - Background tasks (Celery, Dramatiq)
+    - Caching layer (Redis, fastapi-cache2)
+    - Monitoring integration (Loguru, OpenTelemetry, Prometheus)
+    - Testing framework (Basic, Coverage, Advanced)
+    - Utilities (CORS, Rate-Limiting, Pagination, WebSocket)
+    - Deployment configuration (Docker, docker-compose)
+    - Package manager selection (pip, uv, pdm, poetry)
+    - Custom package addition support
+
+### Technical
+
+- **Interactive Backend Architecture**:
+  - `InteractiveConfigBuilder`: Orchestrates full interactive flow
+  - `DynamicConfigGenerator`: Generates feature-specific code
+  - `DependencyCollector`: Intelligently collects stack dependencies
+  - Input validators with comprehensive error handling
+  - Multi-select prompts for utilities and deployment options
+  - Feature compatibility validation system
+
+### Documentation
+
+- Add AI translation support of user guides(docs/ folder sources that mkdocs renders)
+
 ## v1.1.5 (2025-09-14)
 
 ### Improvements

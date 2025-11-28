@@ -94,6 +94,80 @@ class FastkitConfig:
         },
     }
 
+    # Package Catalog for Interactive Mode (v1.2.0+)
+    # Based on recommendations from: https://github.com/mjhea0/awesome-fastapi
+    PACKAGE_CATALOG: dict[str, dict[str, list[str]]] = {
+        "database": {
+            "PostgreSQL": ["psycopg2-binary", "asyncpg", "sqlalchemy", "alembic"],
+            "MySQL": ["pymysql", "aiomysql", "sqlalchemy", "alembic"],
+            "MongoDB": ["motor", "beanie"],
+            "Redis": ["redis[hiredis]", "aioredis"],
+            "SQLite": ["sqlalchemy", "alembic"],
+            "None": [],
+        },
+        "authentication": {
+            "JWT": ["python-jose[cryptography]", "passlib[bcrypt]"],
+            "OAuth2": ["authlib"],
+            "FastAPI-Users": [
+                "fastapi-users[sqlalchemy]",
+                "python-jose[cryptography]",
+                "passlib[bcrypt]",
+            ],
+            "Session-based": ["itsdangerous"],
+            "None": [],
+        },
+        "async_tasks": {
+            "Celery": ["celery[redis]", "redis"],
+            "Dramatiq": ["dramatiq[redis]", "redis"],
+            "None": [],
+        },
+        "testing": {
+            "Basic": ["pytest", "pytest-asyncio", "httpx"],
+            "Coverage": ["pytest", "pytest-asyncio", "pytest-cov", "httpx"],
+            "Advanced": [
+                "pytest",
+                "pytest-asyncio",
+                "pytest-cov",
+                "httpx",
+                "faker",
+                "factory-boy",
+            ],
+            "None": [],
+        },
+        "caching": {
+            "Redis": ["redis[hiredis]", "fastapi-cache2"],
+            "None": [],
+        },
+        "monitoring": {
+            "Loguru": ["loguru"],
+            "OpenTelemetry": [
+                "opentelemetry-api",
+                "opentelemetry-sdk",
+                "opentelemetry-instrumentation-fastapi",
+            ],
+            "Prometheus": ["prometheus-client", "prometheus-fastapi-instrumentator"],
+            "None": [],
+        },
+        "utilities": {
+            "CORS": [],  # Built-in to FastAPI
+            "Rate-Limiting": ["slowapi"],
+            "Pagination": ["fastapi-pagination"],
+            "WebSocket": [],  # Built-in to FastAPI
+            "None": [],
+        },
+    }
+
+    # Feature descriptions for display in interactive mode
+    FEATURE_DESCRIPTIONS: dict[str, str] = {
+        "database": "Database and ORM selection",
+        "authentication": "User authentication and authorization",
+        "async_tasks": "Background task processing",
+        "testing": "Testing framework and tools",
+        "caching": "Response and data caching",
+        "monitoring": "Application monitoring and logging",
+        "utilities": "Additional utilities and middleware",
+    }
+
     # Testing Options
     TEST_SERVER_PORT: int = 8000
     TEST_DEFAULT_TERMINAL_WIDTH: int = 80

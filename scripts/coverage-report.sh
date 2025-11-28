@@ -12,7 +12,7 @@ NC='\033[0m' # No Color
 # Script options
 OPEN_HTML=false
 SHOW_MISSING=true
-MIN_COVERAGE=70
+MIN_COVERAGE=80
 OUTPUT_FORMAT="term"
 
 # Help function
@@ -133,8 +133,6 @@ if [[ "$TEMPLATE_CHANGED" == "false" ]]; then
 else
     echo -e "${GREEN}ℹ️  Changes detected in fastapi_project_template - running all tests${NC}"
 fi
-
-echo ""
 
 # Run tests with coverage
 if pytest $PYTEST_ARGS; then

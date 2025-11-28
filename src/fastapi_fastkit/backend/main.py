@@ -308,6 +308,67 @@ def _process_pyproject_file(
         raise BackendExceptions(f"Failed to process pyproject.toml: {e}")
 
 
+def update_setup_py_dependencies(project_dir: str, dependencies: List[str]) -> None:
+    """
+    Update setup.py file's install_requires list with new dependencies.
+
+    This function finds and updates the install_requires list in setup.py
+    to match the dependencies selected during interactive mode.
+
+    :param project_dir: Path to the project directory
+    :param dependencies: List of dependency specifications
+    """
+    setup_py_path = os.path.join(project_dir, "setup.py")
+
+    if not os.path.exists(setup_py_path):
+        debug_log("setup.py not found, skipping dependency update", "info")
+        return
+
+    try:
+        with open(setup_py_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        # Build the new install_requires list
+        deps_str = ",\n    ".join(f'"{dep}"' for dep in dependencies)
+
+        # Try to replace existing install_requires first (with type annotation)
+        pattern = r"install_requires:\s*list\[str\]\s*=\s*\[(.*?)\]"
+        if re.search(pattern, content, re.DOTALL):
+            content = re.sub(
+                pattern,
+                f"install_requires: list[str] = [\n    {deps_str},\n]",
+                content,
+                flags=re.DOTALL,
+            )
+            debug_log(
+                "Updated install_requires with type annotation in setup.py", "info"
+            )
+        else:
+            # Fallback: try without type annotation
+            pattern_old = r"install_requires\s*=\s*\[(.*?)\]"
+            if re.search(pattern_old, content, re.DOTALL):
+                content = re.sub(
+                    pattern_old,
+                    f"install_requires = [\n    {deps_str},\n]",
+                    content,
+                    flags=re.DOTALL,
+                )
+                debug_log("Updated install_requires in setup.py", "info")
+            else:
+                debug_log("Could not find install_requires in setup.py", "warning")
+                return
+
+        # Write updated content
+        with open(setup_py_path, "w", encoding="utf-8") as f:
+            f.write(content)
+
+        print_info(f"Updated setup.py with {len(dependencies)} dependencies")
+
+    except (OSError, UnicodeDecodeError) as e:
+        debug_log(f"Error updating setup.py dependencies: {e}", "error")
+        print_warning(f"Could not update setup.py: {e}")
+
+
 def create_venv_with_manager(project_dir: str, manager_type: str = "pip") -> str:
     """
     Create a virtual environment using the specified package manager.
@@ -405,6 +466,22 @@ def generate_dependency_file_with_manager(
         package_manager.generate_dependency_file(
             dependencies, project_name, author, author_email, description
         )
+
+        # Also generate requirements.txt for pip compatibility (if not using pip)
+        if manager_type != "pip":
+            from pathlib import Path
+
+            requirements_path = Path(project_dir) / "requirements.txt"
+            try:
+                with open(requirements_path, "w", encoding="utf-8") as f:
+                    for dep in dependencies:
+                        f.write(f"{dep}\n")
+                debug_log("Generated requirements.txt for pip compatibility", "info")
+            except (OSError, UnicodeEncodeError) as e:
+                debug_log(
+                    f"Warning: Could not generate requirements.txt: {e}", "warning"
+                )
+
     except Exception as e:
         debug_log(f"Error generating dependency file with {manager_type}: {e}", "error")
         raise BackendExceptions(f"Failed to generate dependency file: {str(e)}")
