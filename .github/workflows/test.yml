@@ -1,4 +1,6 @@
 name: Test and Coverage
+permissions:
+  contents: read
 
 on:
   pull_request:
