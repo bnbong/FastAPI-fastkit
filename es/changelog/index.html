@@ -1,0 +1,2750 @@
+
+<!doctype html>
+<html lang="es" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Fast, easy-to-use starter kit for new users of Python and FastAPI">
+      
+      
+      
+        <link rel="canonical" href="https://bnbong.github.io/FastAPI-fastkit/es/changelog/">
+      
+      
+        <link rel="prev" href="../reference/template-quality-assurance/">
+      
+      
+      
+        
+          <link rel="alternate" href="../../changelog/" hreflang="en">
+        
+          <link rel="alternate" href="../../ko/changelog/" hreflang="ko">
+        
+          <link rel="alternate" href="../../ja/changelog/" hreflang="ja">
+        
+          <link rel="alternate" href="../../zh/changelog/" hreflang="zh">
+        
+          <link rel="alternate" href="./" hreflang="es">
+        
+          <link rel="alternate" href="../../fr/changelog/" hreflang="fr">
+        
+          <link rel="alternate" href="../../de/changelog/" hreflang="de">
+        
+      
+      
+      <link rel="icon" href="../../img/FastAPI-fastkit_logo.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+    
+    
+      
+        <title>Registro de Cambios - FastAPI-fastkit</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.618322db.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=JetBrains+Mono:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"JetBrains Mono";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../css/termynal.css">
+    
+      <link rel="stylesheet" href="../../css/custom.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="brown">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#changelog" class="md-skip">
+          Saltar a contenido
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Cabecera">
+    <a href="../" title="FastAPI-fastkit" class="md-header__button md-logo" aria-label="FastAPI-fastkit" data-md-component="logo">
+      
+  <img src="../../img/FastAPI-fastkit_logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            FastAPI-fastkit
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Registro de Cambios
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="brown"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="brown"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Seleccionar idioma">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="../../changelog/" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../ko/changelog/" hreflang="ko" class="md-select__link">
+              한국어
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../ja/changelog/" hreflang="ja" class="md-select__link">
+              日本語
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../zh/changelog/" hreflang="zh" class="md-select__link">
+              中文
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="es" class="md-select__link">
+              Español
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../fr/changelog/" hreflang="fr" class="md-select__link">
+              Français
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../de/changelog/" hreflang="de" class="md-select__link">
+              Deutsch
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Búsqueda" placeholder="Búsqueda" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Buscar">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Compartir" aria-label="Compartir" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpiar" aria-label="Limpiar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando búsqueda
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/bnbong/FastAPI-fastkit" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    bnbong/FastAPI-fastkit
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Pestañas" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Inicio
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../user-guide/installation/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Guía del Usuario
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../tutorial/getting-started/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Tutorial
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../contributing/development-setup/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Contribuir
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../reference/faq/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Referencia
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Registro de Cambios
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navegación" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../" title="FastAPI-fastkit" class="md-nav__button md-logo" aria-label="FastAPI-fastkit" data-md-component="logo">
+      
+  <img src="../../img/FastAPI-fastkit_logo.png" alt="logo">
+
+    </a>
+    FastAPI-fastkit
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/bnbong/FastAPI-fastkit" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    bnbong/FastAPI-fastkit
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inicio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guía del Usuario
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guía del Usuario
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user-guide/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user-guide/quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user-guide/creating-projects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Creating Projects
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user-guide/adding-routes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Routes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user-guide/using-templates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Using Templates
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user-guide/cli-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorial
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorial
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/first-project/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Your First Project
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/basic-api-server/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implementing Basic API Server
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/async-crud-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implementing Asynchronous CRUD API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/database-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Database Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/docker-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/custom-response-handling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implementing Custom Response Handling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/mcp-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implementing MCP Server
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contribuir
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Contribuir
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/development-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/code-guidelines/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Code Guidelines
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/template-creation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Template Creation Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/translation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Translation Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Referencia
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Referencia
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/template-quality-assurance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Template Quality Assurance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Registro de Cambios
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Registro de Cambios
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Tabla de contenidos">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Tabla de contenidos
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#v120-2025-11-27" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v1.2.0 (2025-11-27)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v1.2.0 (2025-11-27)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Features
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#improvements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Improvements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#technical" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Technical
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v115-2025-09-14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v1.1.5 (2025-09-14)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v1.1.5 (2025-09-14)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#improvements_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Improvements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v114-deprecated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v1.1.4 (deprecated)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v113-2025-09-13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v1.1.3 (2025-09-13)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v1.1.3 (2025-09-13)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Templates
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v112-2025-09-05" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v1.1.2 (2025-09-05)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v1.1.2 (2025-09-05)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#improvements_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Improvements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v111-2025-08-15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v1.1.1 (2025-08-15)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v1.1.1 (2025-08-15)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#improvements_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Improvements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v110-2025-08-08" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v1.1.0 (2025-08-08)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v1.1.0 (2025-08-08)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Features
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#improvements_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Improvements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#documentation_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#technical_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Technical
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#breaking-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Breaking Changes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v102-2025-07-02" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v1.0.2 (2025-07-02)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v1.0.2 (2025-07-02)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Features
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maintenances" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Maintenances
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v101-2025-06-27" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v1.0.1 (2025-06-27)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v1.0.1 (2025-06-27)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixes_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#documentations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maintenances_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Maintenances
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v100-2025-03-01" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v1.0.0 (2025-03-01)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v1.0.0 (2025-03-01)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Features
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#documentations_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v011-2025-02-21" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.1.1 (2025-02-21)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.1.1 (2025-02-21)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixes_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v010-2025-02-13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.1.0 (2025-02-13)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.1.0 (2025-02-13)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#templates_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Templates
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#features_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Features
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maintenances_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Maintenances
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chores" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chores
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Tabla de contenidos">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Tabla de contenidos
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#v120-2025-11-27" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v1.2.0 (2025-11-27)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v1.2.0 (2025-11-27)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Features
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#improvements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Improvements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#technical" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Technical
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v115-2025-09-14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v1.1.5 (2025-09-14)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v1.1.5 (2025-09-14)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#improvements_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Improvements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v114-deprecated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v1.1.4 (deprecated)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v113-2025-09-13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v1.1.3 (2025-09-13)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v1.1.3 (2025-09-13)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Templates
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v112-2025-09-05" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v1.1.2 (2025-09-05)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v1.1.2 (2025-09-05)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#improvements_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Improvements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v111-2025-08-15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v1.1.1 (2025-08-15)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v1.1.1 (2025-08-15)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#improvements_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Improvements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v110-2025-08-08" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v1.1.0 (2025-08-08)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v1.1.0 (2025-08-08)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Features
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#improvements_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Improvements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#documentation_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#technical_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Technical
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#breaking-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Breaking Changes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v102-2025-07-02" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v1.0.2 (2025-07-02)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v1.0.2 (2025-07-02)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Features
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maintenances" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Maintenances
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v101-2025-06-27" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v1.0.1 (2025-06-27)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v1.0.1 (2025-06-27)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixes_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#documentations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maintenances_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Maintenances
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v100-2025-03-01" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v1.0.0 (2025-03-01)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v1.0.0 (2025-03-01)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Features
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#documentations_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v011-2025-02-21" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.1.1 (2025-02-21)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.1.1 (2025-02-21)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixes_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v010-2025-02-13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.1.0 (2025-02-13)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.1.0 (2025-02-13)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#templates_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Templates
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#features_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Features
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maintenances_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Maintenances
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chores" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chores
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="changelog">Changelog</h1>
+<h2 id="v120-2025-11-27">v1.2.0 (2025-11-27)</h2>
+<h3 id="features">Features</h3>
+<ul>
+<li><strong>(Breaking Change) Add <code>fastkit init --interactive</code> feature</strong>: Revolutionary feature-by-feature project builder</li>
+<li><code>fastkit init --interactive</code> now provides guided project setup with intelligent feature selection</li>
+<li>Always uses Empty project (fastapi-empty template) as base template to prevent conflicts with DynamicConfigGenerator</li>
+<li>Interactive project configuration with validation and compatibility warnings</li>
+<li>Real-time dependency collection based on selected features</li>
+<li>
+<p>Confirmation summary before project creation</p>
+</li>
+<li>
+<p><strong>Dynamic Code Generation</strong>: Intelligent code generation based on feature selections</p>
+</li>
+<li>Integrated DynamicConfigGenerator for automatic code scaffolding</li>
+<li>Generates <code>main.py</code> with selected features (auth, database, monitoring, etc.)</li>
+<li>Creates database configuration files for PostgreSQL, MySQL, MongoDB, SQLite</li>
+<li>Generates authentication setup for JWT, OAuth2, FastAPI-Users</li>
+<li>Auto-generates test configuration (pytest with optional coverage)</li>
+<li>
+<p>Docker deployment files (Dockerfile, docker-compose.yml) generation</p>
+</li>
+<li>
+<p><strong>Enhanced Dependency Management</strong>: Multi-format dependency file generation</p>
+</li>
+<li>Automatically generates both package-manager-specific files AND requirements.txt</li>
+<li>Ensures pip compatibility regardless of selected package manager</li>
+<li>Dependencies correctly reflect all selected stack features</li>
+<li>Smart dependency deduplication and version management</li>
+</ul>
+<h3 id="improvements">Improvements</h3>
+<ul>
+<li><strong>Interactive CLI Experience</strong>:</li>
+<li>Step-by-step feature selection with descriptions. Each selection step proceeds in the following order below:<ul>
+<li>Database selection (PostgreSQL, MySQL, MongoDB, Redis, SQLite)</li>
+<li>Authentication options (JWT, OAuth2, FastAPI-Users, Session-based)</li>
+<li>Background tasks (Celery, Dramatiq)</li>
+<li>Caching layer (Redis, fastapi-cache2)</li>
+<li>Monitoring integration (Loguru, OpenTelemetry, Prometheus)</li>
+<li>Testing framework (Basic, Coverage, Advanced)</li>
+<li>Utilities (CORS, Rate-Limiting, Pagination, WebSocket)</li>
+<li>Deployment configuration (Docker, docker-compose)</li>
+<li>Package manager selection (pip, uv, pdm, poetry)</li>
+<li>Custom package addition support</li>
+</ul>
+</li>
+</ul>
+<h3 id="technical">Technical</h3>
+<ul>
+<li><strong>Interactive Backend Architecture</strong>:</li>
+<li><code>InteractiveConfigBuilder</code>: Orchestrates full interactive flow</li>
+<li><code>DynamicConfigGenerator</code>: Generates feature-specific code</li>
+<li><code>DependencyCollector</code>: Intelligently collects stack dependencies</li>
+<li>Input validators with comprehensive error handling</li>
+<li>Multi-select prompts for utilities and deployment options</li>
+<li>Feature compatibility validation system</li>
+</ul>
+<h3 id="documentation">Documentation</h3>
+<ul>
+<li>Add AI translation support of user guides(docs/ folder sources that mkdocs renders)</li>
+</ul>
+<h2 id="v115-2025-09-14">v1.1.5 (2025-09-14)</h2>
+<h3 id="improvements_1">Improvements</h3>
+<ul>
+<li><strong>Adaptive Console Sizing</strong>: Enhanced terminal output display</li>
+<li>Console width is 80% of terminal width, capped at 120 characters</li>
+<li>Console height is terminal height minus buffer (5 lines)</li>
+<li>Automatic terminal size detection with fallback to default sizes (80x24)</li>
+<li>Dynamic sizing based on actual terminal dimensions</li>
+</ul>
+<h3 id="fixes">Fixes</h3>
+<ul>
+<li><strong>Text Truncation Prevention</strong>: Completely eliminated text truncation in CLI output</li>
+<li>Template names and descriptions are now fully displayed without "..." truncation</li>
+<li>Table columns automatically adjust to content length to prevent text cutting</li>
+<li>Added <code>overflow="fold"</code> and <code>no_wrap=False</code> settings to Rich tables</li>
+<li>Template listing now shows complete template names (e.g., <code>fastapi-custom-response</code> instead of <code>fastapi-custom-respo...</code>)</li>
+<li><strong>Fixing the object <code>console</code> not found error</strong></li>
+<li>this critical error was occurred every version before this version.</li>
+<li>this error was occurred because of the mismatched logic between distribute github actions workflow and the top <code>__init__.py</code> file of fastkit project package.</li>
+<li>This issue was discovered during the development of version 1.1.2, and I spent a lot of time troubleshooting it. I believe this was due to my lack of development experience. I sincerely apologize.</li>
+</ul>
+<h2 id="v114-deprecated">v1.1.4 (deprecated)</h2>
+<p>this version was hotfix build, but it is deprecated.</p>
+<p>The issues that were being addressed during the development of this version remained unresolved and were fixed in version v1.1.5.</p>
+<p>For more details, please refer to the CHANGELOG.md file for v1.1.5.</p>
+<h2 id="v113-2025-09-13">v1.1.3 (2025-09-13)</h2>
+<h3 id="templates">Templates</h3>
+<ul>
+<li>add <code>fastapi-single-module</code> template</li>
+<li>update <code>fastapi-psql-orm</code> template : fix dockerfile &amp; docker-compose.yml scripts errors</li>
+</ul>
+<h2 id="v112-2025-09-05">v1.1.2 (2025-09-05)</h2>
+<h3 id="improvements_2">Improvements</h3>
+<ul>
+<li>add a feature of <code>fastkit init</code>, <code>fastkit startdemo</code> command to define to make a new project folder at current working directory</li>
+<li>add <code>setuptools</code> package at <code>fastapi-empty</code> template's dependency list.</li>
+<li>add a feature of <code>fastkit addroute</code>command to recognize current working project (with cmd option <code>.</code>).</li>
+</ul>
+<h2 id="v111-2025-08-15">v1.1.1 (2025-08-15)</h2>
+<h3 id="improvements_3">Improvements</h3>
+<ul>
+<li>fix template inspection workflow &amp; script</li>
+<li>fixing uv supportation compatibility</li>
+<li>for now, template inspection is running with <code>uv</code> package manager</li>
+</ul>
+<h2 id="v110-2025-08-08">v1.1.0 (2025-08-08)</h2>
+<h3 id="features_1">Features</h3>
+<ul>
+<li><strong>Package Manager Support</strong>: Add comprehensive support for multiple Python package managers</li>
+<li>Support for UV (default), PDM, Poetry, and PIP package managers</li>
+<li>Interactive package manager selection in <code>fastkit init</code> and <code>fastkit startdemo</code> commands</li>
+<li><code>--package-manager</code> CLI option for non-interactive usage</li>
+<li>Automatic generation of appropriate dependency files (<code>pyproject.toml</code> for UV/PDM/Poetry, <code>requirements.txt</code> for PIP)</li>
+<li>
+<p>PEP 621 compliant project metadata for modern package managers</p>
+</li>
+<li>
+<p><strong>Automated Template Testing System</strong>: Revolutionary zero-configuration template testing</p>
+</li>
+<li>Dynamic template discovery - new templates are automatically tested</li>
+<li>Comprehensive end-to-end testing with actual project creation</li>
+<li>Multi-package manager compatibility testing</li>
+<li>Virtual environment creation and dependency installation validation</li>
+<li>Project structure and FastAPI integration verification</li>
+<li>Parameterized testing with pytest for scalable test execution</li>
+</ul>
+<h3 id="improvements_4">Improvements</h3>
+<ul>
+<li><strong>Enhanced CLI Experience</strong>: Package manager selection with interactive prompts and helpful descriptions</li>
+<li><strong>Better Template Quality Assurance</strong>: Multi-layer quality assurance with static inspection and dynamic testing</li>
+<li><strong>Improved Developer Experience</strong>: Zero boilerplate test configuration for template contributors</li>
+<li><strong>Cross-Platform Compatibility</strong>: Enhanced support for different package manager workflows</li>
+</ul>
+<h3 id="documentation_1">Documentation</h3>
+<ul>
+<li>Updated all user guides with package manager selection examples</li>
+<li>Enhanced CLI reference with comprehensive package manager documentation</li>
+<li>Updated contributing guidelines with new automated testing system</li>
+<li>Improved template creation guide with zero-configuration testing instructions</li>
+<li>Enhanced template quality assurance documentation</li>
+</ul>
+<h3 id="technical_1">Technical</h3>
+<ul>
+<li>Implemented BasePackageManager abstract class with concrete implementations</li>
+<li>Added PackageManagerFactory for dynamic package manager instantiation</li>
+<li>Enhanced project metadata injection for all package managers</li>
+<li>Improved test infrastructure with dynamic template discovery</li>
+<li>Updated CI/CD pipelines for multi-package manager testing</li>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<ul>
+<li><strong>Default Package Manager</strong>: Changed from PIP to UV for better performance</li>
+<li><strong>CLI Prompts</strong>: Added package manager selection step in interactive commands</li>
+</ul>
+<h2 id="v102-2025-07-02">v1.0.2 (2025-07-02)</h2>
+<h3 id="features_2">Features</h3>
+<ul>
+<li>add logging feature at <code>--debug</code> mode option : debugging log will be stored at package directory</li>
+</ul>
+<h3 id="maintenances">Maintenances</h3>
+<ul>
+<li>add coverage test report and apply it at pre-commit hook</li>
+</ul>
+<h2 id="v101-2025-06-27">v1.0.1 (2025-06-27)</h2>
+<h3 id="fixes_1">Fixes</h3>
+<ul>
+<li>bump <code>h11</code> version from 0.14.0 to 0.16.0</li>
+</ul>
+<h3 id="documentations">Documentations</h3>
+<ul>
+<li>add github.io site for FastAPI-fastkit (with termynal &amp; mkdocs-material)</li>
+</ul>
+<h3 id="maintenances_1">Maintenances</h3>
+<ul>
+<li>add a test case : test_cli_extended.py</li>
+</ul>
+<h2 id="v100-2025-03-01">v1.0.0 (2025-03-01)</h2>
+<p>official release version</p>
+<h3 id="features_3">Features</h3>
+<ul>
+<li>rename some <code>fastkit</code> commands:</li>
+<li><code>fastkit startup</code> -&gt; <code>fastkit startdemo</code></li>
+<li><code>fastkit startproject</code> -&gt; <code>fastkit init</code></li>
+<li>add <code>fastkit addroute</code> command : for adding a route to project</li>
+<li>add <code>fastkit runserver</code> command : for running FastAPI server</li>
+</ul>
+<h3 id="documentations_1">Documentations</h3>
+<ul>
+<li>complete contribution guides</li>
+</ul>
+<h2 id="v011-2025-02-21">v0.1.1 (2025-02-21)</h2>
+<p>pre-release version</p>
+<h3 id="fixes_2">Fixes</h3>
+<ul>
+<li>modified template metadata injection modules</li>
+</ul>
+<h2 id="v010-2025-02-13">v0.1.0 (2025-02-13)</h2>
+<p>initial release : pre-release version</p>
+<h3 id="templates_1">Templates</h3>
+<ul>
+<li>add <code>fastapi-default</code> template</li>
+<li>add <code>fastapi-asnyc-crud</code> template</li>
+<li>add <code>fastapi-customized-response</code> template</li>
+<li>add <code>fastapi-dockerized</code> template</li>
+<li>add <code>fastapi-psql-orm</code> template</li>
+</ul>
+<h3 id="features_4">Features</h3>
+<ul>
+<li>add <code>fastkit</code> command line base structure : <code>fastkit &lt;command&gt;</code></li>
+<li>add <code>fastkit --help</code> command : for more information about fastkit command</li>
+<li>add <code>fastkit --version</code> command : for version information</li>
+<li>add <code>fastkit --debug</code> command : for debugging information</li>
+<li>add <code>fastkit echo</code> command : for echo test</li>
+<li>add <code>fastkit list-templates</code> command : for listing available templates</li>
+<li>add <code>fastkit startup</code> command : for starting project with template</li>
+<li>add <code>fastkit startproject</code>command : for starting empty FastAPI project</li>
+<li>add <code>fastkit deleteproject</code> command : for deleting project</li>
+</ul>
+<h3 id="maintenances_2">Maintenances</h3>
+<ul>
+<li>add test cases including template test cases</li>
+</ul>
+<h3 id="chores">Chores</h3>
+<ul>
+<li>add version tag system</li>
+<li>add pr-branching methods</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Volver al principio
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Pie" >
+        
+          
+          <a href="../reference/template-quality-assurance/" class="md-footer__link md-footer__link--prev" aria-label="Anterior: Template Quality Assurance">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Anterior
+              </span>
+              <div class="md-ellipsis">
+                Template Quality Assurance
+              </div>
+            </div>
+          </a>
+        
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.indexes", "navigation.footer", "navigation.top", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.expand", "search.highlight", "search.share", "search.suggest", "announce.dismiss", "toc.follow"], "search": "../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      
+        <script src="../../js/termynal.js"></script>
+      
+        <script src="../../js/custom.js"></script>
+      
+    
+  </body>
+</html>
