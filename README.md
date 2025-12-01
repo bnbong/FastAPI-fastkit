@@ -14,6 +14,9 @@
 <a href="https://codecov.io/gh/bnbong/FastAPI-fastkit" >
     <img src="https://codecov.io/gh/bnbong/FastAPI-fastkit/graph/badge.svg?token=WS0B6WWD8K"/>
 </a>
+<a href="https://pepy.tech/project/fastapi-fastkit">
+    <img src="https://static.pepy.tech/personalized-badge/fastapi-fastkit?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=GREEN&left_text=downloads" alt="PyPI Downloads">
+</a>
 </p>
 
 ---
@@ -25,6 +28,7 @@ This project was inspired by the `SpringBoot initializer` & Python Django's `dja
 ## Key Features
 
 - **⚡ Immediate FastAPI project creation** : Super-fast FastAPI workspace & project creation via CLI, inspired by `django-admin` feature of [Python Django](https://github.com/django/django)
+- **✨ Interactive project builder**: Guided step-by-step feature selection for databases, authentication, caching, monitoring, and more with auto-generated code
 - **🎨 Prettier CLI output** : Beautiful CLI experience powered by [rich library](https://github.com/Textualize/rich)
 - **📋 Standards-based FastAPI project templates** : Templates follow Python standards and common FastAPI patterns.
 - **🔍 Automated template quality assurance** : Weekly automated testing ensures all templates remain functional and up-to-date
@@ -56,6 +60,28 @@ fastkit init [OPTIONS]
   - `--project-name`, `--author`, `--author-email`, `--description`
   - `--package-manager` [pip|uv|pdm|poetry]
   - Stack selection: `minimal` | `standard` | `full` (interactive)
+
+### Create a project with interactive mode
+```console
+fastkit init --interactive
+```
+- What it does: Guided step-by-step project setup with intelligent feature selection
+- Features:
+  - **Database selection**: PostgreSQL, MySQL, MongoDB, Redis, SQLite
+  - **Authentication**: JWT, OAuth2, FastAPI-Users, Session-based
+  - **Background tasks**: Celery, Dramatiq
+  - **Caching**: Redis, fastapi-cache2
+  - **Monitoring**: Loguru, OpenTelemetry, Prometheus
+  - **Testing**: Basic (pytest), Coverage, Advanced (with faker, factory-boy)
+  - **Utilities**: CORS, Rate-Limiting, Pagination, WebSocket
+  - **Deployment**: Docker, docker-compose with auto-generated configs
+  - **Package manager**: pip, uv, pdm, poetry
+  - **Custom packages**: Add your own dependencies
+- Auto-generates:
+  - `main.py` with selected features integrated
+  - Database and authentication configuration files
+  - Docker deployment files (Dockerfile, docker-compose.yml)
+  - Test configuration (pytest with coverage)
 
 ### Create a project from a template
 ```console

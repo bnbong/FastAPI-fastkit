@@ -11,6 +11,9 @@
 <a href="https://github.com/bnbong/FastAPI-fastkit/releases" target="_blank">
     <img src="https://img.shields.io/github/v/release/bnbong/FastAPI-fastkit" alt="GitHub Release">
 </a>
+<a href="https://pepy.tech/project/fastapi-fastkit">
+    <img src="https://static.pepy.tech/personalized-badge/fastapi-fastkit?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=GREEN&left_text=downloads" alt="PyPI Downloads">
+</a>
 </p>
 
 ---
@@ -22,6 +25,7 @@ This project was inspired by the `SpringBoot initializer` & Python Django's `dja
 ## Key Features
 
 - **⚡ Immediate FastAPI project creation** : Super-fast FastAPI workspace & project creation via CLI, inspired by `django-admin` feature of [Python Django](https://github.com/django/django)
+- **✨ Interactive project builder**: Guided step-by-step feature selection for databases, authentication, caching, monitoring, and more with auto-generated code
 - **🎨 Prettier CLI outputs** : Beautiful CLI experience powered by [rich library](https://github.com/Textualize/rich)
 - **📋 Standards-based FastAPI project templates** : All FastAPI-fastkit templates are based on Python standards and FastAPI's common use patterns
 - **🔍 Automated template quality assurance** : Weekly automated testing ensures all templates remain functional and up-to-date
@@ -166,6 +170,160 @@ Installing dependencies...
 </div>
 
 This command will create a new FastAPI project workspace environment with Python virtual environment.
+
+### Create a project with interactive mode ✨ NEW!
+
+For more complex projects, use the **interactive mode** to build your FastAPI application step-by-step with intelligent feature selection:
+
+<div class="termy">
+
+```console
+$ fastkit init --interactive
+
+⚡ FastAPI-fastkit Interactive Project Setup ⚡
+
+📋 Basic Project Information
+Enter the project name: my-fullstack-project
+Enter the author name: John Doe
+Enter the author email: john@example.com
+Enter the project description: Full-stack FastAPI project with PostgreSQL and JWT
+
+🗄️ Database Selection
+Select database (PostgreSQL, MySQL, MongoDB, Redis, SQLite, None):
+  1. PostgreSQL - PostgreSQL database with SQLAlchemy
+  2. MySQL - MySQL database with SQLAlchemy
+  3. MongoDB - MongoDB with motor async driver
+  4. Redis - Redis for caching and session storage
+  5. SQLite - SQLite database for development
+  6. None - No database
+
+Select database: 1
+
+🔐 Authentication Selection
+Select authentication (JWT, OAuth2, FastAPI-Users, Session-based, None):
+  1. JWT - JSON Web Token authentication
+  2. OAuth2 - OAuth2 with password flow
+  3. FastAPI-Users - Full featured user management
+  4. Session-based - Cookie-based sessions
+  5. None - No authentication
+
+Select authentication: 1
+
+⚙️ Background Tasks Selection
+Select background tasks (Celery, Dramatiq, None):
+  1. Celery - Distributed task queue
+  2. Dramatiq - Fast and reliable task processing
+  3. None - No background tasks
+
+Select background tasks: 1
+
+💾 Caching Selection
+Select caching (Redis, fastapi-cache2, None):
+  1. Redis - Redis caching
+  2. fastapi-cache2 - Simple caching for FastAPI
+  3. None - No caching
+
+Select caching: 1
+
+📊 Monitoring Selection
+Select monitoring (Loguru, OpenTelemetry, Prometheus, None):
+  1. Loguru - Simple and powerful logging
+  2. OpenTelemetry - Observability framework
+  3. Prometheus - Metrics and monitoring
+  4. None - No monitoring
+
+Select monitoring: 3
+
+🧪 Testing Framework Selection
+Select testing framework (Basic, Coverage, Advanced, None):
+  1. Basic - pytest + httpx for API testing
+  2. Coverage - Basic + code coverage
+  3. Advanced - Coverage + faker + factory-boy for fixtures
+  4. None - No testing framework
+
+Select testing framework: 2
+
+🛠️ Additional Utilities
+Select utilities (comma-separated numbers, e.g., 1,3,4):
+  1. CORS - Cross-Origin Resource Sharing
+  2. Rate-Limiting - Request rate limiting
+  3. Pagination - Pagination support
+  4. WebSocket - WebSocket support
+
+Select utilities: 1
+
+🚀 Deployment Configuration
+Select deployment option:
+  1. Docker - Generate Dockerfile
+  2. docker-compose - Generate docker-compose.yml (includes Docker)
+  3. None - No deployment configuration
+
+Select deployment option: 2
+
+📦 Package Manager Selection
+Select package manager (pip, uv, pdm, poetry): uv
+
+📝 Custom Packages (optional)
+Enter custom package names (comma-separated, press Enter to skip):
+
+───────────────── Selected Configuration ─────────────────
+Project: my-fullstack-project
+Database: PostgreSQL
+Authentication: JWT
+Background Tasks: Celery
+Caching: Redis
+Monitoring: Prometheus
+Testing: Coverage
+Utilities: CORS
+Deployment: Docker, docker-compose
+Package Manager: uv
+──────────────────────────────────────────────────────────
+
+Proceed with project creation? [Y/n]: y
+
+╭─────────────────────── Success ───────────────────────╮
+│ ✨ Generated main.py with selected features           │
+╰───────────────────────────────────────────────────────╯
+╭─────────────────────── Success ───────────────────────╮
+│ ✨ Generated database configuration                   │
+╰───────────────────────────────────────────────────────╯
+╭─────────────────────── Success ───────────────────────╮
+│ ✨ Generated authentication configuration             │
+╰───────────────────────────────────────────────────────╯
+╭─────────────────────── Success ───────────────────────╮
+│ ✨ Generated test configuration                       │
+╰───────────────────────────────────────────────────────╯
+╭─────────────────────── Success ───────────────────────╮
+│ ✨ Generated Docker deployment files                  │
+╰───────────────────────────────────────────────────────╯
+
+Creating virtual environment...
+Installing dependencies...
+
+----> 100%
+
+╭─────────────────────── Success ───────────────────────╮
+│ ✨ FastAPI project 'my-fullstack-project' created!    │
+│                                                       │
+│ Generated files:                                      │
+│   • main.py (with all selected features)             │
+│   • src/config/database.py                           │
+│   • src/config/auth.py                               │
+│   • tests/conftest.py                                │
+│   • Dockerfile                                       │
+│   • docker-compose.yml                               │
+│   • pyproject.toml / requirements.txt                │
+╰───────────────────────────────────────────────────────╯
+```
+
+</div>
+
+The interactive mode provides:
+- **Guided selection** for databases, authentication, background tasks, caching, monitoring, and more
+- **Auto-generated code** for selected features (main.py, config files, Docker files)
+- **Smart dependency management** with automatic pip compatibility
+- **Feature validation** to prevent incompatible combinations
+- **Always Empty project** as base for maximum flexibility
 
 ### Add a new route to the FastAPI project
 
