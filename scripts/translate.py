@@ -117,7 +117,7 @@ class OpenAITranslator(TranslationAPI):
         self,
         api_key: str,
         base_url: Optional[str] = None,
-        model_name: str = "openai/gpt-5",
+        model_name: str = "openai/gpt-4o-mini",
         max_retries: int = 5,
         retry_delay: float = 60.0,
         request_delay: float = 2.0,
@@ -518,8 +518,8 @@ def main() -> None:
     parser.add_argument(
         "--model",
         type=str,
-        default="gpt-5",
-        help="Model name to use for translation (default: gpt-5). For GitHub, use format like 'openai/gpt-4o-mini'.",
+        default="gpt-4o-mini",
+        help="Model name to use for translation (default: gpt-4o-mini). For GitHub, use format like 'openai/gpt-4o-mini'.",
     )
     parser.add_argument(
         "--no-pr", action="store_true", help="Skip creating GitHub Pull Request"
