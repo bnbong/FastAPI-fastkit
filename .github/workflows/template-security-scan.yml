@@ -1,0 +1,184 @@
+name: Weekly Template Security Scan
+
+on:
+  schedule:
+    - cron: "0 23 * * 0"
+  workflow_dispatch:
+    inputs:
+      templates:
+        description: "Specific templates to scan (comma-separated, leave empty for all)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install pip-audit
+        run: pip install pip-audit
+
+      - name: Run security scan on templates
+        id: scan
+        run: |
+          TEMPLATE_DIR="src/fastapi_fastkit/fastapi_project_template"
+          RESULTS_FILE="security_scan_results.json"
+          SCAN_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          # Initialize results
+          echo '{' > $RESULTS_FILE
+          echo '  "scan_date": "'$SCAN_DATE'",' >> $RESULTS_FILE
+          echo '  "templates": [' >> $RESULTS_FILE
+
+          TEMPLATES_INPUT="${{ github.event.inputs.templates }}"
+          FIRST_TEMPLATE=true
+          TOTAL_VULNERABILITIES=0
+          AFFECTED_TEMPLATES=""
+
+          for template_dir in $TEMPLATE_DIR/fastapi-*/; do
+            template_name=$(basename "$template_dir")
+
+            # Skip if specific templates are requested and this isn't one
+            if [ -n "$TEMPLATES_INPUT" ]; then
+              if ! echo "$TEMPLATES_INPUT" | grep -q "$template_name"; then
+                continue
+              fi
+            fi
+
+            req_file="$template_dir/requirements.txt-tpl"
+            if [ -f "$req_file" ]; then
+              echo "🔍 Scanning $template_name..."
+
+              # Create temp requirements file
+              temp_req=$(mktemp)
+              cp "$req_file" "$temp_req"
+
+              # Run pip-audit and capture output
+              audit_output=$(pip-audit -r "$temp_req" --format json 2>/dev/null || echo '[]')
+              rm "$temp_req"
+
+              # Count vulnerabilities
+              vuln_count=$(echo "$audit_output" | python3 -c "import sys, json; data = json.load(sys.stdin); print(len(data))" 2>/dev/null || echo "0")
+
+              if [ "$vuln_count" -gt 0 ]; then
+                TOTAL_VULNERABILITIES=$((TOTAL_VULNERABILITIES + vuln_count))
+                AFFECTED_TEMPLATES="$AFFECTED_TEMPLATES $template_name"
+                echo "⚠️ Found $vuln_count vulnerabilities in $template_name"
+              else
+                echo "✅ No vulnerabilities in $template_name"
+              fi
+
+              # Add to JSON
+              if [ "$FIRST_TEMPLATE" = true ]; then
+                FIRST_TEMPLATE=false
+              else
+                echo '    ,' >> $RESULTS_FILE
+              fi
+
+              echo '    {' >> $RESULTS_FILE
+              echo '      "name": "'$template_name'",' >> $RESULTS_FILE
+              echo '      "vulnerability_count": '$vuln_count',' >> $RESULTS_FILE
+              echo '      "vulnerabilities": '$audit_output >> $RESULTS_FILE
+              echo '    }' >> $RESULTS_FILE
+            fi
+          done
+
+          echo '  ],' >> $RESULTS_FILE
+          echo '  "total_vulnerabilities": '$TOTAL_VULNERABILITIES',' >> $RESULTS_FILE
+          echo '  "affected_templates": "'$(echo $AFFECTED_TEMPLATES | xargs)'"' >> $RESULTS_FILE
+          echo '}' >> $RESULTS_FILE
+
+          # Set outputs for later steps
+          echo "total_vulnerabilities=$TOTAL_VULNERABILITIES" >> $GITHUB_OUTPUT
+          echo "affected_templates=$AFFECTED_TEMPLATES" >> $GITHUB_OUTPUT
+
+      - name: Upload scan results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-scan-results
+          path: security_scan_results.json
+          retention-days: 30
+
+      - name: Create Issue on Vulnerabilities
+        if: steps.scan.outputs.total_vulnerabilities != '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            let issueBody = `## 🔒 Template Dependency Security Scan Results\n\n`;
+            issueBody += `**Scan Date:** ${new Date().toISOString()}\n`;
+            issueBody += `**Total Vulnerabilities Found:** ${{ steps.scan.outputs.total_vulnerabilities }}\n\n`;
+
+            try {
+              const results = JSON.parse(fs.readFileSync('security_scan_results.json', 'utf8'));
+
+              results.templates.forEach(template => {
+                if (template.vulnerability_count > 0) {
+                  issueBody += `### ⚠️ ${template.name}\n\n`;
+                  issueBody += `Found **${template.vulnerability_count}** vulnerabilities:\n\n`;
+                  issueBody += `| Package | Installed | Fix Versions | Vulnerability ID |\n`;
+                  issueBody += `|---------|-----------|--------------|------------------|\n`;
+
+                  template.vulnerabilities.forEach(vuln => {
+                    const fixVersions = vuln.fix_versions ? vuln.fix_versions.join(', ') : 'N/A';
+                    issueBody += `| ${vuln.name} | ${vuln.version} | ${fixVersions} | ${vuln.id} |\n`;
+                  });
+
+                  issueBody += `\n`;
+                }
+              });
+
+            } catch (error) {
+              issueBody += `\nError reading detailed results: ${error.message}\n`;
+            }
+
+            issueBody += `\n---\n**Workflow:** [${context.workflow}](${context.payload.repository.html_url}/actions/runs/${context.runId})`;
+
+            // Determine severity label
+            const totalVulns = parseInt('${{ steps.scan.outputs.total_vulnerabilities }}');
+            let severityLabel = 'security: low';
+            if (totalVulns >= 10) {
+              severityLabel = 'security: critical';
+            } else if (totalVulns >= 5) {
+              severityLabel = 'security: high';
+            } else if (totalVulns >= 2) {
+              severityLabel = 'security: medium';
+            }
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🔒 Template Security Alert: ${totalVulns} vulnerabilities found - ${new Date().toISOString().split('T')[0]}`,
+              body: issueBody,
+              labels: ['security', severityLabel, 'automated', 'template']
+            });
+
+      - name: Report Summary
+        if: always()
+        run: |
+          echo "## 🔒 Security Scan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.scan.outputs.total_vulnerabilities }}" = "0" ]; then
+            echo "✅ **No vulnerabilities found in any template!**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ **Found ${{ steps.scan.outputs.total_vulnerabilities }} vulnerabilities**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Affected templates: ${{ steps.scan.outputs.affected_templates }}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "A GitHub Issue has been created with detailed information." >> $GITHUB_STEP_SUMMARY
+          fi

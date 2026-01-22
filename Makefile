@@ -1,4 +1,4 @@
-.PHONY: help install install-dev install-test uninstall test test-verbose lint format format-check clean build build-docs serve-docs version-update all
+.PHONY: help install install-dev install-test uninstall test test-verbose lint format format-check clean build build-docs serve-docs version-update all translate coverage-report
 
 # Default target
 help: ## Show this help message
@@ -137,3 +137,21 @@ all: ## Run complete development workflow
 	$(MAKE) dev-setup
 	$(MAKE) dev-check
 	$(MAKE) build
+
+# Translation commands
+translate: ## Translate documentation - Usage: make translate LANG=ko PROVIDER=github MODEL=gpt-4o-mini
+	@echo "Starting translation..."
+	@CMD="python scripts/translate.py"; \
+	if [ -n "$(LANG)" ]; then CMD="$$CMD --target-lang $(LANG)"; fi; \
+	if [ -n "$(PROVIDER)" ]; then CMD="$$CMD --api-provider $(PROVIDER)"; fi; \
+	if [ -n "$(MODEL)" ]; then CMD="$$CMD --model $(MODEL)"; fi; \
+	echo "Running: $$CMD"; \
+	$$CMD
+
+# Coverage report commands
+coverage-report: ## Generate detailed coverage report - Usage: make coverage-report FORMAT=html
+	@if [ -z "$(FORMAT)" ]; then \
+		./scripts/coverage-report.sh; \
+	else \
+		./scripts/coverage-report.sh -f "$(FORMAT)"; \
+	fi
