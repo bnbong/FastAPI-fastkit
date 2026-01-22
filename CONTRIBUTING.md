@@ -99,6 +99,7 @@ Key commands for contributors:
 - `make test` - Run all tests
 - `make test-verbose` - Run tests with verbose output
 - `make test-coverage` - Run tests with coverage report
+- `make coverage-report` - Generate detailed coverage report (supports FORMAT=html/xml/json/all)
 
 #### Installation and Building
 - `make install-test` - Install package for testing (uninstall + reinstall)
@@ -108,6 +109,9 @@ Key commands for contributors:
 #### Documentation
 - `make build-docs` - Build documentation
 - `make serve-docs` - Serve documentation locally
+
+#### Translation
+- `make translate` - Translate documentation (supports LANG, PROVIDER, MODEL parameters)
 
 ### Development Workflow
 
@@ -168,6 +172,13 @@ Run tests using these commands:
 3. **Coverage report:**
    ```bash
    make test-coverage
+   ```
+
+4. **Detailed coverage report with options:**
+   ```bash
+   make coverage-report              # Terminal output
+   make coverage-report FORMAT=html  # HTML report (opens in browser)
+   make coverage-report FORMAT=all   # All formats (term, html, xml, json)
    ```
 
 ### Making PRs
@@ -423,7 +434,21 @@ This migrates existing English docs to `docs/en/` and creates language directori
 
 ### Translating Documentation
 
-#### Translate to Specific Language
+#### Using Make Commands (Recommended)
+
+```bash
+# Translate all docs to all configured languages
+make translate
+
+# Translate to specific language
+make translate LANG=ko
+
+# Specify API provider and model
+make translate LANG=ko PROVIDER=github MODEL=gpt-4o-mini
+make translate LANG=ko PROVIDER=openai MODEL=gpt-4
+```
+
+#### Using Script Directly
 
 ```bash
 # Translate all docs to Korean

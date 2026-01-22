@@ -191,6 +191,7 @@ The project Makefile provides convenient commands for common development tasks:
 | `make test-unit` | Run unit tests only |
 | `make test-integration` | Run integration tests only |
 | `make test-coverage` | Run tests with coverage report |
+| `make coverage-report` | Generate detailed coverage report (FORMAT=html/xml/json/all) |
 | `make test-watch` | Run tests in watch mode |
 
 ### Documentation Commands
@@ -200,6 +201,12 @@ The project Makefile provides convenient commands for common development tasks:
 | `make docs-serve` | Serve documentation locally |
 | `make docs-build` | Build documentation |
 | `make docs-deploy` | Deploy documentation to GitHub Pages |
+
+### Translation Commands
+
+| Command | Description |
+|---------|-----------|
+| `make translate` | Translate documentation (LANG, PROVIDER, MODEL parameters) |
 
 ### Examples
 
@@ -231,6 +238,15 @@ src/cli.py                  89      5    94%
 src/templates.py            67      3    96%
 --------------------------------------------
 TOTAL                      201     10    95%
+
+# Generate HTML coverage report
+$ make coverage-report FORMAT=html
+🌐 Opening HTML coverage report in browser...
+
+# Translate documentation to Korean
+$ make translate LANG=ko PROVIDER=github MODEL=gpt-4o-mini
+Starting translation...
+Running: python scripts/translate.py --target-lang ko --api-provider github --model gpt-4o-mini
 ```
 
 </div>
