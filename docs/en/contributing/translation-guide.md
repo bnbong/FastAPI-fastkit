@@ -66,7 +66,25 @@ gh auth login
 
 ## Usage
 
-### Translate All Documentation
+### Using Make Commands (Recommended)
+
+The easiest way to run translations:
+
+```bash
+# Translate all docs to all languages
+make translate
+
+# Translate to specific language
+make translate LANG=ko
+
+# Specify API provider and model
+make translate LANG=ko PROVIDER=openai MODEL=gpt-4
+make translate LANG=ko PROVIDER=github MODEL=gpt-4o-mini
+```
+
+### Using Script Directly
+
+#### Translate All Documentation
 
 Translate all documentation to all supported languages:
 

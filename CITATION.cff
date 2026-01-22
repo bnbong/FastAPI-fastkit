@@ -14,10 +14,11 @@ authors:
     affiliation: Hanyang Univ. ERICA
 repository-code: 'https://github.com/bnbong/FastAPI-fastkit'
 abstract: >-
-  This project was created to speed up the configuration of
-  the development environment needed to develop
-  PostgreSQL-based web apps for new users of Python and
-  FastAPI
+  Fast, easy-to-use starter kit for new users of Python and
+  FastAPI. Provides immediate project scaffolding via CLI
+  inspired by Django's django-admin, interactive project
+  builder with guided feature selection, and multiple
+  pre-configured templates for different use cases.
 keywords:
   - fastapi-fastkit
 license: MIT

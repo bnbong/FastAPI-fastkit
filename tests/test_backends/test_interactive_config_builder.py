@@ -7,9 +7,7 @@ from unittest.mock import MagicMock, call, patch
 
 import pytest
 
-from fastapi_fastkit.backend.interactive.config_builder import (
-    InteractiveConfigBuilder,
-)
+from fastapi_fastkit.backend.interactive.config_builder import InteractiveConfigBuilder
 from fastapi_fastkit.core.settings import FastkitConfig
 
 

@@ -13,11 +13,11 @@
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
 import argparse
-import json
 import logging
 import os
 import subprocess
 import sys
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Optional, Tuple
@@ -39,10 +39,16 @@ class TranslationConfig:
         default_factory=lambda: ["ko", "ja", "zh", "es", "fr", "de"]
     )
     docs_dir: Path = Path(__file__).parent.parent / "docs" / source_lang
-    api_provider: str = "openai"  # openai, anthropic, etc.
+    api_provider: str = "openai"  # openai, github, etc.
     api_key: Optional[str] = None
+    api_base_url: Optional[str] = None  # Custom API endpoint (e.g., GitHub Models)
+    model_name: str = "gpt-4o-mini"  # Default model name
     create_pr: bool = True
     branch_prefix: str = "translation"
+    # Rate limit handling settings
+    max_retries: int = 5  # Maximum number of retries on rate limit
+    retry_delay: float = 60.0  # Initial delay between retries (seconds)
+    request_delay: float = 2.0  # Delay between consecutive API requests (seconds)
 
 
 class TranslationAPI:
@@ -94,40 +100,239 @@ Provide only the translated text without any additional commentary or explanatio
 
 
 class OpenAITranslator(TranslationAPI):
-    """OpenAI API translator."""
+    """OpenAI API translator (compatible with GitHub Models API)."""
 
-    def translate(self, text: str, target_lang: str, source_lang: str = "en") -> str:
-        """Translate using OpenAI API."""
-        try:
+    # Approximate token limits for different models (conservative estimates)
+    MODEL_TOKEN_LIMITS = {
+        "gpt-5": 3000,  # GitHub Models gpt-5 has ~4000 limit, use 3000 for safety
+        "openai/gpt-5": 3000,
+        "gpt-4o": 12000,
+        "openai/gpt-4o": 12000,
+        "gpt-4o-mini": 12000,
+        "openai/gpt-4o-mini": 12000,
+    }
+    DEFAULT_TOKEN_LIMIT = 3000  # Conservative default
+
+    def __init__(
+        self,
+        api_key: str,
+        base_url: Optional[str] = None,
+        model_name: str = "openai/gpt-4o-mini",
+        max_retries: int = 5,
+        retry_delay: float = 60.0,
+        request_delay: float = 2.0,
+        max_chunk_chars: Optional[int] = None,
+    ):
+        super().__init__(api_key)
+        self.base_url = base_url
+        self.model_name = model_name
+        self.max_retries = max_retries
+        self.retry_delay = retry_delay
+        self.request_delay = request_delay
+        self._client = None
+        # Estimate max chars based on token limit (roughly 4 chars per token for English)
+        token_limit = self.MODEL_TOKEN_LIMITS.get(model_name, self.DEFAULT_TOKEN_LIMIT)
+        self.max_chunk_chars = max_chunk_chars or (
+            token_limit * 3
+        )  # Conservative: 3 chars per token
+
+    def _get_client(self):
+        """Lazy initialization of OpenAI client."""
+        if self._client is None:
             import openai
 
-            client = openai.OpenAI(api_key=self.api_key)
+            client_kwargs = {"api_key": self.api_key}
+            if self.base_url:
+                client_kwargs["base_url"] = self.base_url
 
+            self._client = openai.OpenAI(**client_kwargs)
+        return self._client
+
+    def _is_rate_limit_error(self, error: Exception) -> bool:
+        """Check if the error is a rate limit error."""
+        error_str = str(error).lower()
+        return any(
+            keyword in error_str
+            for keyword in [
+                "rate limit",
+                "ratelimit",
+                "429",
+                "too many requests",
+                "quota",
+            ]
+        )
+
+    def _is_payload_too_large_error(self, error: Exception) -> bool:
+        """Check if the error is a payload too large error."""
+        error_str = str(error).lower()
+        return any(
+            keyword in error_str
+            for keyword in [
+                "413",
+                "payload too large",
+                "tokens_limit_reached",
+                "too large",
+            ]
+        )
+
+    def _split_text_into_chunks(self, text: str) -> List[str]:
+        """Split text into chunks that fit within token limits.
+
+        Tries to split at natural boundaries (paragraphs, headers) to maintain context.
+        """
+        if len(text) <= self.max_chunk_chars:
+            return [text]
+
+        chunks = []
+        current_chunk = ""
+
+        # Split by double newlines (paragraphs) first
+        paragraphs = text.split("\n\n")
+
+        for para in paragraphs:
+            # If adding this paragraph would exceed the limit
+            if len(current_chunk) + len(para) + 2 > self.max_chunk_chars:
+                if current_chunk:
+                    chunks.append(current_chunk.strip())
+                    current_chunk = ""
+
+                # If a single paragraph is too large, split by lines
+                if len(para) > self.max_chunk_chars:
+                    lines = para.split("\n")
+                    for line in lines:
+                        if len(current_chunk) + len(line) + 1 > self.max_chunk_chars:
+                            if current_chunk:
+                                chunks.append(current_chunk.strip())
+                                current_chunk = ""
+
+                            # If a single line is still too large, force split
+                            if len(line) > self.max_chunk_chars:
+                                for i in range(0, len(line), self.max_chunk_chars):
+                                    chunks.append(line[i : i + self.max_chunk_chars])
+                            else:
+                                current_chunk = line
+                        else:
+                            current_chunk += ("\n" if current_chunk else "") + line
+                else:
+                    current_chunk = para
+            else:
+                current_chunk += ("\n\n" if current_chunk else "") + para
+
+        if current_chunk:
+            chunks.append(current_chunk.strip())
+
+        return chunks
+
+    def _translate_single_chunk(
+        self,
+        text: str,
+        target_lang: str,
+        source_lang: str,
+        is_continuation: bool = False,
+    ) -> str:
+        """Translate a single chunk of text."""
+        client = self._get_client()
+
+        if is_continuation:
+            # Simplified prompt for continuation chunks
+            prompt = f"""Continue translating the following text to {target_lang}.
+Maintain the same style and formatting as before.
+IMPORTANT: Preserve all markdown formatting, code blocks, and technical terms.
+
+Text:
+
+{text}
+
+Provide only the translated text without any additional commentary."""
+        else:
             prompt = self.get_translation_prompt(text, target_lang, source_lang)
 
-            response = client.chat.completions.create(
-                model="gpt-5-nano",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are a professional technical documentation translator.",
-                    },
-                    {"role": "user", "content": prompt},
-                ],
-                temperature=0.3,
-                max_tokens=4096,
-            )
+        last_error = None
+        for attempt in range(self.max_retries + 1):
+            try:
+                if attempt > 0:
+                    wait_time = self.retry_delay * (2 ** (attempt - 1))
+                    logger.warning(
+                        f"Rate limit hit. Waiting {wait_time:.1f}s before retry {attempt}/{self.max_retries}..."
+                    )
+                    time.sleep(wait_time)
 
-            response_content = response.choices[0].message.content
-            if response_content is None:
-                return text
-            return response_content.strip()
+                # Build API call parameters - GPT-5 doesn't support temperature
+                api_params = {
+                    "model": self.model_name,
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": "You are a professional technical documentation translator.",
+                        },
+                        {"role": "user", "content": prompt},
+                    ],
+                }
+
+                # Only add temperature for models that support it
+                if "gpt-5" not in self.model_name.lower():
+                    api_params["temperature"] = 0.3
+
+                response = client.chat.completions.create(**api_params)
+
+                response_content = response.choices[0].message.content
+                if response_content is None:
+                    return text
+
+                time.sleep(self.request_delay)
+                return response_content.strip()
+
+            except Exception as e:
+                last_error = e
+                if self._is_rate_limit_error(e):
+                    if attempt < self.max_retries:
+                        continue
+                    else:
+                        logger.error(
+                            f"Max retries ({self.max_retries}) exceeded due to rate limiting."
+                        )
+                        raise
+                else:
+                    raise
+
+        if last_error:
+            raise last_error
+        return text
+
+    def translate(self, text: str, target_lang: str, source_lang: str = "en") -> str:
+        """Translate text, automatically chunking if necessary."""
+        try:
+            import openai
         except ImportError:
             logger.error("OpenAI package not installed. Run: pip install openai")
             raise
+
+        # Try direct translation first
+        try:
+            return self._translate_single_chunk(text, target_lang, source_lang)
         except Exception as e:
-            logger.error(f"Translation failed: {e}")
-            raise
+            if not self._is_payload_too_large_error(e):
+                logger.error(f"Translation failed: {e}")
+                raise
+
+            # If payload too large, split into chunks and translate each
+            logger.info(f"Document too large, splitting into chunks for translation...")
+            chunks = self._split_text_into_chunks(text)
+            logger.info(f"Split into {len(chunks)} chunks")
+
+            translated_chunks = []
+            for i, chunk in enumerate(chunks):
+                logger.info(f"Translating chunk {i + 1}/{len(chunks)}...")
+                try:
+                    translated = self._translate_single_chunk(
+                        chunk, target_lang, source_lang, is_continuation=(i > 0)
+                    )
+                    translated_chunks.append(translated)
+                except Exception as chunk_error:
+                    logger.error(f"Failed to translate chunk {i + 1}: {chunk_error}")
+                    raise
+
+            return "\n\n".join(translated_chunks)
 
 
 class DocumentTranslator:
@@ -144,8 +349,20 @@ class DocumentTranslator:
                 "API key is required. Set via --api-key or environment variable."
             )
 
-        if self.config.api_provider == "openai":
-            return OpenAITranslator(self.config.api_key)
+        if self.config.api_provider in ("openai", "github"):
+            # For GitHub Models, set default base_url if not provided
+            base_url = self.config.api_base_url
+            if self.config.api_provider == "github" and not base_url:
+                base_url = "https://models.github.ai/inference"
+
+            return OpenAITranslator(
+                api_key=self.config.api_key,
+                base_url=base_url,
+                model_name=self.config.model_name,
+                max_retries=self.config.max_retries,
+                retry_delay=self.config.retry_delay,
+                request_delay=self.config.request_delay,
+            )
         else:
             raise ValueError(f"Unsupported API provider: {self.config.api_provider}")
 
@@ -283,14 +500,25 @@ def main() -> None:
     parser.add_argument(
         "--api-provider",
         type=str,
-        choices=["openai"],
+        choices=["openai", "github"],
         default="openai",
-        help="AI API provider for translation",
+        help="AI API provider for translation (openai or github)",
     )
     parser.add_argument(
         "--api-key",
         type=str,
-        help="API key for translation service. Can also be set via TRANSLATION_API_KEY environment variable.",
+        help="API key for translation service. Can also be set via TRANSLATION_API_KEY (OpenAI) or GITHUB_TOKEN (GitHub) environment variable.",
+    )
+    parser.add_argument(
+        "--api-base-url",
+        type=str,
+        help="Custom API base URL. Defaults to https://models.github.ai/inference for github provider.",
+    )
+    parser.add_argument(
+        "--model",
+        type=str,
+        default="gpt-4o-mini",
+        help="Model name to use for translation (default: gpt-4o-mini). For GitHub, use format like 'openai/gpt-4o-mini'.",
     )
     parser.add_argument(
         "--no-pr", action="store_true", help="Skip creating GitHub Pull Request"
@@ -302,20 +530,51 @@ def main() -> None:
         help="Specific files to translate (relative to docs directory)",
     )
     parser.add_argument("--docs-dir", type=str, help="Path to documentation directory")
+    # Rate limit handling options
+    parser.add_argument(
+        "--max-retries",
+        type=int,
+        default=5,
+        help="Maximum number of retries on rate limit errors (default: 5)",
+    )
+    parser.add_argument(
+        "--retry-delay",
+        type=float,
+        default=60.0,
+        help="Initial delay in seconds between retries (uses exponential backoff, default: 60.0)",
+    )
+    parser.add_argument(
+        "--request-delay",
+        type=float,
+        default=2.0,
+        help="Delay in seconds between consecutive API requests to avoid rate limits (default: 2.0)",
+    )
 
     args = parser.parse_args()
 
-    # Get API key from args or environment
+    # Get API key from args or environment (support both TRANSLATION_API_KEY and GITHUB_TOKEN)
     api_key = args.api_key or os.getenv("TRANSLATION_API_KEY")
+    if not api_key and args.api_provider == "github":
+        api_key = os.getenv("GITHUB_TOKEN")
     if not api_key:
+        env_var = (
+            "GITHUB_TOKEN" if args.api_provider == "github" else "TRANSLATION_API_KEY"
+        )
         logger.error(
-            "API key is required. Provide via --api-key or TRANSLATION_API_KEY environment variable."
+            f"API key is required. Provide via --api-key or {env_var} environment variable."
         )
         sys.exit(1)
 
     # Setup configuration
     config = TranslationConfig(
-        api_provider=args.api_provider, api_key=api_key, create_pr=not args.no_pr
+        api_provider=args.api_provider,
+        api_key=api_key,
+        api_base_url=args.api_base_url,
+        model_name=args.model,
+        max_retries=args.max_retries,
+        retry_delay=args.retry_delay,
+        request_delay=args.request_delay,
+        create_pr=not args.no_pr,
     )
 
     if args.docs_dir:
