@@ -519,7 +519,7 @@ def main() -> None:
         "--model",
         type=str,
         default="gpt-5",
-        help="Model name to use for translation (default: gpt-4o-mini). For GitHub, use format like 'openai/gpt-4o-mini'.",
+        help="Model name to use for translation (default: gpt-5). For GitHub, use format like 'openai/gpt-4o-mini'.",
     )
     parser.add_argument(
         "--no-pr", action="store_true", help="Skip creating GitHub Pull Request"
