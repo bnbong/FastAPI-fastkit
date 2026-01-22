@@ -333,7 +333,6 @@ Provide only the translated text without any additional commentary."""
                     raise
 
             return "\n\n".join(translated_chunks)
-        return text
 
 
 class DocumentTranslator:
