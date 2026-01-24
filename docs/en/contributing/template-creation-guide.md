@@ -285,6 +285,8 @@ make inspect-template TEMPLATES="fastapi-your-template"
 python scripts/inspect-templates.py --templates "fastapi-your-template" --verbose
 ```
 
+> **Note:** When you submit a PR, the **Template PR Inspection** workflow will automatically run and validate your template changes. You'll receive feedback directly on your PR.
+
 ### Validation Checklist
 
 The inspector automatically validates the following items:
@@ -456,10 +458,14 @@ Closes #issue-number
 ### Review Process
 
 1. **Automated Validation**: GitHub Actions automatically validates the template
+   - **Template PR Inspection**: Runs `inspect-changed-templates.py` on PRs modifying templates
+   - **Weekly Inspection**: Full template validation every Wednesday
 2. **Code Review**: Maintainers and community review the code
 3. **Testing**: Template is tested in various environments
 4. **Documentation Review**: Review documentation accuracy and completeness
 5. **Approval & Merge**: Merge to main branch when all requirements are satisfied
+
+> 💡 **Tip:** You'll receive automatic PR comments with validation results. Check these before requesting a review!
 
 ## 🎯 Best Practices
 

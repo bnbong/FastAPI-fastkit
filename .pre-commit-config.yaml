@@ -4,7 +4,7 @@ default_language_version:
     python: python3.12
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.2.0
+    rev: v6.0.0
     hooks:
     -   id: trailing-whitespace
     -   id: end-of-file-fixer
@@ -15,29 +15,48 @@ repos:
     hooks:
     -   id: format
         name: format
-        entry: bash scripts/format.sh
-        language: system
-        pass_filenames: false
-
-    -   id: lint
-        name: lint
-        entry: bash scripts/lint.sh
-        language: system
-        pass_filenames: false
-
-    -   id: coverage-test
-        name: coverage test
-        entry: bash scripts/coverage-report.sh
-        language: system
+        entry: black --config pyproject.toml --check .
+        language: python
         types: [python]
+        additional_dependencies: ['black>=24.10.0']
         pass_filenames: false
 
-    -   id: inspect-templates
-        name: inspect changed fastapi templates
-        entry: python scripts/inspect-changed-templates.py
-        language: system
+    -   id: isort-check
+        name: isort check
+        entry: isort --sp pyproject.toml --check-only --diff .
+        language: python
+        types: [python]
+        additional_dependencies: ['isort>=5.13.2']
         pass_filenames: false
-        stages: [commit]
+
+    -   id: isort-fix
+        name: isort fix
+        entry: isort --sp pyproject.toml .
+        language: python
+        types: [python]
+        additional_dependencies: ['isort>=5.13.2']
+        pass_filenames: false
+
+    -   id: black-fix
+        name: black fix
+        entry: black --config pyproject.toml .
+        language: python
+        types: [python]
+        additional_dependencies: ['black>=24.10.0']
+        pass_filenames: false
+
+    -   id: mypy
+        name: mypy
+        entry: mypy --config-file pyproject.toml src
+        language: python
+        types: [python]
+        additional_dependencies:
+          - mypy>=1.12.0
+          - rich>=13.9.2
+          - click>=8.1.7
+          - pyyaml>=6.0.0
+          - types-PyYAML>=6.0.12
+        pass_filenames: false
 
 ci:
     autofix_commit_msg: 🎨 [pre-commit.ci] Auto format from pre-commit.com hooks

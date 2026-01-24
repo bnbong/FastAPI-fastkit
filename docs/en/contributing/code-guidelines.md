@@ -645,26 +645,34 @@ We use pre-commit hooks to enforce standards:
 ```yaml
 # .pre-commit-config.yaml
 repos:
-  - repo: https://github.com/psf/black
-    rev: 23.1.0
+  - repo: local
     hooks:
-      - id: black
+      - id: isort-check
+        name: isort-check
+        entry: isort --check-only --sp pyproject.toml .
+        language: python
+        additional_dependencies: [isort]
+        pass_filenames: false
+        always_run: true
 
-  - repo: https://github.com/pycqa/isort
-    rev: 5.12.0
-    hooks:
-      - id: isort
+      - id: black-fix
+        name: black-fix
+        entry: black --config pyproject.toml .
+        language: python
+        additional_dependencies: [black]
+        pass_filenames: false
+        always_run: true
 
-  - repo: https://github.com/pycqa/flake8
-    rev: 6.0.0
-    hooks:
-      - id: flake8
-
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.0.1
-    hooks:
       - id: mypy
+        name: mypy
+        entry: mypy --config-file pyproject.toml src
+        language: python
+        additional_dependencies: [mypy]
+        pass_filenames: false
+        always_run: true
 ```
+
+> **Note:** Pre-commit hooks use isolated Python environments (`language: python`), ensuring compatibility with external Git tools like GitKraken and Sourcetree.
 
 ### IDE Configuration
 
@@ -673,7 +681,6 @@ Recommended VS Code settings:
 ```json
 {
     "python.linting.enabled": true,
-    "python.linting.flake8Enabled": true,
     "python.linting.mypyEnabled": true,
     "python.formatting.provider": "black",
     "python.sortImports.path": "isort",

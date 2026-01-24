@@ -31,10 +31,11 @@ Installing pre-commit hooks...
 </div>
 
 This single command:
-- Creates a virtual environment
-- Installs all dependencies
+- Installs the package in editable mode with dev dependencies
 - Sets up pre-commit hooks
 - Configures development tools
+
+> **Note:** You should create and activate a virtual environment before running this command.
 
 ## Manual Setup
 
@@ -139,17 +140,6 @@ Fixing import order in src/main.py
 
 ### Code Linting
 
-**flake8** - Style guide enforcement:
-
-<div class="termy">
-
-```console
-$ flake8 src/ tests/
-src/main.py:45:80: E501 line too long (82 > 79 characters)
-```
-
-</div>
-
 **mypy** - Type checking:
 
 <div class="termy">
@@ -171,6 +161,8 @@ The project Makefile provides convenient commands for common development tasks:
 |---------|-------------|
 | `make install` | Install package in production mode |
 | `make install-dev` | Install package with development dependencies |
+| `make install-test` | Install package for testing (uninstall + reinstall) |
+| `make uninstall` | Uninstall the package |
 | `make clean` | Clean build artifacts and cache files |
 
 ### Code Quality Commands
@@ -178,29 +170,32 @@ The project Makefile provides convenient commands for common development tasks:
 | Command | Description |
 |---------|-------------|
 | `make format` | Format code with black and isort |
-| `make lint` | Run flake8 linting |
-| `make type-check` | Run mypy type checking |
-| `make security` | Run bandit security checks |
-| `make check-all` | Run all quality checks |
+| `make format-check` | Check code formatting without making changes |
+| `make lint` | Run all linting checks (isort, black, mypy) |
 
 ### Testing Commands
 
 | Command | Description |
 |---------|-------------|
 | `make test` | Run all tests |
-| `make test-unit` | Run unit tests only |
-| `make test-integration` | Run integration tests only |
+| `make test-verbose` | Run tests with verbose output |
 | `make test-coverage` | Run tests with coverage report |
 | `make coverage-report` | Generate detailed coverage report (FORMAT=html/xml/json/all) |
-| `make test-watch` | Run tests in watch mode |
+
+### Template Inspection Commands
+
+| Command | Description |
+|---------|-------------|
+| `make inspect-templates` | Run template inspection on all templates |
+| `make inspect-templates-verbose` | Run template inspection with verbose output |
+| `make inspect-template` | Inspect specific template(s) (TEMPLATES parameter) |
 
 ### Documentation Commands
 
 | Command | Description |
 |---------|-------------|
-| `make docs-serve` | Serve documentation locally |
-| `make docs-build` | Build documentation |
-| `make docs-deploy` | Deploy documentation to GitHub Pages |
+| `make serve-docs` | Serve documentation locally |
+| `make build-docs` | Build documentation |
 
 ### Translation Commands
 
@@ -214,12 +209,10 @@ The project Makefile provides convenient commands for common development tasks:
 
 ```console
 # Format code and run all checks
-$ make format lint type-check security
-Running black...
+$ make format lint
 Running isort...
-Running flake8...
+Running black...
 Running mypy...
-Running bandit...
 ✅ All checks passed!
 
 # Run tests with coverage
@@ -255,58 +248,101 @@ Running: python scripts/translate.py --target-lang ko --api-provider github --mo
 
 Understanding the project structure is crucial for development:
 
-```
+```bash
 FastAPI-fastkit/
 ├── src/
-│   └── fastapi_fastkit/
-│       ├── __init__.py
-│       ├── cli.py                  # CLI command implementations
-│       │   ├── __init__.py
-│       │   ├── init.py            # Project initialization
-│       │   ├── addroute.py        # Route addition
-│       │   ├── startdemo.py       # Template demos
-│       │   └── runserver.py       # Development server
-│       ├── templates/             # Project templates
-│       │   ├── __init__.py
-│       │   └── manager.py         # Template management
-│       ├── utils/                 # Utility functions
-│       │   ├── __init__.py
-│       │   ├── files.py           # File operations
-│       │   ├── validation.py      # Input validation
-│       │   └── formatting.py      # Output formatting
-│       └── fastapi_project_template/  # Default template
-│           ├── src/
-│           ├── tests/
-│           └── requirements.txt
-├── tests/
-│   ├── __init__.py
-│   ├── test_cli.py               # CLI testing
-│   ├── test_commands/            # Command-specific tests
-│   ├── test_templates/           # Template testing
-│   ├── test_utils/               # Utility testing
-│   └── conftest.py               # Test configuration
-├── docs/                         # Documentation
-├── scripts/                      # Development scripts
-├── requirements.txt              # Production dependencies
-├── requirements-dev.txt          # Development dependencies
-├── setup.py                      # Package configuration
-├── Makefile                      # Development commands
-├── .pre-commit-config.yaml       # Pre-commit configuration
-├── pyproject.toml               # Project metadata
-└── README.md
+│   ├── fastapi_fastkit/
+│   │   ├── __main__.py                      # Entry point of the application
+│   │   ├── backend/
+│   │   │   ├── inspector.py                 # FastAPI-fastkit template inspector
+│   │   │   ├── interactive/
+│   │   │   │   ├── config_builder.py        # Configuration builder for interactive mode
+│   │   │   │   ├── prompts.py               # Prompts for interactive mode
+│   │   │   │   ├── selectors.py             # Selectors logic for interactive mode
+│   │   │   │   └── validators.py            # User input validators for interactive mode
+│   │   │   ├── main.py                      # Backend's logic entry point
+│   │   │   ├── package_managers/
+│   │   │   │   ├── base.py                  # Base class for package managers
+│   │   │   │   ├── factory.py               # Factory for package managers
+│   │   │   │   ├── pdm_manager.py           # PDM package manager
+│   │   │   │   ├── pip_manager.py           # pip package manager
+│   │   │   │   ├── poetry_manager.py        # Poetry package manager
+│   │   │   │   └── uv_manager.py            # uv package manager
+│   │   │   ├── project_builder/
+│   │   │   │   ├── config_generator.py      # Configuration generator for project builder
+│   │   │   │   └── dependency_collector.py  # Dependency collector for project builder
+│   │   │   └── transducer.py                # Transducer for project builder
+│   │   ├── cli.py                           # FastAPI-fastkit main CLI entry point
+│   │   ├── core/
+│   │   │   ├── exceptions.py                # Exception handling
+│   │   │   └── settings.py                  # Settings configuration
+│   │   ├── fastapi_project_template/
+│   │   │   ├── PROJECT_README_TEMPLATE.md   # fastkit template project base README file
+│   │   │   ├── README.md                    # fastkit template README
+│   │   │   ├── fastapi-async-crud/
+│   │   │   ├── fastapi-custom-response/
+│   │   │   ├── fastapi-default/
+│   │   │   ├── fastapi-dockerized/
+│   │   │   ├── fastapi-empty/
+│   │   │   ├── fastapi-mcp/
+│   │   │   ├── fastapi-psql-orm/
+│   │   │   ├── fastapi-single-module/
+│   │   │   └── modules/
+│   │   │       ├── api/
+│   │   │       │   └── routes/
+│   │   │       ├── crud/
+│   │   │       └── schemas/
+│   │   ├── py.typed
+│   │   └── utils/
+│   │       ├── logging.py                   # Logging configuration
+│   │       └── main.py                      # FastAPI-fastkit main entry point
+│   └── logs
+├── tests
+│   ├── conftest.py                          # pytest configuration
+│   ├── test_backends/
+│   ├── test_cli_operations/
+│   ├── test_core.py
+│   ├── test_rich/
+│   ├── test_templates/
+│   └── test_utils.py
+├── uv.lock
+├── docs/                                    # Documentation
+├── scripts/                                 # Development scripts
+├── mkdocs.yml
+├── overrides/                               # mkdocs overrides
+├── pdm.lock
+├── pyproject.toml
+├── requirements-docs.txt                    # requirements for documentation
+├── requirements.txt                         # requirements for development
+├── CHANGELOG.md
+├── CITATION.cff
+├── CODE_OF_CONDUCT.md
+├── CONTRIBUTING.md
+├── LICENSE
+├── MANIFEST.in
+├── Makefile
+├── README.md
+├── SECURITY.md
+└── env.example                              # environment example(configures translation AI model env vars)
 ```
 
 ### Key Directories
 
 **`src/fastapi_fastkit/`** - Main package source code
 - **`cli.py`** - Main CLI entry point
-- **`commands/`** - Individual command implementations
-- **`templates/`** - Template management system
+- **`backend/`** - Core backend logic
+  - **`inspector.py`** - Template inspector
+  - **`interactive/`** - Interactive mode components (prompts, selectors, validators)
+  - **`package_managers/`** - Package manager implementations (pip, uv, pdm, poetry)
+  - **`project_builder/`** - Project building utilities
+  - **`transducer.py`** - Template transducer
+- **`core/`** - Core configuration and exceptions
+- **`fastapi_project_template/`** - Project templates (fastapi-default, fastapi-async-crud, etc.)
 - **`utils/`** - Shared utility functions
 
 **`tests/`** - Test suite
-- **`test_cli.py`** - CLI integration tests
-- **`test_commands/`** - Command-specific unit tests
+- **`test_backends/`** - Backend-specific tests
+- **`test_cli_operations/`** - CLI operation tests
 - **`test_templates/`** - Template system tests
 
 **`docs/`** - Documentation (MkDocs)
@@ -351,11 +387,11 @@ Pre-commit hooks will automatically run:
 ```console
 $ git add .
 $ git commit -m "Add new FastAPI template with authentication"
-black....................................................................Passed
-isort....................................................................Passed
-flake8...................................................................Passed
+format...................................................................Passed
+isort-check..............................................................Passed
+black-fix................................................................Passed
 mypy.....................................................................Passed
-bandit...................................................................Passed
+coverage-test............................................................Passed
 [feature/add-new-template abc1234] Add new FastAPI template with authentication
 ```
 
@@ -603,6 +639,7 @@ For development, you can set these environment variables:
 | `FASTKIT_DEV_MODE` | Enable development features | `False` |
 | `FASTKIT_TEMPLATE_DIR` | Custom template directory | Built-in templates |
 | `FASTKIT_CONFIG_DIR` | Configuration directory | `~/.fastkit` |
+| `TRANSLATION_API_KEY` | Translation API key (put Github PAT when using [Github AI model provider](https://github.com/marketplace/models/azure-openai)) | `None` |
 
 <div class="termy">
 
@@ -615,6 +652,8 @@ DEBUG: Available templates: ['fastapi-default', ...]
 ```
 
 </div>
+
+For other environment variable settings, refer to the [@settings.py](../../../src/fastapi_fastkit/core/settings.py) module.
 
 ## Troubleshooting
 
