@@ -391,7 +391,6 @@ format...................................................................Passed
 isort-check..............................................................Passed
 black-fix................................................................Passed
 mypy.....................................................................Passed
-coverage-test............................................................Passed
 [feature/add-new-template abc1234] Add new FastAPI template with authentication
 ```
 
@@ -653,7 +652,7 @@ DEBUG: Available templates: ['fastapi-default', ...]
 
 </div>
 
-For other environment variable settings, refer to the [@settings.py](../../../src/fastapi_fastkit/core/settings.py) module.
+For other environment variable settings, refer to the [@settings.py](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/core/settings.py) module.
 
 ## Troubleshooting
 

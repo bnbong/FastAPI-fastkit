@@ -33,53 +33,72 @@ jobs:
       - name: Install dependencies
         run: pdm install -G dev
 
-      - name: Install UV package manager
-        run: |
-          curl -LsSf https://astral.sh/uv/install.sh | sh
-          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+      - name: Setup UV
+        uses: astral-sh/setup-uv@v7
 
-      - name: Verify UV installation
+      - name: Verify Docker and Compose
         run: |
-          export PATH="$HOME/.cargo/bin:$PATH"
-          uv --version
-          which uv
-
-      - name: Set up Docker Compose
-        run: |
-          if ! command -v docker-compose &> /dev/null; then
-            echo "Installing Docker Compose..."
-            sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-            sudo chmod +x /usr/local/bin/docker-compose
-          fi
-
           docker --version
-          docker-compose --version
+          docker compose version
 
       - name: Inspect changed templates
-        run: |
-          export PATH="$HOME/.cargo/bin:$PATH"
-          pdm run python scripts/inspect-changed-templates.py
+        run: pdm run python scripts/inspect-changed-templates.py
 
-      - name: Comment on PR (Success)
-        if: success()
+      - name: Create or Update PR Comment
+        if: always()
         uses: actions/github-script@v7
         with:
           script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: '✅ **Template Inspection Passed**\n\nAll changed templates have been validated successfully.'
-            })
+            const marker = '<!-- template-inspection-bot -->';
+            const success = '${{ job.status }}' === 'success';
 
-      - name: Comment on PR (Failure)
-        if: failure()
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
+            const successBody = `${marker}
+            ✅ **Template Inspection Passed**
+
+            All changed templates have been validated successfully.
+
+            ---
+            *Last updated: ${new Date().toISOString()}*`;
+
+            const failureBody = `${marker}
+            ❌ **Template Inspection Failed**
+
+            Please check the workflow logs for details on what needs to be fixed.
+
+            [View Logs](${context.payload.repository.html_url}/actions/runs/${context.runId})
+
+            ---
+            *Last updated: ${new Date().toISOString()}*`;
+
+            const body = success ? successBody : failureBody;
+
+            // Find existing bot comment
+            const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '❌ **Template Inspection Failed**\n\nPlease check the workflow logs for details on what needs to be fixed.\n\n[View Logs](' + context.payload.repository.html_url + '/actions/runs/' + context.runId + ')'
-            })
+              issue_number: context.issue.number
+            });
+
+            const botComment = comments.find(comment =>
+              comment.body.includes(marker)
+            );
+
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+              console.log('Updated existing comment');
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+              console.log('Created new comment');
+            }

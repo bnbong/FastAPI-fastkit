@@ -210,7 +210,6 @@ Pre-commit hooks are automatically installed with `make dev-setup`. The hooks wi
 - Code formatting (black, isort)
 - Linting checks
 - Type checking (mypy)
-- Coverage test
 
 If pre-commit finds issues, fix them and commit again:
 

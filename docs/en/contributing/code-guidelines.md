@@ -645,34 +645,67 @@ We use pre-commit hooks to enforce standards:
 ```yaml
 # .pre-commit-config.yaml
 repos:
-  - repo: local
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
     hooks:
-      - id: isort-check
-        name: isort-check
-        entry: isort --check-only --sp pyproject.toml .
-        language: python
-        additional_dependencies: [isort]
-        pass_filenames: false
-        always_run: true
+    -   id: trailing-whitespace
+    -   id: end-of-file-fixer
+    -   id: check-yaml
+    -   id: check-toml
 
-      - id: black-fix
-        name: black-fix
+-   repo: local
+    hooks:
+    -   id: format
+        name: format
+        entry: black --config pyproject.toml --check .
+        language: python
+        types: [python]
+        additional_dependencies: ['black>=24.10.0']
+        pass_filenames: false
+
+    -   id: isort-check
+        name: isort check
+        entry: isort --sp pyproject.toml --check-only --diff .
+        language: python
+        types: [python]
+        additional_dependencies: ['isort>=5.13.2']
+        pass_filenames: false
+
+    -   id: isort-fix
+        name: isort fix
+        entry: isort --sp pyproject.toml .
+        language: python
+        types: [python]
+        additional_dependencies: ['isort>=5.13.2']
+        pass_filenames: false
+
+    -   id: black-fix
+        name: black fix
         entry: black --config pyproject.toml .
         language: python
-        additional_dependencies: [black]
+        types: [python]
+        additional_dependencies: ['black>=24.10.0']
         pass_filenames: false
-        always_run: true
 
-      - id: mypy
+    -   id: mypy
         name: mypy
         entry: mypy --config-file pyproject.toml src
         language: python
-        additional_dependencies: [mypy]
+        types: [python]
+        additional_dependencies:
+          - mypy>=1.12.0
+          - rich>=13.9.2
+          - click>=8.1.7
+          - pyyaml>=6.0.0
+          - types-PyYAML>=6.0.12
         pass_filenames: false
-        always_run: true
+
+ci:
+    autofix_commit_msg: 🎨 [pre-commit.ci] Auto format from pre-commit.com hooks
+    autoupdate_commit_msg: ⬆ [pre-commit.ci] pre-commit autoupdate
 ```
 
-> **Note:** Pre-commit hooks use isolated Python environments (`language: python`), ensuring compatibility with external Git tools like GitKraken and Sourcetree.
+> **Note:** Pre-commit hooks use isolated Python environments (`language: python`).
 
 ### IDE Configuration
 
