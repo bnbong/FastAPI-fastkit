@@ -1,0 +1,1851 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/changelog/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/changelog/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/contributing/code-guidelines/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/contributing/code-guidelines/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/contributing/development-setup/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/contributing/development-setup/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/contributing/template-creation-guide/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/contributing/template-creation-guide/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/contributing/translation-guide/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/contributing/translation-guide/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/reference/faq/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/reference/faq/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/reference/template-quality-assurance/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/reference/template-quality-assurance/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/tutorial/async-crud-api/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/async-crud-api/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/tutorial/basic-api-server/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/basic-api-server/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/tutorial/custom-response-handling/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/custom-response-handling/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/tutorial/database-integration/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/database-integration/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/tutorial/docker-deployment/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/docker-deployment/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/tutorial/first-project/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/first-project/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/tutorial/getting-started/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/getting-started/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/tutorial/mcp-integration/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/mcp-integration/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/user-guide/adding-routes/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/adding-routes/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/user-guide/cli-reference/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/cli-reference/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/user-guide/creating-projects/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/creating-projects/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/user-guide/installation/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/installation/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/user-guide/quick-start/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/quick-start/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/user-guide/using-templates/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/using-templates/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ko/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ko/changelog/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/changelog/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ko/contributing/code-guidelines/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/contributing/code-guidelines/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ko/contributing/development-setup/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/contributing/development-setup/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ko/contributing/template-creation-guide/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/contributing/template-creation-guide/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ko/contributing/translation-guide/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/contributing/translation-guide/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ko/reference/faq/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/reference/faq/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ko/reference/template-quality-assurance/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/reference/template-quality-assurance/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/async-crud-api/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/async-crud-api/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/basic-api-server/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/basic-api-server/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/custom-response-handling/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/custom-response-handling/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/database-integration/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/database-integration/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/docker-deployment/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/docker-deployment/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/first-project/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/first-project/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/getting-started/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/getting-started/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/mcp-integration/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/mcp-integration/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/adding-routes/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/adding-routes/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/cli-reference/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/cli-reference/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/creating-projects/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/creating-projects/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/installation/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/installation/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/quick-start/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/quick-start/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/using-templates/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/using-templates/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ja/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ja/changelog/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/changelog/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ja/contributing/code-guidelines/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/contributing/code-guidelines/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ja/contributing/development-setup/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/contributing/development-setup/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ja/contributing/template-creation-guide/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/contributing/template-creation-guide/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ja/contributing/translation-guide/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/contributing/translation-guide/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ja/reference/faq/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/reference/faq/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ja/reference/template-quality-assurance/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/reference/template-quality-assurance/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/async-crud-api/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/async-crud-api/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/basic-api-server/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/basic-api-server/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/custom-response-handling/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/custom-response-handling/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/database-integration/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/database-integration/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/docker-deployment/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/docker-deployment/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/first-project/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/first-project/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/getting-started/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/getting-started/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/mcp-integration/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/mcp-integration/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/adding-routes/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/adding-routes/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/cli-reference/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/cli-reference/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/creating-projects/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/creating-projects/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/installation/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/installation/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/quick-start/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/quick-start/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/using-templates/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/using-templates/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/zh/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/zh/changelog/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/changelog/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/zh/contributing/code-guidelines/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/contributing/code-guidelines/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/zh/contributing/development-setup/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/contributing/development-setup/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/zh/contributing/template-creation-guide/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/contributing/template-creation-guide/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/zh/contributing/translation-guide/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/contributing/translation-guide/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/zh/reference/faq/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/reference/faq/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/zh/reference/template-quality-assurance/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/reference/template-quality-assurance/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/async-crud-api/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/async-crud-api/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/basic-api-server/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/basic-api-server/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/custom-response-handling/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/custom-response-handling/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/database-integration/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/database-integration/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/docker-deployment/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/docker-deployment/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/first-project/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/first-project/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/getting-started/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/getting-started/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/mcp-integration/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/mcp-integration/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/adding-routes/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/adding-routes/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/cli-reference/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/cli-reference/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/creating-projects/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/creating-projects/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/installation/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/installation/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/quick-start/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/quick-start/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/using-templates/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/using-templates/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/es/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/es/changelog/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/changelog/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/es/contributing/code-guidelines/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/contributing/code-guidelines/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/es/contributing/development-setup/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/contributing/development-setup/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/es/contributing/template-creation-guide/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/contributing/template-creation-guide/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/es/contributing/translation-guide/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/contributing/translation-guide/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/es/reference/faq/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/reference/faq/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/es/reference/template-quality-assurance/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/reference/template-quality-assurance/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/es/tutorial/async-crud-api/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/async-crud-api/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/es/tutorial/basic-api-server/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/basic-api-server/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/es/tutorial/custom-response-handling/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/custom-response-handling/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/es/tutorial/database-integration/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/database-integration/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/es/tutorial/docker-deployment/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/docker-deployment/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/es/tutorial/first-project/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/first-project/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/es/tutorial/getting-started/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/getting-started/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/es/tutorial/mcp-integration/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/mcp-integration/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/es/user-guide/adding-routes/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/adding-routes/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/es/user-guide/cli-reference/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/cli-reference/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/es/user-guide/creating-projects/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/creating-projects/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/es/user-guide/installation/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/installation/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/es/user-guide/quick-start/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/quick-start/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/es/user-guide/using-templates/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/using-templates/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/fr/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/fr/changelog/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/changelog/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/fr/contributing/code-guidelines/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/contributing/code-guidelines/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/fr/contributing/development-setup/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/contributing/development-setup/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/fr/contributing/template-creation-guide/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/contributing/template-creation-guide/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/fr/contributing/translation-guide/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/contributing/translation-guide/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/fr/reference/faq/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/reference/faq/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/fr/reference/template-quality-assurance/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/reference/template-quality-assurance/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/async-crud-api/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/async-crud-api/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/basic-api-server/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/basic-api-server/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/custom-response-handling/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/custom-response-handling/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/database-integration/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/database-integration/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/docker-deployment/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/docker-deployment/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/first-project/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/first-project/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/getting-started/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/getting-started/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/mcp-integration/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/mcp-integration/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/adding-routes/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/adding-routes/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/cli-reference/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/cli-reference/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/creating-projects/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/creating-projects/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/installation/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/installation/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/quick-start/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/quick-start/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/using-templates/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/using-templates/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/de/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/de/changelog/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/changelog/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/changelog/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/de/contributing/code-guidelines/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/contributing/code-guidelines/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/contributing/code-guidelines/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/de/contributing/development-setup/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/contributing/development-setup/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/contributing/development-setup/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/de/contributing/template-creation-guide/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/contributing/template-creation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/contributing/template-creation-guide/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/de/contributing/translation-guide/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/contributing/translation-guide/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/contributing/translation-guide/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/de/reference/faq/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/reference/faq/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/reference/faq/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/de/reference/template-quality-assurance/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/reference/template-quality-assurance/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/reference/template-quality-assurance/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/de/tutorial/async-crud-api/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/async-crud-api/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/async-crud-api/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/de/tutorial/basic-api-server/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/basic-api-server/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/basic-api-server/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/de/tutorial/custom-response-handling/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/custom-response-handling/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/custom-response-handling/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/de/tutorial/database-integration/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/database-integration/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/database-integration/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/de/tutorial/docker-deployment/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/docker-deployment/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/docker-deployment/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/de/tutorial/first-project/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/first-project/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/first-project/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/de/tutorial/getting-started/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/getting-started/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/de/tutorial/mcp-integration/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/tutorial/mcp-integration/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/tutorial/mcp-integration/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/de/user-guide/adding-routes/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/adding-routes/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/adding-routes/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/de/user-guide/cli-reference/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/cli-reference/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/cli-reference/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/de/user-guide/creating-projects/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/creating-projects/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/creating-projects/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/de/user-guide/installation/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/installation/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/installation/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/de/user-guide/quick-start/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/quick-start/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/quick-start/"/>
+    </url>
+    <url>
+        <loc>https://bnbong.github.io/FastAPI-fastkit/de/user-guide/using-templates/</loc>
+        <lastmod>2026-01-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://bnbong.github.io/FastAPI-fastkit/de/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://bnbong.github.io/FastAPI-fastkit/es/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://bnbong.github.io/FastAPI-fastkit/ja/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://bnbong.github.io/FastAPI-fastkit/ko/user-guide/using-templates/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://bnbong.github.io/FastAPI-fastkit/zh/user-guide/using-templates/"/>
+    </url>
+</urlset>
