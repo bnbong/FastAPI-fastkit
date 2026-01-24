@@ -290,6 +290,16 @@ template-name/
 
 FastAPI-fastkit includes **automated template testing** that provides comprehensive validation:
 
+#### ✅ CI/CD Template Inspection
+
+When you submit a PR that modifies template files, the **Template PR Inspection** workflow automatically runs:
+
+- 🔍 **Automatic Trigger**: Runs when files in `src/fastapi_fastkit/fastapi_project_template/` are modified
+- ✅ **Validation**: Inspects changed templates using `inspect-changed-templates.py`
+- 💬 **PR Feedback**: Posts success/failure comments directly on your PR
+
+Additionally, a **Weekly Template Inspection** runs every Wednesday to validate all templates.
+
 #### ✅ Automatic Template Testing
 
 **Zero Configuration Required:**
