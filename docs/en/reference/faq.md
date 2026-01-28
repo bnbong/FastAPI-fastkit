@@ -86,9 +86,12 @@ $ export PATH="$HOME/.local/bin:$PATH"
 
 **A:** FastAPI-fastkit offers three dependency stacks:
 
-- **MINIMAL**: FastAPI, Uvicorn, Pydantic (basic web API)
+- **MINIMAL**: FastAPI, Uvicorn, Pydantic, Pydantic-Settings (basic web API)
 - **STANDARD**: Adds SQLAlchemy, Alembic, pytest (database support)
 - **FULL**: Adds Redis, Celery (background tasks)
+
+!!! tip "Default Package Manager"
+    The default package manager is `uv` for faster dependency installation. You can also choose `pip`, `pdm`, or `poetry`.
 
 <div class="termy">
 
@@ -115,7 +118,8 @@ $ fastkit list-templates
 $ fastkit startdemo
 
 # Add routes to existing project
-$ fastkit addroute my-project users
+$ fastkit addroute users .          # Add 'users' route to current directory
+$ fastkit addroute users my-project # Add 'users' route to 'my-project'
 ```
 
 </div>
@@ -161,6 +165,54 @@ $ fastkit init
 ```
 
 </div>
+
+### Q: How do I use interactive mode for project setup?
+
+**A:** Use `fastkit init --interactive` for guided step-by-step project setup with intelligent feature selection:
+
+<div class="termy">
+
+```console
+$ fastkit init --interactive
+```
+
+</div>
+
+Interactive mode allows you to select from a comprehensive feature catalog:
+
+| Category | Available Options |
+|----------|-------------------|
+| **Database** | PostgreSQL, MySQL, MongoDB, Redis, SQLite |
+| **Authentication** | JWT, OAuth2, FastAPI-Users, Session-based |
+| **Background Tasks** | Celery, Dramatiq |
+| **Testing** | Basic (pytest), Coverage, Advanced (with faker, factory-boy) |
+| **Caching** | Redis with fastapi-cache2 |
+| **Monitoring** | Loguru, OpenTelemetry, Prometheus |
+| **Utilities** | CORS, Rate-Limiting, Pagination, WebSocket |
+| **Deployment** | Docker, docker-compose with auto-generated configs |
+
+The interactive mode automatically generates:
+
+- `main.py` with selected features integrated
+- Database and authentication configuration files
+- Docker deployment files (Dockerfile, docker-compose.yml)
+- Test configuration (pytest with coverage)
+
+### Q: How do I see available features for interactive mode?
+
+**A:** Use the `list-features` command to display all available features and their packages:
+
+<div class="termy">
+
+```console
+$ fastkit list-features
+# Shows all available features organized by category
+# with their associated packages
+```
+
+</div>
+
+This helps you understand what packages will be installed for each feature selection.
 
 ## Route Development
 
@@ -264,9 +316,11 @@ $ fastkit list-templates
 │ fastapi-default         │ Simple FastAPI Project            │
 │ fastapi-async-crud      │ Async Item Management API Server  │
 │ fastapi-custom-response │ Custom Response System            │
-│ fastapi-dockerized      │ Dockerized FastAPI API           │
-│ fastapi-psql-orm        │ PostgreSQL FastAPI API           │
-│ fastapi-empty           │ Minimal FastAPI Project          │
+│ fastapi-dockerized      │ Dockerized FastAPI API            │
+│ fastapi-empty           │ Minimal FastAPI Project           │
+│ fastapi-mcp             │ MCP (Model Context Protocol) API  │
+│ fastapi-psql-orm        │ PostgreSQL FastAPI API            │
+│ fastapi-single-module   │ Single-file FastAPI Project       │
 └─────────────────────────┴───────────────────────────────────┘
 ```
 
@@ -553,10 +607,10 @@ def test_user_creation_with_mock_db(mock_database):
 ```console
 $ git clone https://github.com/yourusername/FastAPI-fastkit.git
 $ cd FastAPI-fastkit
-$ make install-dev  # Set up development environment
+$ make dev-setup  # Set up development environment
 $ git checkout -b feature/my-feature
 # Make changes...
-$ make check-all test  # Run all checks and tests
+$ make dev-check  # Format, lint, and test
 $ git commit -m "feat: add new feature"
 $ git push origin feature/my-feature
 ```
