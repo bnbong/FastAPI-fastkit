@@ -21,12 +21,17 @@ Changelog = "https://bnbong.github.io/FastAPI-fastkit/changelog/"
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=8.3.3",
+    # Pinned minimums reflect Dependabot security advisories:
+    #   pytest   < 9.0.3   — tmpdir handling (GHSA)
+    #   black    < 26.3.1  — arbitrary file writes via cache file name
+    #   pygments < 2.20.0  — ReDoS in GUID regex (transitive via rich)
+    "pytest>=9.0.3",
     "pytest-cov>=6.2.1",
-    "black>=24.10.0",
+    "black>=26.3.1",
     "pre-commit>=4.0.1",
     "mypy>=1.12.0",
     "isort>=5.13.2",
+    "pygments>=2.20.0",
 ]
 
 [project.scripts]
@@ -74,6 +79,14 @@ docs = [
     "mkdocs-static-i18n>=1.3.0",
     "pyyaml>=6.0.3",
     "types-PyYAML>=6.0.12.20250915",
+    # Security floors for transitive deps surfaced by Dependabot:
+    #   pygments < 2.20.0 — ReDoS in GUID regex
+    #   requests < 2.33.0 — insecure temp file reuse in extract_zipped_paths
+    "pygments>=2.20.0",
+    "requests>=2.33.0",
+    # pymdown-extensions < 10.17.2 crashes on pygments 2.20+ (NoneType filename
+    # passed to html.escape); see pymdown-extensions#2580.
+    "pymdown-extensions>=10.17.2",
 ]
 translation = [
     "openai>=2.8.1",
