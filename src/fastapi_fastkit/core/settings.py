@@ -102,7 +102,7 @@ class FastkitConfig:
             "MySQL": ["pymysql", "aiomysql", "sqlalchemy", "alembic"],
             "MongoDB": ["motor", "beanie"],
             "Redis": ["redis[hiredis]", "aioredis"],
-            "SQLite": ["sqlalchemy", "alembic"],
+            "SQLite": ["sqlalchemy", "aiosqlite", "alembic"],
             "None": [],
         },
         "authentication": {

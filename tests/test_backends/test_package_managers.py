@@ -912,6 +912,44 @@ class TestPoetryManagerExtended:
             with pytest.raises(BackendExceptions):
                 self.manager.generate_dependency_file(["fastapi"])
 
+    def test_generate_dependency_file_with_extras_is_valid_toml(self) -> None:
+        """Dependencies with extras must be emitted as inline tables, not bare keys."""
+        import tomllib
+
+        deps = [
+            "redis[hiredis]",
+            "python-jose[cryptography]==3.3.0",
+            "fastapi-users[sqlalchemy]",
+            "fastapi==0.104.1",
+            "uvicorn",
+        ]
+        self.manager.generate_dependency_file(
+            deps,
+            project_name="test-project",
+            author="Test Author",
+            author_email="test@example.com",
+            description="Test description",
+        )
+
+        pyproject_file = Path(self.temp_dir) / "pyproject.toml"
+        content = pyproject_file.read_text()
+
+        # Must parse as valid TOML - this is what previously broke poetry install.
+        parsed = tomllib.loads(content)
+        deps_table = parsed["tool"]["poetry"]["dependencies"]
+
+        assert deps_table["redis"] == {"version": "*", "extras": ["hiredis"]}
+        assert deps_table["python-jose"] == {
+            "version": "3.3.0",
+            "extras": ["cryptography"],
+        }
+        assert deps_table["fastapi-users"] == {
+            "version": "*",
+            "extras": ["sqlalchemy"],
+        }
+        assert deps_table["fastapi"] == "0.104.1"
+        assert deps_table["uvicorn"] == "*"
+
     @patch("subprocess.run")
     def test_add_dependency_success(self, mock_run: Mock) -> None:
         """Test successful dependency addition with Poetry."""

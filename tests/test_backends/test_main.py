@@ -186,8 +186,7 @@ class TestBackendMain:
         # given
         # Create setup.py file
         setup_py = self.project_path / "setup.py"
-        setup_py.write_text(
-            """
+        setup_py.write_text("""
 from setuptools import setup
 
 setup(
@@ -196,8 +195,7 @@ setup(
     author_email="<author_email>",
     description="<description>",
 )
-"""
-        )
+""")
 
         # Create config file
         config_py = self.project_path / "config.py"
@@ -221,6 +219,30 @@ setup(
 
         config_content = config_py.read_text()
         assert 'PROJECT_NAME = "test-project"' in config_content
+
+    def test_inject_project_metadata_replaces_placeholder_in_main(self) -> None:
+        """Main module placeholders (single-module template) must be substituted."""
+        # given
+        src_dir = self.project_path / "src"
+        src_dir.mkdir()
+        main_py = src_dir / "main.py"
+        main_py.write_text(
+            'from fastapi import FastAPI\n\napp = FastAPI(title="<project_name>")\n'
+        )
+
+        # when
+        inject_project_metadata(
+            str(self.project_path),
+            "my-single-module",
+            "Test Author",
+            "test@example.com",
+            "desc",
+        )
+
+        # then
+        main_content = main_py.read_text()
+        assert "<project_name>" not in main_content
+        assert 'title="my-single-module"' in main_content
 
     @patch("fastapi_fastkit.backend.main.find_template_core_modules")
     def test_inject_project_metadata_with_exception(
@@ -248,8 +270,7 @@ setup(
         template_path = Path(tempfile.mkdtemp())
         try:
             setup_py_tpl = template_path / "setup.py-tpl"
-            setup_py_tpl.write_text(
-                """
+            setup_py_tpl.write_text("""
 from setuptools import setup
 
 install_requires: list[str] = [
@@ -262,8 +283,7 @@ setup(
     name="test",
     install_requires=install_requires,
 )
-"""
-            )
+""")
 
             # when
             result = read_template_stack(str(template_path))
@@ -393,16 +413,14 @@ install_requires = [
         """Test _process_setup_file function with successful processing."""
         # given
         setup_py = self.project_path / "setup.py"
-        setup_py.write_text(
-            """
+        setup_py.write_text("""
 setup(
     name="<project_name>",
     author="<author>",
     author_email="<author_email>",
     description="<description>",
 )
-"""
-        )
+""")
 
         # when
         _process_setup_file(

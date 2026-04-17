@@ -185,12 +185,35 @@ build-backend = "poetry.core.masonry.api"
             # Create dependencies section for Poetry
             deps_section = ""
             for dep in dependencies:
-                # Convert pip-style to poetry-style
+                # Split off version specifier (only == is converted to Poetry's pinned
+                # form; other specifiers fall back to "*").
                 if "==" in dep:
-                    name, version = dep.split("==", 1)
-                    deps_section += f'{name} = "{version}"\n'
+                    name_part, version = dep.split("==", 1)
+                    version_str = version.strip()
                 else:
-                    deps_section += f'{dep} = "*"\n'
+                    name_part, version_str = dep, "*"
+
+                name_part = name_part.strip()
+
+                # Extract optional extras, e.g. "redis[hiredis]" -> ("redis", ["hiredis"]).
+                extras: list[str] = []
+                if "[" in name_part and name_part.endswith("]"):
+                    bare_name, _, extras_part = name_part.partition("[")
+                    extras = [
+                        extra.strip()
+                        for extra in extras_part[:-1].split(",")
+                        if extra.strip()
+                    ]
+                    name_part = bare_name.strip()
+
+                if extras:
+                    extras_str = ", ".join(f'"{extra}"' for extra in extras)
+                    deps_section += (
+                        f'{name_part} = {{version = "{version_str}", '
+                        f"extras = [{extras_str}]}}\n"
+                    )
+                else:
+                    deps_section += f'{name_part} = "{version_str}"\n'
 
             # Create basic pyproject.toml content for Poetry
             pyproject_content = f"""[tool.poetry]

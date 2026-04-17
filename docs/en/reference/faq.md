@@ -194,9 +194,9 @@ Interactive mode allows you to select from a comprehensive feature catalog:
 The interactive mode automatically generates:
 
 - `main.py` with selected features integrated
-- Database and authentication configuration files
-- Docker deployment files (Dockerfile, docker-compose.yml)
-- Test configuration (pytest with coverage)
+- Database and authentication configuration files when the selected options support code generation (e.g. PostgreSQL/MySQL/SQLite/MongoDB for databases, JWT/FastAPI-Users for authentication); other options install the necessary packages only
+- Deployment files matching the selected deployment option (`Dockerfile` when `Docker` is selected, `docker-compose.yml` when `docker-compose` is selected)
+- Test configuration based on the selected testing option (coverage settings are included only when `Coverage` or `Advanced` is selected)
 
 ### Q: How do I see available features for interactive mode?
 

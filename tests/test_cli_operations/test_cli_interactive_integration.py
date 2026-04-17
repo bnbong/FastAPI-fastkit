@@ -206,6 +206,20 @@ class TestCLIInteractiveMode:
             assert "WORKDIR /app" in dockerfile_content
             assert "uvicorn" in dockerfile_content
 
+        # Pytest config must land in pytest.ini, not overwrite tests/conftest.py
+        # (INI content in a Python module breaks the entire test suite).
+        pytest_ini = project_path / "pytest.ini"
+        assert pytest_ini.exists(), "Generated project should have a pytest.ini"
+        ini_content = pytest_ini.read_text()
+        assert "[pytest]" in ini_content
+
+        conftest_path = project_path / "tests" / "conftest.py"
+        if conftest_path.exists():
+            conftest_content = conftest_path.read_text()
+            assert (
+                "[pytest]" not in conftest_content
+            ), "conftest.py must remain a Python module, not INI content"
+
         # Verify subprocess was called for venv and installation
         assert (
             mock_subprocess.call_count >= 2
