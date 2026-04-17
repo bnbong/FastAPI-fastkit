@@ -448,3 +448,26 @@ class TestCleanupFailedProject:
         # then
         assert workspace.exists()
         assert (workspace / "keepme.txt").exists()
+
+    def test_cleanup_returns_when_project_dir_missing(self, temp_dir: str) -> None:
+        """If the project folder was never created, cleanup must be a no-op."""
+        from fastapi_fastkit.cli import _cleanup_failed_project
+
+        # given: a path inside the workspace that does not exist
+        workspace = Path(temp_dir)
+        missing_project = workspace / "never-created"
+        assert not missing_project.exists()
+
+        # when / then: must not raise
+        _cleanup_failed_project(
+            project_dir=str(missing_project),
+            user_workspace=str(workspace),
+            create_project_folder=True,
+        )
+        _cleanup_failed_project(
+            project_dir="",
+            user_workspace=str(workspace),
+            create_project_folder=True,
+        )
+
+        assert workspace.exists()

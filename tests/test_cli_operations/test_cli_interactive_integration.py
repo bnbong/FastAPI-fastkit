@@ -224,3 +224,59 @@ class TestCLIInteractiveMode:
         assert (
             mock_subprocess.call_count >= 2
         ), "subprocess should be called for venv creation and dependency installation"
+
+    @patch("fastapi_fastkit.cli.create_venv_with_manager")
+    @patch("fastapi_fastkit.backend.package_managers.uv_manager.UvManager.is_available")
+    def test_init_interactive_cleans_up_on_failure(
+        self,
+        mock_uv_available: MagicMock,
+        mock_create_venv: MagicMock,
+        temp_dir: str,
+    ) -> None:
+        """When interactive init fails, the partial project folder must be removed."""
+        # given
+        os.chdir(temp_dir)
+        project_name = "test-interactive-failure"
+        mock_uv_available.return_value = True
+        mock_create_venv.side_effect = RuntimeError(
+            "simulated venv failure for cleanup test"
+        )
+
+        # when: reuse the same selections as the happy-path test so only the
+        # patched create_venv_with_manager triggers the failure branch
+        result = self.runner.invoke(
+            fastkit_cli,
+            ["init", "--interactive"],
+            input="\n".join(
+                [
+                    project_name,
+                    "Failure Test",
+                    "failure@test.com",
+                    "Triggers interactive cleanup branch",
+                    "1",  # Database: PostgreSQL
+                    "1",  # Authentication: JWT
+                    "1",  # Background Tasks: Celery
+                    "1",  # Caching: Redis
+                    "3",  # Monitoring: Prometheus
+                    "1",  # Testing: Basic
+                    "1",  # Utilities: CORS
+                    "1",  # Deployment: Docker
+                    "2",  # Package manager: uv
+                    "",  # Custom packages: skip
+                    "Y",  # Proceed
+                    "Y",  # Create project folder
+                ]
+            ),
+        )
+
+        # then: the except block ran
+        assert (
+            "Error during project creation" in result.output
+        ), f"Expected cleanup branch to print error. Output: {result.output}"
+        assert "simulated venv failure" in result.output
+
+        # and: the partially-created project folder was cleaned up
+        project_path = Path(temp_dir) / project_name
+        assert (
+            not project_path.exists()
+        ), "Failed interactive init must leave no partial project folder"

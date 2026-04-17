@@ -14,6 +14,7 @@ import pytest
 from fastapi_fastkit.backend.main import (
     _parse_setup_dependencies,
     _process_config_file,
+    _process_main_file,
     _process_setup_file,
     add_new_route,
     create_venv,
@@ -243,6 +244,35 @@ setup(
         main_content = main_py.read_text()
         assert "<project_name>" not in main_content
         assert 'title="my-single-module"' in main_content
+
+    def test_process_main_file_no_placeholder_is_noop(self) -> None:
+        """main.py without the placeholder must be left untouched and not rewritten."""
+        # given
+        main_py = self.project_path / "main.py"
+        original = 'from fastapi import FastAPI\n\napp = FastAPI(title="static")\n'
+        main_py.write_text(original)
+        original_mtime = main_py.stat().st_mtime_ns
+
+        # when
+        _process_main_file(str(main_py), "my-project")
+
+        # then: file content unchanged and not rewritten
+        assert main_py.read_text() == original
+        assert main_py.stat().st_mtime_ns == original_mtime
+
+    def test_process_main_file_os_error_raises_backend_exception(self) -> None:
+        """IO errors while rewriting main.py must surface as BackendExceptions."""
+        # given: file exists so the existence check passes, but reading raises
+        main_py = self.project_path / "main.py"
+        main_py.write_text('app = FastAPI(title="<project_name>")')
+
+        with patch(
+            "fastapi_fastkit.backend.main.open",
+            side_effect=OSError("disk read failure"),
+        ):
+            # when & then
+            with pytest.raises(BackendExceptions, match="Failed to process main.py"):
+                _process_main_file(str(main_py), "my-project")
 
     @patch("fastapi_fastkit.backend.main.find_template_core_modules")
     def test_inject_project_metadata_with_exception(
