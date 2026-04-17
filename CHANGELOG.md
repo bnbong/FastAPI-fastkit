@@ -1,5 +1,43 @@
 # Changelog
 
+## v1.2.1 (2026-04-17)
+
+### Fixes
+
+- **`fastkit init` failure no longer wipes the user workspace**
+  - Introduced `_cleanup_failed_project` helper; the previous `shutil.rmtree(project_dir)` on error could delete the entire workspace when `create_project_folder=False` (in-place deploy). Cleanup now refuses to remove the workspace and only deletes freshly created project folders.
+- **Single-module template (`fastapi-single-module`) now renders the project name**
+  - `inject_project_metadata()` was not substituting `<project_name>` placeholders that live directly in `main.py`. Added `_process_main_file` so single-module templates come out with the correct title/name.
+- **Generated test configuration written to `pytest.ini`, not `tests/conftest.py`**
+  - Interactive init used to dump INI-format content into a Python module, breaking the generated project's test suite immediately. Test config now lands in `pytest.ini` at the project root.
+- **Poetry dependency generation now handles the full PEP 508 spec**
+  - `PoetryManager.generate_dependency_file` previously only split on `==`. Any other specifier (`>=`, `~=`, `<=`, `!=`, `===`), environment marker (e.g. `; sys_platform != 'win32'`), or `extras + version` combination was emitted as part of the TOML key, producing an invalid `pyproject.toml` that `poetry install` could not parse. Added `_parse_pip_requirement` to split name, extras, version specifier, and marker, emitting inline tables when needed.
+- **SQLite stack now installs `aiosqlite`**
+  - `core/settings.py` catalog previously omitted the async driver, so SQLite projects failed at runtime when the generated code used async sessions.
+- **Dockerfile `CMD` uses exec form with double-quoted JSON array**
+  - The previous single-quoted form was interpreted as shell form by some Docker versions and bypassed signal handling (no graceful shutdown on `SIGTERM`).
+
+### Security
+
+Addressed open Dependabot advisories by bumping minimum versions:
+
+- `pytest >= 9.0.3` — tmpdir handling advisory (GHSA)
+- `black >= 26.3.1` — arbitrary file writes via cache file name
+- `pygments >= 2.20.0` — ReDoS in GUID regex (transitive via `rich`)
+- `requests >= 2.33.0` — insecure temp file reuse in `extract_zipped_paths`
+- `pymdown-extensions >= 10.17.2` — required to run on `pygments` 2.20+ (prevents `html.escape(None)` crash during docs build)
+
+### Documentation
+
+- **FAQ (`docs/en/reference/faq.md`)**: the "interactive mode automatically generates" bullets now accurately describe what is generated conditionally — database/auth files only when the selected option supports code generation, Docker files only for the selected deployment option, and coverage config only when `Coverage` or `Advanced` testing is selected.
+- Contributing and development-setup guides updated; `fastkit --version` example refreshed to 1.2.1.
+
+### Maintenances
+
+- Added regression tests for every fix above, plus targeted tests to close Codecov patch-coverage gaps (`_process_main_file` error handling, `_cleanup_failed_project` edge cases, interactive init failure branch).
+- Cleaned up Ruff warnings in `src/fastapi_fastkit/cli.py` (E402 import ordering for `__version__`, four stray F541 `f""` prefixes).
+- Refreshed `requirements.txt`, `requirements-docs.txt`, `pdm.lock`, and `uv.lock` to the new security floors.
+
 ## v1.2.0 (2025-11-27)
 
 ### Features

@@ -97,7 +97,7 @@ pre-commit installed at .git/hooks/pre-commit
 
 ```console
 $ fastkit --version
-fastapi-fastkit, version 1.2.0
+fastapi-fastkit, version 1.2.1
 
 $ python -m pytest tests/
 ======================== test session starts ========================
