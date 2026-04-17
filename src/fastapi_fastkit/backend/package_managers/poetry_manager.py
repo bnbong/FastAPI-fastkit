@@ -4,7 +4,7 @@
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
 import subprocess
-from typing import List
+from typing import List, Tuple
 
 from fastapi_fastkit.core.exceptions import BackendExceptions
 from fastapi_fastkit.utils.logging import debug_log, get_logger
@@ -18,6 +18,47 @@ from fastapi_fastkit.utils.main import (
 from .base import BasePackageManager
 
 logger = get_logger(__name__)
+
+# PEP 440 version specifier operators, longest-match first so "===" beats "==".
+_PEP440_OPERATORS = ("===", "==", "!=", "<=", ">=", "~=", "<", ">")
+
+
+def _parse_pip_requirement(
+    requirement: str,
+) -> Tuple[str, List[str], str, str]:
+    """Parse a pip/PEP 508 requirement string.
+
+    Returns ``(name, extras, version_spec, marker)`` where ``version_spec``
+    includes the operator (e.g. ``">=1.2.3"``) or is empty when unspecified,
+    and ``marker`` is the environment marker without the leading semicolon.
+    """
+    req = requirement.strip()
+
+    marker = ""
+    if ";" in req:
+        req, marker = req.split(";", 1)
+        req = req.strip()
+        marker = marker.strip()
+
+    version_spec = ""
+    split_at = len(req)
+    for op in _PEP440_OPERATORS:
+        idx = req.find(op)
+        if idx != -1 and idx < split_at:
+            split_at = idx
+    if split_at < len(req):
+        version_spec = req[split_at:].strip()
+        req = req[:split_at].strip()
+
+    extras: List[str] = []
+    if "[" in req and req.endswith("]"):
+        bare_name, _, extras_part = req.partition("[")
+        extras = [
+            extra.strip() for extra in extras_part[:-1].split(",") if extra.strip()
+        ]
+        req = bare_name.strip()
+
+    return req, extras, version_spec, marker
 
 
 class PoetryManager(BasePackageManager):
@@ -182,36 +223,33 @@ build-backend = "poetry.core.masonry.api"
         pyproject_path = self.get_dependency_file_path()
 
         try:
-            # Create dependencies section for Poetry
+            # Create dependencies section for Poetry. Parse each requirement as
+            # PEP 508 so non-``==`` specifiers (``>=``, ``~=``, ...), extras, and
+            # environment markers all round-trip to valid TOML.
             deps_section = ""
             for dep in dependencies:
-                # Split off version specifier (only == is converted to Poetry's pinned
-                # form; other specifiers fall back to "*").
-                if "==" in dep:
-                    name_part, version = dep.split("==", 1)
-                    version_str = version.strip()
+                name_part, extras, version_spec, marker = _parse_pip_requirement(dep)
+                if not name_part:
+                    continue
+
+                if not version_spec:
+                    version_str = "*"
+                elif version_spec.startswith("=="):
+                    # Poetry treats a bare version as a pin; keep the old
+                    # formatting to avoid churn in generated files.
+                    version_str = version_spec[2:].strip()
                 else:
-                    name_part, version_str = dep, "*"
+                    version_str = version_spec
 
-                name_part = name_part.strip()
-
-                # Extract optional extras, e.g. "redis[hiredis]" -> ("redis", ["hiredis"]).
-                extras: list[str] = []
-                if "[" in name_part and name_part.endswith("]"):
-                    bare_name, _, extras_part = name_part.partition("[")
-                    extras = [
-                        extra.strip()
-                        for extra in extras_part[:-1].split(",")
-                        if extra.strip()
-                    ]
-                    name_part = bare_name.strip()
-
-                if extras:
-                    extras_str = ", ".join(f'"{extra}"' for extra in extras)
-                    deps_section += (
-                        f'{name_part} = {{version = "{version_str}", '
-                        f"extras = [{extras_str}]}}\n"
-                    )
+                if extras or marker:
+                    parts = [f'version = "{version_str}"']
+                    if extras:
+                        extras_str = ", ".join(f'"{extra}"' for extra in extras)
+                        parts.append(f"extras = [{extras_str}]")
+                    if marker:
+                        escaped_marker = marker.replace('"', '\\"')
+                        parts.append(f'markers = "{escaped_marker}"')
+                    deps_section += f"{name_part} = {{{', '.join(parts)}}}\n"
                 else:
                     deps_section += f'{name_part} = "{version_str}"\n'
 

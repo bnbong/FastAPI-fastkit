@@ -950,6 +950,48 @@ class TestPoetryManagerExtended:
         assert deps_table["fastapi"] == "0.104.1"
         assert deps_table["uvicorn"] == "*"
 
+    def test_generate_dependency_file_with_pep508_specifiers(self) -> None:
+        """Non-``==`` pip specifiers and PEP 508 markers must round-trip to valid TOML.
+
+        Regression test for the Copilot review that flagged ``requests>=2.33``,
+        ``httpx~=0.27``, and ``uvloop; sys_platform != 'win32'`` producing
+        invalid ``pyproject.toml`` because the whole string was emitted as a key.
+        """
+        import tomllib
+
+        deps = [
+            "requests>=2.33",
+            "httpx~=0.27",
+            "sqlalchemy>=2.0,<3.0",
+            "uvloop; sys_platform != 'win32'",
+            "redis[hiredis]>=4.0",
+        ]
+        self.manager.generate_dependency_file(
+            deps,
+            project_name="test-project",
+            author="Test Author",
+            author_email="test@example.com",
+            description="Test description",
+        )
+
+        pyproject_file = Path(self.temp_dir) / "pyproject.toml"
+        content = pyproject_file.read_text()
+
+        parsed = tomllib.loads(content)
+        deps_table = parsed["tool"]["poetry"]["dependencies"]
+
+        assert deps_table["requests"] == ">=2.33"
+        assert deps_table["httpx"] == "~=0.27"
+        assert deps_table["sqlalchemy"] == ">=2.0,<3.0"
+        assert deps_table["uvloop"] == {
+            "version": "*",
+            "markers": "sys_platform != 'win32'",
+        }
+        assert deps_table["redis"] == {
+            "version": ">=4.0",
+            "extras": ["hiredis"],
+        }
+
     @patch("subprocess.run")
     def test_add_dependency_success(self, mock_run: Mock) -> None:
         """Test successful dependency addition with Poetry."""
