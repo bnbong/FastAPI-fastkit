@@ -35,7 +35,9 @@ This single command:
 - Sets up pre-commit hooks
 - Configures development tools
 
-> **Note:** You should create and activate a virtual environment before running this command.
+!!! note
+
+    You should create and activate a virtual environment before running this command.
 
 ## Manual Setup
 
@@ -95,7 +97,7 @@ pre-commit installed at .git/hooks/pre-commit
 
 ```console
 $ fastkit --version
-FastAPI-fastkit version 1.0.0-dev
+fastapi-fastkit, version 1.2.0
 
 $ python -m pytest tests/
 ======================== test session starts ========================
@@ -111,6 +113,25 @@ tests/test_templates.py::test_template_listing PASSED
 ## Development Tools
 
 The development environment includes several tools to maintain code quality:
+
+### One-liner Commands
+
+using Makefile:
+
+```console
+$ make format lint
+Running isort...
+Running black...
+Running mypy...
+✅ All checks passed!
+```
+
+using provided scripts:
+
+```console
+$ ./scripts/format.sh
+$ ./scripts/lint.sh
+```
 
 ### Code Formatting
 
@@ -328,25 +349,23 @@ FastAPI-fastkit/
 
 ### Key Directories
 
-**`src/fastapi_fastkit/`** - Main package source code
-- **`cli.py`** - Main CLI entry point
-- **`backend/`** - Core backend logic
-  - **`inspector.py`** - Template inspector
-  - **`interactive/`** - Interactive mode components (prompts, selectors, validators)
-  - **`package_managers/`** - Package manager implementations (pip, uv, pdm, poetry)
-  - **`project_builder/`** - Project building utilities
-  - **`transducer.py`** - Template transducer
-- **`core/`** - Core configuration and exceptions
-- **`fastapi_project_template/`** - Project templates (fastapi-default, fastapi-async-crud, etc.)
-- **`utils/`** - Shared utility functions
-
-**`tests/`** - Test suite
-- **`test_backends/`** - Backend-specific tests
-- **`test_cli_operations/`** - CLI operation tests
-- **`test_templates/`** - Template system tests
-
-**`docs/`** - Documentation (MkDocs)
-- User guides, tutorials, and API reference
+- **`src/fastapi_fastkit/`** - Main package source code
+    - **`cli.py`** - Main CLI entry point
+    - **`backend/`** - Core backend logic
+        - **`inspector.py`** - Template inspector
+        - **`interactive/`** - Interactive mode components (prompts, selectors, validators)
+        - **`package_managers/`** - Package manager implementations (pip, uv, pdm, poetry)
+        - **`project_builder/`** - Project building utilities
+        - **`transducer.py`** - Template transducer
+    - **`core/`** - Core configuration and exceptions
+    - **`fastapi_project_template/`** - Project templates (fastapi-default, fastapi-async-crud, etc.)
+    - **`utils/`** - Shared utility functions
+- **`tests/`** - Test suite
+    - **`test_backends/`** - Backend-specific tests
+    - **`test_cli_operations/`** - CLI operation tests
+    - **`test_templates/`** - Template system tests
+- **`docs/`** - Documentation (MkDocs)
+    - User guides, tutorials, and API reference
 
 ## Development Workflow
 
@@ -370,10 +389,10 @@ Edit code, add features, fix bugs...
 <div class="termy">
 
 ```console
-$ make check-all test
+$ make dev-check
 Running all quality checks...
 Running all tests...
-✅ All checks and tests passed!
+✅ All tests passed!
 ```
 
 </div>
@@ -441,18 +460,6 @@ $ python -m pytest tests/test_cli.py -v
 $ make test-coverage
 # or
 $ python -m pytest --cov=src --cov-report=html
-```
-
-</div>
-
-**Watch mode for development:**
-
-<div class="termy">
-
-```console
-$ make test-watch
-# or
-$ ptw tests/
 ```
 
 </div>
@@ -530,7 +537,7 @@ def test_full_project_creation_workflow(tmp_path):
 <div class="termy">
 
 ```console
-$ make docs-serve
+$ make serve-docs
 INFO     -  Building documentation...
 INFO     -  Cleaning site directory
 INFO     -  Documentation built in 0.43 seconds
@@ -544,7 +551,7 @@ INFO     -  [14:30:00] Serving on http://127.0.0.1:8000/
 <div class="termy">
 
 ```console
-$ make docs-build
+$ make build-docs
 INFO     -  Building documentation...
 INFO     -  Documentation built in 0.43 seconds
 ```
@@ -581,6 +588,8 @@ $ fastkit new-feature --option value
 !!! tip "Pro Tip"
     Use `--help` to see all available options.
 ````
+
+For detailed reference about using `mkdocs-material`, see [mkdocs-material documentation](https://squidfunk.github.io/mkdocs-material/reference/admonitions/).
 
 ## Code Style Guidelines
 
@@ -717,19 +726,18 @@ $ pip install -e .
 
 ### Getting Help
 
-- **GitHub Issues**: Report bugs and request features
-- **GitHub Discussions**: Ask questions and share ideas
+- **[GitHub Issues](https://github.com/bnbong/FastAPI-fastkit/issues)**: Report bugs and request features
+- **[GitHub Discussions](https://github.com/bnbong/FastAPI-fastkit/discussions)**: Ask questions and share ideas
 - **Documentation**: Check the [User Guide](../user-guide/installation.md)
 
 ## Contributing Guidelines
 
 ### Before Submitting a PR
 
-1. **Run all checks:** `make check-all test`
+1. **Run all checks:** `make dev-check`
 2. **Update documentation** if needed
 3. **Add tests** for new features
-4. **Update CHANGELOG.md**
-5. **Follow commit message conventions**
+4. **Follow commit message conventions**
 
 ### Commit Message Format
 
@@ -793,15 +801,15 @@ $ git push origin v1.2.0
 
 Now that your development environment is set up:
 
-1. **Explore the codebase** to understand the architecture
+1. **[Explore the codebase](https://github.com/bnbong/FastAPI-fastkit/tree/main/src/fastapi_fastkit)** to understand the architecture
 2. **Run the test suite** to ensure everything works
-3. **Pick an issue** from GitHub to work on
-4. **Join discussions** to connect with other contributors
+3. **Pick an [issue](https://github.com/bnbong/FastAPI-fastkit/issues)** from GitHub to work on
+4. **Join [discussions](https://github.com/bnbong/FastAPI-fastkit/discussions)** to connect with other contributors
 
 Happy coding! 🚀
 
 !!! tip "Development Tips"
-    - Use `make check-all` before committing
+    - Use `make dev-check` before committing
     - Write tests first (TDD approach)
     - Keep commits small and focused
     - Update documentation with new features

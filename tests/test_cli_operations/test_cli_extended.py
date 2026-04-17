@@ -112,8 +112,7 @@ class TestCLIExtended:
 
         # Create setup.py to make it a valid fastkit project
         setup_py = project_path / "setup.py"
-        setup_py.write_text(
-            """
+        setup_py.write_text("""
 from setuptools import setup, find_packages
 
 setup(
@@ -128,8 +127,7 @@ setup(
     author="Test Author",
     author_email="test@example.com",
 )
-"""
-        )
+""")
 
         # when
         result = self.runner.invoke(
@@ -215,8 +213,7 @@ setup(
         src_dir = Path(temp_dir) / "src"
         src_dir.mkdir(exist_ok=True)
         main_py = src_dir / "main.py"
-        main_py.write_text(
-            """
+        main_py.write_text("""
 from fastapi import FastAPI
 
 app = FastAPI()
@@ -224,8 +221,7 @@ app = FastAPI()
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
-"""
-        )
+""")
 
         # when
         with patch("subprocess.Popen") as mock_popen:
@@ -372,3 +368,106 @@ def read_root():
 
         for content in expected_content:
             assert content.lower() in result.output.lower()
+
+
+class TestCleanupFailedProject:
+    """Regression tests for the init error-cleanup helper.
+
+    The original code called ``shutil.rmtree(project_dir, ignore_errors=True)`` on
+    failure, which could wipe the entire user workspace when the project was
+    deployed in-place (create_project_folder=False).
+    """
+
+    def test_in_place_init_failure_does_not_delete_workspace(
+        self, temp_dir: str
+    ) -> None:
+        """If the init was in-place, the workspace must not be removed."""
+        from fastapi_fastkit.cli import _cleanup_failed_project
+
+        # given: simulate an in-place deploy where project_dir == USER_WORKSPACE
+        workspace = Path(temp_dir)
+        sibling_file = workspace / "unrelated_user_file.txt"
+        sibling_file.write_text("precious user data")
+
+        # when
+        _cleanup_failed_project(
+            project_dir=str(workspace),
+            user_workspace=str(workspace),
+            create_project_folder=False,
+        )
+
+        # then
+        assert workspace.exists()
+        assert sibling_file.exists()
+        assert sibling_file.read_text() == "precious user data"
+
+    def test_folder_init_failure_deletes_only_project_folder(
+        self, temp_dir: str
+    ) -> None:
+        """Folder-mode failures should remove the project folder but nothing else."""
+        from fastapi_fastkit.cli import _cleanup_failed_project
+
+        # given
+        workspace = Path(temp_dir)
+        sibling_file = workspace / "unrelated_user_file.txt"
+        sibling_file.write_text("precious user data")
+
+        project_dir = workspace / "new-project"
+        project_dir.mkdir()
+        (project_dir / "marker.txt").write_text("partial project artifact")
+
+        # when
+        _cleanup_failed_project(
+            project_dir=str(project_dir),
+            user_workspace=str(workspace),
+            create_project_folder=True,
+        )
+
+        # then
+        assert not project_dir.exists()
+        assert workspace.exists()
+        assert sibling_file.exists()
+
+    def test_cleanup_refuses_to_delete_workspace_even_with_create_flag(
+        self, temp_dir: str
+    ) -> None:
+        """Defensive check: identical project_dir == user_workspace is never removed."""
+        from fastapi_fastkit.cli import _cleanup_failed_project
+
+        # given
+        workspace = Path(temp_dir)
+        (workspace / "keepme.txt").write_text("keep")
+
+        # when: even if called with create_project_folder=True, don't remove workspace
+        _cleanup_failed_project(
+            project_dir=str(workspace),
+            user_workspace=str(workspace),
+            create_project_folder=True,
+        )
+
+        # then
+        assert workspace.exists()
+        assert (workspace / "keepme.txt").exists()
+
+    def test_cleanup_returns_when_project_dir_missing(self, temp_dir: str) -> None:
+        """If the project folder was never created, cleanup must be a no-op."""
+        from fastapi_fastkit.cli import _cleanup_failed_project
+
+        # given: a path inside the workspace that does not exist
+        workspace = Path(temp_dir)
+        missing_project = workspace / "never-created"
+        assert not missing_project.exists()
+
+        # when / then: must not raise
+        _cleanup_failed_project(
+            project_dir=str(missing_project),
+            user_workspace=str(workspace),
+            create_project_folder=True,
+        )
+        _cleanup_failed_project(
+            project_dir="",
+            user_workspace=str(workspace),
+            create_project_folder=True,
+        )
+
+        assert workspace.exists()

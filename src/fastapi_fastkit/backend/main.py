@@ -185,6 +185,7 @@ def inject_project_metadata(
             description,
         )
         _process_config_file(core_modules.get("config", ""), project_name)
+        _process_main_file(core_modules.get("main", ""), project_name)
 
         print_success("Project metadata injected successfully")
 
@@ -233,6 +234,40 @@ def _process_setup_file(
     except (OSError, UnicodeDecodeError) as e:
         debug_log(f"Error processing setup.py: {e}", "error")
         raise BackendExceptions(f"Failed to process setup.py: {e}")
+
+
+def _process_main_file(main_py: str, project_name: str) -> None:
+    """
+    Replace project name placeholders in the template main.py file.
+
+    Some templates (e.g. fastapi-single-module) inline the project name directly
+    in main.py rather than reading it from a settings module, so the placeholder
+    must be substituted here as well.
+
+    :param main_py: Path to main.py file
+    :param project_name: Project name
+    """
+    if not main_py or not os.path.exists(main_py):
+        return
+
+    try:
+        with open(main_py, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        if "<project_name>" not in content:
+            return
+
+        content = content.replace("<project_name>", project_name)
+
+        with open(main_py, "w", encoding="utf-8") as f:
+            f.write(content)
+
+        debug_log("Injected project name into main.py", "info")
+        print_info("Injected project name into main.py")
+
+    except (OSError, UnicodeDecodeError) as e:
+        debug_log(f"Error processing main.py: {e}", "error")
+        raise BackendExceptions(f"Failed to process main.py: {e}")
 
 
 def _process_config_file(config_py: str, project_name: str) -> None:

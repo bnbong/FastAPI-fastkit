@@ -157,15 +157,13 @@ class TestUtilsLogging:
         project_path = Path(temp_dir) / "fastkit-project"
         project_path.mkdir()
         setup_py = project_path / "setup.py"
-        setup_py.write_text(
-            """
+        setup_py.write_text("""
 from setuptools import setup
 setup(
     name="test-project",
     description="Created with FastAPI-fastkit"
 )
-"""
-        )
+""")
 
         # when & then
         assert is_fastkit_project(str(project_path)) is True

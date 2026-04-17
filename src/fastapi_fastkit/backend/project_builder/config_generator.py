@@ -488,7 +488,7 @@ class DynamicConfigGenerator:
         content.append("")
         content.append("# Run application")
         content.append(
-            "CMD ['uvicorn', 'src.main:app', '--host', '0.0.0.0', '--port', '8000']"
+            'CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]'
         )
         content.append("")
 

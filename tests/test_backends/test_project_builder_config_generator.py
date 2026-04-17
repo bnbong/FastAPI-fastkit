@@ -3,6 +3,10 @@
 #
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
+import json
+import tempfile
+from pathlib import Path
+
 import pytest
 
 from fastapi_fastkit.backend.project_builder.config_generator import (
@@ -330,6 +334,41 @@ class TestGenerateTestConfig:
         # then
         assert content is not None
         assert "[coverage:run]" in content
+
+
+class TestGenerateDockerFiles:
+    """Test cases for generate_docker_files method."""
+
+    def test_generated_dockerfile_uses_exec_form_cmd(self) -> None:
+        """Dockerfile CMD must be JSON exec form, not shell form with single quotes."""
+        # given
+        with tempfile.TemporaryDirectory() as tmp:
+            config = {"deployment": ["Docker"]}
+            generator = DynamicConfigGenerator(config, tmp)
+
+            # when
+            generator.generate_docker_files()
+
+            # then
+            dockerfile = Path(tmp) / "Dockerfile"
+            assert dockerfile.exists()
+            content = dockerfile.read_text()
+
+            # Find the CMD line and validate it parses as JSON array (exec form)
+            cmd_lines = [
+                line for line in content.splitlines() if line.startswith("CMD ")
+            ]
+            assert len(cmd_lines) == 1
+            cmd_payload = cmd_lines[0][len("CMD ") :]
+
+            # Single quotes are Docker shell form; exec form requires double quotes.
+            assert "'" not in cmd_payload, (
+                "Generated Dockerfile CMD still uses single quotes (shell form): "
+                f"{cmd_payload!r}"
+            )
+            parsed = json.loads(cmd_payload)
+            assert parsed[0] == "uvicorn"
+            assert "src.main:app" in parsed
 
 
 class TestHelperMethods:

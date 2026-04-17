@@ -144,12 +144,12 @@ def validate_email(e):
 
 ```python
 # Good ✅
-class ProjectTemplate:
-    """Represents a FastAPI project template."""
+class SomeClass:
+    """Represents example class of FastAPI-fastkit."""
     pass
 
-class TemplateValidationError(Exception):
-    """Raised when template validation fails."""
+class SomeClassValidationError(Exception):
+    """Raised when example class validation fails."""
     pass
 
 class UserInputHandler:
@@ -157,7 +157,7 @@ class UserInputHandler:
     pass
 
 # Bad ❌
-class Template:
+class Class:
     pass
 
 class Error(Exception):
@@ -408,6 +408,10 @@ def test_file_creation_with_permission_error(mock_open):
 ## Import Guidelines
 
 ### Import Organization
+
+!!! note
+
+    `isort` formatter will automatically organize imports, so you can organize imports easily just run `bash scripts/format.sh`.
 
 1. **Standard library** imports first
 2. **Third-party** imports second
@@ -705,7 +709,9 @@ ci:
     autoupdate_commit_msg: ⬆ [pre-commit.ci] pre-commit autoupdate
 ```
 
-> **Note:** Pre-commit hooks use isolated Python environments (`language: python`).
+!!! note
+
+    Pre-commit hooks use isolated Python environments (`language: python`).
 
 ### IDE Configuration
 

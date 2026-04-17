@@ -216,6 +216,16 @@ class TestCoreSettings:
                     required_pkg in pkg for pkg in packages
                 ), f"{required_pkg} missing in {stack_name}"
 
+    def test_settings_sqlite_stack_includes_aiosqlite(self) -> None:
+        """SQLite catalog entry must ship aiosqlite so async engines can be created."""
+        # given
+        sqlite_packages = settings.PACKAGE_CATALOG["database"]["SQLite"]
+
+        # then
+        assert (
+            "aiosqlite" in sqlite_packages
+        ), "aiosqlite is required to support sqlite+aiosqlite:// URLs emitted by the generator"
+
     def test_settings_test_configuration_values(self) -> None:
         """Test test configuration values are reasonable."""
         # given & when & then

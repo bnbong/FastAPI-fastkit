@@ -15,6 +15,7 @@ Adding a new template follows a 5-step process:
 ## 📋 Step 1: Planning & Design
 
 ### Define Template Purpose
+
 Before creating a new template, answer these questions:
 
 - **What is the unique value of this template?**
@@ -34,6 +35,7 @@ Examples:
 - `fastapi-auth-jwt` (JWT authentication template)
 
 ### Technology Stack Planning
+
 Pre-define the main technologies to include:
 
 ```yaml
@@ -226,6 +228,7 @@ setup(
 ```
 
 #### 4. Writing Test Files
+
 ```python
 # tests/test_items.py-tpl
 """
@@ -285,32 +288,39 @@ make inspect-template TEMPLATES="fastapi-your-template"
 python scripts/inspect-templates.py --templates "fastapi-your-template" --verbose
 ```
 
-> **Note:** When you submit a PR, the **Template PR Inspection** workflow will automatically run and validate your template changes. You'll receive feedback directly on your PR.
+!!! note
+
+    When you submit a PR, the **Template PR Inspection** workflow will automatically run and validate your template changes. You'll receive feedback directly on your PR.
 
 ### Validation Checklist
 
 The inspector automatically validates the following items:
 
 #### ✅ File Structure Validation
+
 - [ ] `tests/` directory exists
 - [ ] `requirements.txt-tpl` file exists
 - [ ] `setup.py-tpl` file exists
 - [ ] `README.md-tpl` file exists
 
 #### ✅ File Extension Validation
+
 - [ ] All Python files use `.py-tpl` extension
 - [ ] No `.py` extension files exist
 
 #### ✅ Dependencies Validation
+
 - [ ] `requirements.txt-tpl` includes `fastapi`
 - [ ] `setup.py-tpl`'s `install_requires` includes `fastapi`
 - [ ] `setup.py-tpl`'s description includes `[fastapi-fastkit templated]`
 
 #### ✅ FastAPI Implementation Validation
+
 - [ ] `FastAPI` import exists in `main.py-tpl`
 - [ ] App creation like `app = FastAPI()` exists in `main.py-tpl`
 
 #### ✅ Test Execution Validation
+
 - [ ] Virtual environment creation successful
 - [ ] Dependencies installation successful
 - [ ] All pytest tests pass
@@ -345,7 +355,7 @@ New templates are **automatically discovered** and tested without manual configu
 4. ✅ **Comprehensive Validation**: Structure, metadata, and functionality checks
 
 **What This Means for You:**
-- 🚀 **No Additional Test Files**: Your template is tested automatically
+- 🚀 **No Additional Test Files at `FastAPI-fastkit`'s main source testcases**: Your template is tested automatically
 - ⚡ **Faster Development**: Focus on template content, not test setup
 - 🛡️ **Quality Assurance**: Consistent testing across all templates
 - 🔄 **CI/CD Integration**: Automatic testing in pull requests
@@ -374,18 +384,21 @@ $ fastkit startdemo your-template-name --package-manager uv
 In addition to automated validation, manually check the following items:
 
 #### 🔧 Code Quality
+
 - [ ] Code follows PEP 8 style guide
 - [ ] Appropriate type hints usage
 - [ ] Meaningful variable and function names
 - [ ] Proper comments and docstrings
 
 #### 🏗️ Architecture
+
 - [ ] Separation of concerns (API, business logic, data access separation)
 - [ ] Reusable component design
 - [ ] Scalable structure
 - [ ] Security best practices applied
 
 #### 📚 Documentation
+
 - [ ] README.md-tpl follows PROJECT_README_TEMPLATE.md format
 - [ ] Installation and execution methods specified
 - [ ] API documentation (OpenAPI/Swagger)
@@ -430,7 +443,7 @@ Write a brief description and use cases for your new template here.
 ### PR Title and Description
 
 ```
-[FEAT] Add fastapi-{template-name} template
+[TEMPLATE] Add fastapi-{template-name} template
 
 ## Overview
 Adds a new {purpose} template.
@@ -465,23 +478,28 @@ Closes #issue-number
 4. **Documentation Review**: Review documentation accuracy and completeness
 5. **Approval & Merge**: Merge to main branch when all requirements are satisfied
 
-> 💡 **Tip:** You'll receive automatic PR comments with validation results. Check these before requesting a review!
+!!! note
+
+    You'll receive automatic PR comments with validation results. Check these before requesting a review!
 
 ## 🎯 Best Practices
 
 ### Security Considerations
+
 - Manage sensitive information with environment variables
 - Proper CORS configuration
 - Input data validation
 - SQL injection prevention
 
 ### Performance Optimization
+
 - Utilize asynchronous processing
 - Optimize database queries
 - Appropriate caching strategies
 - Response compression settings
 
 ### Maintainability
+
 - Clear code structure
 - Comprehensive test coverage
 - Detailed documentation

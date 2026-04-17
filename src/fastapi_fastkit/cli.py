@@ -43,9 +43,28 @@ from fastapi_fastkit.utils.main import (
     validate_email,
 )
 
+from . import __version__
+
 console = utils_console
 
-from . import __version__
+
+def _cleanup_failed_project(
+    project_dir: str, user_workspace: str, create_project_folder: bool
+) -> None:
+    """
+    Clean up a partially created project after an error.
+
+    Only deletes a freshly created project folder. When the project was deployed
+    in-place (create_project_folder=False), project_dir equals the user's workspace,
+    and removing it would destroy unrelated files, so no cleanup is performed.
+    """
+    if not create_project_folder:
+        return
+    if not project_dir or not os.path.exists(project_dir):
+        return
+    if os.path.abspath(project_dir) == os.path.abspath(user_workspace):
+        return
+    shutil.rmtree(project_dir, ignore_errors=True)
 
 
 @click.group()
@@ -483,8 +502,7 @@ def init(
             if testing_type != "None":
                 test_config_content = generator.generate_test_config()
                 if test_config_content:
-                    test_config_path = os.path.join(project_dir, "tests", "conftest.py")
-                    os.makedirs(os.path.dirname(test_config_path), exist_ok=True)
+                    test_config_path = os.path.join(project_dir, "pytest.ini")
                     with open(test_config_path, "w") as f:
                         f.write(test_config_content)
 
@@ -492,9 +510,9 @@ def init(
             deployment = config.get("deployment", [])
             if deployment and deployment != ["None"]:
                 generator.generate_docker_files()
-                print_success(f"Generated Docker deployment files")
+                print_success("Generated Docker deployment files")
 
-            print_success(f"Generated configuration files for selected stack")
+            print_success("Generated configuration files for selected stack")
 
             # Create virtual environment and install dependencies
             venv_path = create_venv_with_manager(project_dir, package_manager)
@@ -514,8 +532,9 @@ def init(
                 logger = get_logger()
                 logger.exception(f"Error during project creation in init: {str(e)}")
             print_error(f"Error during project creation: {str(e)}")
-            if os.path.exists(project_dir):
-                shutil.rmtree(project_dir, ignore_errors=True)
+            _cleanup_failed_project(
+                project_dir, settings.USER_WORKSPACE, create_project_folder
+            )
 
         return
 
@@ -662,8 +681,9 @@ def init(
             logger = get_logger()
             logger.exception(f"Error during project creation in init: {str(e)}")
         print_error(f"Error during project creation: {str(e)}")
-        if os.path.exists(project_dir):
-            shutil.rmtree(project_dir, ignore_errors=True)
+        _cleanup_failed_project(
+            project_dir, settings.USER_WORKSPACE, create_project_folder
+        )
 
 
 @fastkit_cli.command()
@@ -930,9 +950,9 @@ def runserver(
         logger.exception(f"FileNotFoundError when starting server: {e}")
         if venv_python:
             print_error(
-                f"Failed to run Python from the virtual environment. Make sure uvicorn is installed in the project's virtual environment."
+                "Failed to run Python from the virtual environment. Make sure uvicorn is installed in the project's virtual environment."
             )
         else:
             print_error(
-                f"uvicorn not found. Make sure it's installed in your system Python."
+                "uvicorn not found. Make sure it's installed in your system Python."
             )

@@ -186,7 +186,7 @@ The script will create a Pull Request with the translations. Review the PR:
 3. Ensure code examples remain unchanged
 4. Check for language-specific issues
 
-### 4. Approve and Merge
+### 4. Approve and Merge (for maintainers)
 
 Once the translation is verified:
 
