@@ -183,6 +183,146 @@ def test_example():
             "FastAPI dependency not found" in error for error in inspector.errors
         )
 
+    def _make_pyproject_template(self, dependencies: list[str]) -> None:
+        """Scaffold a pyproject-only template with the given ``[project].dependencies``."""
+        (self.template_path / "tests").mkdir(exist_ok=True)
+        (self.template_path / "src").mkdir(exist_ok=True)
+        (self.template_path / "README.md-tpl").write_text("# Pyproject-only Template")
+        deps_block = ",\n    ".join(f'"{d}"' for d in dependencies)
+        (self.template_path / "pyproject.toml-tpl").write_text(
+            "[project]\n"
+            'name = "<project_name>"\n'
+            'version = "0.1.0"\n'
+            'description = "[fastapi-fastkit templated] pyproject-only"\n'
+            "dependencies = [\n"
+            f"    {deps_block}\n"
+            "]\n"
+        )
+        (self.template_path / "src" / "main.py-tpl").write_text(
+            "from fastapi import FastAPI\napp = FastAPI()\n"
+        )
+        (self.template_path / "tests" / "test_example.py-tpl").write_text(
+            "def test_example():\n    assert True\n"
+        )
+
+    def test_check_file_structure_pyproject_only(self, temp_dir: str) -> None:
+        """A template with only pyproject.toml-tpl (no setup.py-tpl) passes structure."""
+        # given
+        self._make_pyproject_template(["fastapi>=0.115.0"])
+
+        # when
+        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
+            inspector = TemplateInspector(str(self.template_path), temp_dir)
+            result = inspector._check_file_structure()
+
+        # then
+        assert result is True
+        assert inspector.errors == []
+
+    def test_check_file_structure_missing_metadata(self, temp_dir: str) -> None:
+        """Structure check fails when neither pyproject.toml-tpl nor setup.py-tpl exists."""
+        # given
+        (self.template_path / "tests").mkdir(exist_ok=True)
+        (self.template_path / "README.md-tpl").write_text("# Test")
+
+        # when
+        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
+            inspector = TemplateInspector(str(self.template_path), temp_dir)
+            result = inspector._check_file_structure()
+
+        # then
+        assert result is False
+        assert any(
+            "pyproject.toml-tpl" in error and "setup.py-tpl" in error
+            for error in inspector.errors
+        )
+
+    def test_check_dependencies_pyproject_with_fastapi(self, temp_dir: str) -> None:
+        """Pyproject-only template with fastapi in [project].dependencies passes."""
+        # given
+        self._make_pyproject_template(["fastapi>=0.115.8", "uvicorn[standard]>=0.34.0"])
+
+        # when
+        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
+            inspector = TemplateInspector(str(self.template_path), temp_dir)
+            result = inspector._check_dependencies()
+
+        # then
+        assert result is True
+        assert inspector.errors == []
+
+    def test_check_dependencies_pyproject_without_fastapi(self, temp_dir: str) -> None:
+        """Pyproject-only template missing fastapi fails with a clear error."""
+        # given
+        # fastapi-users must not be confused with fastapi during name normalization.
+        self._make_pyproject_template(["fastapi-users>=13.0", "uvicorn>=0.34.0"])
+
+        # when
+        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
+            inspector = TemplateInspector(str(self.template_path), temp_dir)
+            result = inspector._check_dependencies()
+
+        # then
+        assert result is False
+        assert any(
+            "FastAPI dependency not found" in error and "pyproject.toml-tpl" in error
+            for error in inspector.errors
+        )
+
+    def test_check_dependencies_any_source_satisfies(self, temp_dir: str) -> None:
+        """A stale requirements.txt-tpl does not fail when pyproject declares fastapi.
+
+        The contract is "fastapi declared in at least one source". A template
+        whose requirements.txt-tpl has drifted (missing fastapi) but whose
+        pyproject.toml-tpl is authoritative must still pass.
+        """
+        # given
+        (self.template_path / "tests").mkdir(exist_ok=True)
+        (self.template_path / "README.md-tpl").write_text("# Test")
+        # requirements.txt-tpl WITHOUT fastapi (stale)
+        (self.template_path / "requirements.txt-tpl").write_text("uvicorn==0.24.0\n")
+        # pyproject.toml-tpl WITH fastapi (authoritative)
+        (self.template_path / "pyproject.toml-tpl").write_text(
+            "[project]\n"
+            'name = "<project_name>"\n'
+            'version = "0.1.0"\n'
+            "dependencies = [\n"
+            '    "fastapi>=0.115.0",\n'
+            "]\n"
+        )
+
+        # when
+        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
+            inspector = TemplateInspector(str(self.template_path), temp_dir)
+            result = inspector._check_dependencies()
+
+        # then
+        assert result is True
+        assert inspector.errors == []
+
+    def test_check_dependencies_setup_py_only_with_fastapi(self, temp_dir: str) -> None:
+        """Legacy setup.py-tpl-only template with fastapi in install_requires passes."""
+        # given
+        (self.template_path / "tests").mkdir(exist_ok=True)
+        (self.template_path / "README.md-tpl").write_text("# Legacy Template")
+        (self.template_path / "setup.py-tpl").write_text(
+            "from setuptools import setup\n"
+            "install_requires: list[str] = [\n"
+            '    "fastapi>=0.104.0",\n'
+            '    "uvicorn>=0.24.0",\n'
+            "]\n"
+            'setup(name="legacy", install_requires=install_requires)\n'
+        )
+
+        # when
+        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
+            inspector = TemplateInspector(str(self.template_path), temp_dir)
+            result = inspector._check_dependencies()
+
+        # then
+        assert result is True
+        assert inspector.errors == []
+
     @patch("fastapi_fastkit.backend.inspector.find_template_core_modules")
     def test_check_fastapi_implementation_valid(
         self, mock_find_modules: MagicMock, temp_dir: str
@@ -295,7 +435,7 @@ def test_example():
         with patch("os.makedirs", side_effect=OSError("Permission denied")):
             # when & then
             with pytest.raises(OSError, match="Permission denied"):
-                with TemplateInspector(str(self.template_path), temp_dir) as inspector:
+                with TemplateInspector(str(self.template_path), temp_dir):
                     pass  # Exception should be raised during __enter__
 
     def test_cleanup_method(self, temp_dir: str) -> None:
@@ -423,7 +563,6 @@ def test_example():
             patch.object(inspector, "_check_fastapi_implementation", return_value=True),
             patch.object(inspector, "_test_template", return_value=True),
         ):
-
             # when
             result = inspector.inspect_template()
 
@@ -446,17 +585,21 @@ def test_example():
             patch.object(inspector, "_check_fastapi_implementation", return_value=True),
             patch.object(inspector, "_test_template", return_value=True),
         ):
-
             # when
             result = inspector.inspect_template()
 
             # then
             assert result is False
 
-    def test_check_dependencies_missing_requirements_file(self, temp_dir: str) -> None:
-        """Test _check_dependencies when requirements.txt-tpl is missing."""
+    def test_check_dependencies_missing_requirements_file_falls_back_to_setup(
+        self, temp_dir: str
+    ) -> None:
+        """Without requirements.txt-tpl, the setup.py-tpl install_requires is consulted.
+
+        The setup.py-tpl here declares no fastapi dependency, so the check should
+        fail with an error referencing setup.py-tpl.
+        """
         # given
-        # Create structure without requirements.txt-tpl
         (self.template_path / "tests").mkdir(exist_ok=True)
         (self.template_path / "setup.py-tpl").write_text("from setuptools import setup")
         (self.template_path / "README.md-tpl").write_text("# Test")
@@ -469,13 +612,19 @@ def test_example():
         # then
         assert result is False
         assert any(
-            "requirements.txt-tpl not found" in error for error in inspector.errors
+            "FastAPI dependency not found" in error and "setup.py-tpl" in error
+            for error in inspector.errors
         )
 
-    def test_check_dependencies_missing_setup_file(self, temp_dir: str) -> None:
-        """Test _check_dependencies when setup.py-tpl is missing."""
+    def test_check_dependencies_requirements_without_setup_passes(
+        self, temp_dir: str
+    ) -> None:
+        """A template with requirements.txt-tpl (declaring fastapi) but no setup.py-tpl passes.
+
+        Under the pyproject-first contract, setup.py-tpl is not required as long
+        as fastapi is declared in requirements.txt-tpl.
+        """
         # given
-        # Create structure without setup.py-tpl
         (self.template_path / "tests").mkdir(exist_ok=True)
         (self.template_path / "requirements.txt-tpl").write_text("fastapi==0.104.1")
         (self.template_path / "README.md-tpl").write_text("# Test")
@@ -486,8 +635,8 @@ def test_example():
             result = inspector._check_dependencies()
 
         # then
-        assert result is False
-        assert any("setup.py-tpl not found" in error for error in inspector.errors)
+        assert result is True
+        assert inspector.errors == []
 
     def test_check_dependencies_file_read_error(self, temp_dir: str) -> None:
         """Test _check_dependencies with file read error."""
@@ -547,7 +696,6 @@ fallback_testing:
             "fastapi_fastkit.backend.transducer.copy_and_convert_template"
         ) as mock_copy:
             # Mock that config file exists in temp dir
-            temp_config_path = os.path.join("temp_dir", "template-config.yml")
             mock_copy.return_value = None
 
             inspector = TemplateInspector(str(self.template_path), temp_dir)
@@ -971,7 +1119,6 @@ fallback_testing:
                 inspector, "_test_with_fallback_strategy", return_value=True
             ) as mock_fallback,
         ):
-
             # when
             result = inspector._test_with_docker_strategy()
 
@@ -1008,7 +1155,6 @@ fallback_testing:
             ) as mock_install,
             patch.object(inspector, "_run_test_script_with_env") as mock_run_script,
         ):
-
             mock_create_venv.return_value = "/fake/venv"
             mock_install.return_value = True
             mock_run_script.return_value = MagicMock(

@@ -3,11 +3,8 @@
 #
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
-import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock, patch
-
-import pytest
 
 from fastapi_fastkit.core.settings import FastkitConfig
 from fastapi_fastkit.utils.logging import setup_logging
@@ -177,6 +174,96 @@ setup(
 
         # when & then
         assert is_fastkit_project(nonexistent_path) is False
+
+    def test_is_fastkit_project_pyproject_tool_section(self, temp_dir: str) -> None:
+        """Pyproject with [tool.fastapi-fastkit].managed = true is detected."""
+        from fastapi_fastkit.utils.main import is_fastkit_project
+
+        project_path = Path(temp_dir) / "pyproject-tool-project"
+        project_path.mkdir()
+        (project_path / "pyproject.toml").write_text(
+            '[project]\nname = "demo"\nversion = "0.1.0"\n'
+            'description = "an unrelated description"\n\n'
+            "[tool.fastapi-fastkit]\nmanaged = true\n"
+        )
+
+        assert is_fastkit_project(str(project_path)) is True
+
+    def test_is_fastkit_project_pyproject_description_marker_only(
+        self, temp_dir: str
+    ) -> None:
+        """Pyproject with only the description marker (no tool section) is detected."""
+        from fastapi_fastkit.utils.main import is_fastkit_project
+
+        project_path = Path(temp_dir) / "pyproject-desc-project"
+        project_path.mkdir()
+        # Lowercase marker confirms case-insensitive matching.
+        (project_path / "pyproject.toml").write_text(
+            '[project]\nname = "demo"\nversion = "0.1.0"\n'
+            'description = "[fastapi-fastkit templated] demo"\n'
+        )
+
+        assert is_fastkit_project(str(project_path)) is True
+
+    def test_is_fastkit_project_legacy_setup_py_only(self, temp_dir: str) -> None:
+        """Project with only a legacy setup.py marker is still detected."""
+        from fastapi_fastkit.utils.main import is_fastkit_project
+
+        project_path = Path(temp_dir) / "legacy-setup-project"
+        project_path.mkdir()
+        # Mixed-case marker exercises case-insensitive setup.py scan.
+        (project_path / "setup.py").write_text(
+            "from setuptools import setup\n"
+            'setup(name="legacy", description="[FASTAPI-FASTKIT templated] legacy")\n'
+        )
+
+        assert is_fastkit_project(str(project_path)) is True
+
+    def test_is_fastkit_project_unrelated_fastapi_project(self, temp_dir: str) -> None:
+        """An unrelated FastAPI project with neither marker is NOT detected."""
+        from fastapi_fastkit.utils.main import is_fastkit_project
+
+        project_path = Path(temp_dir) / "unrelated-fastapi"
+        project_path.mkdir()
+        (project_path / "pyproject.toml").write_text(
+            '[project]\nname = "unrelated"\nversion = "0.1.0"\n'
+            'description = "A regular FastAPI app"\n'
+            'dependencies = ["fastapi>=0.115"]\n'
+        )
+
+        assert is_fastkit_project(str(project_path)) is False
+
+    def test_is_fastkit_project_pyproject_precedence_over_setup_py(
+        self, temp_dir: str
+    ) -> None:
+        """Pyproject marker alone is sufficient even without a setup.py."""
+        from fastapi_fastkit.utils.main import is_fastkit_project
+
+        project_path = Path(temp_dir) / "pyproject-only-detection"
+        project_path.mkdir()
+        (project_path / "pyproject.toml").write_text(
+            '[project]\nname = "demo"\nversion = "0.1.0"\n'
+            'description = "demo"\n\n'
+            "[tool.fastapi-fastkit]\nmanaged = true\n"
+        )
+
+        assert is_fastkit_project(str(project_path)) is True
+
+    def test_is_fastkit_project_malformed_pyproject_falls_back(
+        self, temp_dir: str
+    ) -> None:
+        """A malformed pyproject still detects the marker via plain-text scan."""
+        from fastapi_fastkit.utils.main import is_fastkit_project
+
+        project_path = Path(temp_dir) / "broken-pyproject"
+        project_path.mkdir()
+        # Invalid TOML (unterminated string) but the marker text is present.
+        (project_path / "pyproject.toml").write_text(
+            '[project\nname = "broken\n'
+            'description = "[FastAPI-fastkit templated] broken"\n'
+        )
+
+        assert is_fastkit_project(str(project_path)) is True
 
     def test_print_error_with_traceback(self) -> None:
         """Test print_error function with traceback enabled."""

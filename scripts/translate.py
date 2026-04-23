@@ -302,7 +302,7 @@ Provide only the translated text without any additional commentary."""
     def translate(self, text: str, target_lang: str, source_lang: str = "en") -> str:
         """Translate text, automatically chunking if necessary."""
         try:
-            import openai
+            import openai  # noqa
         except ImportError:
             logger.error("OpenAI package not installed. Run: pip install openai")
             raise
@@ -316,7 +316,7 @@ Provide only the translated text without any additional commentary."""
                 raise
 
             # If payload too large, split into chunks and translate each
-            logger.info(f"Document too large, splitting into chunks for translation...")
+            logger.info("Document too large, splitting into chunks for translation...")
             chunks = self._split_text_into_chunks(text)
             logger.info(f"Split into {len(chunks)} chunks")
 

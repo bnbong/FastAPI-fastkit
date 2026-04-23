@@ -222,7 +222,7 @@ class TestCLI:
         # given
         os.chdir(temp_dir)
         project_name = "test-project"
-        result = self.runner.invoke(
+        self.runner.invoke(
             fastkit_cli,
             ["startdemo", "fastapi-default"],
             input="\n".join(
@@ -241,7 +241,7 @@ class TestCLI:
         assert project_path.exists() and project_path.is_dir()
 
         # when
-        result = self.runner.invoke(
+        self.runner.invoke(
             fastkit_cli,
             ["deleteproject", project_name],
             input="N",
@@ -459,7 +459,7 @@ class TestCLI:
         project_name = "test-cancel"
 
         # when
-        result = self.runner.invoke(
+        self.runner.invoke(
             fastkit_cli,
             ["init"],
             input="\n".join(

@@ -8,10 +8,7 @@ import os
 import sys
 from io import StringIO
 from typing import Any
-from unittest.mock import MagicMock, patch
-
-import pytest
-from rich.console import Console
+from unittest.mock import MagicMock
 
 from fastapi_fastkit.utils.logging import (
     DebugFileHandler,
@@ -292,10 +289,10 @@ class TestLoggingFunctions:
     def test_clear_logger_cache_function(self) -> None:
         """Test clear_logger_cache function."""
         # given
-        logger1 = get_logger("cache-test-logger")
+        get_logger("cache-test-logger")
 
         # Verify cache info before clearing
-        cache_info_before = get_logger.cache_info()
+        get_logger.cache_info()
 
         # when
         clear_logger_cache()

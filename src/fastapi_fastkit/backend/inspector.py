@@ -23,19 +23,23 @@ import os
 import shutil
 import subprocess
 import sys
+import tomllib
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import yaml
 
 from fastapi_fastkit.backend.main import (
+    _parse_setup_dependencies,
     create_venv,
     find_template_core_modules,
     inject_project_metadata,
     install_dependencies_with_manager,
 )
+from fastapi_fastkit.backend.package_managers.poetry_manager import (
+    _parse_pip_requirement,
+)
 from fastapi_fastkit.backend.transducer import copy_and_convert_template
-from fastapi_fastkit.core.settings import settings
 from fastapi_fastkit.utils.logging import debug_log, get_logger
 from fastapi_fastkit.utils.main import print_error, print_success, print_warning
 
@@ -127,7 +131,6 @@ class TemplateInspector:
 
     def _force_cleanup_directory(self, directory_path: str) -> None:
         """Force cleanup of directory with multiple strategies."""
-        import stat
         import time
 
         max_retries = 5
@@ -396,20 +399,39 @@ class TemplateInspector:
         return True
 
     def _check_file_structure(self) -> bool:
-        """Check the required file and directory structure."""
-        required_paths = [
-            "tests",
-            "requirements.txt-tpl",
-            "setup.py-tpl",
-            "README.md-tpl",
-        ]
+        """Check the required file and directory structure.
 
-        for path in required_paths:
-            if not (self.template_path / path).exists():
+        Modern templates may ship ``pyproject.toml-tpl`` as the primary metadata
+        file; ``setup.py-tpl`` remains accepted for backward compatibility.
+        A template must provide at least one of the two. ``requirements.txt-tpl``
+        is no longer strictly required when ``pyproject.toml-tpl`` declares
+        ``[project].dependencies``.
+        """
+        always_required = ["tests", "README.md-tpl"]
+        metadata_candidates = ["pyproject.toml-tpl", "setup.py-tpl"]
+
+        missing_required = [
+            path for path in always_required if not (self.template_path / path).exists()
+        ]
+        has_metadata = any(
+            (self.template_path / name).exists() for name in metadata_candidates
+        )
+
+        if missing_required:
+            for path in missing_required:
                 error_msg = f"Missing required path: {path}"
                 self.errors.append(error_msg)
                 debug_log(f"File structure check failed: {error_msg}", "error")
-                return False
+        if not has_metadata:
+            error_msg = (
+                "Missing metadata file: expected pyproject.toml-tpl "
+                "(preferred) or setup.py-tpl"
+            )
+            self.errors.append(error_msg)
+            debug_log(f"File structure check failed: {error_msg}", "error")
+
+        if missing_required or not has_metadata:
+            return False
 
         debug_log("File structure check passed", "info")
         return True
@@ -427,39 +449,138 @@ class TemplateInspector:
         return True
 
     def _check_dependencies(self) -> bool:
-        """Check the dependencies in both setup.py-tpl and requirements.txt-tpl."""
+        """Check that FastAPI is declared in at least one supported source.
+
+        All three metadata sources are consulted independently:
+
+        - ``requirements.txt-tpl``
+        - ``pyproject.toml-tpl`` ``[project].dependencies``
+        - ``setup.py-tpl`` ``install_requires``
+
+        The check passes if *any* source declares ``fastapi``, so a template
+        with a stale ``requirements.txt-tpl`` still passes when
+        ``pyproject.toml-tpl`` is authoritative. It fails only when every
+        present source is missing ``fastapi`` (or when no source exists at
+        all — that also implies no metadata file, which
+        ``_check_file_structure`` already rejects).
+        """
         req_path = self.template_path / "requirements.txt-tpl"
+        pyproject_path = self.template_path / "pyproject.toml-tpl"
         setup_path = self.template_path / "setup.py-tpl"
 
-        if not req_path.exists():
-            error_msg = "requirements.txt-tpl not found"
-            self.errors.append(error_msg)
-            debug_log(f"Dependencies check failed: {error_msg}", "error")
-            return False
-        if not setup_path.exists():
-            error_msg = "setup.py-tpl not found"
+        sources_checked: List[str] = []
+        fastapi_declared = False
+
+        if req_path.exists():
+            sources_checked.append("requirements.txt-tpl")
+            try:
+                with open(req_path, encoding="utf-8") as f:
+                    deps = f.read().splitlines()
+                package_names = {
+                    _parse_pip_requirement(dep)[0].lower()
+                    for dep in deps
+                    if dep.strip() and not dep.strip().startswith("#")
+                }
+                debug_log(
+                    f"requirements.txt-tpl dependencies: {sorted(package_names)}",
+                    "debug",
+                )
+                if "fastapi" in package_names:
+                    fastapi_declared = True
+            except (OSError, UnicodeDecodeError) as e:
+                error_msg = f"Error reading requirements.txt-tpl: {e}"
+                self.errors.append(error_msg)
+                debug_log(f"Dependencies check failed: {error_msg}", "error")
+                return False
+
+        if pyproject_path.exists():
+            sources_checked.append("pyproject.toml-tpl")
+            package_names, parse_error = self._extract_pyproject_dependency_names(
+                pyproject_path
+            )
+            if parse_error is not None:
+                self.errors.append(parse_error)
+                debug_log(f"Dependencies check failed: {parse_error}", "error")
+                return False
+            debug_log(
+                f"pyproject.toml-tpl dependencies: {sorted(package_names)}", "debug"
+            )
+            if "fastapi" in package_names:
+                fastapi_declared = True
+
+        if setup_path.exists():
+            sources_checked.append("setup.py-tpl")
+            try:
+                with open(setup_path, encoding="utf-8") as f:
+                    content = f.read()
+                deps = _parse_setup_dependencies(content)
+                package_names = {
+                    _parse_pip_requirement(dep)[0].lower() for dep in deps if dep
+                }
+                debug_log(
+                    f"setup.py-tpl dependencies: {sorted(package_names)}", "debug"
+                )
+                if "fastapi" in package_names:
+                    fastapi_declared = True
+            except (OSError, UnicodeDecodeError) as e:
+                error_msg = f"Error reading setup.py-tpl: {e}"
+                self.errors.append(error_msg)
+                debug_log(f"Dependencies check failed: {error_msg}", "error")
+                return False
+
+        if not sources_checked:
+            error_msg = (
+                "No dependency source found: expected one of requirements.txt-tpl, "
+                "pyproject.toml-tpl, or setup.py-tpl"
+            )
             self.errors.append(error_msg)
             debug_log(f"Dependencies check failed: {error_msg}", "error")
             return False
 
-        try:
-            with open(req_path, encoding="utf-8") as f:
-                deps = f.read().splitlines()
-                package_names = [dep.split("==")[0] for dep in deps if dep]
-                debug_log(f"Found dependencies: {package_names}", "debug")
-                if "fastapi" not in package_names:
-                    error_msg = "FastAPI dependency not found in requirements.txt-tpl"
-                    self.errors.append(error_msg)
-                    debug_log(f"Dependencies check failed: {error_msg}", "error")
-                    return False
-        except (OSError, UnicodeDecodeError) as e:
-            error_msg = f"Error reading requirements.txt-tpl: {e}"
+        if not fastapi_declared:
+            error_msg = (
+                "FastAPI dependency not found in any source ("
+                + ", ".join(sources_checked)
+                + ")"
+            )
             self.errors.append(error_msg)
             debug_log(f"Dependencies check failed: {error_msg}", "error")
             return False
 
-        debug_log("Dependencies check passed", "info")
+        debug_log(
+            f"Dependencies check passed (sources: {', '.join(sources_checked)})",
+            "info",
+        )
         return True
+
+    @staticmethod
+    def _extract_pyproject_dependency_names(
+        pyproject_path: Path,
+    ) -> Tuple[set, Optional[str]]:  # type: ignore
+        """Parse a pyproject.toml-tpl and return (lowercased dep names, error).
+
+        ``error`` is ``None`` on success. Returns an empty set with a descriptive
+        error string when the file is unreadable or malformed.
+        """
+        try:
+            with open(pyproject_path, "rb") as f:
+                data = tomllib.load(f)
+        except (OSError, tomllib.TOMLDecodeError, UnicodeDecodeError) as e:
+            return set(), f"Invalid pyproject.toml-tpl: {e}"
+
+        project = data.get("project", {})
+        raw_deps = project.get("dependencies", []) or []
+        if not isinstance(raw_deps, list):
+            return set(), "pyproject.toml-tpl [project].dependencies must be a list"
+
+        names: set = set()  # type: ignore
+        for dep in raw_deps:
+            if not isinstance(dep, str) or not dep.strip():
+                continue
+            name = _parse_pip_requirement(dep)[0]
+            if name:
+                names.add(name.lower())
+        return names, None
 
     def _check_fastapi_implementation(self) -> bool:
         """Check if the template has a proper FastAPI server implementation."""

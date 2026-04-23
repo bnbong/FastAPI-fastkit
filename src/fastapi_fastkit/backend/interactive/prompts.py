@@ -15,7 +15,6 @@
 from typing import Any, Dict, List, Optional, cast
 
 import click
-from rich.panel import Panel
 
 from fastapi_fastkit.utils.main import console, print_error
 

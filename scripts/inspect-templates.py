@@ -17,11 +17,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List
 
+from fastapi_fastkit.backend.inspector import inspect_fastapi_template
+
 # Add src to path to import fastapi_fastkit modules
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root / "src"))
-
-from fastapi_fastkit.backend.inspector import inspect_fastapi_template
 
 
 def get_templates_to_inspect(specific_templates: str = "") -> List[str]:
@@ -119,7 +119,7 @@ def main() -> None:
     print(f"📋 Found {len(templates)} templates to inspect: {', '.join(templates)}")
     if args.verbose:
         print(f"🔧 Working directory: {os.getcwd()}")
-        print(f"📁 Template directory: src/fastapi_fastkit/fastapi_project_template/")
+        print("📁 Template directory: src/fastapi_fastkit/fastapi_project_template/")
     print("=" * 60)
 
     # Inspect each template

@@ -96,13 +96,28 @@ fastapi-{template-name}/
 │   ├── lint.sh-tpl             # Linting
 │   ├── run-server.sh-tpl       # Server execution
 │   └── test.sh-tpl             # Test execution
-├── requirements.txt-tpl         # ✅ Dependencies (required)
-├── setup.py-tpl                # ✅ Package setup (required)
+├── pyproject.toml-tpl           # ✅ Primary metadata (PEP 621, preferred)
+├── setup.py-tpl                # 🟡 Legacy metadata (accepted for back-compat)
+├── requirements.txt-tpl         # 🟡 Optional when pyproject declares deps
 ├── setup.cfg-tpl               # Development tools configuration
 ├── README.md-tpl               # ✅ Project documentation (required)
 ├── .env-tpl                    # Environment variables template
 └── .gitignore-tpl              # Git ignore file
 ```
+
+**Minimum required files.** A template must provide:
+
+- `tests/` directory
+- `README.md-tpl`
+- At least one metadata file: `pyproject.toml-tpl` (preferred, PEP 621) or
+  `setup.py-tpl` (legacy, still accepted)
+- A declaration of `fastapi` as a dependency in at least one of:
+  `pyproject.toml-tpl` `[project].dependencies`, `requirements.txt-tpl`, or
+  `setup.py-tpl` `install_requires`
+
+`requirements.txt-tpl` is no longer strictly required when `pyproject.toml-tpl`
+declares `[project].dependencies`. Modern templates SHOULD adopt
+`pyproject.toml-tpl` as their primary metadata file.
 
 ### File Writing Guide
 
@@ -154,7 +169,58 @@ if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
 ```
 
-#### 2. Writing requirements.txt-tpl
+#### 2. Writing pyproject.toml-tpl (preferred)
+
+Modern templates should declare metadata and dependencies with a PEP 621
+`pyproject.toml-tpl`. At minimum the file must expose a `[project]` section with
+`name`, `version`, a `description`, and a `dependencies` list that includes
+`fastapi`. Templates must also carry two FastAPI-fastkit identity markers so
+`is_fastkit_project()` can tell generated projects apart from unrelated FastAPI
+projects in the user's workspace:
+
+- `[FastAPI-fastkit templated]` prefix in `description`
+- A dedicated `[tool.fastapi-fastkit]` table with `managed = true`
+
+Detection accepts either marker (matching is case-insensitive). Metadata
+injection will add both at project generation time if a template omits them,
+but authors should include them explicitly.
+
+```toml
+[project]
+name = "<project_name>"
+version = "0.1.0"
+description = "[FastAPI-fastkit templated] <description>"
+authors = [
+    {name = "<author>", email = "<author_email>"},
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.34.0",
+    "pydantic>=2.10.0",
+    "pydantic-settings>=2.7.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "httpx>=0.28.0",
+]
+
+[tool.fastapi-fastkit]
+managed = true
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+```
+
+#### 3. Writing requirements.txt-tpl (optional)
+
+Optional when `pyproject.toml-tpl` declares `[project].dependencies`. Still
+useful for templates that prefer `pip`-only workflows.
 
 ```txt
 # FastAPI core dependencies (required)
@@ -183,7 +249,10 @@ isort==5.12.0
 mypy==1.7.1
 ```
 
-#### 3. Writing setup.py-tpl
+#### 4. Writing setup.py-tpl (legacy — optional when pyproject is present)
+
+Retained for legacy templates. New templates do not need this file if they
+ship `pyproject.toml-tpl`.
 
 ```python
 """
@@ -205,7 +274,7 @@ install_requires: list[str] = [
 setup(
     name="<project_name>",
     version="1.0.0",
-    description="[fastapi-fastkit templated] <description>",  # Required keyword
+    description="[FastAPI-fastkit templated] <description>",  # Identity marker used by is_fastkit_project()
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     author="<author>",
@@ -227,7 +296,7 @@ setup(
 )
 ```
 
-#### 4. Writing Test Files
+#### 5. Writing Test Files
 
 ```python
 # tests/test_items.py-tpl
@@ -299,9 +368,9 @@ The inspector automatically validates the following items:
 #### ✅ File Structure Validation
 
 - [ ] `tests/` directory exists
-- [ ] `requirements.txt-tpl` file exists
-- [ ] `setup.py-tpl` file exists
 - [ ] `README.md-tpl` file exists
+- [ ] At least one of `pyproject.toml-tpl` (preferred) or `setup.py-tpl`
+      (legacy) exists
 
 #### ✅ File Extension Validation
 
@@ -310,9 +379,10 @@ The inspector automatically validates the following items:
 
 #### ✅ Dependencies Validation
 
-- [ ] `requirements.txt-tpl` includes `fastapi`
-- [ ] `setup.py-tpl`'s `install_requires` includes `fastapi`
-- [ ] `setup.py-tpl`'s description includes `[fastapi-fastkit templated]`
+- [ ] `fastapi` is declared in at least one of:
+  - [ ] `pyproject.toml-tpl` under `[project].dependencies` (preferred)
+  - [ ] `requirements.txt-tpl`
+  - [ ] `setup.py-tpl` under `install_requires`
 
 #### ✅ FastAPI Implementation Validation
 

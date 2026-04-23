@@ -136,7 +136,7 @@ class PackageManagerFactory:
         :param manager_class: Package manager class
         """
         if not issubclass(manager_class, BasePackageManager):
-            raise ValueError(f"Manager class must inherit from BasePackageManager")
+            raise ValueError("Manager class must inherit from BasePackageManager")
 
         self._managers[name.lower()] = manager_class
         debug_log(f"Registered package manager: {name}", "info")

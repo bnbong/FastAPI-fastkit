@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.3.0 (Unreleased)
+
+### Maintenances
+
+- **Modernize template contract to be pyproject-first** (#42)
+  - Template inspection now accepts `pyproject.toml-tpl` (PEP 621) as the primary metadata file. A template passes structural validation as long as `tests/`, `README.md-tpl`, and **at least one** of `pyproject.toml-tpl` / `setup.py-tpl` are present. `requirements.txt-tpl` is no longer strictly required when `pyproject.toml-tpl` declares `[project].dependencies`.
+  - `_check_dependencies` consults every available source (`requirements.txt-tpl`, `pyproject.toml-tpl` `[project].dependencies`, `setup.py-tpl` `install_requires`) independently and passes if **any** one declares `fastapi`. A template with a stale `requirements.txt-tpl` is no longer rejected when its `pyproject.toml-tpl` is authoritative.
+  - `read_template_stack` gained a pyproject fallback between the existing `requirements.txt-tpl` and `setup.py-tpl` paths; legacy templates resolve dependencies exactly as before.
+  - Template authoring docs (`src/fastapi_fastkit/fastapi_project_template/README.md`, `docs/en/contributing/template-creation-guide.md`, `docs/en/reference/template-quality-assurance.md`) now describe required vs optional files under the pyproject-first contract.
+  - Added focused tests for the new rules (pyproject-only structural and dependency validation, setup.py-only legacy validation, pyproject fallback in `read_template_stack`, and `requirements.txt-tpl`-over-pyproject precedence).
+- **Pyproject-aware project identity detection** (follow-up to #42)
+  - `is_fastkit_project()` now recognises FastAPI-fastkit-managed projects from `pyproject.toml` in addition to legacy `setup.py`. Detection precedence: `[tool.fastapi-fastkit].managed = true` → `[project].description` contains the `[FastAPI-fastkit templated]` marker (case-insensitive) → `setup.py` contains `fastapi-fastkit` (case-insensitive). Keeps the pre-existing setup.py path working; the new pyproject paths prevent pyproject-only templates from being mistaken for unrelated FastAPI projects in the user's workspace.
+  - Canonical marker strings (`[FastAPI-fastkit templated]` and the `[tool.fastapi-fastkit]` table key `fastapi-fastkit`) are exported from `fastapi_fastkit.utils.main` as `FASTKIT_DESCRIPTION_MARKER` / `FASTKIT_TOOL_SECTION` so templates, metadata injection, and detection all reference the same strings.
+  - `_process_pyproject_file` idempotently ensures the description marker and `[tool.fastapi-fastkit]\nmanaged = true` section are present after placeholder replacement, providing a safety net when a template author forgets to include them.
+  - All 8 shipped `pyproject.toml-tpl` templates updated to carry `description = "[FastAPI-fastkit templated] <description>"` and a `[tool.fastapi-fastkit]` table with `managed = true`.
+
 ## v1.2.1 (2026-04-17)
 
 ### Fixes

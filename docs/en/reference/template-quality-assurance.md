@@ -188,13 +188,33 @@ For a template to pass inspection, it must meet these requirements:
 ### File Structure
 - Must contain a `src/` directory with Python source files
 - Python files must use `.py-tpl` extension
-- Must include a `requirements.txt-tpl` file
-- Must include a `setup.py-tpl` file
+- Must include a `tests/` directory and a `README.md-tpl` file
+- Must include **at least one** metadata file:
+  - `pyproject.toml-tpl` (preferred, PEP 621), or
+  - `setup.py-tpl` (legacy, still accepted)
+- `requirements.txt-tpl` is optional when `pyproject.toml-tpl` declares
+  `[project].dependencies`
 
 ### FastAPI Requirements
 - Must contain FastAPI app initialization
-- Must include proper dependency declarations
+- Must declare `fastapi` as a dependency in at least one of
+  `pyproject.toml-tpl` `[project].dependencies`, `requirements.txt-tpl`, or
+  `setup.py-tpl` `install_requires`
 - Must have valid Python syntax in all template files
+
+### Identity Markers
+Templates should carry FastAPI-fastkit identity markers so generated projects
+are distinguishable from unrelated FastAPI projects in the user's workspace:
+
+- `pyproject.toml-tpl` — both a `[FastAPI-fastkit templated]` prefix in
+  `description` and a `[tool.fastapi-fastkit]` table with `managed = true`.
+- `setup.py-tpl` — `[FastAPI-fastkit templated]` prefix in the `description`
+  argument to `setup()`.
+
+`is_fastkit_project()` accepts any one of these (pyproject takes precedence,
+setup.py is the legacy fallback; matching is case-insensitive). Metadata
+injection ensures the markers end up in generated projects even if a template
+forgets them.
 
 ### Quality Standards
 - All template files must be syntactically correct

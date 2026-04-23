@@ -10,7 +10,6 @@
 #
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
-import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -179,11 +178,11 @@ class DynamicConfigGenerator:
         # App initialization
         project_name = self.config.get("project_name", "FastAPI App")
         description = self.config.get("description", "")
-        content_parts.append(f"app = FastAPI(")
+        content_parts.append("app = FastAPI(")
         content_parts.append(f'    title="{project_name}",')
         content_parts.append(f'    description="{description}",')
-        content_parts.append(f'    version="0.1.0",')
-        content_parts.append(f")")
+        content_parts.append('    version="0.1.0",')
+        content_parts.append(")")
         content_parts.append("")
 
         # App configuration

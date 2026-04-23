@@ -7,8 +7,6 @@ import json
 import tempfile
 from pathlib import Path
 
-import pytest
-
 from fastapi_fastkit.backend.project_builder.config_generator import (
     DynamicConfigGenerator,
 )

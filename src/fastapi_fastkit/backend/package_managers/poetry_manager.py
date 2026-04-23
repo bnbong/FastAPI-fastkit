@@ -255,10 +255,10 @@ build-backend = "poetry.core.masonry.api"
 
             # Create basic pyproject.toml content for Poetry
             pyproject_content = f"""[tool.poetry]
-name = "{project_name or 'fastapi-project'}"
+name = "{project_name or "fastapi-project"}"
 version = "0.1.0"
-description = "{description or 'A FastAPI project'}"
-authors = ["{author or 'Author'} <{author_email or 'author@example.com'}>"]
+description = "{description or "A FastAPI project"}"
+authors = ["{author or "Author"} <{author_email or "author@example.com"}>"]
 readme = "README.md"
 license = "MIT"
 packages = [{{include = "src"}}]

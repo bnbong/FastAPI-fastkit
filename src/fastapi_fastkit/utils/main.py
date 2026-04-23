@@ -5,6 +5,7 @@
 # --------------------------------------------------------------------------
 import os
 import re
+import tomllib
 import traceback
 from typing import Any, Dict, Optional
 
@@ -22,6 +23,14 @@ logger = get_logger(__name__)
 
 # Email validation regex pattern
 REGEX = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b"
+
+
+# Canonical identity markers used to distinguish FastAPI-fastkit-managed
+# projects from unrelated FastAPI projects in the user workspace. Kept as
+# module-level constants so templates, metadata injection, and detection
+# logic all reference the same strings.
+FASTKIT_DESCRIPTION_MARKER = "[FastAPI-fastkit templated]"
+FASTKIT_TOOL_SECTION = "fastapi-fastkit"  # the [tool.<this>] table key
 
 
 def get_optimal_console_size() -> tuple[int, int]:
@@ -273,19 +282,77 @@ def validate_email(ctx: Context, param: Any, value: Any) -> Any:
 
 def is_fastkit_project(project_dir: str) -> bool:
     """
-    Check if the project was created with fastkit.
-    Inspects the contents of the setup.py file for FastAPI-fastkit markers.
+    Check if the project was created/managed by FastAPI-fastkit.
+
+    Detection precedence (any single match is sufficient):
+
+    1. ``pyproject.toml`` with ``[tool.fastapi-fastkit].managed = true``
+       (machine-readable marker; set by ``fastkit`` during project generation).
+    2. ``pyproject.toml`` ``[project].description`` contains the
+       ``[FastAPI-fastkit templated]`` marker (case-insensitive).
+    3. ``setup.py`` contains ``fastapi-fastkit`` (case-insensitive) — preserves
+       the legacy detection path for projects generated before the pyproject
+       marker existed.
 
     :param project_dir: Path to the project directory
     :return: True if the project was created with fastkit, False otherwise
     """
+    if _pyproject_marks_fastkit(os.path.join(project_dir, "pyproject.toml")):
+        return True
+
     setup_py = os.path.join(project_dir, "setup.py")
-    if not os.path.exists(setup_py):
+    if os.path.exists(setup_py):
+        try:
+            with open(setup_py, "r", encoding="utf-8") as f:
+                content = f.read()
+            if FASTKIT_TOOL_SECTION in content.lower():
+                return True
+        except (OSError, UnicodeDecodeError):
+            pass
+
+    return False
+
+
+def _pyproject_marks_fastkit(pyproject_path: str) -> bool:
+    """Return True if ``pyproject.toml`` carries a FastAPI-fastkit marker.
+
+    Tries structured TOML parsing first (authoritative), falling back to a
+    plain-text scan if the file is malformed so detection still works on
+    hand-edited or partially written pyproject files.
+    """
+    if not os.path.exists(pyproject_path):
         return False
 
     try:
-        with open(setup_py, "r", encoding="utf-8") as f:
-            content = f.read()
-            return "FastAPI-fastkit" in content
+        with open(pyproject_path, "rb") as f:
+            data = tomllib.load(f)
+    except (OSError, tomllib.TOMLDecodeError, UnicodeDecodeError):
+        return _pyproject_text_marks_fastkit(pyproject_path)
+
+    tool_section = data.get("tool", {}).get(FASTKIT_TOOL_SECTION, {})
+    if isinstance(tool_section, dict) and tool_section.get("managed") is True:
+        return True
+
+    description = data.get("project", {}).get("description", "")
+    if (
+        isinstance(description, str)
+        and FASTKIT_DESCRIPTION_MARKER.lower() in description.lower()
+    ):
+        return True
+
+    return False
+
+
+def _pyproject_text_marks_fastkit(pyproject_path: str) -> bool:
+    """Fallback plain-text scan for malformed pyproject files."""
+    try:
+        with open(pyproject_path, "r", encoding="utf-8") as f:
+            content = f.read().lower()
     except (OSError, UnicodeDecodeError):
         return False
+
+    if f"[tool.{FASTKIT_TOOL_SECTION}]" in content:
+        return True
+    if FASTKIT_DESCRIPTION_MARKER.lower() in content:
+        return True
+    return False

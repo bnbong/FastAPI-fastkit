@@ -3,7 +3,6 @@
 #
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
-import pytest
 
 from fastapi_fastkit.backend.project_builder.dependency_collector import (
     DependencyCollector,

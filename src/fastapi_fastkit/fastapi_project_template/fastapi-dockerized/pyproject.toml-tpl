@@ -1,7 +1,7 @@
 [project]
 name = "<project_name>"
 version = "0.1.0"
-description = "<description>"
+description = "[FastAPI-fastkit templated] <description>"
 authors = [
     {name = "<author>", email = "<author_email>"},
 ]
@@ -40,6 +40,9 @@ dev = [
     "PyYAML>=6.0.2",
     "setuptools-scm>=8.1.0",
 ]
+
+[tool.fastapi-fastkit]
+managed = true
 
 [build-system]
 requires = ["hatchling"]
