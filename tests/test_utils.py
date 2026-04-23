@@ -265,6 +265,61 @@ setup(
 
         assert is_fastkit_project(str(project_path)) is True
 
+    def test_is_fastkit_project_malformed_pyproject_tool_section_text(
+        self, temp_dir: str
+    ) -> None:
+        """Malformed pyproject with a [tool.fastapi-fastkit] header is still detected."""
+        from fastapi_fastkit.utils.main import is_fastkit_project
+
+        project_path = Path(temp_dir) / "broken-with-tool"
+        project_path.mkdir()
+        # Unterminated string makes tomllib fail, but the text-fallback spots
+        # the [tool.fastapi-fastkit] header.
+        (project_path / "pyproject.toml").write_text(
+            '[project\nname = "broken\n\n[tool.fastapi-fastkit]\nmanaged = true\n'
+        )
+
+        assert is_fastkit_project(str(project_path)) is True
+
+    def test_is_fastkit_project_malformed_pyproject_no_markers(
+        self, temp_dir: str
+    ) -> None:
+        """Malformed pyproject with neither marker falls through to False."""
+        from fastapi_fastkit.utils.main import is_fastkit_project
+
+        project_path = Path(temp_dir) / "broken-unmarked"
+        project_path.mkdir()
+        (project_path / "pyproject.toml").write_text(
+            '[project\nname = "broken\ndescription = "nothing here"\n'
+        )
+
+        assert is_fastkit_project(str(project_path)) is False
+
+    def test_is_fastkit_project_setup_py_read_error(self, temp_dir: str) -> None:
+        """OSError while reading setup.py does not crash detection; returns False."""
+        from fastapi_fastkit.utils.main import is_fastkit_project
+
+        project_path = Path(temp_dir) / "setup-read-err"
+        project_path.mkdir()
+        (project_path / "setup.py").write_text(
+            'from setuptools import setup\nsetup(name="demo")\n'
+        )
+
+        with patch("builtins.open", side_effect=OSError("Permission denied")):
+            assert is_fastkit_project(str(project_path)) is False
+
+    def test_pyproject_text_marks_fastkit_read_error(self, temp_dir: str) -> None:
+        """Text fallback swallows OSError and returns False cleanly."""
+        from fastapi_fastkit.utils.main import _pyproject_text_marks_fastkit
+
+        project_path = Path(temp_dir) / "text-fallback-err"
+        project_path.mkdir()
+        pyproject = project_path / "pyproject.toml"
+        pyproject.write_text("whatever")
+
+        with patch("builtins.open", side_effect=OSError("Permission denied")):
+            assert _pyproject_text_marks_fastkit(str(pyproject)) is False
+
     def test_print_error_with_traceback(self) -> None:
         """Test print_error function with traceback enabled."""
         # given

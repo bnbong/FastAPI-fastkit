@@ -507,6 +507,42 @@ setup(
 
             shutil.rmtree(str(template_path))
 
+    def test_parse_pyproject_dependencies_non_list_value(self) -> None:
+        """Non-list dependencies value returns [] rather than raising."""
+        template_path = Path(tempfile.mkdtemp())
+        try:
+            pyproject = template_path / "pyproject.toml-tpl"
+            # A string in place of a dependencies array exercises the
+            # defensive isinstance() guard.
+            pyproject.write_text(
+                '[project]\nname = "demo"\nversion = "0.1.0"\n'
+                'dependencies = "fastapi>=0.115"\n'
+            )
+
+            result = _parse_pyproject_dependencies(str(pyproject))
+
+            assert result == []
+
+        finally:
+            import shutil
+
+            shutil.rmtree(str(template_path))
+
+    def test_ensure_pyproject_fastkit_markers_appends_newline_when_missing(
+        self,
+    ) -> None:
+        """Content without a trailing newline gets one before the tool section."""
+        content = '[project]\nname = "demo"\ndescription = "x"'
+        assert not content.endswith("\n")
+
+        result = _ensure_pyproject_fastkit_markers(content)
+
+        # Marker + tool section are present and the output ends cleanly.
+        assert "[tool.fastapi-fastkit]" in result
+        assert result.endswith("managed = true\n")
+        # No doubled newlines immediately before the inserted table.
+        assert "\n\n\n[tool.fastapi-fastkit]" not in result
+
     @patch("builtins.open", mock_open(read_data="fastapi>=0.100.0"))
     @patch("os.path.exists", return_value=True)
     def test_read_template_stack_file_read_error(self, mock_exists: MagicMock) -> None:

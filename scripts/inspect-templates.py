@@ -17,11 +17,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List
 
-from fastapi_fastkit.backend.inspector import inspect_fastapi_template
-
-# Add src to path to import fastapi_fastkit modules
+# Add src to path to import fastapi_fastkit modules. The sys.path bootstrap
+# must run before importing the package so the script works from a fresh
+# repo checkout without the package installed on the interpreter.
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root / "src"))
+
+from fastapi_fastkit.backend.inspector import inspect_fastapi_template  # noqa: E402
 
 
 def get_templates_to_inspect(specific_templates: str = "") -> List[str]:

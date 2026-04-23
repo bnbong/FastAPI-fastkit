@@ -323,6 +323,106 @@ def test_example():
         assert result is True
         assert inspector.errors == []
 
+    def test_check_dependencies_pyproject_parse_error(self, temp_dir: str) -> None:
+        """Malformed pyproject.toml-tpl surfaces a parse error and fails the check."""
+        # given
+        (self.template_path / "tests").mkdir(exist_ok=True)
+        (self.template_path / "README.md-tpl").write_text("# Test")
+        # Unterminated string makes tomllib raise TOMLDecodeError.
+        (self.template_path / "pyproject.toml-tpl").write_text(
+            '[project]\nname = "demo\nversion = "0.1.0"\n'
+        )
+
+        # when
+        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
+            inspector = TemplateInspector(str(self.template_path), temp_dir)
+            result = inspector._check_dependencies()
+
+        # then
+        assert result is False
+        assert any("Invalid pyproject.toml-tpl" in error for error in inspector.errors)
+
+    def test_check_dependencies_setup_py_read_error(self, temp_dir: str) -> None:
+        """OSError while reading setup.py-tpl surfaces a descriptive error."""
+        # given
+        (self.template_path / "tests").mkdir(exist_ok=True)
+        (self.template_path / "README.md-tpl").write_text("# Test")
+        (self.template_path / "setup.py-tpl").write_text(
+            'from setuptools import setup\nsetup(name="demo")\n'
+        )
+
+        # when — selectively fail the open() targeting setup.py-tpl only.
+        real_open = open
+
+        def selective_open(file, *args, **kwargs):  # type: ignore[no-untyped-def]
+            if str(file).endswith("setup.py-tpl"):
+                raise OSError("Permission denied")
+            return real_open(file, *args, **kwargs)
+
+        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
+            inspector = TemplateInspector(str(self.template_path), temp_dir)
+            with patch("builtins.open", side_effect=selective_open):
+                result = inspector._check_dependencies()
+
+        # then
+        assert result is False
+        assert any("Error reading setup.py-tpl" in error for error in inspector.errors)
+
+    def test_check_dependencies_no_sources_at_all(self, temp_dir: str) -> None:
+        """Calling _check_dependencies with no metadata files yields a clear error."""
+        # given
+        (self.template_path / "tests").mkdir(exist_ok=True)
+        (self.template_path / "README.md-tpl").write_text("# Test")
+
+        # when
+        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
+            inspector = TemplateInspector(str(self.template_path), temp_dir)
+            result = inspector._check_dependencies()
+
+        # then
+        assert result is False
+        assert any("No dependency source found" in error for error in inspector.errors)
+
+    def test_extract_pyproject_dependency_names_non_list(self, temp_dir: str) -> None:
+        """Non-list [project].dependencies yields a descriptive parse error."""
+        # given
+        (self.template_path / "tests").mkdir(exist_ok=True)
+        (self.template_path / "README.md-tpl").write_text("# Test")
+        pyproject = self.template_path / "pyproject.toml-tpl"
+        pyproject.write_text(
+            '[project]\nname = "demo"\nversion = "0.1.0"\n'
+            'dependencies = "fastapi>=0.115"\n'
+        )
+
+        # when
+        names, error = TemplateInspector._extract_pyproject_dependency_names(pyproject)
+
+        # then
+        assert names == set()
+        assert error is not None
+        assert "must be a list" in error
+
+    def test_extract_pyproject_dependency_names_skips_non_strings(
+        self, temp_dir: str
+    ) -> None:
+        """Non-string / empty entries in [project].dependencies are ignored."""
+        # given
+        (self.template_path / "tests").mkdir(exist_ok=True)
+        (self.template_path / "README.md-tpl").write_text("# Test")
+        pyproject = self.template_path / "pyproject.toml-tpl"
+        pyproject.write_text(
+            '[project]\nname = "demo"\nversion = "0.1.0"\n'
+            # Empty string and an integer-ish value are dropped without raising.
+            'dependencies = ["fastapi>=0.115", "", "   "]\n'
+        )
+
+        # when
+        names, error = TemplateInspector._extract_pyproject_dependency_names(pyproject)
+
+        # then
+        assert error is None
+        assert names == {"fastapi"}
+
     @patch("fastapi_fastkit.backend.inspector.find_template_core_modules")
     def test_check_fastapi_implementation_valid(
         self, mock_find_modules: MagicMock, temp_dir: str
