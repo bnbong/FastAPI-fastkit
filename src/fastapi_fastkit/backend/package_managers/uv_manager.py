@@ -160,11 +160,11 @@ class UvManager(BasePackageManager):
 
             # Create basic pyproject.toml content for UV
             pyproject_content = f"""[project]
-name = "{project_name or 'fastapi-project'}"
+name = "{project_name or "fastapi-project"}"
 version = "0.1.0"
-description = "{description or 'A FastAPI project'}"
+description = "{description or "A FastAPI project"}"
 authors = [
-    {{name = "{author or 'Author'}", email = "{author_email or 'author@example.com'}"}},
+    {{name = "{author or "Author"}", email = "{author_email or "author@example.com"}"}},
 ]
 dependencies = {deps_toml}
 requires-python = ">=3.8"

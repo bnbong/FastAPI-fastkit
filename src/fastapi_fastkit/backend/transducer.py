@@ -10,7 +10,6 @@ import os
 import shutil
 from typing import Dict, Optional
 
-from fastapi_fastkit.core.settings import settings
 from fastapi_fastkit.utils.logging import debug_log, get_logger
 
 logger = get_logger(__name__)

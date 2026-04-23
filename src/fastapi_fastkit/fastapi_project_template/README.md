@@ -18,37 +18,72 @@ template-name/
 │ ├── models/
 │ ├── routes/
 │ └── utils/
-├── tests/
+├── tests/                    # required
 ├── scripts/
-├── requirements.txt-tpl
-├── setup.py-tpl
-└── README.md-tpl
+├── pyproject.toml-tpl        # preferred primary metadata file (PEP 621)
+├── setup.py-tpl              # legacy alternative, still accepted
+├── requirements.txt-tpl      # optional when pyproject.toml-tpl declares deps
+└── README.md-tpl             # required
 ```
+
+The minimum required files for a modern template are `tests/`, `README.md-tpl`,
+and at least one metadata file (`pyproject.toml-tpl` or `setup.py-tpl`).
+`requirements.txt-tpl` is optional when the template's dependencies are
+declared under `[project].dependencies` in `pyproject.toml-tpl`.
+
+Modern templates **SHOULD** ship `pyproject.toml-tpl` as the primary metadata
+file. `setup.py-tpl` remains supported for backward compatibility.
 
 ### Key Requirements:
 
 1. All source files must use `.py-tpl` extension
-2. `setup.py` must include `fastapi-fastkit` string in project description
-   for example:
+2. The template must declare `fastapi` as a dependency in at least one of:
+   - `pyproject.toml-tpl` under `[project].dependencies` (preferred)
+   - `requirements.txt-tpl`
+   - `setup.py-tpl` under `install_requires`
+3. `pyproject.toml-tpl` (preferred) should use PEP 621 metadata and carry the
+   FastAPI-fastkit identity markers so that `is_fastkit_project()` can tell
+   generated projects apart from unrelated FastAPI projects in the user's
+   workspace:
    ```
-   ...
-   setup(
-      ...
-      description = "[fastapi-fastkit templated] <description>",
-      ...
-   )
+   [project]
+   name = "<project_name>"
+   version = "0.1.0"
+   description = "[FastAPI-fastkit templated] <description>"
+   dependencies = [
+       "fastapi>=0.115.0",
+       ...
+   ]
+
+   [tool.fastapi-fastkit]
+   managed = true
    ```
-3. `setup.py` must include `install_requires` section, it must include essential dependencies for the template project. Also, note that install_requires list must be type annotated.
-   for example:
-   ```
-   ...
-   install_requires: list[str] = [
-      ...
-   ],
-   ```
-4. Basic CRUD operations example
-5. Unit tests implementation
-6. API documentation (OpenAPI/Swagger)
+   The `[FastAPI-fastkit templated]` marker in `description` and the
+   `[tool.fastapi-fastkit]` table are both recognized by detection (any one
+   suffices; matching is case-insensitive). Metadata injection will also add
+   these markers at project-generation time if a template forgets them, but
+   authors should include them explicitly.
+4. Legacy templates using `setup.py-tpl` should:
+   - declare dependencies via a type-annotated `install_requires` list, e.g.
+     ```
+     install_requires: list[str] = [
+        ...
+     ]
+     ```
+   - include the `[FastAPI-fastkit templated]` marker in the project
+     description. Detection falls back to a case-insensitive scan for
+     `fastapi-fastkit` in `setup.py`, so this marker keeps legacy projects
+     identifiable:
+     ```
+     setup(
+        ...
+        description = "[FastAPI-fastkit templated] <description>",
+        ...
+     )
+     ```
+5. Basic CRUD operations example
+6. Unit tests implementation
+7. API documentation (OpenAPI/Swagger)
 
 ## Base structure of modules template
 

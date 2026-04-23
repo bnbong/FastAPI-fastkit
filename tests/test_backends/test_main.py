@@ -12,9 +12,12 @@ from unittest.mock import MagicMock, mock_open, patch
 import pytest
 
 from fastapi_fastkit.backend.main import (
+    _ensure_pyproject_fastkit_markers,
+    _parse_pyproject_dependencies,
     _parse_setup_dependencies,
     _process_config_file,
     _process_main_file,
+    _process_pyproject_file,
     _process_setup_file,
     add_new_route,
     create_venv,
@@ -353,6 +356,192 @@ setup(
             import shutil
 
             shutil.rmtree(str(template_path))
+
+    def test_read_template_stack_pyproject_only(self) -> None:
+        """read_template_stack reads [project].dependencies from pyproject-only templates."""
+        # given
+        template_path = Path(tempfile.mkdtemp())
+        try:
+            (template_path / "pyproject.toml-tpl").write_text(
+                "[project]\n"
+                'name = "<project_name>"\n'
+                'version = "0.1.0"\n'
+                "dependencies = [\n"
+                '    "fastapi>=0.115.8",\n'
+                '    "uvicorn[standard]>=0.34.0",\n'
+                "]\n"
+            )
+
+            # when
+            result = read_template_stack(str(template_path))
+
+            # then
+            assert "fastapi>=0.115.8" in result
+            assert "uvicorn[standard]>=0.34.0" in result
+
+        finally:
+            import shutil
+
+            shutil.rmtree(str(template_path))
+
+    def test_read_template_stack_precedence_requirements_over_pyproject(self) -> None:
+        """requirements.txt-tpl wins over pyproject.toml-tpl to preserve legacy behaviour."""
+        # given
+        template_path = Path(tempfile.mkdtemp())
+        try:
+            (template_path / "requirements.txt-tpl").write_text(
+                "fastapi>=0.100.0\nuvicorn>=0.23.0\n"
+            )
+            (template_path / "pyproject.toml-tpl").write_text(
+                "[project]\n"
+                'name = "test"\n'
+                'version = "0.1.0"\n'
+                "dependencies = [\n"
+                '    "fastapi>=0.999.0",\n'  # distinct marker — must NOT be chosen
+                "]\n"
+            )
+
+            # when
+            result = read_template_stack(str(template_path))
+
+            # then
+            assert "fastapi>=0.100.0" in result
+            assert "uvicorn>=0.23.0" in result
+            assert "fastapi>=0.999.0" not in result
+
+        finally:
+            import shutil
+
+            shutil.rmtree(str(template_path))
+
+    def test_parse_pyproject_dependencies_malformed(self) -> None:
+        """_parse_pyproject_dependencies returns [] on TOML parse errors."""
+        # given
+        template_path = Path(tempfile.mkdtemp())
+        try:
+            pyproject = template_path / "pyproject.toml-tpl"
+            pyproject.write_text("[project\nname = broken")
+
+            # when
+            result = _parse_pyproject_dependencies(str(pyproject))
+
+            # then
+            assert result == []
+
+        finally:
+            import shutil
+
+            shutil.rmtree(str(template_path))
+
+    def test_ensure_pyproject_fastkit_markers_adds_both(self) -> None:
+        """Injects the description marker and tool section when neither is present."""
+        content = (
+            '[project]\nname = "demo"\nversion = "0.1.0"\n'
+            'description = "an app"\n\n[build-system]\nrequires = ["hatchling"]\n'
+        )
+        result = _ensure_pyproject_fastkit_markers(content)
+
+        assert 'description = "[FastAPI-fastkit templated] an app"' in result
+        assert "[tool.fastapi-fastkit]" in result
+        assert "managed = true" in result
+
+    def test_ensure_pyproject_fastkit_markers_is_idempotent(self) -> None:
+        """Running injection twice must not duplicate markers."""
+        content = (
+            '[project]\nname = "demo"\nversion = "0.1.0"\n'
+            'description = "[FastAPI-fastkit templated] an app"\n\n'
+            "[tool.fastapi-fastkit]\nmanaged = true\n"
+        )
+        once = _ensure_pyproject_fastkit_markers(content)
+        twice = _ensure_pyproject_fastkit_markers(once)
+
+        assert once == twice
+        assert once.count("[FastAPI-fastkit templated]") == 1
+        assert once.count("[tool.fastapi-fastkit]") == 1
+
+    def test_ensure_pyproject_fastkit_markers_preserves_existing_marker_case_insensitive(
+        self,
+    ) -> None:
+        """A description already carrying a lowercase marker is not re-prepended."""
+        content = (
+            '[project]\nname = "demo"\n'
+            'description = "[fastapi-fastkit templated] legacy text"\n'
+        )
+        result = _ensure_pyproject_fastkit_markers(content)
+
+        # Lowercase is preserved, marker is not duplicated.
+        assert result.count("fastapi-fastkit templated") == 1
+        assert "[fastapi-fastkit templated] legacy text" in result
+
+    def test_process_pyproject_file_writes_markers_into_generated_pyproject(
+        self,
+    ) -> None:
+        """End-to-end: _process_pyproject_file replaces placeholders and injects markers."""
+        template_path = Path(tempfile.mkdtemp())
+        try:
+            pyproject = template_path / "pyproject.toml"
+            pyproject.write_text(
+                '[project]\nname = "<project_name>"\nversion = "0.1.0"\n'
+                'description = "<description>"\n'
+                'authors = [{name = "<author>", email = "<author_email>"}]\n'
+                'dependencies = ["fastapi>=0.115"]\n\n'
+                '[build-system]\nrequires = ["hatchling"]\n'
+            )
+
+            _process_pyproject_file(
+                str(pyproject),
+                project_name="demo",
+                author="Me",
+                author_email="me@example.com",
+                description="an app",
+            )
+
+            final = pyproject.read_text()
+            assert 'name = "demo"' in final
+            assert 'description = "[FastAPI-fastkit templated] an app"' in final
+            assert "[tool.fastapi-fastkit]" in final
+            assert "managed = true" in final
+
+        finally:
+            import shutil
+
+            shutil.rmtree(str(template_path))
+
+    def test_parse_pyproject_dependencies_non_list_value(self) -> None:
+        """Non-list dependencies value returns [] rather than raising."""
+        template_path = Path(tempfile.mkdtemp())
+        try:
+            pyproject = template_path / "pyproject.toml-tpl"
+            # A string in place of a dependencies array exercises the
+            # defensive isinstance() guard.
+            pyproject.write_text(
+                '[project]\nname = "demo"\nversion = "0.1.0"\n'
+                'dependencies = "fastapi>=0.115"\n'
+            )
+
+            result = _parse_pyproject_dependencies(str(pyproject))
+
+            assert result == []
+
+        finally:
+            import shutil
+
+            shutil.rmtree(str(template_path))
+
+    def test_ensure_pyproject_fastkit_markers_appends_newline_when_missing(
+        self,
+    ) -> None:
+        """Content without a trailing newline gets one before the tool section."""
+        content = '[project]\nname = "demo"\ndescription = "x"'
+        assert not content.endswith("\n")
+
+        result = _ensure_pyproject_fastkit_markers(content)
+
+        # Marker + tool section are present and the output ends cleanly.
+        assert "[tool.fastapi-fastkit]" in result
+        assert result.endswith("managed = true\n")
+        # No doubled newlines immediately before the inserted table.
+        assert "\n\n\n[tool.fastapi-fastkit]" not in result
 
     @patch("builtins.open", mock_open(read_data="fastapi>=0.100.0"))
     @patch("os.path.exists", return_value=True)

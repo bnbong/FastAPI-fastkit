@@ -3,9 +3,7 @@
 #
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
-from unittest.mock import MagicMock, patch
-
-import pytest
+from unittest.mock import patch
 
 from fastapi_fastkit.backend.interactive.selectors import (
     confirm_selections,

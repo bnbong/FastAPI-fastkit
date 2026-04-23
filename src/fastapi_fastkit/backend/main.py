@@ -5,6 +5,7 @@
 # --------------------------------------------------------------------------
 import os
 import re
+import tomllib
 from typing import Dict, List
 
 import click
@@ -18,8 +19,9 @@ from fastapi_fastkit.core.exceptions import BackendExceptions
 from fastapi_fastkit.core.settings import settings
 from fastapi_fastkit.utils.logging import debug_log, get_logger
 from fastapi_fastkit.utils.main import (
+    FASTKIT_DESCRIPTION_MARKER,
+    FASTKIT_TOOL_SECTION,
     handle_exception,
-    print_error,
     print_info,
     print_success,
     print_warning,
@@ -82,12 +84,19 @@ def find_template_core_modules(project_dir: str) -> Dict[str, str]:
 
 def read_template_stack(template_path: str) -> List[str]:
     """
-    Read dependencies from template requirements.txt-tpl file or setup.py-tpl file.
+    Read dependencies from a template's metadata files.
+
+    Lookup order preserves legacy behaviour for templates that still ship
+    ``requirements.txt-tpl`` while allowing modern pyproject-first templates
+    to resolve their stack from ``pyproject.toml-tpl``:
+
+    1. ``requirements.txt-tpl`` (legacy, highest precedence)
+    2. ``pyproject.toml-tpl`` ``[project].dependencies``
+    3. ``setup.py-tpl`` ``install_requires``
 
     :param template_path: Path to the template directory
-    :return: List of dependencies
+    :return: List of PEP 508 requirement strings
     """
-    # First try requirements.txt-tpl
     req_file = os.path.join(template_path, "requirements.txt-tpl")
     if os.path.exists(req_file):
         try:
@@ -100,7 +109,12 @@ def read_template_stack(template_path: str) -> List[str]:
             )
             return []
 
-    # Fallback: try to read from setup.py-tpl for legacy templates
+    pyproject_file = os.path.join(template_path, "pyproject.toml-tpl")
+    if os.path.exists(pyproject_file):
+        deps = _parse_pyproject_dependencies(pyproject_file)
+        if deps:
+            return deps
+
     setup_file = os.path.join(template_path, "setup.py-tpl")
     if os.path.exists(setup_file):
         try:
@@ -151,6 +165,28 @@ def _parse_setup_dependencies(content: str) -> List[str]:
         return [dep for dep in deps if dep]  # Remove empty strings
 
     return []
+
+
+def _parse_pyproject_dependencies(pyproject_path: str) -> List[str]:
+    """
+    Parse dependencies from a ``pyproject.toml-tpl`` file.
+
+    Returns the list of PEP 508 requirement strings from
+    ``[project].dependencies``. Returns an empty list on parse errors so
+    callers can fall through to the next metadata source.
+    """
+    try:
+        with open(pyproject_path, "rb") as f:
+            data = tomllib.load(f)
+    except (OSError, tomllib.TOMLDecodeError, UnicodeDecodeError) as e:
+        debug_log(f"Error reading pyproject.toml template: {e}", "error")
+        return []
+
+    project = data.get("project", {})
+    raw_deps = project.get("dependencies", []) or []
+    if not isinstance(raw_deps, list):
+        return []
+    return [dep.strip() for dep in raw_deps if isinstance(dep, str) and dep.strip()]
 
 
 # ------------------------------------------------------------
@@ -332,6 +368,8 @@ def _process_pyproject_file(
         for placeholder, value in replacements.items():
             content = content.replace(placeholder, value)
 
+        content = _ensure_pyproject_fastkit_markers(content)
+
         with open(pyproject_toml, "w", encoding="utf-8") as f:
             f.write(content)
 
@@ -341,6 +379,41 @@ def _process_pyproject_file(
     except (OSError, UnicodeDecodeError) as e:
         debug_log(f"Error processing pyproject.toml: {e}", "error")
         raise BackendExceptions(f"Failed to process pyproject.toml: {e}")
+
+
+_DESCRIPTION_LINE_PATTERN = re.compile(
+    r'^(?P<prefix>description\s*=\s*)"(?P<value>.*?)"(?P<suffix>\s*)$',
+    re.MULTILINE,
+)
+
+
+def _ensure_pyproject_fastkit_markers(content: str) -> str:
+    """Idempotently ensure pyproject content carries FastAPI-fastkit markers.
+
+    Adds the canonical description marker if the ``description`` field does
+    not already include it (case-insensitive check), and appends a
+    ``[tool.fastapi-fastkit]`` section with ``managed = true`` if one is not
+    already present. Safe to run on already-marked content — no duplicates
+    are introduced.
+    """
+    marker = FASTKIT_DESCRIPTION_MARKER
+    match = _DESCRIPTION_LINE_PATTERN.search(content)
+    if match and marker.lower() not in match.group("value").lower():
+        existing = match.group("value")
+        new_value = f"{marker} {existing}".strip() if existing else marker
+        content = (
+            content[: match.start()]
+            + f'{match.group("prefix")}"{new_value}"{match.group("suffix")}'
+            + content[match.end() :]
+        )
+
+    tool_header = f"[tool.{FASTKIT_TOOL_SECTION}]"
+    if tool_header not in content:
+        if not content.endswith("\n"):
+            content += "\n"
+        content += f"\n{tool_header}\nmanaged = true\n"
+
+    return content
 
 
 def update_setup_py_dependencies(project_dir: str, dependencies: List[str]) -> None:
@@ -554,7 +627,7 @@ def _ensure_project_structure(src_dir: str) -> Dict[str, str]:
             # Create __init__.py if it doesn't exist
             init_file = os.path.join(dir_path, "__init__.py")
             if not os.path.exists(init_file):
-                with open(init_file, "w") as f:
+                with open(init_file, "w"):
                     pass
 
     return target_dirs

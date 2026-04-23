@@ -267,7 +267,7 @@ def startdemo(
     if template_deps:
         deps_table = create_info_table(
             "Template Dependencies",
-            {f"Dependency {i+1}": dep for i, dep in enumerate(template_deps)},
+            {f"Dependency {i + 1}": dep for i, dep in enumerate(template_deps)},
         )
         console.print("\n")
         console.print(deps_table)
@@ -579,7 +579,7 @@ def init(
     for stack_name, deps in settings.PROJECT_STACKS.items():
         table = create_info_table(
             f"{stack_name.upper()} Stack",
-            {f"Dependency {i+1}": dep for i, dep in enumerate(deps)},
+            {f"Dependency {i + 1}": dep for i, dep in enumerate(deps)},
         )
         console.print(table)
         console.print("\n")

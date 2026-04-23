@@ -182,10 +182,10 @@ class TestCLIInteractiveMode:
             "pytest" in deps_lower or "httpx" in deps_lower
         ), "Testing dependencies should be present"
 
-        print(f"\n✅ Interactive mode created full-stack project successfully!")
+        print("\n✅ Interactive mode created full-stack project successfully!")
         print(f"Project: {project_name}")
-        print(f"Stack: PostgreSQL + JWT + Celery + Redis + Prometheus")
-        print(f"Dependencies validated in pyproject.toml")
+        print("Stack: PostgreSQL + JWT + Celery + Redis + Prometheus")
+        print("Dependencies validated in pyproject.toml")
 
         # Check venv was created
         venv_path = project_path / ".venv"

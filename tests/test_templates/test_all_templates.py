@@ -222,6 +222,10 @@ class TestAllTemplates:
         readme_path = template_path / "README.md-tpl"
         assert readme_path.exists(), f"README.md-tpl not found in {template_name}"
 
-        # Should have setup.py-tpl
+        # Should have at least one metadata file (pyproject.toml-tpl preferred,
+        # setup.py-tpl accepted for backward compatibility).
+        pyproject_path = template_path / "pyproject.toml-tpl"
         setup_path = template_path / "setup.py-tpl"
-        assert setup_path.exists(), f"setup.py-tpl not found in {template_name}"
+        assert (
+            pyproject_path.exists() or setup_path.exists()
+        ), f"Neither pyproject.toml-tpl nor setup.py-tpl found in {template_name}"

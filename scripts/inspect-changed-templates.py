@@ -8,11 +8,13 @@ import sys
 from pathlib import Path
 from typing import List, Set
 
-# Ensure src is importable
+# Ensure src is importable before importing the package. Pre-commit / local
+# runs invoke this script with the project not installed in the interpreter,
+# so the sys.path bootstrap has to happen first.
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
-from fastapi_fastkit.backend.inspector import inspect_fastapi_template
+from fastapi_fastkit.backend.inspector import inspect_fastapi_template  # noqa: E402
 
 TEMPLATE_DIR = PROJECT_ROOT / "src" / "fastapi_fastkit" / "fastapi_project_template"
 

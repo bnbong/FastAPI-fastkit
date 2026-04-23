@@ -3,7 +3,6 @@
 #
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
-import pytest
 
 from fastapi_fastkit.backend.interactive.validators import (
     sanitize_custom_packages,
