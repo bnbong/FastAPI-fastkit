@@ -41,6 +41,32 @@ class TestCLIInteractiveMode:
             or "catalog" in output_lower
         )
 
+    def test_init_help_mentions_architecture_preset(self, temp_dir: str) -> None:
+        """``fastkit init --help`` must call out the new preset step.
+
+        Regression guard for issue #44's "docs/help text reflect the new
+        step" acceptance criterion — keeps the user-facing help in sync
+        with the actual interactive flow.
+        """
+        # given / when
+        result = self.runner.invoke(fastkit_cli, ["init", "--help"])
+
+        # then
+        assert result.exit_code == 0
+        text = result.output.lower()
+        assert "architecture preset" in text or "architecture" in text
+        # The four canonical preset ids must all be discoverable from --help.
+        for preset_id in (
+            "minimal",
+            "single-module",
+            "classic-layered",
+            "domain-starter",
+        ):
+            assert preset_id in text, (
+                f"expected preset id {preset_id!r} in init --help output, "
+                f"got:\n{result.output}"
+            )
+
     def test_init_interactive_command_exists(self, temp_dir: str) -> None:
         """Test that init --interactive command is recognized."""
         # given
@@ -96,6 +122,7 @@ class TestCLIInteractiveMode:
                     author,
                     author_email,
                     description,
+                    "",  # Architecture preset: accept default (domain-starter)
                     # Template selection removed - always Empty project
                     "1",  # Database: PostgreSQL (1st option)
                     "1",  # Authentication: JWT (1st option)
@@ -253,6 +280,7 @@ class TestCLIInteractiveMode:
                     "Failure Test",
                     "failure@test.com",
                     "Triggers interactive cleanup branch",
+                    "",  # Architecture preset: accept default (domain-starter)
                     "1",  # Database: PostgreSQL
                     "1",  # Authentication: JWT
                     "1",  # Background Tasks: Celery

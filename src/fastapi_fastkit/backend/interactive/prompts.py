@@ -63,6 +63,58 @@ def prompt_basic_info() -> Dict[str, str]:
     }
 
 
+def prompt_architecture_preset(settings: Any) -> str:
+    """
+    Prompt for the project's architecture preset.
+
+    Run early in the interactive flow so downstream prompts (and later,
+    preset-specific scaffolding) can branch on the user's choice. Returns
+    the canonical preset id (one of the keys in
+    ``settings.ARCHITECTURE_PRESETS``).
+
+    The recommended default (``settings.DEFAULT_ARCHITECTURE_PRESET``) is
+    annotated as such in the rendered table so users can spot it at a glance
+    and accept it with a single Enter press.
+
+    Args:
+        settings: FastkitConfig instance
+
+    Returns:
+        Preset id, e.g. ``"domain-starter"``.
+    """
+    console.print("\n[bold cyan]🧱 Architecture Preset[/bold cyan]")
+    console.print(
+        "[dim]Pick a project layout. Generation logic for each preset is "
+        "rolled out incrementally — your choice is recorded in the "
+        "config either way.[/dim]\n"
+    )
+
+    presets: Dict[str, str] = settings.ARCHITECTURE_PRESETS
+    default_id: str = settings.DEFAULT_ARCHITECTURE_PRESET
+    # Derive a display-only mapping so the recommended default is visibly
+    # annotated without mutating the canonical catalog in settings.
+    display_options: Dict[str, str] = {
+        preset_id: (
+            f"{description} [bold green](recommended default)[/bold green]"
+            if preset_id == default_id
+            else description
+        )
+        for preset_id, description in presets.items()
+    }
+    render_selection_table("Architecture Presets", display_options)
+
+    preset_ids = list(presets.keys())
+    default_idx = preset_ids.index(default_id) + 1
+
+    choice = click.prompt(
+        f"\nSelect architecture preset (default: {default_id})",
+        type=click.IntRange(1, len(preset_ids)),
+        default=default_idx,
+    )
+
+    return cast(str, preset_ids[choice - 1])
+
+
 def prompt_template_selection(settings: Any) -> Optional[str]:
     """
     Prompt for base template selection.

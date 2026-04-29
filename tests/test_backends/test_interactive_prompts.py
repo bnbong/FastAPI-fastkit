@@ -39,6 +39,93 @@ class TestPromptBasicInfo:
         assert result["description"] == "A test description"
 
 
+class TestPromptArchitecturePreset:
+    """Test cases for prompt_architecture_preset function."""
+
+    @patch("fastapi_fastkit.backend.interactive.prompts.click.prompt")
+    @patch("fastapi_fastkit.backend.interactive.prompts.render_selection_table")
+    def test_prompt_architecture_preset_default_is_domain_starter(
+        self, mock_render, mock_prompt
+    ) -> None:
+        """Default selection (Enter on the prompt) yields the documented default."""
+        # given
+        settings = FastkitConfig()
+        # Returning the default index simulates the user pressing Enter.
+        preset_ids = list(settings.ARCHITECTURE_PRESETS.keys())
+        default_idx = preset_ids.index(settings.DEFAULT_ARCHITECTURE_PRESET) + 1
+        mock_prompt.return_value = default_idx
+
+        # when
+        result = prompts.prompt_architecture_preset(settings)
+
+        # then
+        assert result == settings.DEFAULT_ARCHITECTURE_PRESET == "domain-starter"
+        # The settings catalog and the prompt's offered options must agree.
+        mock_render.assert_called_once()
+        rendered_options = mock_render.call_args.args[1]
+        assert list(rendered_options.keys()) == preset_ids
+
+    @patch("fastapi_fastkit.backend.interactive.prompts.click.prompt")
+    @patch("fastapi_fastkit.backend.interactive.prompts.render_selection_table")
+    def test_prompt_architecture_preset_explicit_minimal(
+        self, mock_render, mock_prompt
+    ) -> None:
+        """Selecting the first option returns ``minimal``."""
+        # given
+        settings = FastkitConfig()
+        mock_prompt.return_value = 1
+
+        # when
+        result = prompts.prompt_architecture_preset(settings)
+
+        # then
+        assert result == "minimal"
+
+    @patch("fastapi_fastkit.backend.interactive.prompts.click.prompt")
+    @patch("fastapi_fastkit.backend.interactive.prompts.render_selection_table")
+    def test_prompt_architecture_preset_offers_all_required_ids(
+        self, mock_render, mock_prompt
+    ) -> None:
+        """All four preset ids required by issue #44 must be offered."""
+        # given
+        settings = FastkitConfig()
+        mock_prompt.return_value = 1
+
+        # when
+        prompts.prompt_architecture_preset(settings)
+
+        # then
+        offered = set(mock_render.call_args.args[1].keys())
+        assert offered == {
+            "minimal",
+            "single-module",
+            "classic-layered",
+            "domain-starter",
+        }
+
+    @patch("fastapi_fastkit.backend.interactive.prompts.click.prompt")
+    @patch("fastapi_fastkit.backend.interactive.prompts.render_selection_table")
+    def test_prompt_architecture_preset_marks_recommended_default(
+        self, mock_render, mock_prompt
+    ) -> None:
+        """Default preset's row must be visibly annotated as recommended."""
+        # given
+        settings = FastkitConfig()
+        mock_prompt.return_value = 1
+
+        # when
+        prompts.prompt_architecture_preset(settings)
+
+        # then — only the default's display description carries the marker.
+        rendered_options = mock_render.call_args.args[1]
+        default_id = settings.DEFAULT_ARCHITECTURE_PRESET
+        assert "recommended default" in rendered_options[default_id].lower()
+        for preset_id, description in rendered_options.items():
+            if preset_id == default_id:
+                continue
+            assert "recommended default" not in description.lower()
+
+
 class TestPromptTemplateSelection:
     """Test cases for prompt_template_selection function."""
 

@@ -334,7 +334,11 @@ def startdemo(
     "--interactive",
     is_flag=True,
     default=False,
-    help="Enable interactive mode for guided project setup with feature selection.",
+    help=(
+        "Enable interactive mode for guided project setup. Walks through an "
+        "architecture preset (minimal / single-module / classic-layered / "
+        "domain-starter, default: domain-starter), then feature selection."
+    ),
 )
 @click.option(
     "--project-name",
@@ -372,7 +376,11 @@ def init(
     """
     Start a FastAPI project setup.
 
-    Use --interactive for guided setup with dynamic feature selection.
+    Use --interactive for guided setup. Interactive mode prompts for an
+    architecture preset (``minimal`` / ``single-module`` / ``classic-layered``
+    / ``domain-starter`` — default: ``domain-starter``) and then walks
+    through feature selection (database, auth, testing, deployment, ...).
+
     Without --interactive, creates an empty project with predefined stacks.
 
     This command will automatically create a new FastAPI project directory

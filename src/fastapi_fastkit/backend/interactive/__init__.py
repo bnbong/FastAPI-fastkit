@@ -9,6 +9,7 @@
 from .config_builder import InteractiveConfigBuilder
 from .prompts import (
     prompt_additional_features,
+    prompt_architecture_preset,
     prompt_authentication_selection,
     prompt_basic_info,
     prompt_caching_selection,
@@ -31,6 +32,7 @@ from .validators import (
 __all__ = [
     "InteractiveConfigBuilder",
     "prompt_basic_info",
+    "prompt_architecture_preset",
     "prompt_template_selection",
     "prompt_database_selection",
     "prompt_authentication_selection",

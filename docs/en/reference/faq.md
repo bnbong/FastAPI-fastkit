@@ -178,10 +178,23 @@ $ fastkit init --interactive
 
 </div>
 
-Interactive mode allows you to select from a comprehensive feature catalog:
+Interactive mode walks you through these steps in order:
+
+1. **Project information** — name, author, email, description.
+2. **Architecture preset** — picks the project layout. The recommended
+   default is `domain-starter`; press Enter to accept it.
+3. **Feature selections** — database, authentication, background tasks,
+   caching, monitoring, testing, utilities, deployment.
+4. **Package manager and custom packages** — pip / uv / pdm / poetry,
+   plus any extras you want pinned.
+5. **Confirmation** — a summary table shows every choice (including the
+   architecture preset) before the project is created.
+
+Interactive mode lets you select from a comprehensive feature catalog:
 
 | Category | Available Options |
 |----------|-------------------|
+| **Architecture** | minimal, single-module, classic-layered, **domain-starter** (recommended default) |
 | **Database** | PostgreSQL, MySQL, MongoDB, Redis, SQLite |
 | **Authentication** | JWT, OAuth2, FastAPI-Users, Session-based |
 | **Background Tasks** | Celery, Dramatiq |

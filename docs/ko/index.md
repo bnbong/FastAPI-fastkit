@@ -188,6 +188,15 @@ Enter the author name: John Doe
 Enter the author email: john@example.com
 Enter the project description: Full-stack FastAPI project with PostgreSQL and JWT
 
+🧱 Architecture Preset
+프로젝트 레이아웃을 선택합니다. Enter를 누르면 추천 기본값이 적용됩니다.
+  1. minimal           - 가장 작은 FastAPI 앱
+  2. single-module     - 단일 모듈 구성 (프로토타입 / 스크립트용)
+  3. classic-layered   - api/routes + crud + schemas + core (fastapi-default 형태)
+  4. domain-starter    - 도메인 지향 src/app/domains/<concept>/ (recommended)
+
+Select architecture preset: [4]
+
 🗄️ Database Selection
 Select database (PostgreSQL, MySQL, MongoDB, Redis, SQLite, None):
   1. PostgreSQL - PostgreSQL database with SQLAlchemy
@@ -233,7 +242,7 @@ Select monitoring (Loguru, OpenTelemetry, Prometheus, None):
   4. None - No monitoring
 
 Select monitoring: 3
-```
+
 
 🧪 테스트 프레임워크 선택
 테스트 프레임워크를 선택하세요 (Basic, Coverage, Advanced, None):

@@ -235,6 +235,33 @@ class TestBuildFinalConfig:
         assert final_config["author"] == "Test Author"
 
 
+class TestCollectArchitecturePreset:
+    """Test cases for the preset collection step."""
+
+    @patch(
+        "fastapi_fastkit.backend.interactive.config_builder.prompt_architecture_preset"
+    )
+    def test_collect_architecture_preset_persists_choice(self, mock_preset) -> None:
+        """The preset is persisted on the config under ``architecture_preset``."""
+        # given
+        settings = FastkitConfig()
+        builder = InteractiveConfigBuilder(settings)
+        mock_preset.return_value = "classic-layered"
+
+        # when
+        builder._collect_architecture_preset()
+
+        # then
+        assert builder.config["architecture_preset"] == "classic-layered"
+        # The human-readable description must also be persisted so the
+        # confirmation summary can show users what their choice means.
+        assert (
+            builder.config["architecture_preset_description"]
+            == settings.ARCHITECTURE_PRESETS["classic-layered"]
+        )
+        mock_preset.assert_called_once_with(settings)
+
+
 class TestRunInteractiveFlow:
     """Test cases for run_interactive_flow method with mocked prompts."""
 
@@ -248,10 +275,14 @@ class TestRunInteractiveFlow:
     @patch(
         "fastapi_fastkit.backend.interactive.config_builder.prompt_template_selection"
     )
+    @patch(
+        "fastapi_fastkit.backend.interactive.config_builder.prompt_architecture_preset"
+    )
     @patch("fastapi_fastkit.backend.interactive.config_builder.prompt_basic_info")
     def test_run_interactive_flow_full_journey(
         self,
         mock_basic_info,
+        mock_preset,
         mock_template,
         mock_features,
         mock_validate,
@@ -268,6 +299,7 @@ class TestRunInteractiveFlow:
             "author_email": "test@example.com",
             "description": "Test description",
         }
+        mock_preset.return_value = "domain-starter"
         mock_template.return_value = None  # Empty template
         mock_features.return_value = {
             "database": {"type": "PostgreSQL", "packages": ["sqlalchemy", "asyncpg"]},
@@ -292,6 +324,7 @@ class TestRunInteractiveFlow:
         assert config["project_name"] == "test-project"
         assert config["author"] == "Test Author"
         assert config["authentication"] == "JWT"
+        assert config["architecture_preset"] == "domain-starter"
         assert "all_dependencies" in config
 
     @patch("fastapi_fastkit.backend.interactive.config_builder.confirm_selections")
@@ -304,10 +337,14 @@ class TestRunInteractiveFlow:
     @patch(
         "fastapi_fastkit.backend.interactive.config_builder.prompt_template_selection"
     )
+    @patch(
+        "fastapi_fastkit.backend.interactive.config_builder.prompt_architecture_preset"
+    )
     @patch("fastapi_fastkit.backend.interactive.config_builder.prompt_basic_info")
     def test_run_interactive_flow_user_cancels(
         self,
         mock_basic_info,
+        mock_preset,
         mock_template,
         mock_features,
         mock_validate,
@@ -324,6 +361,7 @@ class TestRunInteractiveFlow:
             "author_email": "test@example.com",
             "description": "Test",
         }
+        mock_preset.return_value = "domain-starter"
         mock_template.return_value = None
         mock_features.return_value = {
             "database": {"type": "None"},
@@ -356,10 +394,14 @@ class TestRunInteractiveFlow:
     @patch(
         "fastapi_fastkit.backend.interactive.config_builder.prompt_template_selection"
     )
+    @patch(
+        "fastapi_fastkit.backend.interactive.config_builder.prompt_architecture_preset"
+    )
     @patch("fastapi_fastkit.backend.interactive.config_builder.prompt_basic_info")
     def test_run_interactive_flow_with_warnings(
         self,
         mock_basic_info,
+        mock_preset,
         mock_template,
         mock_features,
         mock_validate,
@@ -376,6 +418,7 @@ class TestRunInteractiveFlow:
             "author_email": "test@example.com",
             "description": "Test",
         }
+        mock_preset.return_value = "minimal"
         mock_template.return_value = None
         mock_features.return_value = {
             "database": {"type": "None"},
