@@ -646,6 +646,26 @@ class TestCLI:
         assert result.exit_code == 0
         assert "Virtual environment not found" in result.output
 
+    def test_derive_app_module_handles_all_supported_layouts(self) -> None:
+        """Regression: nested layouts like src/app/main.py must map correctly.
+
+        ``runserver`` previously mapped any ``src/`` main file to
+        ``src.main:app``, which silently mis-targeted the
+        ``fastapi-domain-starter`` layout (``src/app/main.py``).
+        """
+        from fastapi_fastkit.cli import _derive_app_module
+
+        proj = "/proj"
+        assert _derive_app_module(proj, os.path.join(proj, "main.py")) == "main:app"
+        assert (
+            _derive_app_module(proj, os.path.join(proj, "src", "main.py"))
+            == "src.main:app"
+        )
+        assert (
+            _derive_app_module(proj, os.path.join(proj, "src", "app", "main.py"))
+            == "src.app.main:app"
+        )
+
     def test_addroute_command(self, temp_dir: str) -> None:
         # given
         os.chdir(temp_dir)

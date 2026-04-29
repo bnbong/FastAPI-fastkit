@@ -819,6 +819,20 @@ def deleteproject(ctx: Context, project_name: str) -> None:
         print_error(f"Error during project deletion: {e}")
 
 
+def _derive_app_module(project_dir: str, main_path: str) -> str:
+    """Convert a discovered ``main.py`` path into a uvicorn ``module:attr``.
+
+    Templates can place ``main.py`` anywhere under the project (``main.py``,
+    ``src/main.py``, ``src/app/main.py``, ...). The previous ``"src/"`` /
+    ``""`` heuristic mis-mapped the domain-starter layout (``src/app/main.py``
+    → wrongly produced ``src.main:app``); deriving the dotted path from the
+    actual relative location avoids that drift for any future layout too.
+    """
+    rel_path = os.path.relpath(main_path, project_dir)
+    module_part = os.path.splitext(rel_path)[0].replace(os.sep, ".")
+    return f"{module_part}:app"
+
+
 @fastkit_cli.command()
 @click.option(
     "--host",
@@ -893,10 +907,7 @@ def runserver(
         return
 
     main_path = core_modules["main"]
-    if "src/" in main_path:
-        app_module = "src.main:app"
-    else:
-        app_module = "main:app"
+    app_module = _derive_app_module(project_dir, main_path)
 
     if venv_python:
         print_info(f"Using Python from virtual environment: {venv_python}")
