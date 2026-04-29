@@ -208,6 +208,95 @@ class TestConfirmSelections:
         # then
         assert result is False
 
+    @patch("fastapi_fastkit.backend.interactive.selectors.console.input")
+    @patch("fastapi_fastkit.backend.interactive.selectors.console.print")
+    def test_confirm_selections_includes_architecture_preset(
+        self, mock_print, mock_input
+    ) -> None:
+        """The summary table must surface the chosen architecture preset.
+
+        It renders ``<id> — <description>`` so users see what their choice
+        means rather than just the raw id.
+        """
+        # given
+        config = {
+            "project_name": "test-project",
+            "author": "Test",
+            "author_email": "test@example.com",
+            "description": "Test",
+            "architecture_preset": "domain-starter",
+            "architecture_preset_description": (
+                "Domain-oriented: src/app/domains/<concept>/."
+            ),
+            "database": {"type": "None"},
+            "authentication": "None",
+            "package_manager": "uv",
+            "all_dependencies": [],
+        }
+        mock_input.return_value = "y"
+
+        # when
+        confirm_selections(config)
+
+        # then — locate the summary Table among the print calls and look
+        # for an "Architecture Preset" row carrying the chosen value plus
+        # its description.
+        from rich.table import Table
+
+        summary_tables = [
+            call.args[0]
+            for call in mock_print.call_args_list
+            if call.args and isinstance(call.args[0], Table)
+        ]
+        assert summary_tables, "Expected a summary Table to be printed"
+
+        # ``rich.table.Table.rows`` doesn't surface cell text directly, so
+        # walk each column's ``cells`` iterable instead.
+        flattened_cells: list[str] = []
+        for table in summary_tables:
+            for column in table.columns:
+                flattened_cells.extend(str(cell) for cell in column.cells)
+        assert "Architecture Preset" in flattened_cells
+        # The id and the em-dash separated description must both render in
+        # one cell so users get the human-readable label, not just the raw id.
+        assert any(
+            cell.startswith("domain-starter — ") for cell in flattened_cells
+        ), f"Expected 'domain-starter — ...' cell; got {flattened_cells}"
+
+    @patch("fastapi_fastkit.backend.interactive.selectors.console.input")
+    @patch("fastapi_fastkit.backend.interactive.selectors.console.print")
+    def test_confirm_selections_falls_back_to_id_when_description_missing(
+        self, mock_print, mock_input
+    ) -> None:
+        """Older configs without a description still render the preset id."""
+        # given
+        config = {
+            "project_name": "legacy",
+            "architecture_preset": "minimal",
+            "database": {"type": "None"},
+            "authentication": "None",
+            "package_manager": "uv",
+            "all_dependencies": [],
+        }
+        mock_input.return_value = "y"
+
+        # when
+        confirm_selections(config)
+
+        # then
+        from rich.table import Table
+
+        summary_tables = [
+            call.args[0]
+            for call in mock_print.call_args_list
+            if call.args and isinstance(call.args[0], Table)
+        ]
+        flattened_cells: list[str] = []
+        for table in summary_tables:
+            for column in table.columns:
+                flattened_cells.extend(str(cell) for cell in column.cells)
+        assert "minimal" in flattened_cells
+
 
 class TestDisplayFeatureCatalog:
     """Test cases for display_feature_catalog function."""

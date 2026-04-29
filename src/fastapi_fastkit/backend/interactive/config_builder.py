@@ -12,6 +12,7 @@ from fastapi_fastkit.utils.main import console, print_warning
 
 from .prompts import (
     prompt_additional_features,
+    prompt_architecture_preset,
     prompt_basic_info,
     prompt_template_selection,
 )
@@ -51,11 +52,15 @@ class InteractiveConfigBuilder:
         # Step 1: Basic information
         self._collect_basic_info()
 
-        # Step 2: Always use Empty template as base for interactive mode
+        # Step 2: Architecture preset — chosen early so downstream prompts
+        # (and later, preset-specific scaffolding) can branch on the layout.
+        self._collect_architecture_preset()
+
+        # Step 3: Always use Empty template as base for interactive mode
         # (Feature selection will build the project incrementally)
         self.config["base_template"] = None  # None = Empty project
 
-        # Step 3: Feature selections
+        # Step 4: Feature selections
         self._collect_feature_selections()
 
         # Step 4: Build final configuration
@@ -77,6 +82,20 @@ class InteractiveConfigBuilder:
         """Collect basic project information."""
         basic_info = prompt_basic_info()
         self.config.update(basic_info)
+
+    def _collect_architecture_preset(self) -> None:
+        """Collect the user's architecture preset choice.
+
+        Persists the canonical id on the config under ``architecture_preset``
+        (used by downstream code) plus the human-readable description under
+        ``architecture_preset_description`` (used by the confirmation summary
+        so users see what their choice means, not just the raw id).
+        """
+        preset = prompt_architecture_preset(self.settings)
+        self.config["architecture_preset"] = preset
+        self.config["architecture_preset_description"] = (
+            self.settings.ARCHITECTURE_PRESETS.get(preset, "")
+        )
 
     def _collect_template_selection(self) -> None:
         """Collect template selection."""

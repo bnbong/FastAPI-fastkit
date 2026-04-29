@@ -188,6 +188,15 @@ Enter the author name: John Doe
 Enter the author email: john@example.com
 Enter the project description: Full-stack FastAPI project with PostgreSQL and JWT
 
+🧱 Architecture Preset
+Pick a project layout. Press Enter to accept the recommended default.
+  1. minimal           - Smallest viable FastAPI app
+  2. single-module     - Everything in one module (prototypes / scripts)
+  3. classic-layered   - api/routes + crud + schemas + core (à la fastapi-default)
+  4. domain-starter    - Domain-oriented src/app/domains/<concept>/ (recommended)
+
+Select architecture preset: [4]
+
 🗄️ Database Selection
 Select database (PostgreSQL, MySQL, MongoDB, Redis, SQLite, None):
   1. PostgreSQL - PostgreSQL database with SQLAlchemy

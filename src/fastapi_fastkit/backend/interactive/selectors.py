@@ -133,6 +133,16 @@ def confirm_selections(config: Dict[str, Any]) -> bool:
     table.add_row("Email", config.get("author_email", "N/A"))
     table.add_row("Description", config.get("description", "N/A"))
 
+    # Architecture preset (interactive ``init`` always sets this; older
+    # callers may not — guard with a falsy check to stay backward compatible).
+    preset = config.get("architecture_preset")
+    if preset:
+        preset_description = config.get("architecture_preset_description", "")
+        table.add_row(
+            "Architecture Preset",
+            f"{preset} — {preset_description}" if preset_description else preset,
+        )
+
     # Template
     if config.get("base_template"):
         table.add_row("Base Template", config["base_template"])

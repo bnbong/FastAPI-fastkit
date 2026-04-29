@@ -45,6 +45,20 @@ class FastkitConfig:
         },
     }
 
+    # Architecture Presets (interactive ``init`` wizard)
+    #
+    # The preset shapes how the generated project is laid out (single file vs.
+    # layered vs. domain-oriented). Preset-specific generation logic lives in
+    # later issues — this catalog is the user-facing menu and the canonical
+    # set of preset ids persisted in the interactive config.
+    ARCHITECTURE_PRESETS: dict[str, str] = {
+        "minimal": "Smallest viable FastAPI app — a single app + a couple of files.",
+        "single-module": "Everything in one module; ideal for tiny scripts and prototypes.",
+        "classic-layered": "Layered split: api/routes, crud, schemas, core (a la fastapi-default).",
+        "domain-starter": "Domain-oriented: src/app/domains/<concept>/ with router/service/repository (recommended).",
+    }
+    DEFAULT_ARCHITECTURE_PRESET: str = "domain-starter"
+
     # Startproject Options
     PROJECT_STACKS: dict[str, list[str]] = {
         "minimal": ["fastapi", "uvicorn", "pydantic", "pydantic-settings"],
