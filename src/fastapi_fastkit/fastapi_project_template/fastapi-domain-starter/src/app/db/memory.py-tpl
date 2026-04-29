@@ -1,0 +1,48 @@
+# --------------------------------------------------------------------------
+# Process-local in-memory store used as a placeholder for a real database.
+#
+# Domain repositories sit on top of this store, so swapping the store for
+# SQLAlchemy / async drivers later is a contained change — only the
+# repositories need to be rewritten.
+# --------------------------------------------------------------------------
+from typing import Dict, Generic, Iterable, Optional, TypeVar
+
+T = TypeVar("T")
+
+
+class InMemoryStore(Generic[T]):
+    """Tiny ID-keyed collection backed by a dict.
+
+    Not thread-safe and not suitable for production — but lets the rest of
+    the application code stay realistic (repository / service / router) while
+    keeping the starter self-contained.
+    """
+
+    def __init__(self) -> None:
+        self._data: Dict[int, T] = {}
+        self._next_id: int = 1
+
+    def list(self) -> Iterable[T]:
+        return list(self._data.values())
+
+    def get(self, id_: int) -> Optional[T]:
+        return self._data.get(id_)
+
+    def add(self, item: T) -> int:
+        new_id = self._next_id
+        self._data[new_id] = item
+        self._next_id += 1
+        return new_id
+
+    def replace(self, id_: int, item: T) -> bool:
+        if id_ not in self._data:
+            return False
+        self._data[id_] = item
+        return True
+
+    def delete(self, id_: int) -> bool:
+        return self._data.pop(id_, None) is not None
+
+    def clear(self) -> None:
+        self._data.clear()
+        self._next_id = 1

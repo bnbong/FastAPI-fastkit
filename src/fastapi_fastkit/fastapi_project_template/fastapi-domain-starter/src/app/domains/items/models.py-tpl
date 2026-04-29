@@ -1,0 +1,17 @@
+# --------------------------------------------------------------------------
+# Items domain — internal entity model.
+#
+# Kept separate from the API schemas in ``schemas.py`` so the wire format
+# can evolve without touching domain logic, and vice versa.
+# --------------------------------------------------------------------------
+from dataclasses import dataclass
+
+
+@dataclass
+class Item:
+    """Domain entity: an item tracked by the application."""
+
+    id: int
+    name: str
+    price: float
+    in_stock: bool = True

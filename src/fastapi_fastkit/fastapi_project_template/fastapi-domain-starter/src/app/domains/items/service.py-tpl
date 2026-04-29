@@ -1,0 +1,52 @@
+# --------------------------------------------------------------------------
+# Items domain — service layer (business logic).
+#
+# Routers should call into the service rather than the repository directly,
+# so policy and validation rules can grow here without touching transport
+# code or persistence.
+# --------------------------------------------------------------------------
+from typing import List, Optional
+
+from src.app.domains.items.models import Item
+from src.app.domains.items.repository import ItemRepository
+from src.app.domains.items.schemas import ItemCreate
+
+
+class ItemNotFoundError(Exception):
+    """Raised when an item lookup misses."""
+
+
+class ItemService:
+    def __init__(self, repository: Optional[ItemRepository] = None) -> None:
+        self._repository = repository if repository is not None else ItemRepository()
+
+    def list_items(self) -> List[Item]:
+        return self._repository.list_all()
+
+    def get_item(self, item_id: int) -> Item:
+        item = self._repository.get(item_id)
+        if item is None:
+            raise ItemNotFoundError(f"Item {item_id} does not exist")
+        return item
+
+    def create_item(self, payload: ItemCreate) -> Item:
+        return self._repository.add(
+            name=payload.name,
+            price=payload.price,
+            in_stock=payload.in_stock,
+        )
+
+    def replace_item(self, item_id: int, payload: ItemCreate) -> Item:
+        updated = self._repository.replace(
+            item_id,
+            name=payload.name,
+            price=payload.price,
+            in_stock=payload.in_stock,
+        )
+        if updated is None:
+            raise ItemNotFoundError(f"Item {item_id} does not exist")
+        return updated
+
+    def delete_item(self, item_id: int) -> None:
+        if not self._repository.delete(item_id):
+            raise ItemNotFoundError(f"Item {item_id} does not exist")

@@ -1,0 +1,77 @@
+# --------------------------------------------------------------------------
+# Items domain — end-to-end coverage of the CRUD endpoints.
+# --------------------------------------------------------------------------
+from src.app.core.config import settings
+
+ITEMS_URL = f"{settings.API_V1_PREFIX}/items"
+
+
+def test_list_items_starts_empty(client):
+    response = client.get(ITEMS_URL)
+
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_create_then_read_item(client):
+    create_response = client.post(
+        ITEMS_URL,
+        json={"name": "Sticker", "price": 2.5, "in_stock": True},
+    )
+
+    assert create_response.status_code == 201
+    created = create_response.json()
+    assert created["id"] == 1
+    assert created["name"] == "Sticker"
+
+    read_response = client.get(f"{ITEMS_URL}/{created['id']}")
+
+    assert read_response.status_code == 200
+    assert read_response.json() == created
+
+
+def test_get_unknown_item_returns_404(client):
+    response = client.get(f"{ITEMS_URL}/999")
+
+    assert response.status_code == 404
+
+
+def test_replace_item(client):
+    created = client.post(
+        ITEMS_URL,
+        json={"name": "Mug", "price": 9.0, "in_stock": True},
+    ).json()
+
+    response = client.put(
+        f"{ITEMS_URL}/{created['id']}",
+        json={"name": "Mug v2", "price": 11.0, "in_stock": False},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["id"] == created["id"]
+    assert body["name"] == "Mug v2"
+    assert body["price"] == 11.0
+    assert body["in_stock"] is False
+
+
+def test_delete_item(client):
+    created = client.post(
+        ITEMS_URL,
+        json={"name": "Keychain", "price": 4.0, "in_stock": True},
+    ).json()
+
+    delete_response = client.delete(f"{ITEMS_URL}/{created['id']}")
+    assert delete_response.status_code == 204
+
+    follow_up = client.get(f"{ITEMS_URL}/{created['id']}")
+    assert follow_up.status_code == 404
+
+
+def test_create_item_validates_payload(client):
+    response = client.post(
+        ITEMS_URL,
+        json={"name": "", "price": -1.0},
+    )
+
+    assert response.status_code == 422

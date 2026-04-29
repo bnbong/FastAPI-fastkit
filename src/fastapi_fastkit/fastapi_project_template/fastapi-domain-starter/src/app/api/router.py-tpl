@@ -1,0 +1,12 @@
+# --------------------------------------------------------------------------
+# Top-level API router — aggregates the health probe with every domain
+# module under ``src/app/domains/``.
+# --------------------------------------------------------------------------
+from fastapi import APIRouter
+
+from src.app.api import health
+from src.app.domains.items import router as items_router
+
+api_router = APIRouter()
+api_router.include_router(health.router)
+api_router.include_router(items_router.router)

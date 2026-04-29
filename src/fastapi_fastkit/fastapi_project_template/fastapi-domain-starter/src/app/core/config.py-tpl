@@ -1,0 +1,49 @@
+# --------------------------------------------------------------------------
+# Application settings (pydantic-settings).
+# --------------------------------------------------------------------------
+import secrets
+from typing import Annotated, Any, List, Literal, Union
+
+from pydantic import AnyUrl, BeforeValidator, computed_field
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+def _parse_cors(v: Any) -> Union[List[str], str]:
+    if isinstance(v, str) and not v.startswith("["):
+        return [item.strip() for item in v.split(",") if item.strip()]
+    if isinstance(v, (list, str)):
+        return v
+    raise ValueError(v)
+
+
+class Settings(BaseSettings):
+    """Centralized configuration for the application.
+
+    Values are populated from environment variables (or a local ``.env``
+    file) so the same image / build can run in development, staging, and
+    production without code changes.
+    """
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_ignore_empty=True,
+        extra="ignore",
+    )
+
+    PROJECT_NAME: str = "<project_name>"
+    ENVIRONMENT: Literal["development", "staging", "production"] = "development"
+    SECRET_KEY: str = secrets.token_urlsafe(32)
+
+    API_V1_PREFIX: str = "/api/v1"
+
+    BACKEND_CORS_ORIGINS: Annotated[
+        Union[List[AnyUrl], str], BeforeValidator(_parse_cors)
+    ] = []
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def all_cors_origins(self) -> List[str]:
+        return [str(origin).rstrip("/") for origin in self.BACKEND_CORS_ORIGINS]
+
+
+settings = Settings()  # type: ignore[call-arg]

@@ -1,0 +1,59 @@
+# --------------------------------------------------------------------------
+# Items domain — HTTP transport (FastAPI router).
+# --------------------------------------------------------------------------
+from typing import List
+
+from fastapi import APIRouter, Depends, HTTPException, Response, status
+
+from src.app.domains.items.schemas import ItemCreate, ItemRead
+from src.app.domains.items.service import ItemNotFoundError, ItemService
+
+router = APIRouter(prefix="/items", tags=["items"])
+
+
+def get_item_service() -> ItemService:
+    """Default dependency — overridable in tests."""
+    return ItemService()
+
+
+@router.get("", response_model=List[ItemRead])
+def list_items(service: ItemService = Depends(get_item_service)) -> List[ItemRead]:
+    return [ItemRead.model_validate(item) for item in service.list_items()]
+
+
+@router.get("/{item_id}", response_model=ItemRead)
+def get_item(item_id: int, service: ItemService = Depends(get_item_service)) -> ItemRead:
+    try:
+        return ItemRead.model_validate(service.get_item(item_id))
+    except ItemNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+
+@router.post("", response_model=ItemRead, status_code=status.HTTP_201_CREATED)
+def create_item(
+    payload: ItemCreate, service: ItemService = Depends(get_item_service)
+) -> ItemRead:
+    return ItemRead.model_validate(service.create_item(payload))
+
+
+@router.put("/{item_id}", response_model=ItemRead)
+def replace_item(
+    item_id: int,
+    payload: ItemCreate,
+    service: ItemService = Depends(get_item_service),
+) -> ItemRead:
+    try:
+        return ItemRead.model_validate(service.replace_item(item_id, payload))
+    except ItemNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+
+@router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_item(
+    item_id: int, service: ItemService = Depends(get_item_service)
+) -> Response:
+    try:
+        service.delete_item(item_id)
+    except ItemNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

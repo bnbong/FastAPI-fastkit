@@ -1,0 +1,24 @@
+# --------------------------------------------------------------------------
+# pytest fixtures for <project_name>.
+# --------------------------------------------------------------------------
+from collections.abc import Generator
+
+import pytest
+from fastapi.testclient import TestClient
+
+from src.app.domains.items.repository import ItemRepository
+from src.app.main import app
+
+
+@pytest.fixture(autouse=True)
+def reset_items_store() -> Generator[None, None, None]:
+    """Each test starts with an empty items store."""
+    ItemRepository().reset()
+    yield
+    ItemRepository().reset()
+
+
+@pytest.fixture
+def client() -> Generator[TestClient, None, None]:
+    with TestClient(app) as c:
+        yield c

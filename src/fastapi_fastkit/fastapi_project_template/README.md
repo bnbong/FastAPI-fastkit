@@ -85,6 +85,20 @@ file. `setup.py-tpl` remains supported for backward compatibility.
 6. Unit tests implementation
 7. API documentation (OpenAPI/Swagger)
 
+## Available templates
+
+| Template | When to choose |
+|---|---|
+| `fastapi-default` | Quick CRUD demo with the classic layered layout (`api/routes`, `crud`, `schemas`). Good first stop. |
+| `fastapi-empty` | Minimal scaffold for users who want to add their own structure on top. |
+| `fastapi-single-module` | Single-file sandbox for tiny prototypes / scripts. |
+| `fastapi-async-crud` | Async-flavoured equivalent of `fastapi-default`. |
+| `fastapi-custom-response` | Demonstrates custom response formatting / envelope patterns. |
+| `fastapi-dockerized` | Adds a production-ready Dockerfile to the default layout. |
+| `fastapi-psql-orm` | PostgreSQL + SQLAlchemy + Alembic; pick this when you need a real database. |
+| `fastapi-mcp` | Model Context Protocol integration. |
+| `fastapi-domain-starter` | **Recommended modern default for medium-sized APIs.** Pyproject-first, domain-oriented layout (`src/app/domains/<concept>/`) with a clean transport / service / repository split, plus a built-in `/health` probe. |
+
 ## Base structure of modules template
 
 This template is used to create a new FastAPI project with a specific module structure.

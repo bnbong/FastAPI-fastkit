@@ -1,0 +1,23 @@
+# --------------------------------------------------------------------------
+# Items domain — API I/O schemas (pydantic).
+# --------------------------------------------------------------------------
+from pydantic import BaseModel, ConfigDict, Field
+
+
+class ItemCreate(BaseModel):
+    """Payload accepted on POST /items."""
+
+    name: str = Field(min_length=1, max_length=120)
+    price: float = Field(ge=0)
+    in_stock: bool = True
+
+
+class ItemRead(BaseModel):
+    """Outgoing representation of an item."""
+
+    id: int
+    name: str
+    price: float
+    in_stock: bool
+
+    model_config = ConfigDict(from_attributes=True)
