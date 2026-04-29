@@ -24,6 +24,7 @@ class FastkitConfig:
     TEMPLATE_PATHS: dict[str, list[str] | dict[str, list[str]]] = {
         "main": [
             "src/main.py",
+            "src/app/main.py",
             "main.py",
         ],
         "setup": [
@@ -37,6 +38,7 @@ class FastkitConfig:
             "files": ["settings.py", "config.py"],
             "paths": [
                 "src/core",
+                "src/app/core",
                 "src",
                 "",
             ],

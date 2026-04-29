@@ -1,0 +1,124 @@
+# FastAPI Domain Starter
+
+Modern, domain-oriented FastAPI starter — the recommended default for
+medium-sized API projects.
+
+> Generated project: **<project_name>** — <description>
+
+## When to choose this starter
+
+Pick this template when you want:
+
+- A **domain-oriented layout** (one folder per business concept under
+  `src/app/domains/`) rather than the layered `routes/ + crud/ + schemas/`
+  split. Domains scale better as the API grows.
+- A clear separation between **transport** (`router.py`), **business
+  logic** (`service.py`), and **data access** (`repository.py`) so each
+  layer can evolve independently.
+- A **`pyproject.toml`-first** project (PEP 621) compatible with `uv`,
+  `pdm`, or `poetry` out of the box — no `setup.py` to maintain.
+- Sensible defaults for settings, testing, formatting, and a built-in
+  `/health` probe.
+
+If you only need a quick CRUD demo, start with `fastapi-default`. If you
+need PostgreSQL, start with `fastapi-psql-orm`. If you want a single-file
+sandbox, use `fastapi-single-module`.
+
+## Project structure
+
+```
+.
+├── README.md
+├── pyproject.toml
+├── .env
+├── .gitignore
+├── scripts/
+│   ├── format.sh
+│   ├── lint.sh
+│   ├── run-server.sh
+│   └── test.sh
+├── src/
+│   └── app/
+│       ├── main.py             # FastAPI app entry point
+│       ├── core/
+│       │   └── config.py       # pydantic-settings configuration
+│       ├── db/
+│       │   └── memory.py       # in-memory store stand-in for a real DB
+│       ├── api/
+│       │   ├── router.py       # aggregates health + every domain router
+│       │   └── health.py       # GET /health
+│       └── domains/
+│           └── items/          # example domain (CRUD over an item entity)
+│               ├── models.py       # entity dataclass
+│               ├── schemas.py      # API I/O schemas (pydantic)
+│               ├── repository.py   # data access layer
+│               ├── service.py      # business logic
+│               └── router.py       # FastAPI router for the domain
+└── tests/
+    ├── conftest.py
+    ├── test_health.py
+    └── test_items.py
+```
+
+The recipe for adding a new domain is:
+
+1. Create `src/app/domains/<your_domain>/`.
+2. Mirror the `items` layout (`models.py`, `schemas.py`, `repository.py`,
+   `service.py`, `router.py`).
+3. Register the router in `src/app/api/router.py`.
+4. Add tests under `tests/test_<your_domain>.py`.
+
+## Running the app
+
+```bash
+# create a virtualenv and install dependencies
+$ uv sync   # or: pip install -e ".[dev]"
+
+# launch the dev server
+$ bash scripts/run-server.sh
+# or directly:
+$ uvicorn src.app.main:app --reload
+```
+
+API docs are then served at:
+
+- Swagger UI: <http://127.0.0.1:8000/docs>
+- ReDoc:      <http://127.0.0.1:8000/redoc>
+
+## API endpoints
+
+| Method | Endpoint                  | Description                  |
+|--------|---------------------------|------------------------------|
+| GET    | `/api/v1/health`          | Liveness probe               |
+| GET    | `/api/v1/items`           | List items                   |
+| GET    | `/api/v1/items/{item_id}` | Read a single item           |
+| POST   | `/api/v1/items`           | Create an item               |
+| PUT    | `/api/v1/items/{item_id}` | Replace an item              |
+| DELETE | `/api/v1/items/{item_id}` | Delete an item               |
+
+## Running tests
+
+```bash
+$ bash scripts/test.sh
+# or directly:
+$ pytest
+```
+
+## Configuration
+
+`src/app/core/config.py` reads settings from environment variables (or a
+local `.env` file). The provided `.env` only sets a placeholder
+`SECRET_KEY` — replace it before deploying.
+
+## Project Origin
+
+This project was created from the **`fastapi-domain-starter`** template
+shipped with [FastAPI-fastkit](https://github.com/bnbong/FastAPI-fastkit).
+
+The `FastAPI-fastkit` is an open-source project that helps Python and
+FastAPI beginners quickly set up a FastAPI-based application development
+environment in a framework-like structure.
+
+### Template Information
+- Template creator: [bnbong](mailto:bbbong9@gmail.com)
+- FastAPI-fastkit project maintainer: [bnbong](mailto:bbbong9@gmail.com)

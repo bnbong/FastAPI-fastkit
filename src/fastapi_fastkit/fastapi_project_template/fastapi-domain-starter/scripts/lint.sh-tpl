@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -x
+
+black . --check
+isort . --check-only
+mypy src

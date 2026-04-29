@@ -1,0 +1,48 @@
+# --------------------------------------------------------------------------
+# Items domain — repository (data access boundary).
+#
+# Wraps the in-memory store with item-typed methods so the service layer
+# stays decoupled from how items are persisted.
+# --------------------------------------------------------------------------
+from typing import List, Optional
+
+from src.app.db.memory import InMemoryStore
+from src.app.domains.items.models import Item
+
+_store: InMemoryStore[Item] = InMemoryStore()
+
+
+class ItemRepository:
+    """Data access for ``Item`` entities."""
+
+    def __init__(self, store: Optional[InMemoryStore[Item]] = None) -> None:
+        self._store = store if store is not None else _store
+
+    def list_all(self) -> List[Item]:
+        return list(self._store.list())
+
+    def get(self, item_id: int) -> Optional[Item]:
+        return self._store.get(item_id)
+
+    def add(self, name: str, price: float, in_stock: bool = True) -> Item:
+        # Reserve the next id from the store, then back-fill it on the
+        # entity so the repository is the single source of identity.
+        item = Item(id=0, name=name, price=price, in_stock=in_stock)
+        new_id = self._store.add(item)
+        item.id = new_id
+        return item
+
+    def replace(self, item_id: int, name: str, price: float, in_stock: bool) -> Optional[Item]:
+        existing = self._store.get(item_id)
+        if existing is None:
+            return None
+        updated = Item(id=item_id, name=name, price=price, in_stock=in_stock)
+        self._store.replace(item_id, updated)
+        return updated
+
+    def delete(self, item_id: int) -> bool:
+        return self._store.delete(item_id)
+
+    def reset(self) -> None:
+        # Convenience for tests / local development; not exposed via the API.
+        self._store.clear()

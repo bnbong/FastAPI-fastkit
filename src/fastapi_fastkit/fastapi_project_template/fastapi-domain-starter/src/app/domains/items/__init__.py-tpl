@@ -1,0 +1,9 @@
+# Re-exports for the items domain so callers can write:
+#   from src.app.domains.items import service
+from src.app.domains.items import (  # noqa: F401
+    models,
+    repository,
+    router,
+    schemas,
+    service,
+)

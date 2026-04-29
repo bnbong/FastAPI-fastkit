@@ -57,6 +57,29 @@ class TemplateTestConfig:
             "fastapi-mcp": {
                 "expected_files": list(metadata["expected_files"]),
             },
+            # Pyproject-first domain-oriented starter — no setup.py, the
+            # FastAPI app entry point lives under src/app/, and domains are
+            # grouped under src/app/domains/.
+            "fastapi-domain-starter": {
+                "expected_files": [
+                    "README.md",
+                    "pyproject.toml",
+                    "src/app/main.py",
+                    "src/app/core/config.py",
+                    "src/app/api/health.py",
+                    "src/app/domains/items/router.py",
+                ],
+                "required_dirs": [
+                    "src",
+                    "tests",
+                    "src/app",
+                    "src/app/core",
+                    "src/app/db",
+                    "src/app/api",
+                    "src/app/domains",
+                    "src/app/domains/items",
+                ],
+            },
         }
 
         if template_name in template_configs:
@@ -205,6 +228,48 @@ class TestAllTemplates:
         assert templates == sorted(
             templates
         ), "Templates should be sorted for consistent test order"
+
+    @pytest.mark.parametrize("package_manager", ["pip", "uv", "pdm", "poetry"])
+    def test_fastapi_domain_starter_supports_all_package_managers(
+        self, package_manager: str, temp_dir: str
+    ) -> None:
+        """Regression: domain-starter must succeed under every supported manager.
+
+        The pyproject-first template still needs to work when a user picks
+        ``pip``, ``pdm``, or ``poetry`` from the CLI prompt — otherwise the
+        recommended modern default would be silently broken on three of the
+        four supported package managers.
+        """
+        # Given
+        project_name = f"manager-test-{package_manager}"
+        result = self.runner.invoke(
+            fastkit_cli,
+            ["startdemo", "fastapi-domain-starter"],
+            input="\n".join(
+                [
+                    project_name,
+                    "test-author",
+                    "test@example.com",
+                    "Domain starter package-manager check",
+                    package_manager,
+                    "Y",  # Proceed with project creation
+                    "Y",  # Create new project folder
+                ]
+            ),
+        )
+
+        # Then
+        project_path = Path(temp_dir) / project_name
+        assert result.exit_code == 0, (
+            f"startdemo failed for fastapi-domain-starter with "
+            f"{package_manager}: {result.output}"
+        )
+        assert (
+            project_path.exists()
+        ), f"Project directory missing for {package_manager} run"
+        assert is_fastkit_project(str(project_path))
+        assert (project_path / "pyproject.toml").exists()
+        assert (project_path / "src" / "app" / "main.py").exists()
 
     @pytest.mark.parametrize("template_name", TemplateTestConfig.discover_templates())
     def test_template_structure_validation(self, template_name: str) -> None:
