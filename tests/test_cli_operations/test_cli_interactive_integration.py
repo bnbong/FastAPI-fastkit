@@ -514,6 +514,56 @@ class TestCLIInteractiveMode:
             f"output:\n{result.output}"
         )
 
+        # The confirmation summary must surface the architecture preset
+        # row regardless of which preset the user picked. Issue #46
+        # acceptance: "Tests fail if preset-specific output regresses in
+        # key files OR DIRECTORIES" — the preset row in the summary table
+        # is the single user-facing artefact that ties the choice to the
+        # generated layout.
+        #
+        # Be careful with the slicing. The bare label "Architecture
+        # Preset" appears earlier in the captured output (the prompt
+        # header), and the chosen preset id + em-dash also appear LATER
+        # in the captured output (e.g. inside the "Preset compatibility"
+        # warning text for preserve-main presets). To isolate just the
+        # summary table content, bound the section at the table title on
+        # one side and at the "Total dependencies to install" line that
+        # ``confirm_selections`` always prints right after the table on
+        # the other.
+        title_marker = "Project Configuration Summary"
+        end_marker = "Total dependencies to install"
+        assert title_marker in result.output, (
+            f"[{suffix}] confirmation summary table missing entirely.\n"
+            f"output:\n{result.output}"
+        )
+        assert end_marker in result.output, (
+            f"[{suffix}] 'Total dependencies' marker missing — "
+            f"summary table never closed.\n"
+            f"output:\n{result.output}"
+        )
+        summary_section = result.output.split(title_marker, 1)[1].split(end_marker, 1)[
+            0
+        ]
+
+        # All three summary-specific signals must appear inside the
+        # bounded section: the row label, the chosen preset id, and the
+        # em-dash separator from the cell's "<id> — <description>"
+        # format. Neither the prompt header nor any later CLI output
+        # provides all three at once.
+        assert "Architecture Preset" in summary_section, (
+            f"[{suffix}] summary section missing 'Architecture Preset' row.\n"
+            f"summary section:\n{summary_section}"
+        )
+        assert suffix in summary_section, (
+            f"[{suffix}] chosen preset id missing from summary section.\n"
+            f"summary section:\n{summary_section}"
+        )
+        assert "—" in summary_section, (
+            f"[{suffix}] em-dash separator missing from summary section "
+            f"(expected '<id> — <description>' format).\n"
+            f"summary section:\n{summary_section}"
+        )
+
         # The base template's signature file ends up in the project, which
         # is how we tell that the strategist picked the right template.
         main_py = project_path / main_relpath
