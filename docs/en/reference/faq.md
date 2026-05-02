@@ -182,7 +182,10 @@ Interactive mode walks you through these steps in order:
 
 1. **Project information** — name, author, email, description.
 2. **Architecture preset** — picks the project layout. The recommended
-   default is `domain-starter`; press Enter to accept it.
+   default is `domain-starter`; press Enter to accept it. See the
+   [preset / feature matrix](preset-feature-matrix.md) for the exact
+   layout each preset produces and which feature combinations require
+   manual wiring.
 3. **Feature selections** — database, authentication, background tasks,
    caching, monitoring, testing, utilities, deployment.
 4. **Package manager and custom packages** — pip / uv / pdm / poetry,

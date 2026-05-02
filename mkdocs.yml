@@ -140,6 +140,7 @@ nav:
     - Translation Guide: contributing/translation-guide.md
   - Reference:
     - FAQ: reference/faq.md
+    - Architecture Preset Matrix: reference/preset-feature-matrix.md
     - Template Quality Assurance: reference/template-quality-assurance.md
   - Changelog: changelog.md
 
