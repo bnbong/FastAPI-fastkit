@@ -422,8 +422,17 @@ def init(
         try:
             user_local = settings.USER_WORKSPACE
 
-            # Use fastapi-empty template as base
-            template = "fastapi-empty"
+            # Pick the base template from the architecture preset chosen
+            # earlier in the interactive flow. Older callers without a
+            # preset fall back to ``minimal`` (= fastapi-empty), preserving
+            # pre-#45 behaviour.
+            from fastapi_fastkit.backend.project_builder import (
+                PresetLayoutStrategist,
+            )
+
+            preset_id = config.get("architecture_preset")
+            strategist = PresetLayoutStrategist(preset_id)
+            template = strategist.base_template
             template_dir = settings.FASTKIT_TEMPLATE_ROOT
             target_template = os.path.join(template_dir, template)
 
@@ -472,38 +481,44 @@ def init(
 
             generator = DynamicConfigGenerator(config, project_dir)
 
-            # Generate main.py with selected features
-            main_py_content = generator.generate_main_py()
-            main_py_path = os.path.join(project_dir, "src", "main.py")
-            if not os.path.exists(main_py_path):
-                main_py_path = os.path.join(project_dir, "main.py")
+            # main.py overlay — only regenerated for presets that ship a
+            # placeholder app (minimal, single-module). For richer presets
+            # (classic-layered, domain-starter) we keep the template's
+            # router-aware main.py intact.
+            #
+            # The strategist's ``main_py_target`` is always ``src/main.py``
+            # for both regenerate-main presets, and both fastapi-empty and
+            # fastapi-single-module ship that file, so we can write
+            # straight to the strategist's path without a flat-``main.py``
+            # fallback branch.
+            if strategist.should_regenerate_main:
+                main_py_path = strategist.main_py_target(project_dir)
+                main_py_path.parent.mkdir(parents=True, exist_ok=True)
+                main_py_path.write_text(generator.generate_main_py())
+            else:
+                print_info(
+                    f"Preserving template-shipped main.py for preset "
+                    f"'{strategist.preset_id}'."
+                )
 
-            with open(main_py_path, "w") as f:
-                f.write(main_py_content)
-
-            # Generate database configuration if selected
+            # Generate database configuration if selected — preset chooses
+            # where the file lives so it sits next to the existing structure.
             db_info = config.get("database", {})
             if isinstance(db_info, dict) and db_info.get("type") != "None":
                 db_config_content = generator.generate_database_config()
                 if db_config_content:
-                    db_config_path = os.path.join(
-                        project_dir, "src", "config", "database.py"
-                    )
-                    os.makedirs(os.path.dirname(db_config_path), exist_ok=True)
-                    with open(db_config_path, "w") as f:
-                        f.write(db_config_content)
+                    db_config_path = strategist.db_config_target(project_dir)
+                    db_config_path.parent.mkdir(parents=True, exist_ok=True)
+                    db_config_path.write_text(db_config_content)
 
             # Generate auth configuration if selected
             auth_type = config.get("authentication", "None")
             if auth_type != "None":
                 auth_config_content = generator.generate_auth_config()
                 if auth_config_content:
-                    auth_config_path = os.path.join(
-                        project_dir, "src", "config", "auth.py"
-                    )
-                    os.makedirs(os.path.dirname(auth_config_path), exist_ok=True)
-                    with open(auth_config_path, "w") as f:
-                        f.write(auth_config_content)
+                    auth_config_path = strategist.auth_config_target(project_dir)
+                    auth_config_path.parent.mkdir(parents=True, exist_ok=True)
+                    auth_config_path.write_text(auth_config_content)
 
             # Generate test configuration if testing selected
             testing_type = config.get("testing", "None")
@@ -517,8 +532,19 @@ def init(
             # Generate Docker files if deployment selected
             deployment = config.get("deployment", [])
             if deployment and deployment != ["None"]:
-                generator.generate_docker_files()
+                # Thread the preset-aware app module so the generated
+                # Dockerfile's ``CMD ["uvicorn", "<module>:app", ...]``
+                # matches the layout the user actually generated. Default
+                # ``src.main:app`` only works for minimal / single-module /
+                # classic-layered; domain-starter needs ``src.app.main:app``.
+                generator.generate_docker_files(app_module=strategist.app_module)
                 print_success("Generated Docker deployment files")
+
+            # Surface preset-specific warnings (e.g. "you picked a preset
+            # whose shipped main.py we kept; CORS/Prometheus must be wired
+            # manually").
+            for warning in strategist.compatibility_warnings(config):
+                print_warning(warning, title="Preset compatibility")
 
             print_success("Generated configuration files for selected stack")
 

@@ -10,8 +10,11 @@
 # --------------------------------------------------------------------------
 from .config_generator import DynamicConfigGenerator
 from .dependency_collector import DependencyCollector
+from .preset_layout import PresetLayoutStrategist, PresetProfile
 
 __all__ = [
     "DependencyCollector",
     "DynamicConfigGenerator",
+    "PresetLayoutStrategist",
+    "PresetProfile",
 ]

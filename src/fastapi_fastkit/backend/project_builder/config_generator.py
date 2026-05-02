@@ -447,12 +447,20 @@ class DynamicConfigGenerator:
 
         return "\n".join(content)
 
-    def generate_docker_files(self) -> None:
-        """Generate Dockerfile and docker-compose.yml."""
+    def generate_docker_files(self, app_module: str = "src.main:app") -> None:
+        """Generate Dockerfile and docker-compose.yml.
+
+        The ``app_module`` is the ``module:attr`` string baked into the
+        Dockerfile's ``CMD`` (and into docker-compose's `command` if the
+        compose generator ever needs it). Architecture presets that put
+        the FastAPI app at a non-default location (e.g. ``domain-starter``
+        ships ``src/app/main.py``) must pass the matching dotted path so
+        the generated container actually starts.
+        """
         deployment = self.config.get("deployment", [])
 
         if "Docker" in deployment:
-            dockerfile_content = self._generate_dockerfile()
+            dockerfile_content = self._generate_dockerfile(app_module=app_module)
             dockerfile_path = self.project_dir / "Dockerfile"
             with open(dockerfile_path, "w") as f:
                 f.write(dockerfile_content)
@@ -463,8 +471,8 @@ class DynamicConfigGenerator:
             with open(compose_path, "w") as f:
                 f.write(compose_content)
 
-    def _generate_dockerfile(self) -> str:
-        """Generate Dockerfile content."""
+    def _generate_dockerfile(self, app_module: str = "src.main:app") -> str:
+        """Generate Dockerfile content with a layout-aware uvicorn target."""
         content = []
         content.append(
             "# --------------------------------------------------------------------------"
@@ -487,7 +495,7 @@ class DynamicConfigGenerator:
         content.append("")
         content.append("# Run application")
         content.append(
-            'CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]'
+            f'CMD ["uvicorn", "{app_module}", "--host", "0.0.0.0", "--port", "8000"]'
         )
         content.append("")
 
