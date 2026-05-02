@@ -130,6 +130,21 @@ class PresetLayoutStrategist:
         """Absolute path where the dynamic main.py overlay should land."""
         return Path(project_dir) / self.profile.main_py_relpath
 
+    @property
+    def app_module(self) -> str:
+        """Return the ``module:attr`` string uvicorn / Docker should target.
+
+        Derived from ``main_py_relpath`` so docker generation, runserver,
+        and any future container-orchestration code all agree on the
+        entrypoint a given preset produces.
+        """
+        # Strip the trailing ``.py`` and convert path separators to dots.
+        relpath = self.profile.main_py_relpath
+        if relpath.endswith(".py"):
+            relpath = relpath[: -len(".py")]
+        module_part = relpath.replace("/", ".").replace("\\", ".")
+        return f"{module_part}:app"
+
     def db_config_target(self, project_dir: str) -> Path:
         """Absolute path for the generated database config module."""
         return Path(project_dir) / self.profile.db_config_relpath

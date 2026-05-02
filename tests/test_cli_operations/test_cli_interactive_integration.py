@@ -349,6 +349,90 @@ class TestCLIInteractiveMode:
         ),
     ]
 
+    @patch("fastapi_fastkit.cli.subprocess.run")
+    @patch("fastapi_fastkit.backend.package_managers.uv_manager.UvManager.is_available")
+    def test_domain_starter_dockerfile_targets_src_app_main(
+        self,
+        mock_uv_available: MagicMock,
+        mock_subprocess: MagicMock,
+        temp_dir: str,
+    ) -> None:
+        """Regression for Codex P1 on PR #55.
+
+        domain-starter ships ``src/app/main.py``; the generated Dockerfile's
+        ``CMD`` must target ``src.app.main:app``, not the legacy default
+        ``src.main:app`` — otherwise the container fails to boot.
+        """
+        # given
+        os.chdir(temp_dir)
+        project_name = "docker-domain-starter"
+        mock_uv_available.return_value = True
+
+        def _mock_subprocess(*args: Any, **kwargs: Any) -> MagicMock:
+            if args and "venv" in str(args[0]):
+                venv_path = Path(temp_dir) / project_name / ".venv"
+                venv_path.mkdir(parents=True, exist_ok=True)
+                bin_dir = "Scripts" if os.name == "nt" else "bin"
+                (venv_path / bin_dir).mkdir(exist_ok=True)
+            mock_result = MagicMock()
+            mock_result.returncode = 0
+            return mock_result
+
+        mock_subprocess.side_effect = _mock_subprocess
+
+        # when — pick the domain-starter preset and Docker-only deployment.
+        result = self.runner.invoke(
+            fastkit_cli,
+            ["init", "--interactive"],
+            input="\n".join(
+                [
+                    project_name,
+                    "Docker Tester",
+                    "docker@test.com",
+                    "Domain-starter Docker regression",
+                    "4",  # Architecture preset: domain-starter
+                    "6",  # Database: None (last option)
+                    "5",  # Authentication: None (last option)
+                    "3",  # Background Tasks: None (last option)
+                    "2",  # Caching: None (last option)
+                    "4",  # Monitoring: None (last option)
+                    "1",  # Testing: Basic
+                    "",  # Utilities: skip
+                    "1",  # Deployment: Docker
+                    "2",  # Package manager: uv
+                    "",  # Custom packages: skip
+                    "Y",  # Proceed
+                    "Y",  # Create project folder
+                ]
+            ),
+        )
+
+        # then
+        project_path = Path(temp_dir) / project_name
+        assert project_path.exists(), (
+            f"project not created. exit_code={result.exit_code}\n"
+            f"output:\n{result.output}"
+        )
+
+        dockerfile = project_path / "Dockerfile"
+        assert dockerfile.exists(), (
+            f"Dockerfile missing despite Docker deployment selection.\n"
+            f"output:\n{result.output}"
+        )
+
+        content = dockerfile.read_text()
+        assert "src.app.main:app" in content, (
+            "Domain-starter Dockerfile must target src.app.main:app; "
+            "the CMD currently reads:\n"
+            + "\n".join(
+                line for line in content.splitlines() if line.startswith("CMD ")
+            )
+        )
+        assert '"src.main:app"' not in content, (
+            "Bogus legacy default src.main:app leaked into the generated "
+            "Dockerfile despite the preset override."
+        )
+
     @pytest.mark.parametrize(
         "preset_choice,suffix,base_template_name,main_relpath,db_relpath,regenerates_main",
         _PRESET_LAYOUT_CASES,

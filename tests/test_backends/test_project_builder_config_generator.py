@@ -368,6 +368,35 @@ class TestGenerateDockerFiles:
             assert parsed[0] == "uvicorn"
             assert "src.main:app" in parsed
 
+    def test_generated_dockerfile_honors_custom_app_module(self) -> None:
+        """The Dockerfile CMD must target the caller-supplied app module.
+
+        Regression for the Codex P1 finding on PR #55: domain-starter
+        ships ``src/app/main.py``, so the default ``src.main:app`` would
+        produce a container that fails at startup. Callers (like the
+        interactive init flow, via ``PresetLayoutStrategist.app_module``)
+        thread the layout-correct module through ``generate_docker_files``.
+        """
+        # given
+        with tempfile.TemporaryDirectory() as tmp:
+            config = {"deployment": ["Docker"]}
+            generator = DynamicConfigGenerator(config, tmp)
+
+            # when
+            generator.generate_docker_files(app_module="src.app.main:app")
+
+            # then
+            dockerfile = Path(tmp) / "Dockerfile"
+            content = dockerfile.read_text()
+            cmd_lines = [
+                line for line in content.splitlines() if line.startswith("CMD ")
+            ]
+            assert len(cmd_lines) == 1
+            parsed = json.loads(cmd_lines[0][len("CMD ") :])
+            assert "src.app.main:app" in parsed
+            # The bogus default must not leak in alongside the override.
+            assert "src.main:app" not in parsed
+
 
 class TestHelperMethods:
     """Test cases for helper methods."""

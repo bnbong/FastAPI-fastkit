@@ -123,6 +123,25 @@ class TestFileTargets:
         assert strategist.auth_config_target(project) == Path(project) / expected_auth
 
 
+class TestAppModule:
+    """The ``app_module`` property must match each preset's main.py path."""
+
+    @pytest.mark.parametrize(
+        "preset_id, expected_app_module",
+        [
+            ("minimal", "src.main:app"),
+            ("single-module", "src.main:app"),
+            ("classic-layered", "src.main:app"),
+            ("domain-starter", "src.app.main:app"),
+        ],
+    )
+    def test_app_module_matches_main_py_path(
+        self, preset_id: str, expected_app_module: str
+    ) -> None:
+        strategist = PresetLayoutStrategist(preset_id)
+        assert strategist.app_module == expected_app_module
+
+
 class TestCompatibilityWarnings:
     """Warnings only fire on presets that don't regenerate main.py."""
 

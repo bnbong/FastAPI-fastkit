@@ -8,7 +8,6 @@ import os
 import shutil
 import subprocess
 import sys
-from pathlib import Path
 from typing import Union, cast
 
 import click
@@ -486,12 +485,14 @@ def init(
             # placeholder app (minimal, single-module). For richer presets
             # (classic-layered, domain-starter) we keep the template's
             # router-aware main.py intact.
+            #
+            # The strategist's ``main_py_target`` is always ``src/main.py``
+            # for both regenerate-main presets, and both fastapi-empty and
+            # fastapi-single-module ship that file, so we can write
+            # straight to the strategist's path without a flat-``main.py``
+            # fallback branch.
             if strategist.should_regenerate_main:
                 main_py_path = strategist.main_py_target(project_dir)
-                if not main_py_path.exists():
-                    fallback = Path(project_dir) / "main.py"
-                    if fallback.exists():
-                        main_py_path = fallback
                 main_py_path.parent.mkdir(parents=True, exist_ok=True)
                 main_py_path.write_text(generator.generate_main_py())
             else:
@@ -531,7 +532,12 @@ def init(
             # Generate Docker files if deployment selected
             deployment = config.get("deployment", [])
             if deployment and deployment != ["None"]:
-                generator.generate_docker_files()
+                # Thread the preset-aware app module so the generated
+                # Dockerfile's ``CMD ["uvicorn", "<module>:app", ...]``
+                # matches the layout the user actually generated. Default
+                # ``src.main:app`` only works for minimal / single-module /
+                # classic-layered; domain-starter needs ``src.app.main:app``.
+                generator.generate_docker_files(app_module=strategist.app_module)
                 print_success("Generated Docker deployment files")
 
             # Surface preset-specific warnings (e.g. "you picked a preset
