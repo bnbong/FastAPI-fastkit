@@ -190,5 +190,9 @@ is the reference page for that.
 - [Quick Start](quick-start.md) — actually create your first project.
 - [Creating Projects](creating-projects.md) — deeper walkthrough of the
   CLI flags.
+- [Domain-oriented Project tutorial](../tutorial/domain-starter.md) —
+  if you picked `domain-starter`, this is the end-to-end walkthrough of
+  the generated tree, the bundled `items` example, and how to add your
+  next domain.
 - [Architecture Preset Matrix](../reference/preset-feature-matrix.md) —
   the full per-preset / per-feature contract.

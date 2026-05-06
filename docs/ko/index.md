@@ -22,6 +22,14 @@
 
 이 프로젝트는 `SpringBoot initializer` 및 Python Django의 `django-admin` CLI 동작에서 영감을 받았습니다.
 
+!!! info "번역 상태"
+    이 문서의 **원본은 영어 (`en`)** 입니다. 한국어 번역은 일부 페이지에만
+    제공되며, 번역되지 않은 페이지는 영어 원문으로 표시됩니다. 각 언어의
+    실제 번역 진행 상황은
+    [Translation Status](reference/translation-status.md) 페이지를
+    확인해 주세요. 영어 페이지와 번역 페이지의 내용이 다르다면 영어
+    페이지를 기준으로 삼으세요.
+
 ## 주요 기능
 
 - **⚡ Immediate FastAPI project creation** : [Python Django](https://github.com/django/django)의 `django-admin` 기능에서 영감을 받은 CLI를 통해 초고속 FastAPI 워크스페이스 및 프로젝트 생성

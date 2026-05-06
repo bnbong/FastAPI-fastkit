@@ -22,6 +22,12 @@ This project was created to speed up the configuration of the development enviro
 
 This project was inspired by the `SpringBoot initializer` & Python Django's `django-admin` cli operation.
 
+!!! info "Translation status"
+    English is the source of truth for these docs. Other languages in
+    the language switcher may be partial or fall back to English page by
+    page. See [Translation Status](reference/translation-status.md) for
+    each locale's actual completeness.
+
 ## Key Features
 
 - **⚡ Immediate FastAPI project creation** : Super-fast FastAPI workspace & project creation via CLI, inspired by `django-admin` feature of [Python Django](https://github.com/django/django)
@@ -481,6 +487,7 @@ Learn FastAPI development through practical use cases with our pre-built templat
 
 - **[Building a Basic API Server](tutorial/basic-api-server.md)** - Create your first FastAPI server using the `fastapi-default` template
 - **[Building an Asynchronous CRUD API](tutorial/async-crud-api.md)** - Develop a high-performance async API with the `fastapi-async-crud` template
+- **[Domain-oriented Project (Domain Starter)](tutorial/domain-starter.md)** - Build a medium-sized API with the `fastapi-domain-starter` template, the recommended modern default
 
 ### 🗄️ Database & Infrastructure
 

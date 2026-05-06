@@ -130,6 +130,7 @@ nav:
     - Your First Project: tutorial/first-project.md
     - Implementing Basic API Server: tutorial/basic-api-server.md
     - Implementing Asynchronous CRUD API: tutorial/async-crud-api.md
+    - Domain-oriented Project (Domain Starter): tutorial/domain-starter.md
     - Database Integration: tutorial/database-integration.md
     - Docker Deployment: tutorial/docker-deployment.md
     - Implementing Custom Response Handling: tutorial/custom-response-handling.md
@@ -143,6 +144,7 @@ nav:
     - FAQ: reference/faq.md
     - Architecture Preset Matrix: reference/preset-feature-matrix.md
     - Template Quality Assurance: reference/template-quality-assurance.md
+    - Translation Status: reference/translation-status.md
   - Changelog: changelog.md
 
 markdown_extensions:

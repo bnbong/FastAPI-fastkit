@@ -119,6 +119,10 @@ The `FastAPI-fastkit` is an open-source project that helps Python and
 FastAPI beginners quickly set up a FastAPI-based application development
 environment in a framework-like structure.
 
+For an end-to-end walkthrough of this template — the generated tree,
+the bundled `items` example, and how to add your next domain — see the
+[**Domain-oriented Project tutorial**](https://bnbong.github.io/FastAPI-fastkit/tutorial/domain-starter/).
+
 ### Template Information
 - Template creator: [bnbong](mailto:bbbong9@gmail.com)
 - FastAPI-fastkit project maintainer: [bnbong](mailto:bbbong9@gmail.com)
