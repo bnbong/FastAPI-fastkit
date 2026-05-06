@@ -29,14 +29,14 @@ next section explains).
 | Locale | Status | Markdown pages | Notes |
 |---|---|---:|---|
 | 🇬🇧 English (`en`) | ✅ Source of truth | 26 / 26 | Authoritative. |
-| 🇰🇷 Korean (`ko`) | 🟡 Partial | 2 / 26 | `index.md`, `changelog.md`. Other pages fall back to English. |
+| 🇰🇷 Korean (`ko`) | 🟡 Partial | 8 / 26 | `index.md`, `changelog.md`, `reference/translation-status.md`, plus 5 user-guide pages (`installation`, `quick-start`, `creating-projects`, `using-templates`, `choosing-a-starter`). Other pages fall back to English. |
 | 🇯🇵 Japanese (`ja`) | 🔴 Skeleton | 0 / 26 | Build target only. Every page falls back to English. |
 | 🇨🇳 Chinese (`zh`) | 🔴 Skeleton | 0 / 26 | Build target only. Every page falls back to English. |
 | 🇪🇸 Spanish (`es`) | 🔴 Skeleton | 0 / 26 | Build target only. Every page falls back to English. |
 | 🇫🇷 French (`fr`) | 🔴 Skeleton | 0 / 26 | Build target only. Every page falls back to English. |
 | 🇩🇪 German (`de`) | 🔴 Skeleton | 0 / 26 | Build target only. Every page falls back to English. |
 
-*Snapshot verified 2026-05-06.* These counts are maintained by hand;
+*Snapshot verified 2026-05-06; ko row recounted for the current branch.* These counts are maintained by hand;
 to recount the current state from the repo root, run:
 
 ```console
