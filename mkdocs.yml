@@ -120,6 +120,7 @@ nav:
   - User Guide:
     - Installation: user-guide/installation.md
     - Quick Start: user-guide/quick-start.md
+    - Choosing a Starter: user-guide/choosing-a-starter.md
     - Creating Projects: user-guide/creating-projects.md
     - Adding Routes: user-guide/adding-routes.md
     - Using Templates: user-guide/using-templates.md

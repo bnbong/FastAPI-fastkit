@@ -275,35 +275,54 @@ Select package manager (pip, uv, pdm, poetry): uv
 📝 Custom Packages (optional)
 Enter custom package names (comma-separated, press Enter to skip):
 
-───────────────── Selected Configuration ─────────────────
-Project: my-fullstack-project
-Database: PostgreSQL
-Authentication: JWT
-Background Tasks: Celery
-Caching: Redis
-Monitoring: Prometheus
-Testing: Coverage
-Utilities: CORS
-Deployment: Docker, docker-compose
-Package Manager: uv
-──────────────────────────────────────────────────────────
+📋 Project Configuration Summary
+┌─────────────────────┬───────────────────────────────────────────────────────────────────────────┐
+│ Setting             │ Value                                                                     │
+├─────────────────────┼───────────────────────────────────────────────────────────────────────────┤
+│ Project Name        │ my-fullstack-project                                                      │
+│ Author              │ John Doe                                                                  │
+│ Email               │ john@example.com                                                          │
+│ Description         │ Full-stack FastAPI project with PostgreSQL and JWT                        │
+│ Architecture Preset │ domain-starter — Domain-oriented: src/app/domains/<concept>/ (recommended)│
+│ Database            │ PostgreSQL                                                                │
+│ Authentication      │ JWT                                                                       │
+│ Async Tasks         │ Celery                                                                    │
+│ Caching             │ Redis                                                                     │
+│ Monitoring          │ Prometheus                                                                │
+│ Testing             │ Coverage                                                                  │
+│ Utilities           │ CORS                                                                      │
+│ Package Manager     │ uv                                                                        │
+└─────────────────────┴───────────────────────────────────────────────────────────────────────────┘
+
+Total dependencies to install: 18
 
 Proceed with project creation? [Y/n]: y
 
+╭──────────────────────── Info ────────────────────────╮
+│ ℹ Injected metadata into pyproject.toml              │
+╰──────────────────────────────────────────────────────╯
 ╭─────────────────────── Success ───────────────────────╮
-│ ✨ Generated main.py with selected features           │
+│ ✨ Generated dependency file with 18 packages         │
 ╰───────────────────────────────────────────────────────╯
-╭─────────────────────── Success ───────────────────────╮
-│ ✨ Generated database configuration                   │
-╰───────────────────────────────────────────────────────╯
-╭─────────────────────── Success ───────────────────────╮
-│ ✨ Generated authentication configuration             │
-╰───────────────────────────────────────────────────────╯
-╭─────────────────────── Success ───────────────────────╮
-│ ✨ Generated test configuration                       │
-╰───────────────────────────────────────────────────────╯
+╭──────────────────────── Info ────────────────────────╮
+│ ℹ Preserving template-shipped main.py for preset     │
+│ 'domain-starter'.                                    │
+╰──────────────────────────────────────────────────────╯
 ╭─────────────────────── Success ───────────────────────╮
 │ ✨ Generated Docker deployment files                  │
+╰───────────────────────────────────────────────────────╯
+╭────────────────────── Warning ────────────────────────╮
+│ ⚠ Preset compatibility                               │
+│ fastapi-domain-starter's shipped src/app/main.py is  │
+│ preserved. The selections below need manual wiring   │
+│ there (CORS is already wired — set                   │
+│ BACKEND_CORS_ORIGINS in .env to activate it).        │
+│ Affected selections (packages installed, but no      │
+│ dynamic main.py edits applied for the                │
+│ 'domain-starter' preset): Prometheus                 │
+╰───────────────────────────────────────────────────────╯
+╭─────────────────────── Success ───────────────────────╮
+│ ✨ Generated configuration files for selected stack   │
 ╰───────────────────────────────────────────────────────╯
 
 Creating virtual environment...
@@ -312,27 +331,21 @@ Installing dependencies...
 ----> 100%
 
 ╭─────────────────────── Success ───────────────────────╮
-│ ✨ FastAPI project 'my-fullstack-project' created!    │
-│                                                       │
-│ Generated files:                                      │
-│   • main.py (with all selected features)             │
-│   • src/config/database.py                           │
-│   • src/config/auth.py                               │
-│   • tests/conftest.py                                │
-│   • Dockerfile                                       │
-│   • docker-compose.yml                               │
-│   • pyproject.toml / requirements.txt                │
+│ ✨ FastAPI project 'my-fullstack-project' from        │
+│ 'fastapi-domain-starter' has been created!            │
 ╰───────────────────────────────────────────────────────╯
 ```
 
 </div>
 
 The interactive mode provides:
+- **Architecture preset selection** (`minimal` / `single-module` / `classic-layered` / `domain-starter`) that picks the right base template and project layout
 - **Guided selection** for databases, authentication, background tasks, caching, monitoring, and more
-- **Auto-generated code** for selected features (main.py, config files, Docker files)
+- **Auto-generated code** for selected features — varies by preset (regenerated `main.py` for `minimal` / `single-module`; preserve template-shipped `main.py` and overlay config modules for `classic-layered` / `domain-starter`)
+- **Preset-aware Docker generation** — the generated `Dockerfile` `CMD` targets the preset's actual entrypoint (`src.main:app` or `src.app.main:app`)
 - **Smart dependency management** with automatic pip compatibility
-- **Feature validation** to prevent incompatible combinations
-- **Always Empty project** as base for maximum flexibility
+- **Feature validation** with manual-wiring warnings for selections the preset cannot auto-wire
+- **Identity markers** in the generated `pyproject.toml` (description marker + `[tool.fastapi-fastkit]` table) so `is_fastkit_project()` can recognize generated projects later
 
 ### Add a new route to the FastAPI project
 
@@ -434,18 +447,19 @@ To view the list of available FastAPI demos, check with:
 
 ```console
 $ fastkit list-templates
-                      Available Templates
-┌─────────────────────────┬───────────────────────────────────┐
-│ fastapi-custom-response │ Async Item Management API with    │
-│                         │ Custom Response System            │
-│ fastapi-dockerized      │ Dockerized FastAPI Item           │
-│                         │ Management API                    │
-│ fastapi-empty           │ No description                    │
-│ fastapi-async-crud      │ Async Item Management API Server  │
-│ fastapi-psql-orm        │ Dockerized FastAPI Item           │
-│                         │ Management API with PostgreSQL    │
-│ fastapi-default         │ Simple FastAPI Project            │
-└─────────────────────────┴───────────────────────────────────┘
+                              Available Templates
+┌────────────────────────┬───────────────────────────────────────────────────────┐
+│ fastapi-custom-response│ Async Item Management API with Custom Response System │
+│ fastapi-mcp            │ FastAPI MCP Project                                   │
+│ fastapi-domain-starter │ FastAPI Domain Starter                                │
+│ fastapi-dockerized     │ Dockerized FastAPI Item Management API                │
+│ fastapi-empty          │ Minimal FastAPI Template                              │
+│ fastapi-async-crud     │ Async Item Management API Server                      │
+│ fastapi-psql-orm       │ Dockerized FastAPI Item Management API with           │
+│                        │ PostgreSQL                                            │
+│ fastapi-default        │ Simple FastAPI Project                                │
+│ fastapi-single-module  │ FastAPI Single Module Template                        │
+└────────────────────────┴───────────────────────────────────────────────────────┘
 ```
 
 </div>

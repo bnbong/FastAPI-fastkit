@@ -2,6 +2,13 @@
 
 Create your first FastAPI project with FastAPI-fastkit in under 5 minutes!
 
+!!! tip "Not sure which starter to pick?"
+    See [**Which starter should I choose?**](choosing-a-starter.md) for a
+    beginner-friendly comparison of `startdemo` templates and interactive
+    architecture presets (`minimal` / `single-module` / `classic-layered`
+    / `domain-starter`). The short answer: **`fastkit init --interactive`
+    with the `domain-starter` preset is the recommended modern default.**
+
 ## 1. Create Project
 
 Use FastAPI-fastkit's `init` command to create a new project:
