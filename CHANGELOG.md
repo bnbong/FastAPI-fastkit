@@ -1,20 +1,53 @@
 # Changelog
 
-## v1.3.0 (Unreleased)
+## v1.3.0 (2026-05-06)
+
+### Features
+
+- **Architecture preset selection in interactive init**
+  - `fastkit init --interactive` now includes an `Architecture Preset` step with `minimal`, `single-module`, `classic-layered`, and `domain-starter`.
+  - The selected preset is saved in the interactive config and shown in the final summary.
+  - CLI help and interactive docs were updated to match the new flow.
+- **Preset-aware project generation**
+  - Interactive generation now selects a different base template for each preset.
+  - `minimal` and `single-module` continue to use generated `main.py`, while `classic-layered` and `domain-starter` preserve the template-shipped entrypoint.
+  - Database/auth config output paths, compatibility warnings, and app module resolution are now preset-aware.
+  - `fastkit runserver` and generated Dockerfiles now resolve the correct app module for non-default layouts such as `src/app/main.py`.
+
+### Templates
+
+- **Add `fastapi-domain-starter` template**
+  - New pyproject-first, domain-oriented starter for medium-sized FastAPI APIs.
+  - Includes a built-in `/api/v1/health` endpoint and an example `items` domain.
+  - Ships with FastAPI-fastkit identity markers in `pyproject.toml`.
+- Improve template metadata/path handling for the domain-oriented layout.
+- Update template README titles so `fastkit list-templates` shows readable descriptions.
+
+### Documentation
+
+- Add `Choosing a Starter` guide for template and preset selection.
+- Add `Preset Feature Matrix` reference docs for preset-specific generation behavior.
+- Add `fastapi-domain-starter` tutorial and generated project walkthrough.
+- Add translation status and source-of-truth policy docs, plus translation status notices on the English and Korean landing pages.
+- Refresh CLI examples and fix the Korean `init --interactive` walkthrough so docs match the current flow.
+
+### Tests
+
+- Add end-to-end coverage for architecture presets and `fastapi-domain-starter`.
+- Add regression tests for preset layout decisions, app module derivation, and interactive summary rendering.
+- Add package-manager compatibility coverage for `fastapi-domain-starter`, including the `pip` path.
+- Suite size: **612 tests passing** at the close of v1.3.0.
 
 ### Maintenances
 
-- **Modernize template contract to be pyproject-first** (#42)
-  - Template inspection now accepts `pyproject.toml-tpl` (PEP 621) as the primary metadata file. A template passes structural validation as long as `tests/`, `README.md-tpl`, and **at least one** of `pyproject.toml-tpl` / `setup.py-tpl` are present. `requirements.txt-tpl` is no longer strictly required when `pyproject.toml-tpl` declares `[project].dependencies`.
-  - `_check_dependencies` consults every available source (`requirements.txt-tpl`, `pyproject.toml-tpl` `[project].dependencies`, `setup.py-tpl` `install_requires`) independently and passes if **any** one declares `fastapi`. A template with a stale `requirements.txt-tpl` is no longer rejected when its `pyproject.toml-tpl` is authoritative.
-  - `read_template_stack` gained a pyproject fallback between the existing `requirements.txt-tpl` and `setup.py-tpl` paths; legacy templates resolve dependencies exactly as before.
-  - Template authoring docs (`src/fastapi_fastkit/fastapi_project_template/README.md`, `docs/en/contributing/template-creation-guide.md`, `docs/en/reference/template-quality-assurance.md`) now describe required vs optional files under the pyproject-first contract.
-  - Added focused tests for the new rules (pyproject-only structural and dependency validation, setup.py-only legacy validation, pyproject fallback in `read_template_stack`, and `requirements.txt-tpl`-over-pyproject precedence).
-- **Pyproject-aware project identity detection** (follow-up to #42)
-  - `is_fastkit_project()` now recognises FastAPI-fastkit-managed projects from `pyproject.toml` in addition to legacy `setup.py`. Detection precedence: `[tool.fastapi-fastkit].managed = true` → `[project].description` contains the `[FastAPI-fastkit templated]` marker (case-insensitive) → `setup.py` contains `fastapi-fastkit` (case-insensitive). Keeps the pre-existing setup.py path working; the new pyproject paths prevent pyproject-only templates from being mistaken for unrelated FastAPI projects in the user's workspace.
-  - Canonical marker strings (`[FastAPI-fastkit templated]` and the `[tool.fastapi-fastkit]` table key `fastapi-fastkit`) are exported from `fastapi_fastkit.utils.main` as `FASTKIT_DESCRIPTION_MARKER` / `FASTKIT_TOOL_SECTION` so templates, metadata injection, and detection all reference the same strings.
-  - `_process_pyproject_file` idempotently ensures the description marker and `[tool.fastapi-fastkit]\nmanaged = true` section are present after placeholder replacement, providing a safety net when a template author forgets to include them.
-  - All 8 shipped `pyproject.toml-tpl` templates updated to carry `description = "[FastAPI-fastkit templated] <description>"` and a `[tool.fastapi-fastkit]` table with `managed = true`.
+- **Modernize template contract to be pyproject-first**
+  - Template inspection now accepts `pyproject.toml-tpl` as a primary metadata source.
+  - Dependency inspection and `read_template_stack` now support `pyproject.toml-tpl` alongside existing files.
+  - Template authoring and QA docs were updated for the new contract.
+- **Add pyproject-aware project identity detection**
+  - `is_fastkit_project()` now detects FastAPI-fastkit-managed projects from `pyproject.toml` as well as legacy `setup.py`.
+  - Standardize the FastAPI-fastkit description marker and `[tool.fastapi-fastkit] managed = true` metadata across shipped pyproject templates.
+- Add `requirements.txt-tpl` to `fastapi-domain-starter` for full package-manager compatibility, including `pip`.
 
 ## v1.2.1 (2026-04-17)
 
