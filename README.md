@@ -67,6 +67,7 @@ fastkit init --interactive
 ```
 - What it does: Guided step-by-step project setup with intelligent feature selection
 - Features:
+  - **Architecture preset**: `minimal` | `single-module` | `classic-layered` | `domain-starter` (default)
   - **Database selection**: PostgreSQL, MySQL, MongoDB, Redis, SQLite
   - **Authentication**: JWT, OAuth2, FastAPI-Users, Session-based
   - **Background tasks**: Celery, Dramatiq
@@ -77,10 +78,10 @@ fastkit init --interactive
   - **Deployment**: Docker, docker-compose with auto-generated configs
   - **Package manager**: pip, uv, pdm, poetry
   - **Custom packages**: Add your own dependencies
-- Auto-generates:
-  - `main.py` with selected features integrated
-  - Database and authentication configuration files
-  - Docker deployment files (Dockerfile, docker-compose.yml)
+- Auto-generates (varies by preset — see [the matrix](https://bnbong.github.io/FastAPI-fastkit/reference/preset-feature-matrix/) for details):
+  - `main.py` regenerated from selected features for `minimal` / `single-module`; preserved as-shipped for `classic-layered` / `domain-starter`
+  - Database and authentication configuration files at preset-specific paths
+  - Docker deployment files (`Dockerfile`, `docker-compose.yml`) with the preset's correct uvicorn entrypoint
   - Test configuration (pytest with coverage)
 
 ### Create a project from a template
@@ -121,9 +122,11 @@ fastkit deleteproject <project_name>
 
 For comprehensive guides and detailed usage instructions, visit our documentation:
 
+- 🧭 **[Which starter should I choose?](https://bnbong.github.io/FastAPI-fastkit/user-guide/choosing-a-starter/)** - Beginner decision guide for `startdemo` templates and interactive presets
 - 📚 **[User Guide](https://bnbong.github.io/FastAPI-fastkit/user-guide/quick-start/)** - Detailed installation and usage guides
 - 🎯 **[Tutorial](https://bnbong.github.io/FastAPI-fastkit/tutorial/getting-started/)** - Step-by-step tutorials for beginners
 - 📖 **[CLI Reference](https://bnbong.github.io/FastAPI-fastkit/user-guide/cli-reference/)** - Complete command reference
+- 🧱 **[Architecture Preset Matrix](https://bnbong.github.io/FastAPI-fastkit/reference/preset-feature-matrix/)** - Per-preset / per-feature contract for interactive generation
 - 🔍 **[Template Quality Assurance](https://bnbong.github.io/FastAPI-fastkit/reference/template-quality-assurance/)** - Automated testing and quality standards
 
 ## Contributing

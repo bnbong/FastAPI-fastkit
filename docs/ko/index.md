@@ -22,6 +22,14 @@
 
 이 프로젝트는 `SpringBoot initializer` 및 Python Django의 `django-admin` CLI 동작에서 영감을 받았습니다.
 
+!!! info "번역 상태"
+    이 문서의 **원본은 영어 (`en`)** 입니다. 한국어 번역은 일부 페이지에만
+    제공되며, 번역되지 않은 페이지는 영어 원문으로 표시됩니다. 각 언어의
+    실제 번역 진행 상황은
+    [Translation Status](reference/translation-status.md) 페이지를
+    확인해 주세요. 영어 페이지와 번역 페이지의 내용이 다르다면 영어
+    페이지를 기준으로 삼으세요.
+
 ## 주요 기능
 
 - **⚡ Immediate FastAPI project creation** : [Python Django](https://github.com/django/django)의 `django-admin` 기능에서 영감을 받은 CLI를 통해 초고속 FastAPI 워크스페이스 및 프로젝트 생성
@@ -276,36 +284,55 @@ Select monitoring: 3
 📝 사용자 정의 패키지(선택 사항)
 사용자 정의 패키지 이름을 입력하세요(쉼표로 구분, 건너뛰려면 Enter):
 
-───────────────── 선택된 구성 ─────────────────
-프로젝트: my-fullstack-project
-데이터베이스: PostgreSQL
-인증: JWT
-백그라운드 작업: Celery
-캐싱: Redis
-모니터링: Prometheus
-테스트: Coverage
-유틸리티: CORS
-배포: Docker, docker-compose
-패키지 매니저: uv
-──────────────────────────────────────────────────────────
+📋 Project Configuration Summary
+┌─────────────────────┬───────────────────────────────────────────────────────────────────────────┐
+│ Setting             │ Value                                                                     │
+├─────────────────────┼───────────────────────────────────────────────────────────────────────────┤
+│ Project Name        │ my-fullstack-project                                                      │
+│ Author              │ John Doe                                                                  │
+│ Email               │ john@example.com                                                          │
+│ Description         │ Full-stack FastAPI project with PostgreSQL and JWT                        │
+│ Architecture Preset │ domain-starter — Domain-oriented: src/app/domains/<concept>/ (recommended)│
+│ Database            │ PostgreSQL                                                                │
+│ Authentication      │ JWT                                                                       │
+│ Async Tasks         │ Celery                                                                    │
+│ Caching             │ Redis                                                                     │
+│ Monitoring          │ Prometheus                                                                │
+│ Testing             │ Coverage                                                                  │
+│ Utilities           │ CORS                                                                      │
+│ Package Manager     │ uv                                                                        │
+└─────────────────────┴───────────────────────────────────────────────────────────────────────────┘
 
-프로젝트 생성을 진행하시겠습니까? [Y/n]: y
+Total dependencies to install: 18
 
-╭─────────────────────── 성공 ───────────────────────╮
-│ ✨ 선택한 기능이 포함된 main.py 생성              │
-╰────────────────────────────────────────────────────╯
-╭─────────────────────── 성공 ───────────────────────╮
-│ ✨ 데이터베이스 구성 생성                          │
-╰────────────────────────────────────────────────────╯
-╭─────────────────────── 성공 ───────────────────────╮
-│ ✨ 인증 구성 생성                                  │
-╰────────────────────────────────────────────────────╯
-╭─────────────────────── 성공 ───────────────────────╮
-│ ✨ 테스트 구성 생성                                │
-╰────────────────────────────────────────────────────╯
-╭─────────────────────── 성공 ───────────────────────╮
-│ ✨ Docker 배포 파일 생성                           │
-╰────────────────────────────────────────────────────╯
+Proceed with project creation? [Y/n]: y
+
+╭──────────────────────── Info ────────────────────────╮
+│ ℹ Injected metadata into pyproject.toml              │
+╰──────────────────────────────────────────────────────╯
+╭─────────────────────── Success ───────────────────────╮
+│ ✨ Generated dependency file with 18 packages         │
+╰───────────────────────────────────────────────────────╯
+╭──────────────────────── Info ────────────────────────╮
+│ ℹ Preserving template-shipped main.py for preset     │
+│ 'domain-starter'.                                    │
+╰──────────────────────────────────────────────────────╯
+╭─────────────────────── Success ───────────────────────╮
+│ ✨ Generated Docker deployment files                  │
+╰───────────────────────────────────────────────────────╯
+╭────────────────────── Warning ────────────────────────╮
+│ ⚠ Preset compatibility                               │
+│ fastapi-domain-starter's shipped src/app/main.py is  │
+│ preserved. The selections below need manual wiring   │
+│ there (CORS is already wired — set                   │
+│ BACKEND_CORS_ORIGINS in .env to activate it).        │
+│ Affected selections (packages installed, but no      │
+│ dynamic main.py edits applied for the                │
+│ 'domain-starter' preset): Prometheus                 │
+╰───────────────────────────────────────────────────────╯
+╭─────────────────────── Success ───────────────────────╮
+│ ✨ Generated configuration files for selected stack   │
+╰───────────────────────────────────────────────────────╯
 
 가상 환경을 생성하는 중...
 종속성을 설치하는 중...
@@ -314,27 +341,20 @@ Select monitoring: 3
 
 ╭─────────────────────── 성공 ───────────────────────╮
 │ ✨ FastAPI 프로젝트 'my-fullstack-project'가       │
-│   생성되었습니다!                                  │
-│                                                    │
-│ 생성된 파일:                                       │
-│   • main.py (선택한 모든 기능 포함)               │
-│   • src/config/database.py                         │
-│   • src/config/auth.py                             │
-│   • tests/conftest.py                              │
-│   • Dockerfile                                     │
-│   • docker-compose.yml                             │
-│   • pyproject.toml / requirements.txt              │
+│   'fastapi-domain-starter' 템플릿에서 생성되었습니다│
 ╰────────────────────────────────────────────────────╯
 ```
 
 </div>
 
 대화형 모드가 제공하는 기능:
+- **아키텍처 프리셋 선택** (`minimal` / `single-module` / `classic-layered` / `domain-starter`) — 베이스 템플릿과 프로젝트 레이아웃을 선택
 - 데이터베이스, 인증, 백그라운드 작업, 캐싱, 모니터링 등 기능에 대한 가이드형 선택
-- 선택한 기능에 대한 자동 코드 생성(main.py, 구성 파일, Docker 파일)
+- 선택한 기능에 대한 자동 코드 생성 — 프리셋에 따라 동작 방식 차이 (`minimal` / `single-module`은 `main.py` 재생성, `classic-layered` / `domain-starter`는 템플릿 제공 `main.py` 보존하며 구성 모듈만 추가)
+- 프리셋에 맞춘 Docker 생성 — 생성된 `Dockerfile`의 `CMD`가 해당 프리셋의 실제 진입점(`src.main:app` 또는 `src.app.main:app`)을 가리킴
 - 자동 pip 호환성의 스마트 종속성 관리
-- 호환되지 않는 조합을 방지하는 기능 검증
-- 최대 유연성을 위한 Always Empty project를 기본 베이스로 제공
+- 호환되지 않는 조합을 방지하는 기능 검증과 수동 와이어링 경고
+- 생성된 `pyproject.toml`에 식별 마커 주입 (`description` 마커 + `[tool.fastapi-fastkit]` 테이블) — 이후 `is_fastkit_project()`가 생성된 프로젝트를 식별 가능
 
 ### FastAPI 프로젝트에 새 라우트를 추가하기
 
@@ -436,18 +456,19 @@ FastAPI 템플릿 프로젝트가 '~your-project-path~'에 배포됩니다
 
 ```console
 $ fastkit list-templates
-                      사용 가능한 템플릿
-┌─────────────────────────┬───────────────────────────────────┐
-│ fastapi-custom-response │ 커스텀 응답 시스템을 갖춘 비동기  │
-│                         │ 아이템 관리 API                   │
-│ fastapi-dockerized      │ Docker로 컨테이너화된 FastAPI     │
-│                         │ 아이템 관리 API                   │
-│ fastapi-empty           │ 설명 없음                         │
-│ fastapi-async-crud      │ 비동기 아이템 관리 API 서버       │
-│ fastapi-psql-orm        │ PostgreSQL을 사용하는 Docker로    │
-│                         │ 컨테이너화된 FastAPI 아이템 관리 API │
-│ fastapi-default         │ 간단한 FastAPI 프로젝트           │
-└─────────────────────────┴───────────────────────────────────┘
+                              Available Templates
+┌────────────────────────┬───────────────────────────────────────────────────────┐
+│ fastapi-custom-response│ Async Item Management API with Custom Response System │
+│ fastapi-mcp            │ FastAPI MCP Project                                   │
+│ fastapi-domain-starter │ FastAPI Domain Starter                                │
+│ fastapi-dockerized     │ Dockerized FastAPI Item Management API                │
+│ fastapi-empty          │ Minimal FastAPI Template                              │
+│ fastapi-async-crud     │ Async Item Management API Server                      │
+│ fastapi-psql-orm       │ Dockerized FastAPI Item Management API with           │
+│                        │ PostgreSQL                                            │
+│ fastapi-default        │ Simple FastAPI Project                                │
+│ fastapi-single-module  │ FastAPI Single Module Template                        │
+└────────────────────────┴───────────────────────────────────────────────────────┘
 ```
 
 </div>

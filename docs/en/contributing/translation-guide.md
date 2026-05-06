@@ -2,6 +2,26 @@
 
 This guide explains how to contribute translations for FastAPI-fastkit documentation.
 
+## Source of truth and translation policy
+
+> **English (`en`) is the canonical source of truth** for FastAPI-fastkit
+> documentation. Every other locale is a translation target that may
+> lag behind English by a release or by individual pages.
+>
+> If a translated page disagrees with the English page, **trust the
+> English page** until the translation catches up. Translations are
+> shipped at whatever completeness contributors have reached — partial
+> coverage is normal and expected.
+
+The user-facing companion to this policy is the
+[Translation Status](../reference/translation-status.md) page, which
+lists each locale's actual completeness and how MkDocs renders pages
+that haven't been translated yet (TL;DR: they fall back to English).
+
+When you contribute a translation, also update the status page's table
+so users can tell what's available without guessing from the language
+switcher.
+
 ## Overview
 
 FastAPI-fastkit uses an automated translation system powered by AI to translate documentation into multiple languages. The system:
@@ -11,9 +31,16 @@ FastAPI-fastkit uses an automated translation system powered by AI to translate 
 - Saves translations to language-specific directories
 - Creates GitHub Pull Requests for review
 
+The automation produces a starting point; human review is still
+required before merging. AI-generated translations should be flagged as
+"draft" in their PRs and reviewed by a fluent speaker before landing.
+
 ## Supported Languages
 
-Currently supported languages:
+These are the locales the docs site currently **builds**. Build target
+configuration alone does **not** mean a locale's pages are translated —
+see [Translation Status](../reference/translation-status.md) for actual
+per-locale completeness.
 
 - 🇰🇷 Korean (ko)
 - 🇯🇵 Japanese (ja)
