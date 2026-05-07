@@ -67,15 +67,23 @@ function setupTermynal() {
                         saveBuffer();
                         const promptStart = line.indexOf(promptLiteralStart);
                         if (promptStart === -1) {
-                            console.error("Custom prompt found but no end delimiter", line)
+                            const value = "💬 " + line.replace(customPromptLiteralStart, "").trimEnd();
+                            useLines.push({
+                                value: value,
+                                class: "termynal-comment",
+                                delay: 0
+                            });
+                        } else {
+                            const prompt = line
+                                .slice(0, promptStart)
+                                .replace(customPromptLiteralStart, "");
+                            const value = line.slice(promptStart + promptLiteralStart.length);
+                            useLines.push({
+                                type: "input",
+                                value: value,
+                                prompt: prompt
+                            });
                         }
-                        const prompt = line.slice(0, promptStart).replace(customPromptLiteralStart, "")
-                        let value = line.slice(promptStart + promptLiteralStart.length);
-                        useLines.push({
-                            type: "input",
-                            value: value,
-                            prompt: prompt
-                        });
                     } else {
                         buffer.push(line);
                     }
