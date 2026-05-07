@@ -158,15 +158,15 @@ Add a new API route to an existing FastAPI project.
 #### Syntax
 
 ```console
-$ fastkit addroute PROJECT_NAME ROUTE_NAME [OPTIONS]
+$ fastkit addroute ROUTE_NAME [PROJECT_DIR] [OPTIONS]
 ```
 
 #### Arguments
 
 | Argument | Description | Required |
 |----------|-------------|----------|
-| `PROJECT_NAME` | Name of the existing project | Yes |
 | `ROUTE_NAME` | Name of the new route (plural recommended) | Yes |
+| `PROJECT_DIR` | Project directory under your workspace (defaults to `.`, the current directory) | No |
 
 #### Options
 
@@ -179,7 +179,8 @@ $ fastkit addroute PROJECT_NAME ROUTE_NAME [OPTIONS]
 <div class="termy">
 
 ```console
-$ fastkit addroute my-api users
+$ cd my-api
+$ fastkit addroute users
                        Adding New Route
 ┌──────────────────┬──────────────────────────────────────────┐
 │ Project          │ my-api                                   │
@@ -190,6 +191,16 @@ $ fastkit addroute my-api users
 Do you want to add route 'users' to project 'my-api'? [Y/n]: y
 
 ✨ Successfully added new route 'users' to project 'my-api'
+```
+
+</div>
+
+You can also target a project under your workspace by name without `cd`-ing into it:
+
+<div class="termy">
+
+```console
+$ fastkit addroute users my-api
 ```
 
 </div>
@@ -456,10 +467,10 @@ $ fastkit runserver
 <div class="termy">
 
 ```console
-# Add multiple routes
-$ fastkit addroute my-api users
-$ fastkit addroute my-api products
-$ fastkit addroute my-api orders
+# Add multiple routes (project name as second positional arg = workspace project)
+$ fastkit addroute users my-api
+$ fastkit addroute products my-api
+$ fastkit addroute orders my-api
 
 # Test the API
 $ fastkit runserver
@@ -631,7 +642,7 @@ y
 EOF
 
     cd "$service-service"
-    fastkit addroute "$service-service" "$service"
+    fastkit addroute "$service"
     cd ..
 done
 ```

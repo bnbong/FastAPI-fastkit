@@ -19,6 +19,11 @@ The English files live under [`docs/en/`](https://github.com/bnbong/FastAPI-fast
 Every other locale (`docs/ko/`, `docs/ja/`, ...) is a translation
 target.
 
+The repository-root `CHANGELOG.md` is part of that English source of
+truth. Locale-specific `changelog.md` pages may exist as wrappers or
+entry points, but they intentionally reuse the canonical English
+release history instead of maintaining translated copies.
+
 ## Per-locale completeness
 
 The numbers below count Markdown pages in each locale's directory tree
@@ -29,14 +34,14 @@ next section explains).
 | Locale | Status | Markdown pages | Notes |
 |---|---|---:|---|
 | 🇬🇧 English (`en`) | ✅ Source of truth | 26 / 26 | Authoritative. |
-| 🇰🇷 Korean (`ko`) | 🟡 Partial | 2 / 26 | `index.md`, `changelog.md`. Other pages fall back to English. |
+| 🇰🇷 Korean (`ko`) | ✅ Complete | 26 / 26 | All locale pages are present. Phase 1: top-level + core user-guide; Phase 2: remaining user-guide + all tutorials; Phase 3: contributing + reference. `docs/ko/changelog.md` intentionally reuses the canonical English `CHANGELOG.md`. |
 | 🇯🇵 Japanese (`ja`) | 🔴 Skeleton | 0 / 26 | Build target only. Every page falls back to English. |
 | 🇨🇳 Chinese (`zh`) | 🔴 Skeleton | 0 / 26 | Build target only. Every page falls back to English. |
 | 🇪🇸 Spanish (`es`) | 🔴 Skeleton | 0 / 26 | Build target only. Every page falls back to English. |
 | 🇫🇷 French (`fr`) | 🔴 Skeleton | 0 / 26 | Build target only. Every page falls back to English. |
 | 🇩🇪 German (`de`) | 🔴 Skeleton | 0 / 26 | Build target only. Every page falls back to English. |
 
-*Snapshot verified 2026-05-06.* These counts are maintained by hand;
+*Snapshot verified 2026-05-07; ko row recounted for the current branch after Phase 3 (contributing + reference) landed. Korean now has all locale pages present, while `docs/ko/changelog.md` intentionally points to the canonical English changelog.* These counts are maintained by hand;
 to recount the current state from the repo root, run:
 
 ```console
@@ -88,19 +93,38 @@ underlying content actually is.
 
 ## How to help
 
-If you'd like to translate a page or fix an existing translation:
+The current rollout is **one tracking issue per locale**, with the work
+broken into **phases** — for example `ko` is being landed across
+Phase 1 (top-level + core user-guide), Phase 2 (remaining user-guide +
+all tutorials), Phase 3 (contributing + reference). Each phase ships
+as its own PR so reviewers can sign off on a coherent slice without
+waiting for the entire locale to be finished.
+
+If you'd like to contribute:
 
 1. Read the [Translation Guide](../contributing/translation-guide.md)
    for the workflow, tooling, and style conventions.
-2. Translate one page at a time — partial translations are welcome and
-   merged incrementally.
-3. Open a PR adding the new file(s) under `docs/<locale>/<same path>`.
-   Keep filenames identical to the English source so MkDocs picks them
-   up automatically.
-4. Update this page's table to reflect the new completeness count
+2. **Check or open the locale tracking issue first.** If a locale
+   already has an open tracking issue, claim a phase (or a specific
+   page within a phase) there so the work doesn't double up. If no
+   tracking issue exists for the locale you want to work on, open one
+   that lists which pages belong to which phase, then start with
+   Phase 1.
+3. **One PR per phase is the preferred shape.** Smaller "fix this
+   single page" PRs are still welcome — especially for correcting an
+   out-of-sync translation — but for net-new locale work, batching by
+   phase keeps glossary decisions and cross-link wording consistent
+   across the slice.
+4. Open the PR adding files under `docs/<locale>/<same path>`. Keep
+   filenames identical to the English source so MkDocs picks them up
+   automatically.
+5. Treat localized changelog pages as wrappers around the canonical
+   English `CHANGELOG.md` unless project policy explicitly changes.
+6. Update this page's table to reflect the new completeness count
    (use the recount snippet at the top of this page) and bump the
    "Snapshot verified" date so reviewers can see when it was last
-   reconciled.
+   reconciled. Note in the "Notes" column which phase has landed if
+   the locale is still partial.
 
 Bug reports about translated pages going out of sync with the English
 source are welcome — please link the English page and the translated

@@ -18,6 +18,12 @@ The user-facing companion to this policy is the
 lists each locale's actual completeness and how MkDocs renders pages
 that haven't been translated yet (TL;DR: they fall back to English).
 
+The repository-root `CHANGELOG.md` also remains in English as the
+canonical release history. If a locale exposes a `changelog.md` page,
+that page should link to or include the canonical English changelog
+rather than maintain a separate translated changelog unless project
+policy changes later.
+
 When you contribute a translation, also update the status page's table
 so users can tell what's available without guessing from the language
 switcher.
@@ -212,6 +218,14 @@ The script will create a Pull Request with the translations. Review the PR:
 2. Verify technical terms are handled correctly
 3. Ensure code examples remain unchanged
 4. Check for language-specific issues
+
+### Changelog policy
+
+- Keep the repository-root `CHANGELOG.md` in English.
+- Do not open translation PRs whose goal is to rewrite release history
+  into another language inside the root changelog.
+- If a locale needs a changelog page, treat `docs/<locale>/changelog.md`
+  as a wrapper or entry point for the canonical English changelog.
 
 ### 4. Approve and Merge (for maintainers)
 

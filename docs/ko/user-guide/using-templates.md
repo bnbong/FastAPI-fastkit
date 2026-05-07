@@ -1,10 +1,10 @@
-# Using Templates
+# 템플릿 사용
 
-FastAPI-fastkit provides pre-built project templates to help you get started quickly with different technology stacks.
+FastAPI-fastkit은 다양한 기술 스택으로 빠르게 시작할 수 있도록 사전 구성된 프로젝트 템플릿을 제공합니다.
 
-## Available Templates
+## 사용 가능한 템플릿
 
-Check the available templates with the `list-templates` command:
+`list-templates` 명령으로 사용 가능한 템플릿을 확인하세요:
 
 <div class="termy">
 
@@ -26,100 +26,100 @@ $ fastkit list-templates
 
 </div>
 
-## Template Descriptions
+## 템플릿 설명
 
 ### 1. `fastapi-default`
 
-**Simple FastAPI Project**
+**단순한 FastAPI 프로젝트**
 
-- Basic FastAPI setup with essential features
-- Item management with mock data
-- Perfect for learning and simple APIs
-- Includes basic CRUD operations
+- 핵심 기능을 갖춘 기본 FastAPI 셋업
+- 목 데이터 기반 item 관리
+- 학습용이나 간단한 API에 적합
+- 기본 CRUD 작업 포함
 
-**Best for:**
+**적합한 경우:**
 
-- FastAPI beginners
-- Simple web APIs
-- Learning and prototyping
+- FastAPI 초보자
+- 단순한 웹 API
+- 학습 및 프로토타이핑
 
 ### 2. `fastapi-async-crud`
 
-**Async Item Management API Server**
+**비동기 item 관리용 API 서버**
 
-- Fully asynchronous FastAPI application
-- Advanced CRUD operations with async/await
-- Better performance for I/O operations
-- Mock data storage with async patterns
+- 완전 비동기 FastAPI 애플리케이션
+- async/await 기반의 고급 CRUD 작업
+- I/O 작업에서 더 좋은 성능
+- 비동기 패턴의 목 데이터 저장
 
-**Best for:**
+**적합한 경우:**
 
-- High-performance applications
-- I/O intensive operations
-- Modern async Python development
+- 고성능 애플리케이션
+- I/O 집약적 작업
+- 모던 비동기 Python 개발
 
 ### 3. `fastapi-custom-response`
 
-**Async Item Management API with Custom Response System**
+**맞춤형 응답 시스템을 갖춘 비동기 item 관리 API**
 
-- Custom response models and formatting
-- Advanced error handling
-- Pagination support
-- Custom HTTP status codes and responses
+- 커스텀 응답 모델과 포매팅
+- 고급 에러 처리
+- 페이지네이션 지원
+- 커스텀 HTTP 상태 코드와 응답
 
-**Best for:**
+**적합한 경우:**
 
-- APIs requiring specific response formats
-- Advanced error handling needs
-- Custom business logic in responses
+- 특정 응답 형식이 요구되는 API
+- 고급 에러 처리가 필요한 경우
+- 응답에 커스텀 비즈니스 로직이 필요한 경우
 
 ### 4. `fastapi-dockerized`
 
-**Dockerized FastAPI Item Management API**
+**Docker 기반 FastAPI item 관리 API**
 
-- Full Docker containerization
-- Production-ready deployment setup
-- Multi-stage Docker builds
-- Environment-based configuration
+- 완전한 Docker 컨테이너화
+- 실서비스 배포에 가까운 구성
+- 멀티 스테이지 Docker 빌드
+- 환경 기반 설정
 
-**Best for:**
+**적합한 경우:**
 
-- Production deployments
-- Containerized environments
-- DevOps and CI/CD pipelines
+- 프로덕션 배포
+- 컨테이너화된 환경
+- DevOps 및 CI/CD 파이프라인
 
 ### 5. `fastapi-psql-orm`
 
-**Dockerized FastAPI Item Management API with PostgreSQL**
+**PostgreSQL을 사용하는 Docker 기반 FastAPI item 관리 API**
 
-- PostgreSQL database integration
-- SQLAlchemy ORM with Alembic migrations
-- Docker Compose for local development
-- Full database CRUD operations
+- PostgreSQL 데이터베이스 통합
+- SQLAlchemy ORM 과 Alembic 마이그레이션
+- 로컬 개발용 Docker Compose
+- 완전한 데이터베이스 CRUD 작업
 
-**Best for:**
+**적합한 경우:**
 
-- Database-driven applications
-- Production-grade data storage
-- Complex data relationships
+- 데이터베이스 기반 애플리케이션
+- 프로덕션 수준의 데이터 저장
+- 복잡한 데이터 관계
 
 ### 6. `fastapi-empty`
 
-**Minimal FastAPI Project**
+**최소 FastAPI 프로젝트**
 
-- Bare minimum FastAPI setup
-- No pre-built features
-- Clean slate for custom development
+- 최소한의 FastAPI 셋업
+- 사전 구축된 기능 없음
+- 커스텀 개발을 위한 빈 캔버스
 
-**Best for:**
+**적합한 경우:**
 
-- Starting from scratch
-- Minimal dependencies
-- Custom architecture requirements
+- 처음부터 직접 시작하기
+- 의존성을 최소화하고 싶을 때
+- 커스텀 아키텍처 요구 사항
 
-## Creating a Project from Template
+## 템플릿으로 프로젝트 생성
 
-Use the `startdemo` command to create a project from a template:
+`startdemo` 명령으로 템플릿에서 프로젝트를 생성합니다:
 
 <div class="termy">
 
@@ -190,28 +190,28 @@ Do you want to proceed with project creation? [y/N]: y
 
 </div>
 
-## Template Features Comparison
+## 템플릿 기능 비교
 
-| Feature | Default | Async CRUD | Custom Response | Dockerized | PostgreSQL ORM | Empty |
-|---------|---------|------------|-----------------|------------|----------------|-------|
-| **Basic FastAPI** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Mock Data** | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
-| **Async Support** | Basic | ✅ | ✅ | ✅ | ✅ | ❌ |
-| **Custom Responses** | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| 기능 | Default | Async CRUD | Custom Response | Dockerized | PostgreSQL ORM | Empty |
+|---|---|---|---|---|---|---|
+| **기본 FastAPI** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **목 데이터** | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
+| **비동기 지원** | 기본 | ✅ | ✅ | ✅ | ✅ | ❌ |
+| **커스텀 응답** | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
 | **Docker** | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ |
-| **Database** | Mock | Mock | Mock | Mock | PostgreSQL | None |
+| **데이터베이스** | Mock | Mock | Mock | Mock | PostgreSQL | None |
 | **ORM** | ❌ | ❌ | ❌ | ❌ | SQLAlchemy | ❌ |
-| **Migrations** | ❌ | ❌ | ❌ | ❌ | Alembic | ❌ |
-| **Testing** | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| **Best For** | Learning | Performance | Custom APIs | Production | Database Apps | Custom |
+| **마이그레이션** | ❌ | ❌ | ❌ | ❌ | Alembic | ❌ |
+| **테스트** | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| **적합한 경우** | 학습 | 성능 | 커스텀 API | 프로덕션 | DB 앱 | 커스텀 |
 
-## Template-Specific Setup
+## 템플릿별 셋업
 
-### Using `fastapi-psql-orm`
+### `fastapi-psql-orm` 사용
 
-This template includes full PostgreSQL setup. After creation:
+이 템플릿은 완전한 PostgreSQL 셋업을 포함합니다. 생성 후:
 
-1. **Start PostgreSQL with Docker:**
+1. **Docker로 PostgreSQL 시작:**
 
 <div class="termy">
 
@@ -223,7 +223,7 @@ Starting my-blog-api_postgres_1 ... done
 
 </div>
 
-2. **Run database migrations:**
+2. **데이터베이스 마이그레이션 실행:**
 
 <div class="termy">
 
@@ -237,7 +237,7 @@ INFO  [alembic.runtime.migration] Running upgrade -> bedcdc35b64a, first alembic
 
 </div>
 
-3. **Start the API server:**
+3. **API 서버 시작:**
 
 <div class="termy">
 
@@ -248,11 +248,11 @@ INFO:     Uvicorn running on http://127.0.0.1:8000
 
 </div>
 
-### Using `fastapi-dockerized`
+### `fastapi-dockerized` 사용
 
-This template provides full Docker support:
+이 템플릿은 완전한 Docker 지원을 제공합니다:
 
-1. **Build the Docker image:**
+1. **Docker 이미지 빌드:**
 
 <div class="termy">
 
@@ -265,7 +265,7 @@ Successfully tagged my-dockerized-api:latest
 
 </div>
 
-2. **Run the container:**
+2. **컨테이너 실행:**
 
 <div class="termy">
 
@@ -276,11 +276,11 @@ INFO:     Uvicorn running on http://0.0.0.0:8000
 
 </div>
 
-### Using `fastapi-custom-response`
+### `fastapi-custom-response` 사용
 
-This template includes advanced response handling:
+이 템플릿은 고급 응답 처리를 포함합니다:
 
-1. **Custom response models:**
+1. **커스텀 응답 모델:**
 
 ```python
 from src.helper.pagination import PaginatedResponse
@@ -308,7 +308,7 @@ def create_item(item: ItemCreate):
     )
 ```
 
-2. **Enhanced error handling:**
+2. **개선된 에러 처리:**
 
 ```python
 from src.helper.exceptions import ItemNotFoundError, ValidationError
@@ -325,11 +325,11 @@ def read_item(item_id: int):
         )
 ```
 
-## Template Project Structure
+## 템플릿 프로젝트 구조
 
-Each template follows a consistent but customized structure:
+각 템플릿은 일관되면서도 용도에 맞게 커스터마이즈된 구조를 따릅니다:
 
-### `fastapi-default` Structure
+### `fastapi-default` 구조
 ```
 my-project/
 ├── src/
@@ -346,7 +346,7 @@ my-project/
 └── requirements.txt
 ```
 
-### `fastapi-psql-orm` Structure
+### `fastapi-psql-orm` 구조
 ```
 my-project/
 ├── src/
@@ -372,11 +372,11 @@ my-project/
 └── requirements.txt
 ```
 
-## Customizing Templates
+## 템플릿 커스터마이즈
 
-After creating a project from a template, you can customize it:
+템플릿으로 프로젝트를 생성한 후, 자유롭게 커스터마이즈할 수 있습니다:
 
-### 1. Add New Routes
+### 1. 새 라우트 추가
 
 <div class="termy">
 
@@ -388,9 +388,9 @@ $ fastkit addroute comments my-blog-api
 
 </div>
 
-### 2. Modify Configuration
+### 2. 설정 수정
 
-Edit `src/core/config.py` to match your needs:
+`src/core/config.py` 를 필요에 맞게 수정하세요:
 
 ```python
 from pydantic_settings import BaseSettings
@@ -400,10 +400,10 @@ class Settings(BaseSettings):
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api/v1"
 
-    # Database settings (for PostgreSQL templates)
+    # 데이터베이스 설정 (PostgreSQL 템플릿용)
     DATABASE_URL: str = "postgresql://user:password@localhost/dbname"
 
-    # Security settings
+    # 보안 설정
     SECRET_KEY: str = "your-secret-key-here"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
@@ -413,9 +413,9 @@ class Settings(BaseSettings):
 settings = Settings()
 ```
 
-### 3. Add Environment Variables
+### 3. 환경 변수 추가
 
-Create a `.env` file in your project root:
+프로젝트 루트에 `.env` 파일을 만드세요:
 
 ```env
 # .env
@@ -423,20 +423,20 @@ PROJECT_NAME=My Blog API
 VERSION=1.0.0
 DEBUG=True
 
-# Database (for PostgreSQL templates)
+# 데이터베이스 (PostgreSQL 템플릿용)
 DATABASE_URL=postgresql://user:password@localhost:5432/myblogdb
 POSTGRES_USER=user
 POSTGRES_PASSWORD=password
 POSTGRES_DB=myblogdb
 
-# Security
+# 보안
 SECRET_KEY=your-super-secret-key-here
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 ```
 
-## Template Testing
+## 템플릿 테스트
 
-Each template comes with pre-configured tests:
+각 템플릿은 사전 구성된 테스트와 함께 제공됩니다:
 
 <div class="termy">
 
@@ -456,96 +456,96 @@ tests/test_items.py::test_delete_item PASSED
 
 </div>
 
-## Template Development Workflow
+## 템플릿 개발 워크플로
 
-### 1. Choose the Right Template
+### 1. 적합한 템플릿 선택
 
-- **Learning/Simple APIs**: `fastapi-default`
-- **High Performance**: `fastapi-async-crud`
-- **Custom Response Formats**: `fastapi-custom-response`
-- **Production Deployment**: `fastapi-dockerized`
-- **Database Applications**: `fastapi-psql-orm`
-- **Custom Architecture**: `fastapi-empty`
+- **학습 / 단순 API**: `fastapi-default`
+- **고성능**: `fastapi-async-crud`
+- **커스텀 응답 형식**: `fastapi-custom-response`
+- **프로덕션 배포**: `fastapi-dockerized`
+- **데이터베이스 애플리케이션**: `fastapi-psql-orm`
+- **커스텀 아키텍처**: `fastapi-empty`
 
-### 2. Create and Setup
+### 2. 생성 및 셋업
 
 <div class="termy">
 
 ```console
 $ fastkit startdemo
-# Follow the prompts
+# 프롬프트를 따라 진행
 $ cd your-project
 $ source .venv/bin/activate
 ```
 
 </div>
 
-### 3. Development
+### 3. 개발
 
 <div class="termy">
 
 ```console
-# Start development server
+# 개발 서버 시작
 $ fastkit runserver
 
-# Run tests
+# 테스트 실행
 $ python -m pytest
 
-# Add new features
+# 새 기능 추가
 $ fastkit addroute new-resource your-project
 ```
 
 </div>
 
-### 4. Deployment
+### 4. 배포
 
-For production templates (`fastapi-dockerized`, `fastapi-psql-orm`):
+프로덕션 템플릿(`fastapi-dockerized`, `fastapi-psql-orm`) 의 경우:
 
 <div class="termy">
 
 ```console
-# Build for production
+# 프로덕션용 빌드
 $ docker build -t your-app .
 
-# Deploy with Docker Compose
+# Docker Compose 로 배포
 $ docker-compose up -d
 ```
 
 </div>
 
-## Best Practices
+## 모범 사례
 
-### 1. Choose Templates Wisely
+### 1. 템플릿을 신중히 선택
 
-- Start with simpler templates for learning
-- Use database templates for data-driven apps
-- Use Docker templates for production deployments
+- 학습용으로는 더 간단한 템플릿부터 시작하세요
+- 데이터 기반 앱에는 데이터베이스 템플릿을 사용하세요
+- 프로덕션 배포에는 Docker 템플릿을 사용하세요
 
-### 2. Environment Management
+### 2. 환경 관리
 
-- Always use `.env` files for configuration
-- Never commit sensitive data to version control
-- Use different environments for development/production
+- 설정에는 항상 `.env` 파일을 사용하세요
+- 민감한 데이터를 버전 관리에 절대 커밋하지 마세요
+- 개발/프로덕션 환경을 분리해서 사용하세요
 
-### 3. Customization Strategy
+### 3. 커스터마이즈 전략
 
-- Add new routes using `fastkit addroute`
-- Modify existing code to fit your business logic
-- Keep the project structure organized
+- 새 라우트는 `fastkit addroute` 로 추가하세요
+- 비즈니스 로직에 맞게 기존 코드를 수정하세요
+- 프로젝트 구조를 정돈된 상태로 유지하세요
 
-### 4. Testing
+### 4. 테스트
 
-- Run tests regularly during development
-- Add tests for new features you implement
-- Use the provided test structure as a guide
+- 개발 중에 정기적으로 테스트를 실행하세요
+- 새로 추가한 기능에 대한 테스트도 작성하세요
+- 제공된 테스트 구조를 가이드로 활용하세요
 
-## Troubleshooting
+## 문제 해결
 
-### Database Connection Issues (PostgreSQL templates)
+### 데이터베이스 연결 문제 (PostgreSQL 템플릿)
 
-If you can't connect to PostgreSQL:
+PostgreSQL에 연결할 수 없는 경우:
 
-1. **Check Docker is running:**
+1. **Docker가 실행 중인지 확인:**
 
    <div class="termy">
    ```console
@@ -553,7 +553,7 @@ If you can't connect to PostgreSQL:
    ```
    </div>
 
-2. **Verify PostgreSQL container:**
+2. **PostgreSQL 컨테이너 상태 확인:**
 
    <div class="termy">
    ```console
@@ -561,48 +561,48 @@ If you can't connect to PostgreSQL:
    ```
    </div>
 
-3. **Check environment variables:**
+3. **환경 변수 확인:**
 
    ```env
    DATABASE_URL=postgresql://user:password@localhost:5432/dbname
    ```
 
-### Docker Build Failures
+### Docker 빌드 실패
 
-If Docker build fails:
+Docker 빌드가 실패하는 경우:
 
-1. **Check Dockerfile syntax**
-2. **Verify all files are present**
-3. **Check Docker daemon is running**
+1. **Dockerfile 문법 확인**
+2. **모든 파일이 존재하는지 확인**
+3. **Docker 데몬이 실행 중인지 확인**
 
-### Missing Dependencies
+### 의존성 누락
 
-If you get import errors:
+import 오류가 발생하는 경우:
 
-1. **Activate virtual environment:**
+1. **가상 환경 활성화:**
    <div class="termy">
    ```console
    $ source .venv/bin/activate
    ```
    </div>
 
-2. **Install dependencies:**
+2. **의존성 설치:**
    <div class="termy">
    ```console
    $ pip install -r requirements.txt
    ```
    </div>
 
-## Next Steps
+## 다음 단계
 
-Now that you understand templates:
+이제 템플릿을 이해했다면:
 
-1. **[Your First Project](../tutorial/first-project.md)**: Build a complete application
-2. **[Adding Routes](adding-routes.md)**: Expand your template-based project
-3. **[CLI Reference](cli-reference.md)**: Master all available commands
+1. **[첫 프로젝트 만들기](../tutorial/first-project.md)**: 완전한 애플리케이션 구축
+2. **[라우트 추가](adding-routes.md)**: 템플릿 기반 프로젝트 확장
+3. **[CLI 레퍼런스](cli-reference.md)**: 모든 명령어 익히기
 
-!!! tip "Template Tips"
-    - Templates provide excellent starting points, not final solutions
-    - Customize templates to match your specific requirements
-    - Study template code to learn FastAPI best practices
-    - Use version control to track your customizations
+!!! tip "템플릿 팁"
+    - 템플릿은 훌륭한 출발점이지 최종 솔루션이 아닙니다
+    - 템플릿을 자신의 요구 사항에 맞게 커스터마이즈하세요
+    - 템플릿 코드를 학습해 FastAPI 모범 사례를 익히세요
+    - 커스터마이즈 내역을 추적할 수 있도록 버전 관리를 사용하세요

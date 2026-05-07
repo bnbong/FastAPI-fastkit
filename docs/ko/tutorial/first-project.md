@@ -1,41 +1,41 @@
-# Your First Project
+# 첫 프로젝트 만들기
 
-Build a complete blog API with user management, post creation, and comment system using FastAPI-fastkit.
+FastAPI-fastkit으로 사용자 관리, 게시물 작성, 댓글 시스템을 갖춘 완전한 블로그 API를 구축합니다.
 
-## Project Overview
+## 프로젝트 개요
 
-In this tutorial, we'll create a **Blog API** with the following features:
+이 튜토리얼에서는 다음 기능을 갖춘 **블로그 API** 를 만듭니다:
 
-- **User Management**: Registration, authentication, and user profiles
-- **Post Management**: Create, read, update, and delete blog posts
-- **Comment System**: Add comments to blog posts
-- **Data Validation**: Robust input validation and error handling
-- **API Documentation**: Automatic OpenAPI documentation
-- **Testing**: Complete test suite
+- **사용자 관리**: 회원 가입, 인증, 사용자 프로필
+- **게시물 관리**: 블로그 게시물 생성, 조회, 갱신, 삭제
+- **댓글 시스템**: 블로그 게시물에 댓글 추가
+- **데이터 검증**: 견고한 입력 검증 및 에러 처리
+- **API 문서화**: 자동 OpenAPI 문서
+- **테스트**: 완전한 테스트 스위트
 
-### What You'll Learn
+### 배우는 내용
 
-By the end of this tutorial, you'll understand:
+이 튜토리얼이 끝날 때면 다음을 이해하게 됩니다:
 
-- Advanced FastAPI-fastkit project structure
-- Database integration with SQLAlchemy
-- User authentication and authorization
-- Complex data relationships
-- Error handling and validation
-- Testing best practices
+- 고급 FastAPI-fastkit 프로젝트 구조
+- SQLAlchemy와의 데이터베이스 통합
+- 사용자 인증과 권한 부여
+- 복잡한 데이터 관계
+- 에러 처리와 검증
+- 테스트 모범 사례
 
-## Prerequisites
+## 사전 요구 사항
 
-Before starting, make sure you have:
+시작하기 전에 다음을 갖춰 두세요:
 
-- Completed the [Getting Started](getting-started.md) tutorial
-- Basic understanding of REST APIs
-- Python 3.12+ installed
-- Text editor or IDE ready
+- [시작하기](getting-started.md) 튜토리얼 완료
+- REST API의 기본 이해
+- Python 3.12+ 설치
+- 텍스트 에디터 또는 IDE 준비
 
-## Step 1: Create the Project
+## 1단계: 프로젝트 생성
 
-Let's start by creating a new project with the **STANDARD** stack for database support:
+데이터베이스 지원을 위해 **STANDARD** 스택으로 새 프로젝트를 시작합니다:
 
 <div class="termy">
 
@@ -94,9 +94,9 @@ Do you want to proceed with project creation? [y/N]: y
 
 </div>
 
-## Step 2: Set Up the Project
+## 2단계: 프로젝트 설정
 
-Navigate to the project and activate the virtual environment:
+프로젝트로 이동해 가상 환경을 활성화합니다:
 
 <div class="termy">
 
@@ -107,9 +107,9 @@ $ source .venv/bin/activate
 
 </div>
 
-## Step 3: Add Required Routes
+## 3단계: 필요한 라우트 추가
 
-Let's add the main resources for our blog API:
+블로그 API의 주요 리소스를 추가합니다:
 
 <div class="termy">
 
@@ -126,13 +126,13 @@ $ fastkit addroute comments blog-api
 
 </div>
 
-## Step 4: Design the Data Models
+## 4단계: 데이터 모델 설계
 
-Let's design our data schemas. We'll start by updating the user schema to be more realistic.
+데이터 스키마를 설계해 봅시다. 먼저 사용자 스키마를 좀 더 현실적으로 갱신합니다.
 
-### Update User Schema
+### User 스키마 갱신
 
-Edit `src/schemas/users.py`:
+`src/schemas/users.py` 를 수정합니다:
 
 ```python
 from typing import Optional, List
@@ -168,9 +168,9 @@ class UserInDB(User):
     hashed_password: str
 ```
 
-### Create Post Schema
+### Post 스키마 작성
 
-Edit `src/schemas/posts.py`:
+`src/schemas/posts.py` 를 수정합니다:
 
 ```python
 from typing import Optional, List
@@ -206,16 +206,16 @@ class PostWithAuthor(Post):
 class PostWithComments(Post):
     comments: List["Comment"] = []
 
-# Import to avoid circular imports
+# 순환 import 회피를 위한 import
 from src.schemas.users import User
 from src.schemas.comments import Comment
 PostWithAuthor.model_rebuild()
 PostWithComments.model_rebuild()
 ```
 
-### Create Comment Schema
+### Comment 스키마 작성
 
-Edit `src/schemas/comments.py`:
+`src/schemas/comments.py` 를 수정합니다:
 
 ```python
 from typing import Optional
@@ -244,16 +244,16 @@ class Comment(CommentBase):
 class CommentWithAuthor(Comment):
     author: "User"
 
-# Import to avoid circular imports
+# 순환 import 회피를 위한 import
 from src.schemas.users import User
 CommentWithAuthor.model_rebuild()
 ```
 
-## Step 5: Implement Advanced CRUD Operations
+## 5단계: 고급 CRUD 작업 구현
 
-### Enhanced User CRUD
+### 향상된 User CRUD
 
-Update `src/crud/users.py`:
+`src/crud/users.py` 를 갱신합니다:
 
 ```python
 from typing import List, Optional
@@ -354,7 +354,7 @@ users_crud = UsersCRUD()
 
 ### Posts CRUD
 
-Update `src/crud/posts.py`:
+`src/crud/posts.py` 를 갱신합니다:
 
 ```python
 from typing import List, Optional
@@ -451,7 +451,7 @@ posts_crud = PostsCRUD()
 
 ### Comments CRUD
 
-Update `src/crud/comments.py`:
+`src/crud/comments.py` 를 갱신합니다:
 
 ```python
 from typing import List, Optional
@@ -537,11 +537,11 @@ class CommentsCRUD:
 comments_crud = CommentsCRUD()
 ```
 
-## Step 6: Implement Advanced API Routes
+## 6단계: 고급 API 라우트 구현
 
-### Enhanced User Routes
+### 향상된 User 라우트
 
-Update `src/api/routes/users.py`:
+`src/api/routes/users.py` 를 갱신합니다:
 
 ```python
 from typing import List
@@ -652,9 +652,9 @@ def login(email: str, password: str):
     }
 ```
 
-### Enhanced Posts Routes
+### 향상된 Posts 라우트
 
-Update `src/api/routes/posts.py`:
+`src/api/routes/posts.py` 를 갱신합니다:
 
 ```python
 from typing import List, Optional
@@ -739,9 +739,9 @@ def read_posts_by_author(
     return posts
 ```
 
-### Enhanced Comments Routes
+### 향상된 Comments 라우트
 
-Update `src/api/routes/comments.py`:
+`src/api/routes/comments.py` 를 갱신합니다:
 
 ```python
 from typing import List
@@ -838,9 +838,9 @@ def read_comments_by_author(
     return comments
 ```
 
-## Step 7: Test Your Blog API
+## 7단계: 블로그 API 테스트
 
-Let's start the server and test our complete blog API:
+서버를 시작하고 완성된 블로그 API를 테스트합니다:
 
 <div class="termy">
 
@@ -851,7 +851,7 @@ INFO:     Uvicorn running on http://127.0.0.1:8000
 
 </div>
 
-### Test User Registration
+### 사용자 회원 가입 테스트
 
 <div class="termy">
 
@@ -880,7 +880,7 @@ $ curl -X POST "http://127.0.0.1:8000/api/v1/users/" \
 
 </div>
 
-### Test User Login
+### 사용자 로그인 테스트
 
 <div class="termy">
 
@@ -901,7 +901,7 @@ $ curl -X POST "http://127.0.0.1:8000/api/v1/users/login" \
 
 </div>
 
-### Test Post Creation
+### 게시물 생성 테스트
 
 <div class="termy">
 
@@ -910,7 +910,7 @@ $ curl -X POST "http://127.0.0.1:8000/api/v1/posts/" \
      -H "Content-Type: application/json" \
      -d '{
        "title": "My First Blog Post",
-       "content": "This is the content of my first blog post. It's about learning FastAPI with FastAPI-fastkit!",
+       "content": "This is the content of my first blog post. It'\''s about learning FastAPI with FastAPI-fastkit!",
        "published": true
      }'
 
@@ -928,7 +928,7 @@ $ curl -X POST "http://127.0.0.1:8000/api/v1/posts/" \
 
 </div>
 
-### Test Comment Creation
+### 댓글 생성 테스트
 
 <div class="termy">
 
@@ -952,7 +952,7 @@ $ curl -X POST "http://127.0.0.1:8000/api/v1/comments/" \
 
 </div>
 
-### Test Search Functionality
+### 검색 기능 테스트
 
 <div class="termy">
 
@@ -975,25 +975,25 @@ $ curl "http://127.0.0.1:8000/api/v1/posts/?search=FastAPI"
 
 </div>
 
-## Step 8: API Documentation
+## 8단계: API 문서
 
-Visit [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) to see your complete API documentation. You should now see:
+[http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)에 접속해 완성된 API 문서를 확인하세요. 다음 내용을 볼 수 있습니다:
 
-- **Users**: Registration, login, profile management
-- **Posts**: CRUD operations, search, author filtering
-- **Comments**: CRUD operations, post/author filtering
-- **Items**: Original example endpoints
+- **Users**: 회원 가입, 로그인, 프로필 관리
+- **Posts**: CRUD 작업, 검색, 작성자 필터링
+- **Comments**: CRUD 작업, 게시물 / 작성자 필터링
+- **Items**: 원래 예제 엔드포인트
 
-The documentation shows:
+문서에서 보여 주는 것:
 
-- All available endpoints
-- Request/response schemas
-- Data validation rules
-- Error responses
+- 사용 가능한 모든 엔드포인트  
+- 요청 / 응답 스키마  
+- 데이터 검증 규칙  
+- 에러 응답  
 
-## Step 9: Write Tests
+## 9단계: 테스트 작성
 
-Let's create comprehensive tests for our blog API. Create `tests/test_blog_api.py`:
+블로그 API를 위한 종합 테스트를 만들어 봅시다. `tests/test_blog_api.py`를 작성합니다:
 
 ```python
 from fastapi.testclient import TestClient
@@ -1146,7 +1146,7 @@ if __name__ == "__main__":
     pytest.main([__file__])
 ```
 
-### Run the Tests
+### 테스트 실행
 
 <div class="termy">
 
@@ -1166,87 +1166,87 @@ tests/test_blog_api.py::TestCommentAPI::test_get_comments_by_post PASSED
 
 </div>
 
-## What You've Built
+## 무엇을 만들었나
 
-Congratulations! You've successfully built a complete blog API with:
+축하합니다! 다음 기능을 갖춘 완전한 블로그 API를 성공적으로 구축했습니다:
 
-### ✅ Features Implemented
+### ✅ 구현한 기능
 
-- **User Management**
-    - User registration with validation
-    - User authentication (login)
-    - Profile management
-    - Duplicate prevention
+- **사용자 관리**
+    - 검증을 갖춘 사용자 회원 가입
+    - 사용자 인증 (로그인)
+    - 프로필 관리
+    - 중복 방지
 
-- **Blog Posts**
-    - Create, read, update, delete posts
-    - Author-based filtering
-    - Search functionality
-    - Publish/draft status
+- **블로그 게시물**
+    - 게시물 생성, 조회, 갱신, 삭제
+    - 작성자 기반 필터링
+    - 검색 기능
+    - 게시 / 임시 저장 상태
 
-- **Comment System**
-    - Add comments to posts
-    - View comments by post or author
-    - Comment management
+- **댓글 시스템**
+    - 게시물에 댓글 추가
+    - 게시물별 / 작성자별 댓글 조회
+    - 댓글 관리
 
-- **Data Validation**
-    - Email validation
-    - Password requirements
-    - Content length limits
-    - Required field validation
+- **데이터 검증**
+    - 이메일 검증
+    - 패스워드 요구 사항
+    - 콘텐츠 길이 제한
+    - 필수 필드 검증
 
-- **Error Handling**
-    - Proper HTTP status codes
-    - Descriptive error messages
-    - Input validation errors
+- **에러 처리**
+    - 적절한 HTTP 상태 코드
+    - 설명적인 에러 메시지
+    - 입력 검증 에러
 
-- **API Documentation**
-    - Automatic OpenAPI generation
-    - Interactive testing interface
-    - Request/response schemas
+- **API 문서화**
+    - 자동 OpenAPI 생성
+    - 인터랙티브 테스트 인터페이스
+    - 요청 / 응답 스키마
 
-- **Testing**
-    - Comprehensive test coverage
-    - Unit tests for all endpoints
-    - Edge case testing
+- **테스트**
+    - 종합 테스트 커버리지
+    - 모든 엔드포인트의 단위 테스트
+    - 엣지 케이스 테스트
 
-## Next Steps
+## 다음 단계
 
-### Potential Enhancements
+### 가능한 개선 사항
 
-1. **Real Authentication**
-    - Implement JWT tokens
-    - Add password hashing with bcrypt
-    - Role-based permissions
+1. **실제 인증**
+    - JWT 토큰 구현
+    - bcrypt 로 패스워드 해싱 추가
+    - 역할 기반 권한
 
-2. **Database Integration**
-    - Use PostgreSQL or MySQL
-    - Implement proper database models
-    - Add database migrations
+2. **데이터베이스 통합**
+    - PostgreSQL 또는 MySQL 사용
+    - 적절한 데이터베이스 모델 구현
+    - 데이터베이스 마이그레이션 추가
 
-3. **Advanced Features**
-    - File uploads for images
-    - Email notifications
-    - Post categories/tags
-    - Like/dislike system
+3. **고급 기능**
+    - 이미지 파일 업로드
+    - 이메일 알림
+    - 게시물 카테고리 / 태그
+    - 좋아요 / 싫어요 시스템
 
-4. **Production Readiness**
-    - Add logging
-    - Implement caching
-    - Add rate limiting
-    - Environment configuration
+4. **프로덕션 준비**
+    - 로깅 추가
+    - 캐싱 구현
+    - 레이트 제한 추가
+    - 환경 설정
 
-### Continue Learning
+### 학습 이어가기
 
-1. **[Using Templates](../user-guide/using-templates.md)**: Explore the `fastapi-psql-orm` template for database integration
-2. **[Adding Routes](../user-guide/adding-routes.md)**: Learn more advanced routing patterns
-3. **[Contributing](../contributing/development-setup.md)**: Contribute to FastAPI-fastkit
+1. **[템플릿 사용하기](../user-guide/using-templates.md)**: 데이터베이스 통합을 위한 `fastapi-psql-orm` 템플릿 살펴보기
+2. **[라우트 추가](../user-guide/adding-routes.md)**: 더 고급 라우팅 패턴 학습
+3. **[기여 안내](../contributing/development-setup.md)**: FastAPI-fastkit에 기여하기
 
-!!! tip "Best Practices You've Learned"
-    - **Modular Architecture**: Separation of concerns with schemas, CRUD, and routes
-    - **Data Validation**: Using Pydantic for robust input validation
-    - **Error Handling**: Proper HTTP status codes and error messages
-    - **Testing**: Comprehensive test coverage for all functionality
-    - **Documentation**: Leveraging automatic API documentation generation
+!!! tip "여기서 배운 모범 사례"
+    - **모듈형 아키텍처**: 스키마, CRUD, 라우트로 관심사 분리
+    - **데이터 검증**: 견고한 입력 검증을 위한 Pydantic 사용
+    - **에러 처리**: 적절한 HTTP 상태 코드와 에러 메시지
+    - **테스트**: 모든 기능을 아우르는 종합 테스트 커버리지
+    - **문서화**: 자동 API 문서 생성 활용
 
-You now have the skills to build production-quality APIs with FastAPI-fastkit! 🚀
+이제 FastAPI-fastkit으로 실서비스 수준의 API를 만들 기본기를 갖췄습니다! 🚀

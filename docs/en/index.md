@@ -345,6 +345,7 @@ Installing dependencies...
 </div>
 
 The interactive mode provides:
+
 - **Architecture preset selection** (`minimal` / `single-module` / `classic-layered` / `domain-starter`) that picks the right base template and project layout
 - **Guided selection** for databases, authentication, background tasks, caching, monitoring, and more
 - **Auto-generated code** for selected features — varies by preset (regenerated `main.py` for `minimal` / `single-module`; preserve template-shipped `main.py` and overlay config modules for `classic-layered` / `domain-starter`)
@@ -362,7 +363,7 @@ Add a new route endpoint to your FastAPI project with:
 <div class="termy">
 
 ```console
-$ fastkit addroute my-awesome-project user
+$ fastkit addroute user my-awesome-project
                        Adding New Route
 ┌──────────────────┬──────────────────────────────────────────┐
 │ Project          │ my-awesome-project                       │
@@ -500,6 +501,7 @@ Learn FastAPI development through practical use cases with our pre-built templat
 - **[Integrating with MCP](tutorial/mcp-integration.md)** - Create an API server integrated with AI models using the `fastapi-mcp` template
 
 Each tutorial provides:
+
 - ✅ **Practical Examples** - Code you can use directly in real projects
 - ✅ **Step-by-Step Guides** - Detailed explanations for beginners to follow easily
 - ✅ **Best Practices** - Industry-standard patterns and security considerations

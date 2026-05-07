@@ -1,12 +1,12 @@
-# Adding Routes
+# 라우트 추가
 
-Learn how to add new API routes to your existing FastAPI project.
+기존 FastAPI 프로젝트에 새 API 라우트를 추가하는 방법을 안내합니다.
 
-## Basic Route Addition
+## 기본 라우트 추가
 
-### Using the `addroute` Command
+### `addroute` 명령 사용
 
-FastAPI-fastkit's `addroute` command makes it easy to add new routes:
+FastAPI-fastkit의 `addroute` 명령을 쓰면 새 라우트를 간편하게 추가할 수 있습니다:
 
 <div class="termy">
 
@@ -32,11 +32,11 @@ Do you want to add route 'users' to project 'my-awesome-api'? [Y/n]: y
 
 </div>
 
-## What Gets Created
+## 무엇이 만들어지나
 
-When you add a route, FastAPI-fastkit automatically creates:
+라우트를 추가하면 FastAPI-fastkit이 다음 항목을 자동으로 만들어 줍니다:
 
-### 1. Route File: `src/api/routes/users.py`
+### 1. 라우트 파일: `src/api/routes/users.py`
 
 ```python
 from typing import List
@@ -80,7 +80,7 @@ def delete_user(user_id: int):
         raise HTTPException(status_code=404, detail="User not found")
 ```
 
-### 2. CRUD Operations: `src/crud/users.py`
+### 2. CRUD 작업: `src/crud/users.py`
 
 ```python
 from typing import List, Optional
@@ -131,7 +131,7 @@ class UsersCRUD:
 users_crud = UsersCRUD()
 ```
 
-### 3. Pydantic Schemas: `src/schemas/users.py`
+### 3. Pydantic 스키마: `src/schemas/users.py`
 
 ```python
 from typing import Optional
@@ -155,9 +155,9 @@ class User(UserBase):
         from_attributes = True
 ```
 
-### 4. Router Registration
+### 4. 라우터 등록
 
-The command automatically updates `src/api/api.py` to include the new router:
+명령은 `src/api/api.py` 도 자동으로 갱신해 새 라우터를 포함시킵니다:
 
 ```python
 from fastapi import APIRouter
@@ -169,21 +169,21 @@ api_router.include_router(items.router, prefix="/items", tags=["items"])
 api_router.include_router(users.router, prefix="/users", tags=["users"])
 ```
 
-## Generated API Endpoints
+## 생성되는 API 엔드포인트
 
-After adding the `users` route, you'll have these endpoints:
+`users` 라우트를 추가하면 다음 엔드포인트들이 만들어집니다:
 
-| Method | Endpoint | Description |
+| 메서드 | 엔드포인트 | 설명 |
 |--------|----------|-------------|
-| `GET` | `/api/v1/users/` | Get all users |
-| `POST` | `/api/v1/users/` | Create a new user |
-| `GET` | `/api/v1/users/{user_id}` | Get a specific user |
-| `PUT` | `/api/v1/users/{user_id}` | Update a user |
-| `DELETE` | `/api/v1/users/{user_id}` | Delete a user |
+| `GET` | `/api/v1/users/` | 모든 사용자 조회 |
+| `POST` | `/api/v1/users/` | 새 사용자 생성 |
+| `GET` | `/api/v1/users/{user_id}` | 특정 사용자 조회 |
+| `PUT` | `/api/v1/users/{user_id}` | 사용자 갱신 |
+| `DELETE` | `/api/v1/users/{user_id}` | 사용자 삭제 |
 
-## Testing Your New Routes
+## 새 라우트 테스트하기
 
-### 1. Start the Server
+### 1. 서버 시작
 
 <div class="termy">
 
@@ -194,13 +194,13 @@ INFO:     Uvicorn running on http://127.0.0.1:8000
 
 </div>
 
-### 2. Check API Documentation
+### 2. API 문서 확인
 
-Visit [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) to see your new endpoints in the interactive documentation.
+[http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) 에 접속해 인터랙티브 문서에서 새 엔드포인트들을 확인하세요.
 
-### 3. Test with curl
+### 3. curl 로 테스트
 
-**Create a user:**
+**사용자 생성:**
 <div class="termy">
 
 ```console
@@ -217,7 +217,7 @@ $ curl -X POST "http://127.0.0.1:8000/api/v1/users/" \
 
 </div>
 
-**Get all users:**
+**모든 사용자 조회:**
 <div class="termy">
 
 ```console
@@ -234,7 +234,7 @@ $ curl http://127.0.0.1:8000/api/v1/users/
 
 </div>
 
-**Get a specific user:**
+**특정 사용자 조회:**
 <div class="termy">
 
 ```console
@@ -249,13 +249,13 @@ $ curl http://127.0.0.1:8000/api/v1/users/1
 
 </div>
 
-## Customizing Generated Code
+## 생성된 코드 커스터마이즈하기
 
-The generated code is fully customizable. Here are common modifications:
+생성된 코드는 자유롭게 수정할 수 있습니다. 자주 하는 변경들을 소개합니다:
 
-### 1. Enhanced User Schema
+### 1. 향상된 User 스키마
 
-Modify `src/schemas/users.py` for more realistic user data:
+좀 더 현실적인 사용자 데이터를 위해 `src/schemas/users.py` 를 수정하세요:
 
 ```python
 from typing import Optional
@@ -288,9 +288,9 @@ class UserInDB(User):
     hashed_password: str
 ```
 
-### 2. Enhanced CRUD with Validation
+### 2. 검증을 강화한 CRUD
 
-Update `src/crud/users.py` with better validation:
+검증 로직을 더 갖춘 `src/crud/users.py` 로 갱신하세요:
 
 ```python
 from typing import List, Optional
@@ -339,9 +339,9 @@ class UsersCRUD:
 users_crud = UsersCRUD()
 ```
 
-### 3. Enhanced Route with Error Handling
+### 3. 에러 처리를 개선한 라우트
 
-Update `src/api/routes/users.py` with better error handling:
+에러 처리를 더 갖춘 `src/api/routes/users.py` 로 갱신하세요:
 
 ```python
 from typing import List
@@ -376,35 +376,35 @@ def read_user(user_id: int):
     return User(**user.dict())
 ```
 
-## Adding Multiple Routes
+## 여러 라우트 추가하기
 
-You can add multiple routes to build a complete API:
+여러 라우트를 추가해 구조가 갖춰진 API를 만들 수 있습니다:
 
 <div class="termy">
 
 ```console
-# Add more resource routes (route name first, project dir second)
+# 추가 리소스 라우트 생성 (라우트 이름이 첫째, 프로젝트 디렉터리가 둘째)
 $ fastkit addroute products my-awesome-api
 $ fastkit addroute orders my-awesome-api
 $ fastkit addroute categories my-awesome-api
 
-# Each creates the full CRUD structure
+# 각각이 전체 CRUD 구조를 만들어 줍니다
 ```
 
 </div>
 
-This creates a comprehensive API with:
+이렇게 하면 다음과 같은 종합적인 API 구성이 완성됩니다:
 
-- `/api/v1/users/` - User management
-- `/api/v1/products/` - Product catalog
-- `/api/v1/orders/` - Order processing
-- `/api/v1/categories/` - Category management
+- `/api/v1/users/` - 사용자 관리
+- `/api/v1/products/` - 상품 카탈로그
+- `/api/v1/orders/` - 주문 처리
+- `/api/v1/categories/` - 카테고리 관리
 
-## Route Organization
+## 라우트 구성
 
-### Grouping Related Endpoints
+### 관련 엔드포인트 묶기
 
-You can organize routes by domain:
+라우트를 도메인 단위로 정리할 수 있습니다:
 
 ```python
 # src/api/api.py
@@ -438,9 +438,9 @@ api_router.include_router(
 )
 ```
 
-### Adding Route Dependencies
+### 라우트 의존성 추가
 
-Add authentication or other dependencies:
+인증 등 의존성을 추가할 수 있습니다:
 
 ```python
 from fastapi import APIRouter, Depends
@@ -464,19 +464,19 @@ def create_user(
     return users_crud.create(user)
 ```
 
-## Best Practices
+## 모범 사례
 
-### 1. Consistent Naming
+### 1. 일관된 명명
 
-Follow consistent naming conventions:
+명명 규칙을 일관되게 유지하세요:
 
-- **Route names**: Use plural nouns (`users`, `products`, `orders`)
-- **Schema names**: Use singular (`User`, `Product`, `Order`)
-- **CRUD classes**: End with `CRUD` (`UsersCRUD`, `ProductsCRUD`)
+- **라우트 이름**: 복수 명사 사용 (`users`, `products`, `orders`)
+- **스키마 이름**: 단수 사용 (`User`, `Product`, `Order`)
+- **CRUD 클래스**: 끝에 `CRUD` 붙이기 (`UsersCRUD`, `ProductsCRUD`)
 
-### 2. Error Handling
+### 2. 에러 처리
 
-Always handle errors gracefully:
+항상 에러를 우아하게 처리하세요:
 
 ```python
 @router.post("/", response_model=User)
@@ -489,9 +489,9 @@ def create_user(user: UserCreate):
         raise HTTPException(status_code=500, detail="Internal server error")
 ```
 
-### 3. Documentation
+### 3. 문서화
 
-Add comprehensive docstrings:
+자세한 docstring 을 추가하세요:
 
 ```python
 @router.get("/{user_id}", response_model=User)
@@ -514,9 +514,9 @@ def read_user(user_id: int):
     return user
 ```
 
-### 4. Testing
+### 4. 테스트
 
-Always test your new routes:
+새로 추가한 라우트는 항상 테스트하세요:
 
 ```python
 # tests/test_users.py
@@ -540,42 +540,42 @@ def test_get_user():
     assert response.status_code == 200
 ```
 
-## Troubleshooting
+## 문제 해결
 
-### Route Not Appearing
+### 라우트가 보이지 않을 때
 
-If your route doesn't appear in the API documentation:
+API 문서에 라우트가 나타나지 않는다면:
 
-1. **Check router registration** in `src/api/api.py`
-2. **Restart the server** after adding routes
-3. **Check for import errors** in the route file
+1. `src/api/api.py` 에서 **라우터 등록을 확인**하세요
+2. 라우트 추가 후 **서버를 재시작**하세요
+3. 라우트 파일에 **import 오류가 없는지 확인**하세요
 
-### Import Errors
+### Import 오류
 
-If you get import errors:
+import 오류가 발생한다면:
 
-1. **Check file structure** matches the expected layout
-2. **Verify schema imports** in route and CRUD files
-3. **Ensure all `__init__.py` files exist**
+1. **파일 구조**가 기대 레이아웃과 일치하는지 확인하세요
+2. 라우트와 CRUD 파일의 **스키마 import 를 검증**하세요
+3. **모든 `__init__.py` 파일이 존재**하는지 확인하세요
 
-### Server Won't Start
+### 서버가 시작되지 않을 때
 
-If the server fails to start after adding routes:
+라우트 추가 후 서버가 시작되지 않는다면:
 
-1. **Check syntax errors** in generated files
-2. **Verify schema compatibility** between files
-3. **Check logs** for specific error messages
+1. 생성된 파일에 **문법 오류가 없는지 확인**하세요
+2. 파일 간 **스키마 호환성을 검증**하세요
+3. 구체적인 에러 메시지를 보려면 **로그를 확인**하세요
 
-## Next Steps
+## 다음 단계
 
-Now that you know how to add routes:
+이제 라우트 추가 방법을 알았으니:
 
-1. **[Your First Project](../tutorial/first-project.md)**: Build a complete blog API
-2. **[CLI Reference](cli-reference.md)**: Learn all available commands
-3. **[Using Templates](using-templates.md)**: Explore pre-built project templates
+1. **[첫 프로젝트 만들기](../tutorial/first-project.md)**: 완전한 블로그 API 구축
+2. **[CLI 레퍼런스](cli-reference.md)**: 사용 가능한 모든 명령어 학습
+3. **[템플릿 사용하기](using-templates.md)**: 사전 구축 프로젝트 템플릿 살펴보기
 
-!!! tip "Route Development Tips"
-    - Always test new routes in the interactive docs (`/docs`)
-    - Use meaningful HTTP status codes
-    - Implement proper error handling for all endpoints
-    - Keep route handlers simple and delegate business logic to CRUD classes
+!!! tip "라우트 개발 팁"
+    - 새 라우트는 항상 인터랙티브 문서 (`/docs`) 에서 테스트하세요
+    - 의미 있는 HTTP 상태 코드를 사용하세요
+    - 모든 엔드포인트에 적절한 에러 처리를 구현하세요
+    - 라우트 핸들러는 단순하게 유지하고 비즈니스 로직은 CRUD 클래스에 위임하세요
