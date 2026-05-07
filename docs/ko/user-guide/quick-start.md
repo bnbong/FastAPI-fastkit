@@ -147,7 +147,7 @@ INFO:     Application startup complete.
 <div class="termy">
 
 ```console
-$ fastkit addroute my-first-app users
+$ fastkit addroute users my-first-app
                        Adding New Route
 ┌──────────────────┬──────────────────────────────────────────┐
 │ Project          │ my-first-app                             │
@@ -352,9 +352,9 @@ $ fastkit list-templates
 # 템플릿으로 프로젝트 생성
 $ fastkit startdemo
 
-# 라우트 더 추가
-$ fastkit addroute my-first-app products
-$ fastkit addroute my-first-app orders
+# 라우트 더 추가 (라우트 이름이 첫째, 프로젝트 디렉터리가 둘째)
+$ fastkit addroute products my-first-app
+$ fastkit addroute orders my-first-app
 ```
 
 </div>

@@ -158,15 +158,15 @@ my-api/
 #### 문법
 
 ```console
-$ fastkit addroute PROJECT_NAME ROUTE_NAME [OPTIONS]
+$ fastkit addroute ROUTE_NAME [PROJECT_DIR] [OPTIONS]
 ```
 
 #### 인자
 
 | 인자 | 설명 | 필수 |
 |----------|-------------|----------|
-| `PROJECT_NAME` | 기존 프로젝트의 이름 | 예 |
 | `ROUTE_NAME` | 새 라우트의 이름 (복수형 권장) | 예 |
+| `PROJECT_DIR` | 워크스페이스 내 프로젝트 디렉터리 (기본값 `.`, 즉 현재 디렉터리) | 아니오 |
 
 #### 옵션
 
@@ -179,7 +179,8 @@ $ fastkit addroute PROJECT_NAME ROUTE_NAME [OPTIONS]
 <div class="termy">
 
 ```console
-$ fastkit addroute my-api users
+$ cd my-api
+$ fastkit addroute users
                        Adding New Route
 ┌──────────────────┬──────────────────────────────────────────┐
 │ Project          │ my-api                                   │
@@ -190,6 +191,16 @@ $ fastkit addroute my-api users
 Do you want to add route 'users' to project 'my-api'? [Y/n]: y
 
 ✨ Successfully added new route 'users' to project 'my-api'
+```
+
+</div>
+
+`cd` 하지 않고 워크스페이스 내 프로젝트 이름을 두 번째 인자로 넘겨도 됩니다:
+
+<div class="termy">
+
+```console
+$ fastkit addroute users my-api
 ```
 
 </div>
@@ -456,10 +467,10 @@ $ fastkit runserver
 <div class="termy">
 
 ```console
-# 여러 라우트 추가
-$ fastkit addroute my-api users
-$ fastkit addroute my-api products
-$ fastkit addroute my-api orders
+# 여러 라우트 추가 (두 번째 인자로 워크스페이스 내 프로젝트 이름)
+$ fastkit addroute users my-api
+$ fastkit addroute products my-api
+$ fastkit addroute orders my-api
 
 # API 테스트
 $ fastkit runserver
@@ -631,7 +642,7 @@ y
 EOF
 
     cd "$service-service"
-    fastkit addroute "$service-service" "$service"
+    fastkit addroute "$service"
     cd ..
 done
 ```

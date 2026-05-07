@@ -342,7 +342,7 @@ Let's add a new API route to practice what you've learned:
 <div class="termy">
 
 ```console
-$ fastkit addroute my-first-api users
+$ fastkit addroute users my-first-api
                        Adding New Route
 ┌──────────────────┬──────────────────────────────────────────┐
 │ Project          │ my-first-api                             │

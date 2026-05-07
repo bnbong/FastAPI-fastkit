@@ -342,7 +342,7 @@ def create_item(item: ItemCreate):
 <div class="termy">
 
 ```console
-$ fastkit addroute my-first-api users
+$ fastkit addroute users my-first-api
                        Adding New Route
 ┌──────────────────┬──────────────────────────────────────────┐
 │ Project          │ my-first-api                             │

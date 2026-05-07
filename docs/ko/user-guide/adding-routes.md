@@ -11,7 +11,7 @@ FastAPI-fastkit의 `addroute` 명령을 쓰면 새 라우트를 간편하게 추
 <div class="termy">
 
 ```console
-$ fastkit addroute my-awesome-api users
+$ fastkit addroute users my-awesome-api
                        Adding New Route
 ┌──────────────────┬──────────────────────────────────────────┐
 │ Project          │ my-awesome-api                           │
@@ -383,10 +383,10 @@ def read_user(user_id: int):
 <div class="termy">
 
 ```console
-# 추가 리소스 라우트 생성
-$ fastkit addroute my-awesome-api products
-$ fastkit addroute my-awesome-api orders
-$ fastkit addroute my-awesome-api categories
+# 추가 리소스 라우트 생성 (라우트 이름이 첫째, 프로젝트 디렉터리가 둘째)
+$ fastkit addroute products my-awesome-api
+$ fastkit addroute orders my-awesome-api
+$ fastkit addroute categories my-awesome-api
 
 # 각각이 전체 CRUD 구조를 만들어 줍니다
 ```

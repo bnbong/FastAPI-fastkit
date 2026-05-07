@@ -360,7 +360,7 @@ Installing dependencies...
 <div class="termy">
 
 ```console
-$ fastkit addroute my-awesome-project user
+$ fastkit addroute user my-awesome-project
                        Adding New Route
 ┌──────────────────┬──────────────────────────────────────────┐
 │ Project          │ my-awesome-project                       │

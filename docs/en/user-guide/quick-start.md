@@ -153,7 +153,7 @@ Let's add a new API route to your project:
 <div class="termy">
 
 ```console
-$ fastkit addroute my-first-app users
+$ fastkit addroute users my-first-app
                        Adding New Route
 ┌──────────────────┬──────────────────────────────────────────┐
 │ Project          │ my-first-app                             │
@@ -358,9 +358,9 @@ $ fastkit list-templates
 # Create a project from a template
 $ fastkit startdemo
 
-# Add more routes
-$ fastkit addroute my-first-app products
-$ fastkit addroute my-first-app orders
+# Add more routes (route name first, project dir second)
+$ fastkit addroute products my-first-app
+$ fastkit addroute orders my-first-app
 ```
 
 </div>

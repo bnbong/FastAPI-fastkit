@@ -114,13 +114,13 @@ $ source .venv/bin/activate
 <div class="termy">
 
 ```console
-$ fastkit addroute blog-api users
+$ fastkit addroute users blog-api
 ✨ Successfully added new route 'users' to project 'blog-api'
 
-$ fastkit addroute blog-api posts
+$ fastkit addroute posts blog-api
 ✨ Successfully added new route 'posts' to project 'blog-api'
 
-$ fastkit addroute blog-api comments
+$ fastkit addroute comments blog-api
 ✨ Successfully added new route 'comments' to project 'blog-api'
 ```
 

@@ -11,7 +11,7 @@ FastAPI-fastkit's `addroute` command makes it easy to add new routes:
 <div class="termy">
 
 ```console
-$ fastkit addroute my-awesome-api users
+$ fastkit addroute users my-awesome-api
                        Adding New Route
 ┌──────────────────┬──────────────────────────────────────────┐
 │ Project          │ my-awesome-api                           │
@@ -383,10 +383,10 @@ You can add multiple routes to build a complete API:
 <div class="termy">
 
 ```console
-# Add more resource routes
-$ fastkit addroute my-awesome-api products
-$ fastkit addroute my-awesome-api orders
-$ fastkit addroute my-awesome-api categories
+# Add more resource routes (route name first, project dir second)
+$ fastkit addroute products my-awesome-api
+$ fastkit addroute orders my-awesome-api
+$ fastkit addroute categories my-awesome-api
 
 # Each creates the full CRUD structure
 ```

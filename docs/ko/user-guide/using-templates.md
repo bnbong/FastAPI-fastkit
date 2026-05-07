@@ -381,9 +381,9 @@ my-project/
 <div class="termy">
 
 ```console
-$ fastkit addroute my-blog-api posts
-$ fastkit addroute my-blog-api users
-$ fastkit addroute my-blog-api comments
+$ fastkit addroute posts my-blog-api
+$ fastkit addroute users my-blog-api
+$ fastkit addroute comments my-blog-api
 ```
 
 </div>
@@ -492,7 +492,7 @@ $ fastkit runserver
 $ python -m pytest
 
 # 새 기능 추가
-$ fastkit addroute your-project new-resource
+$ fastkit addroute new-resource your-project
 ```
 
 </div>
