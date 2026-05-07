@@ -30,6 +30,7 @@ fastapi-{purpose}-{stack}
 ```
 
 Examples:
+
 - `fastapi-microservice` (Microservice template)
 - `fastapi-graphql` (GraphQL integration template)
 - `fastapi-auth-jwt` (JWT authentication template)
@@ -380,9 +381,9 @@ The inspector automatically validates the following items:
 #### ✅ Dependencies Validation
 
 - [ ] `fastapi` is declared in at least one of:
-  - [ ] `pyproject.toml-tpl` under `[project].dependencies` (preferred)
-  - [ ] `requirements.txt-tpl`
-  - [ ] `setup.py-tpl` under `install_requires`
+    - [ ] `pyproject.toml-tpl` under `[project].dependencies` (preferred)
+    - [ ] `requirements.txt-tpl`
+    - [ ] `setup.py-tpl` under `install_requires`
 
 #### ✅ FastAPI Implementation Validation
 
@@ -400,6 +401,7 @@ The inspector automatically validates the following items:
 FastAPI-fastkit includes **automated template testing** that runs comprehensive tests for all templates:
 
 **Test Coverage:**
+
 - ✅ Template creation process
 - ✅ Project metadata injection
 - ✅ Virtual environment setup
@@ -425,12 +427,14 @@ New templates are **automatically discovered** and tested without manual configu
 4. ✅ **Comprehensive Validation**: Structure, metadata, and functionality checks
 
 **What This Means for You:**
+
 - 🚀 **No Additional Test Files at `FastAPI-fastkit`'s main source testcases**: Your template is tested automatically
 - ⚡ **Faster Development**: Focus on template content, not test setup
 - 🛡️ **Quality Assurance**: Consistent testing across all templates
 - 🔄 **CI/CD Integration**: Automatic testing in pull requests
 
 **Manual Testing Still Required:**
+
 - 🧪 **Template-specific functionality**: Business logic and custom features
 - 🔧 **Integration testing**: External services and complex workflows
 - 📱 **End-to-end scenarios**: Complete user workflows
@@ -541,8 +545,8 @@ Closes #issue-number
 ### Review Process
 
 1. **Automated Validation**: GitHub Actions automatically validates the template
-   - **Template PR Inspection**: Runs `inspect-changed-templates.py` on PRs modifying templates
-   - **Weekly Inspection**: Full template validation every Wednesday
+    - **Template PR Inspection**: Runs `inspect-changed-templates.py` on PRs modifying templates
+    - **Weekly Inspection**: Full template validation every Wednesday
 2. **Code Review**: Maintainers and community review the code
 3. **Testing**: Template is tested in various environments
 4. **Documentation Review**: Review documentation accuracy and completeness

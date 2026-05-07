@@ -101,17 +101,20 @@ The automated testing system runs in **CI/CD pipelines**:
 ### Benefits for Contributors
 
 **Zero Configuration Testing:**
+
 - 🚀 Add new template → automatic testing
 - ⚡ No manual test file creation required
 - 🛡️ Consistent quality standards
 
 **Comprehensive Coverage:**
+
 - 🔍 End-to-end project creation testing
 - 📦 Multi package manager validation
 - 🏗️ Complete dependency resolution testing
 - ✅ Real-world usage simulation
 
 **Developer Experience:**
+
 - 🎯 **Focus on Template Content**: Testing is automatic
 - 🔄 **Immediate Feedback**: Fast test execution
 - 📊 **Clear Results**: Detailed test reporting
@@ -190,8 +193,8 @@ For a template to pass inspection, it must meet these requirements:
 - Python files must use `.py-tpl` extension
 - Must include a `tests/` directory and a `README.md-tpl` file
 - Must include **at least one** metadata file:
-  - `pyproject.toml-tpl` (preferred, PEP 621), or
-  - `setup.py-tpl` (legacy, still accepted)
+    - `pyproject.toml-tpl` (preferred, PEP 621), or
+    - `setup.py-tpl` (legacy, still accepted)
 - `requirements.txt-tpl` is optional when `pyproject.toml-tpl` declares
   `[project].dependencies`
 

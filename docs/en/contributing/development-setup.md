@@ -31,6 +31,7 @@ Installing pre-commit hooks...
 </div>
 
 This single command:
+
 - Installs the package in editable mode with dev dependencies
 - Sets up pre-commit hooks
 - Configures development tools

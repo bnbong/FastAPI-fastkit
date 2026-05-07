@@ -1,21 +1,21 @@
-# Getting Started
+# 시작하기
 
-A comprehensive, step-by-step tutorial for getting started with FastAPI-fastkit. This guide will take you from installation to running your first API in about 15 minutes.
+FastAPI-fastkit으로 시작하는 종합 단계별 튜토리얼입니다. 이 가이드는 설치부터 첫 API 실행까지 약 15분 안에 차근차근 안내합니다.
 
-## Prerequisites
+## 사전 요구 사항
 
-Before we begin, make sure you have:
+시작하기 전에 다음을 갖춰 두세요:
 
-- **Python 3.12 or higher** installed on your system
-- **Basic knowledge of Python** (variables, functions, classes)
-- **Terminal/Command line** access
-- **Text editor or IDE** (VS Code, PyCharm, etc.)
+- 시스템에 설치된 **Python 3.12 이상**
+- **Python 기초 지식** (변수, 함수, 클래스)
+- **터미널 / 커맨드라인** 사용 가능
+- **텍스트 에디터 또는 IDE** (VS Code, PyCharm 등)
 
-## Step 1: Installation
+## 1단계: 설치
 
-First, let's install FastAPI-fastkit. We recommend using a virtual environment to keep your projects isolated.
+먼저 FastAPI-fastkit을 설치합니다. 프로젝트를 분리해서 관리할 수 있도록 가상 환경 사용을 권장합니다.
 
-### Option A: Using pip (Traditional)
+### 방법 A: pip 사용 (전통적)
 
 <div class="termy">
 
@@ -27,17 +27,17 @@ Successfully installed fastapi-fastkit
 
 </div>
 
-### Option B: Using UV (Recommended - Faster)
+### 방법 B: UV 사용 (권장 — 더 빠름)
 
-UV is a fast Python package manager. If you don't have UV installed:
+UV는 빠른 Python 패키지 매니저입니다. 아직 설치하지 않았다면 다음과 같이 진행하세요:
 
 <div class="termy">
 
 ```console
-# Install UV first
+# 먼저 UV 설치
 $ curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Then install FastAPI-fastkit
+# 이어서 FastAPI-fastkit 설치
 $ uv pip install fastapi-fastkit
 ---> 100%
 Successfully installed fastapi-fastkit
@@ -45,21 +45,21 @@ Successfully installed fastapi-fastkit
 
 </div>
 
-### Option C: Using a Virtual Environment
+### 방법 C: 가상 환경 사용
 
 <div class="termy">
 
 ```console
 $ python -m venv fastapi-env
-$ source fastapi-env/bin/activate  # On Windows: fastapi-env\Scripts\activate
+$ source fastapi-env/bin/activate  # Windows: fastapi-env\Scripts\activate
 $ pip install fastapi-fastkit
 ```
 
 </div>
 
-### Verify Installation
+### 설치 확인
 
-Check that FastAPI-fastkit is installed correctly:
+FastAPI-fastkit이 올바르게 설치됐는지 확인합니다:
 
 <div class="termy">
 
@@ -70,9 +70,9 @@ FastAPI-fastkit version 1.0.0
 
 </div>
 
-## Step 2: Create Your First Project
+## 2단계: 첫 프로젝트 생성
 
-Now let's create your first FastAPI project using the interactive `init` command:
+이제 대화형 `init` 명령으로 첫 FastAPI 프로젝트를 만듭니다:
 
 <div class="termy">
 
@@ -132,12 +132,12 @@ Installing dependencies...
 
 </div>
 
-!!! note "Stack Selection"
-    We chose **MINIMAL** for this tutorial to keep things simple. For real projects, consider **STANDARD** (includes database support) or **FULL** (includes background tasks).
+!!! note "스택 선택"
+    이 튜토리얼에서는 단순함을 위해 **MINIMAL** 을 골랐습니다. 실제 프로젝트에서는 **STANDARD** (데이터베이스 지원 포함) 또는 **FULL** (백그라운드 작업 포함) 을 고려하세요.
 
-## Step 3: Navigate to Your Project
+## 3단계: 프로젝트로 이동
 
-Move into your newly created project directory:
+방금 생성한 프로젝트 디렉터리로 이동합니다:
 
 <div class="termy">
 
@@ -158,24 +158,24 @@ drwxr-xr-x  3 user user   96 Dec  7 10:30 tests
 
 </div>
 
-## Step 4: Activate Virtual Environment
+## 4단계: 가상 환경 활성화
 
-Your project comes with a pre-configured virtual environment. Let's activate it:
+프로젝트에는 미리 구성된 가상 환경이 함께 옵니다. 활성화해 봅시다:
 
 <div class="termy">
 
 ```console
-$ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+$ source .venv/bin/activate  # Windows: .venv\Scripts\activate
 (my-first-api) $
 ```
 
 </div>
 
-Notice how your terminal prompt now shows `(my-first-api)` indicating the virtual environment is active.
+이제 터미널 프롬프트가 `(my-first-api)` 로 표시되며, 가상 환경이 활성화됐음을 알려 줍니다.
 
-## Step 5: Start the Development Server
+## 5단계: 개발 서버 시작
 
-Now comes the exciting part - let's start your FastAPI server:
+이제 FastAPI 서버를 실행해 봅시다:
 
 <div class="termy">
 
@@ -190,40 +190,40 @@ INFO:     Application startup complete.
 
 </div>
 
-🎉 **Congratulations!** Your FastAPI server is now running.
+🎉 **축하합니다!** FastAPI 서버가 동작 중입니다.
 
-## Step 6: Test Your API
+## 6단계: API 테스트
 
-Let's test your API in several ways:
+여러 방법으로 API를 테스트해 봅시다:
 
-### Method 1: Browser
+### 방법 1: 브라우저
 
-Open your web browser and visit:
+웹 브라우저에서 다음 주소를 열어 보세요:
 
-- **Main API endpoint**: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+- **메인 API 엔드포인트**: [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
-You should see:
+다음과 같이 보일 것입니다:
 ```json
 {"message": "Hello World"}
 ```
 
-### Method 2: Interactive API Documentation
+### 방법 2: 인터랙티브 API 문서
 
-Visit the automatically generated API documentation:
+자동 생성된 API 문서를 열어 봅니다:
 
 - **Swagger UI**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 - **ReDoc**: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
 
-The Swagger UI is particularly useful - you can:
+특히 Swagger UI 가 유용합니다. 다음을 할 수 있습니다:
 
-- See all available endpoints
-- Test endpoints directly in your browser
-- View request/response schemas
-- Download OpenAPI specifications
+- 사용 가능한 모든 엔드포인트 보기  
+- 브라우저에서 직접 엔드포인트 테스트  
+- 요청 / 응답 스키마 확인  
+- OpenAPI 명세 다운로드  
 
-### Method 3: Command Line
+### 방법 3: 커맨드라인
 
-Open a new terminal (keep the server running) and test with curl:
+새 터미널을 열고 (서버를 실행하는 터미널은 그대로 두세요) curl 로 테스트합니다:
 
 <div class="termy">
 
@@ -246,9 +246,9 @@ $ curl -X POST "http://127.0.0.1:8000/api/v1/items/" \
 
 </div>
 
-## Step 7: Understand Your Project Structure
+## 7단계: 프로젝트 구조 이해
 
-Let's explore what FastAPI-fastkit generated for you:
+FastAPI-fastkit이 무엇을 생성했는지 살펴봅시다:
 
 <div class="termy">
 
@@ -256,32 +256,32 @@ Let's explore what FastAPI-fastkit generated for you:
 $ tree src
 src/
 ├── __init__.py
-├── main.py                 # FastAPI application entry point
+├── main.py                 # FastAPI 애플리케이션 진입점
 ├── core/
 │   ├── __init__.py
-│   └── config.py          # Application configuration
+│   └── config.py          # 애플리케이션 설정
 ├── api/
 │   ├── __init__.py
-│   ├── api.py             # Main API router
+│   ├── api.py             # 메인 API 라우터
 │   └── routes/
 │       ├── __init__.py
-│       └── items.py       # Items API endpoints
+│       └── items.py       # Items API 엔드포인트
 ├── crud/
 │   ├── __init__.py
-│   └── items.py           # Business logic for items
+│   └── items.py           # items 의 비즈니스 로직
 ├── schemas/
 │   ├── __init__.py
-│   └── items.py           # Data validation schemas
+│   └── items.py           # 데이터 검증 스키마
 └── mocks/
     ├── __init__.py
-    └── mock_items.json    # Sample data
+    └── mock_items.json    # 샘플 데이터
 ```
 
 </div>
 
-### Key Files Explained
+### 주요 파일 설명
 
-**`src/main.py`** - The heart of your application:
+**`src/main.py`** — 애플리케이션의 핵심:
 ```python
 from fastapi import FastAPI
 from src.api.api import api_router
@@ -300,7 +300,7 @@ def read_root():
     return {"message": "Hello World"}
 ```
 
-**`src/core/config.py`** - Application settings:
+**`src/core/config.py`** — 애플리케이션 설정:
 ```python
 from pydantic_settings import BaseSettings
 
@@ -315,7 +315,7 @@ class Settings(BaseSettings):
 settings = Settings()
 ```
 
-**`src/api/routes/items.py`** - API endpoints:
+**`src/api/routes/items.py`** — API 엔드포인트:
 ```python
 from typing import List
 from fastapi import APIRouter, HTTPException
@@ -335,9 +335,9 @@ def create_item(item: ItemCreate):
     return items_crud.create(item)
 ```
 
-## Step 8: Add Your First Custom Route
+## 8단계: 첫 커스텀 라우트 추가
 
-Let's add a new API route to practice what you've learned:
+배운 내용을 연습할 겸 새 API 라우트를 추가해 봅시다:
 
 <div class="termy">
 
@@ -357,14 +357,14 @@ Do you want to add route 'users' to project 'my-first-api'? [Y/n]: y
 
 </div>
 
-The server will automatically restart and now you have new endpoints:
+서버는 자동으로 재시작되고, 이제 새 엔드포인트들이 생깁니다:
 
-- `GET /api/v1/users/` - Get all users
-- `POST /api/v1/users/` - Create a new user
-- `GET /api/v1/users/{user_id}` - Get a specific user
-- And more...
+- `GET /api/v1/users/` — 모든 사용자 조회  
+- `POST /api/v1/users/` — 새 사용자 생성  
+- `GET /api/v1/users/{user_id}` — 특정 사용자 조회  
+- 그 외 다수...  
 
-### Test Your New Route
+### 새 라우트 테스트
 
 <div class="termy">
 
@@ -390,13 +390,13 @@ $ curl http://127.0.0.1:8000/api/v1/users/
 
 </div>
 
-## Step 9: Explore and Modify the Code
+## 9단계: 코드 살펴보고 수정하기
 
-Now let's make a small modification to understand how the code works.
+코드가 어떻게 동작하는지 이해하기 위해 작은 수정을 해 봅니다.
 
-### Modify the Welcome Message
+### 환영 메시지 수정
 
-Open `src/main.py` in your text editor and change the root endpoint:
+텍스트 에디터에서 `src/main.py` 를 열고 루트 엔드포인트를 변경합니다:
 
 ```python
 @app.get("/")
@@ -404,9 +404,9 @@ def read_root():
     return {"message": "Welcome to my first FastAPI application!"}
 ```
 
-Save the file. Thanks to auto-reload, your server automatically restarts.
+파일을 저장합니다. 자동 리로드 덕분에 서버가 자동으로 재시작됩니다.
 
-### Test the Change
+### 변경 사항 테스트
 
 <div class="termy">
 
@@ -417,9 +417,9 @@ $ curl http://127.0.0.1:8000
 
 </div>
 
-### Add a New Endpoint
+### 새 엔드포인트 추가
 
-Let's add a simple endpoint to `src/main.py`:
+`src/main.py` 에 단순한 엔드포인트를 추가해 봅시다:
 
 ```python
 @app.get("/hello/{name}")
@@ -427,7 +427,7 @@ def say_hello(name: str):
     return {"message": f"Hello, {name}!"}
 ```
 
-### Test the New Endpoint
+### 새 엔드포인트 테스트
 
 <div class="termy">
 
@@ -441,9 +441,9 @@ $ curl http://127.0.0.1:8000/hello/FastAPI
 
 </div>
 
-## Step 10: Run Tests
+## 10단계: 테스트 실행
 
-Your project comes with pre-configured tests. Let's run them:
+프로젝트에는 미리 구성된 테스트가 함께 옵니다. 실행해 봅시다:
 
 <div class="termy">
 
@@ -463,102 +463,102 @@ tests/test_items.py::test_delete_item PASSED
 
 </div>
 
-## Understanding Core Concepts
+## 핵심 개념 이해
 
-### 1. FastAPI Application Structure
+### 1. FastAPI 애플리케이션 구조
 
-FastAPI-fastkit follows a **modular architecture**:
+FastAPI-fastkit은 **모듈형 아키텍처**를 따릅니다:
 
-- **`main.py`**: Application entry point and global endpoints
-- **`api/`**: API route organization
-- **`core/`**: Application configuration and settings
-- **`crud/`**: Business logic and data operations
-- **`schemas/`**: Data validation and serialization
-- **`tests/`**: Automated testing
+- **`main.py`**: 애플리케이션 진입점과 전역 엔드포인트
+- **`api/`**: API 라우트 구성
+- **`core/`**: 애플리케이션 구성 및 설정
+- **`crud/`**: 비즈니스 로직과 데이터 작업
+- **`schemas/`**: 데이터 검증 및 직렬화
+- **`tests/`**: 자동화된 테스트
 
-### 2. Dependency Management
+### 2. 의존성 관리
 
-Your project uses modern Python dependency management:
+프로젝트는 현대적인 Python 의존성 관리 방식을 사용합니다:
 
-- **Virtual environment**: Isolated Python environment
-- **requirements.txt**: Lists all dependencies
-- **Automatic installation**: Dependencies installed during project creation
+- **가상 환경**: 격리된 Python 환경
+- **requirements.txt**: 모든 의존성을 나열
+- **자동 설치**: 프로젝트 생성 시 의존성을 자동 설치
 
-### 3. Development Server
+### 3. 개발 서버
 
-FastAPI-fastkit uses **Uvicorn** as the ASGI server:
+FastAPI-fastkit은 ASGI 서버로 **Uvicorn**을 사용합니다:
 
-- **Auto-reload**: Automatically restarts when code changes
-- **Fast startup**: Quick development iteration
-- **Production-ready**: Same server used in production
+- **자동 리로드**: 코드 변경 시 자동 재시작
+- **빠른 시작**: 빠른 개발 반복
+- **프로덕션 대비**: 프로덕션에서도 같은 서버 사용
 
-### 4. API Documentation
+### 4. API 문서화
 
-FastAPI automatically generates:
+FastAPI는 자동으로 다음 항목을 생성합니다:
 
-- **OpenAPI specification**: Industry-standard API documentation
-- **Swagger UI**: Interactive testing interface
-- **ReDoc**: Alternative documentation view
+- **OpenAPI 명세**: 업계 표준 API 문서
+- **Swagger UI**: 인터랙티브 테스트 인터페이스
+- **ReDoc**: 대안 문서 뷰
 
-## Next Steps
+## 다음 단계
 
-Congratulations! You've successfully:
+축하합니다! 다음을 성공적으로 마쳤습니다:
 
-✅ Installed FastAPI-fastkit
-✅ Created your first project
-✅ Started the development server
-✅ Tested your API endpoints
-✅ Added a new route
-✅ Modified existing code
-✅ Run tests
+✅ FastAPI-fastkit 설치  
+✅ 첫 프로젝트 생성  
+✅ 개발 서버 시작  
+✅ API 엔드포인트 테스트  
+✅ 새 라우트 추가  
+✅ 기존 코드 수정  
+✅ 테스트 실행  
 
-### Continue Learning
+### 학습 이어가기
 
-1. **[Your First Project](first-project.md)**: Build a complete blog API with advanced features
-2. **[Adding Routes](../user-guide/adding-routes.md)**: Learn to create complex API endpoints
-3. **[Using Templates](../user-guide/using-templates.md)**: Explore pre-built project templates
+1. **[첫 프로젝트 만들기](first-project.md)**: 고급 기능을 갖춘 완전한 블로그 API 구축
+2. **[라우트 추가](../user-guide/adding-routes.md)**: 복잡한 API 엔드포인트 만드는 법 학습
+3. **[템플릿 사용하기](../user-guide/using-templates.md)**: 사전 구축 프로젝트 템플릿 살펴보기
 
-### Experiment More
+### 더 실험해 보기
 
-Try these challenges:
+다음 도전 과제를 시도해 보세요:
 
-1. **Add validation**: Modify schemas to add data validation rules
-2. **Custom responses**: Change response formats in routes
-3. **Environment variables**: Use `.env` files for configuration
-4. **Add middleware**: Implement CORS or authentication
-5. **Database integration**: Upgrade to STANDARD stack for database support
+1. **검증 추가**: 스키마를 수정해 데이터 검증 규칙을 추가해 보세요
+2. **커스텀 응답**: 라우트의 응답 형식을 바꿔 보세요
+3. **환경 변수**: 설정에 `.env` 파일을 사용해 보세요
+4. **미들웨어 추가**: CORS 또는 인증을 구현해 보세요
+5. **데이터베이스 통합**: 데이터베이스 지원을 위해 STANDARD 스택으로 업그레이드하세요
 
-### Common Issues and Solutions
+### 자주 마주치는 문제와 해결
 
-**Server won't start:**
+**서버가 시작되지 않을 때:**
 
-- Check you're in the project directory
-- Ensure virtual environment is activated
-- Verify no syntax errors in your code
+- 프로젝트 디렉터리에 있는지 확인  
+- 가상 환경이 활성화돼 있는지 확인  
+- 코드에 문법 오류가 없는지 검증  
 
-**Import errors:**
+**Import 오류:**
 
-- Make sure all `__init__.py` files exist
-- Check your import paths are correct
-- Verify you're using the virtual environment
+- 모든 `__init__.py` 파일이 존재하는지 확인  
+- import 경로가 올바른지 확인  
+- 가상 환경을 사용하고 있는지 확인  
 
-**Port already in use:**
+**포트가 이미 사용 중일 때:**
 ```console
 $ fastkit runserver --port 8080
 ```
 
-## Best Practices You've Learned
+## 여기서 배운 모범 사례
 
-1. **Virtual Environments**: Always use isolated environments
-2. **Project Structure**: Follow organized, modular architecture
-3. **Auto-reload**: Use development server for fast iteration
-4. **API Documentation**: Leverage automatic documentation generation
-5. **Testing**: Run tests regularly during development
+1. **가상 환경**: 항상 격리된 환경 사용
+2. **프로젝트 구조**: 잘 정리된 모듈형 아키텍처 따르기
+3. **자동 리로드**: 빠른 반복을 위해 개발 서버 사용
+4. **API 문서화**: 자동 문서 생성 활용
+5. **테스트**: 개발 중에도 정기적으로 테스트 실행
 
-!!! tip "Development Tips"
-    - Keep the development server running while coding
-    - Use the interactive docs (`/docs`) to test your APIs
-    - Check the terminal for helpful error messages
-    - Commit your code to version control regularly
+!!! tip "개발 팁"
+    - 코딩 중에는 개발 서버를 켜 두세요
+    - API 테스트에는 인터랙티브 문서 (`/docs`) 를 활용하세요
+    - 도움이 되는 에러 메시지가 있는지 터미널을 확인하세요
+    - 코드를 정기적으로 버전 관리에 커밋하세요
 
-You're now ready to build amazing APIs with FastAPI-fastkit! 🚀
+이제 FastAPI-fastkit으로 멋진 API를 만들 준비가 됐습니다! 🚀

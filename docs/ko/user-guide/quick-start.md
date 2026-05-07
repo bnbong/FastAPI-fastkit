@@ -1,13 +1,13 @@
 # 퀵 스타트
 
-FastAPI-fastkit 으로 5 분 안에 첫 FastAPI 프로젝트를 만드세요!
+FastAPI-fastkit으로 5분 안에 첫 FastAPI 프로젝트를 만들어 보세요!
 
 !!! tip "어떤 스타터를 골라야 할지 모르겠다면?"
-    `startdemo` 템플릿과 대화형 아키텍처 프리셋(`minimal` / `single-module` / `classic-layered` / `domain-starter`) 을 입문자 친화적으로 비교한 [**어떤 스타터를 선택해야 할까?**](choosing-a-starter.md) 를 참고하세요. 짧은 답: **`fastkit init --interactive` 와 `domain-starter` 프리셋이 권장 모던 기본값입니다.**
+    `startdemo` 템플릿과 대화형 아키텍처 프리셋(`minimal` / `single-module` / `classic-layered` / `domain-starter`)을 입문자도 이해하기 쉽게 비교한 [**어떤 스타터를 선택해야 할까?**](choosing-a-starter.md)를 참고하세요. 짧게 말하면 **`fastkit init --interactive`의 `domain-starter` 프리셋이 현재 권장 기본값입니다.**
 
 ## 1. 프로젝트 생성
 
-FastAPI-fastkit 의 `init` 명령으로 새 프로젝트를 만듭니다:
+FastAPI-fastkit의 `init` 명령으로 새 프로젝트를 만듭니다:
 
 <div class="termy">
 
@@ -114,7 +114,7 @@ INFO:     Application startup complete.
 
 ## 4. API 테스트
 
-브라우저에서 다음 URL 들을 방문해 보세요:
+브라우저에서 다음 URL을 열어 보세요:
 
 ### 메인 엔드포인트
 
@@ -129,6 +129,7 @@ INFO:     Application startup complete.
 [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) 를 방문하세요.
 
 자동 생성되는 **Swagger UI** 문서로, 여기서 다음을 할 수 있습니다:
+
 - 모든 API 엔드포인트 보기
 - 브라우저에서 직접 엔드포인트 테스트
 - 요청/응답 스키마 확인
@@ -244,12 +245,12 @@ my-first-app/
 │   │       └── users.py     # 새로 추가한 users 라우트
 │   ├── crud/
 │   │   ├── __init__.py
-│   │   ├── items.py         # items 의 CRUD 작업
-│   │   └── users.py         # users 의 CRUD 작업
+│   │   ├── items.py         # items용 CRUD 작업
+│   │   └── users.py         # users용 CRUD 작업
 │   ├── schemas/
 │   │   ├── __init__.py
-│   │   ├── items.py         # items 의 Pydantic 스키마
-│   │   └── users.py         # users 의 Pydantic 스키마
+│   │   ├── items.py         # items용 Pydantic 스키마
+│   │   └── users.py         # users용 Pydantic 스키마
 │   └── mocks/
 │       ├── __init__.py
 │       └── mock_items.json  # 테스트 데이터
@@ -262,20 +263,20 @@ my-first-app/
 
 ## 8. 패키지 매니저 옵션
 
-FastAPI-fastkit 은 사용자의 선호에 맞는 여러 Python 패키지 매니저를 지원합니다:
+FastAPI-fastkit은 사용자의 선호에 맞는 여러 Python 패키지 매니저를 지원합니다:
 
 ### 사용 가능한 패키지 매니저
 
 | 매니저 | 설명 | 적합한 경우 |
 |---|---|---|
 | **UV** | 빠른 Python 패키지 매니저 (기본값) | 속도와 성능 |
-| **PDM** | 모던 Python 의존성 관리 | 고급 의존성 해석 |
+| **PDM** | 현대적인 Python 의존성 관리 | 고급 의존성 해석 |
 | **Poetry** | Python 의존성 관리 및 패키징 | Poetry 기반 워크플로 |
 | **PIP** | 표준 Python 패키지 매니저 | 전통적인 Python 개발 |
 
 ### 패키지 매니저 지정
 
-선호하는 패키지 매니저를 다음의 여러 방식으로 지정할 수 있습니다:
+선호하는 패키지 매니저는 다음과 같은 방식으로 지정할 수 있습니다:
 
 #### 1. 대화형 선택 (기본)
 
@@ -322,7 +323,7 @@ $ fastkit startdemo --package-manager pdm
 - **Poetry**: `pyproject.toml` (Poetry 형식)
 - **PIP**: `requirements.txt`
 
-## 9. 다음은 무엇을?
+## 9. 다음 단계
 
 축하합니다! 다음을 모두 성공적으로 마쳤습니다:
 

@@ -1,17 +1,17 @@
 # 설치
 
-이 가이드는 FastAPI-fastkit 설치 방법을 설명합니다.
+이 가이드는 FastAPI-fastkit 설치 방법을 안내합니다.
 
 ## 요구 사항
 
-FastAPI-fastkit 을 사용하려면 다음 요구 사항을 충족해야 합니다:
+FastAPI-fastkit을 사용하려면 다음 요구 사항을 충족해야 합니다:
 
 - **Python**: 3.12 이상
 - **운영체제**: Windows, macOS, Linux 지원
 
 ## 설치 방법
 
-### pip 으로 설치 (권장)
+### pip으로 설치 (권장)
 
 가장 간단한 설치 방법:
 
@@ -41,7 +41,7 @@ Successfully installed FastAPI-fastkit-1.0.0
 
 ### 개발 버전 설치
 
-GitHub 에서 직접 최신 개발 버전을 설치하려면:
+GitHub에서 최신 개발 버전을 직접 설치하려면:
 
 <div class="termy">
 
@@ -87,7 +87,7 @@ $ pip install FastAPI-fastkit
 
 ## 설치 확인
 
-설치 후, FastAPI-fastkit 이 올바르게 설치되었는지 확인하세요:
+설치가 끝나면 FastAPI-fastkit이 올바르게 설치되었는지 확인하세요:
 
 <div class="termy">
 
@@ -126,7 +126,7 @@ Commands:
 
 "command not found" 오류가 발생하는 경우:
 
-1. **FastAPI-fastkit 이 설치되어 있는지 확인**:
+1. **FastAPI-fastkit이 설치되어 있는지 확인**:
 
    <div class="termy">
    ```console
@@ -178,7 +178,7 @@ $ pip install FastAPI-fastkit
 
 ### Python 버전 호환성
 
-FastAPI-fastkit 은 Python 3.12 이상이 필요합니다. Python 버전을 확인하세요:
+FastAPI-fastkit은 Python 3.12 이상이 필요합니다. Python 버전을 확인하세요:
 
 <div class="termy">
 
@@ -189,7 +189,7 @@ Python 3.12.0
 
 </div>
 
-이전 버전을 사용 중이라면 Python 을 업그레이드하세요:
+이전 버전을 사용 중이라면 Python을 업그레이드하세요:
 
 - **공식 Python**: [python.org/downloads](https://www.python.org/downloads/)
 - **pyenv**: `pyenv install 3.12.0`
@@ -199,11 +199,11 @@ Python 3.12.0
 
 설치가 완료되면:
 
-1. **[퀵 스타트](quick-start.md)**: 5 분 안에 첫 프로젝트 만들기
+1. **[퀵 스타트](quick-start.md)**: 5분 안에 첫 프로젝트 만들기
 2. **[입문 튜토리얼](../tutorial/getting-started.md)**: 단계별 상세 튜토리얼
 3. **[CLI 레퍼런스](cli-reference.md)**: 전체 명령어 레퍼런스
 
 !!! tip "설치 팁"
     - 프로젝트 격리를 위해 항상 가상 환경을 사용하세요
-    - FastAPI-fastkit 을 최신 버전으로 유지하세요
-    - 업데이트와 이슈는 [GitHub 저장소](https://github.com/bnbong/FastAPI-fastkit) 에서 확인하세요
+    - FastAPI-fastkit을 최신 버전으로 유지하세요
+    - 업데이트와 이슈는 [GitHub 저장소](https://github.com/bnbong/FastAPI-fastkit)에서 확인하세요

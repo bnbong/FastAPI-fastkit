@@ -135,6 +135,7 @@ You'll see:
 Visit [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
 This is the automatically generated **Swagger UI** documentation where you can:
+
 - See all your API endpoints
 - Test endpoints directly in the browser
 - View request/response schemas

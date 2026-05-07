@@ -1,12 +1,12 @@
 # 프로젝트 생성
 
-FastAPI-fastkit 으로 다양한 유형의 FastAPI 프로젝트를 만드는 방법을 자세히 안내합니다.
+FastAPI-fastkit으로 다양한 유형의 FastAPI 프로젝트를 만드는 방법을 자세히 안내합니다.
 
 ## 기본 프로젝트 생성
 
 ### 1. 대화형 모드 프로젝트 생성
 
-가장 기본적인 프로젝트 대화형 생성 방법:
+가장 기본적인 대화형 프로젝트 생성 방법은 다음과 같습니다:
 
 <div class="termy">
 
@@ -32,7 +32,7 @@ Enter the project description: Awesome FastAPI project
 
 프로젝트에 포함할 의존성 스택을 선택합니다:
 
-#### MINIMAL Stack (기본값)
+#### MINIMAL 스택 (기본값)
 
 가장 기본적인 FastAPI 프로젝트:
 
@@ -44,11 +44,11 @@ Enter the project description: Awesome FastAPI project
 **적합한 경우:**
 
 - FastAPI 학습
-- 단순 API
+- 간단한 API
 - 프로토타입
 - 마이크로서비스
 
-#### STANDARD Stack
+#### STANDARD 스택
 
 데이터베이스 지원과 테스트를 포함:
 
@@ -64,7 +64,7 @@ Enter the project description: Awesome FastAPI project
 - 프로덕션 수준의 애플리케이션
 - 팀 프로젝트
 
-#### FULL Stack
+#### FULL 스택
 
 완전한 개발 환경:
 
@@ -103,7 +103,7 @@ Do you want to proceed with project creation? [y/N]: y
 
 ### 프로젝트 구조 설명
 
-프로젝트를 생성하면 FastAPI-fastkit 은 다음 구조를 생성합니다:
+프로젝트를 생성하면 FastAPI-fastkit이 다음과 같은 구조를 만들어 줍니다:
 
 ```
 my-awesome-api/
@@ -122,7 +122,7 @@ my-awesome-api/
 │   │       └── items.py      # 예제 items 엔드포인트
 │   ├── crud/                  # 데이터베이스 작업
 │   │   ├── __init__.py
-│   │   └── items.py          # items 의 CRUD 작업
+│   │   └── items.py          # items용 CRUD 작업
 │   ├── schemas/               # Pydantic 모델
 │   │   ├── __init__.py
 │   │   └── items.py          # 데이터 검증 스키마
@@ -144,7 +144,7 @@ my-awesome-api/
 
 ### 3. 패키지 매니저 선택
 
-FastAPI-fastkit 은 여러 Python 패키지 매니저를 지원합니다. 자신의 개발 워크플로에 가장 잘 맞는 것을 선택하세요:
+FastAPI-fastkit은 여러 Python 패키지 매니저를 지원합니다. 지금 사용하는 개발 워크플로에 가장 잘 맞는 것을 선택하세요:
 
 #### 사용 가능한 패키지 매니저
 
@@ -171,12 +171,13 @@ Select package manager (pip, uv, pdm, poetry) [uv]: uv
 
 **Rust 기반의 빠른 패키지 매니저**
 
-- ⚡ **초고속**: pip 보다 10–100 배 빠름
+- ⚡ **초고속**: pip보다 10~100배 빠름
 - 🔧 **드롭인 대체**: pip 워크플로와 호환
 - 📦 **모던**: 완전한 PEP 621 지원
 - 🛠️ **신뢰성**: 결정론적 의존성 해석
 
 **생성되는 파일:**
+
 - `pyproject.toml` (PEP 621 형식)
 - `uv.lock` (lock 파일)
 
@@ -190,14 +191,15 @@ uv run pytest       # 테스트 실행
 
 #### PDM
 
-**모던 Python 의존성 관리**
+**현대적인 Python 의존성 관리**
 
-- 🚀 **모던**: PEP 582 와 PEP 621 지원
+- 🚀 **현대적**: PEP 582와 PEP 621 지원
 - 🧠 **스마트**: 고급 의존성 해석
 - 💼 **프로페셔널**: 워크스페이스 및 멀티 프로젝트 지원
 - 📊 **분석**: 의존성 분석 도구
 
 **생성되는 파일:**
+
 - `pyproject.toml` (PEP 621 형식)
 - `pdm.lock` (lock 파일)
 
@@ -219,6 +221,7 @@ pdm run pytest      # 테스트 실행
 - 🏗️ **완전함**: 전체 프로젝트 라이프사이클 관리
 
 **생성되는 파일:**
+
 - `pyproject.toml` (Poetry 형식)
 - `poetry.lock` (lock 파일)
 
@@ -234,12 +237,13 @@ poetry run pytest   # 테스트 실행
 
 **표준 Python 패키지 매니저**
 
-- 🏠 **내장**: Python 에 기본 포함
-- 🌍 **유니버설**: 어디서나 작동
+- 🏠 **내장**: Python에 기본 포함
+- 🌍 **범용성**: 어디서나 무리 없이 사용 가능
 - 📚 **친숙함**: 대부분의 개발자가 알고 있음
 - 🔧 **단순함**: 직관적인 워크플로
 
 **생성되는 파일:**
+
 - `requirements.txt`
 
 **생성 후 사용법:**

@@ -1,6 +1,6 @@
 # 템플릿 사용
 
-FastAPI-fastkit 은 다양한 기술 스택으로 빠르게 시작할 수 있도록 사전 구축된 프로젝트 템플릿을 제공합니다.
+FastAPI-fastkit은 다양한 기술 스택으로 빠르게 시작할 수 있도록 사전 구성된 프로젝트 템플릿을 제공합니다.
 
 ## 사용 가능한 템플릿
 
@@ -34,7 +34,7 @@ $ fastkit list-templates
 
 - 핵심 기능을 갖춘 기본 FastAPI 셋업
 - 목 데이터 기반 item 관리
-- 학습과 단순 API 에 최적
+- 학습용이나 간단한 API에 적합
 - 기본 CRUD 작업 포함
 
 **적합한 경우:**
@@ -45,7 +45,7 @@ $ fastkit list-templates
 
 ### 2. `fastapi-async-crud`
 
-**비동기 item 관리 API 서버**
+**비동기 item 관리용 API 서버**
 
 - 완전 비동기 FastAPI 애플리케이션
 - async/await 기반의 고급 CRUD 작업
@@ -60,7 +60,7 @@ $ fastkit list-templates
 
 ### 3. `fastapi-custom-response`
 
-**커스텀 응답 시스템을 갖춘 비동기 item 관리 API**
+**맞춤형 응답 시스템을 갖춘 비동기 item 관리 API**
 
 - 커스텀 응답 모델과 포매팅
 - 고급 에러 처리
@@ -75,10 +75,10 @@ $ fastkit list-templates
 
 ### 4. `fastapi-dockerized`
 
-**Docker 화된 FastAPI item 관리 API**
+**Docker 기반 FastAPI item 관리 API**
 
 - 완전한 Docker 컨테이너화
-- 프로덕션 수준의 배포 셋업
+- 실서비스 배포에 가까운 구성
 - 멀티 스테이지 Docker 빌드
 - 환경 기반 설정
 
@@ -90,7 +90,7 @@ $ fastkit list-templates
 
 ### 5. `fastapi-psql-orm`
 
-**PostgreSQL 을 사용하는 Docker 화된 FastAPI item 관리 API**
+**PostgreSQL을 사용하는 Docker 기반 FastAPI item 관리 API**
 
 - PostgreSQL 데이터베이스 통합
 - SQLAlchemy ORM 과 Alembic 마이그레이션
@@ -211,7 +211,7 @@ Do you want to proceed with project creation? [y/N]: y
 
 이 템플릿은 완전한 PostgreSQL 셋업을 포함합니다. 생성 후:
 
-1. **Docker 로 PostgreSQL 시작:**
+1. **Docker로 PostgreSQL 시작:**
 
 <div class="termy">
 
@@ -543,9 +543,9 @@ $ docker-compose up -d
 
 ### 데이터베이스 연결 문제 (PostgreSQL 템플릿)
 
-PostgreSQL 에 연결할 수 없는 경우:
+PostgreSQL에 연결할 수 없는 경우:
 
-1. **Docker 가 실행 중인지 확인:**
+1. **Docker가 실행 중인지 확인:**
 
    <div class="termy">
    ```console

@@ -177,6 +177,7 @@ Each package manager has its advantages:
 - 🛠️ **Reliable**: Deterministic resolution
 
 **Generated files:**
+
 - `pyproject.toml` (PEP 621 format)
 - `uv.lock` (lockfile)
 
@@ -198,6 +199,7 @@ uv run pytest       # Run tests
 - 📊 **Analytics**: Dependency analysis tools
 
 **Generated files:**
+
 - `pyproject.toml` (PEP 621 format)
 - `pdm.lock` (lockfile)
 
@@ -219,6 +221,7 @@ pdm run pytest      # Run tests
 - 🏗️ **Complete**: Full project lifecycle management
 
 **Generated files:**
+
 - `pyproject.toml` (Poetry format)
 - `poetry.lock` (lockfile)
 
@@ -240,6 +243,7 @@ poetry run pytest   # Run tests
 - 🔧 **Simple**: Straightforward workflow
 
 **Generated files:**
+
 - `requirements.txt`
 
 **Usage after creation:**
