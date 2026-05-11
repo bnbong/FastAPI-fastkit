@@ -176,11 +176,11 @@ docs/
 
 ### 1. 英語でドキュメントを書く
 
-すべてのドキュメントは、まず英語で `docs/` ディレクトリに記述します:
+すべてのドキュメントは、まず英語で `docs/en/` ディレクトリに記述します:
 
 ```bash
 # 新しいドキュメントを作成
-vim docs/user-guide/new-feature.md
+vim docs/en/user-guide/new-feature.md
 ```
 
 ### 2. 翻訳を実行
