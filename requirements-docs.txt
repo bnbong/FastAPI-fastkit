@@ -33,5 +33,5 @@ rcslice==1.1.0
 requests==2.33.1
 six==1.17.0
 types-pyyaml==6.0.12.20260408
-urllib3==2.6.3
+urllib3==2.7.0
 watchdog==6.0.0
