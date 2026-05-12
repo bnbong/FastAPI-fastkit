@@ -1,13 +1,15 @@
 enhancement:
-  - changed-files:
-      - any-glob-to-any-file:
-          - 'src/**'
-      - all-globs-to-all-files:
-          - '!src/fastapi_fastkit/fastapi_project_template/**'
+  - all:
+    - changed-files:
+        - any-glob-to-any-file:
+            - 'src/**'
+        - all-globs-to-all-files:
+            - '!src/fastapi_fastkit/fastapi_project_template/**'
 
 template:
-  - changed-files:
-      - any-glob-to-any-file:
-          - 'src/fastapi_fastkit/fastapi_project_template/**'
-      - all-globs-to-all-files:
-          - '!src/fastapi_fastkit/fastapi_project_template/README.md'
+  - all:
+    - changed-files:
+        - any-glob-to-any-file:
+            - 'src/fastapi_fastkit/fastapi_project_template/**'
+        - all-globs-to-all-files:
+            - '!src/fastapi_fastkit/fastapi_project_template/README.md'
