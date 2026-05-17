@@ -24,9 +24,9 @@ Los números siguientes cuentan páginas Markdown presentes en el árbol de cada
 | 🇪🇸 Español (`es`) | ✅ Completo | 26 / 26 | Todas las páginas del idioma están presentes. Phase 1: nivel superior + user-guide principal; Phase 2: user-guide restante + todos los tutorials; Phase 3: contributing + reference. `docs/es/changelog.md` reutiliza intencionadamente el `CHANGELOG.md` canónico en inglés. |
 | 🇨🇳 Chino (`zh`) | 🔴 Esqueleto | 0 / 26 | Solo está configurado como destino de compilación. Cada página muestra la versión en inglés. |
 | 🇫🇷 Francés (`fr`) | ✅ Completo | 26 / 26 | Todas las páginas del idioma están presentes. Phase 1: nivel superior + núcleo del user-guide; Phase 2: resto del user-guide + todos los tutoriales; Phase 3: contributing + reference. `docs/fr/changelog.md` reutiliza intencionadamente el `CHANGELOG.md` canónico en inglés. |
-| 🇩🇪 Alemán (`de`) | 🔴 Esqueleto | 0 / 26 | Solo está configurado como destino de compilación. Cada página muestra la versión en inglés. |
+| 🇩🇪 Alemán (`de`) | ✅ Completo | 26 / 26 | Todas las páginas del idioma están presentes. Phase 1: nivel superior + núcleo del user-guide; Phase 2: resto del user-guide + todos los tutoriales; Phase 3: contributing + reference. `docs/de/changelog.md` reutiliza intencionadamente el `CHANGELOG.md` canónico en inglés. |
 
-*Verificado el 2026-05-15; la fila de `fr` se volvió a contar para la rama actual tras completar Phase 3 (contributing + reference). El francés ya tiene todas las páginas del idioma presentes, mientras que `docs/fr/changelog.md` apunta al changelog canónico en inglés.* Esta cuenta se mantiene a mano; para volver a contar el estado actual desde la raíz del repositorio, ejecuta:
+*Verificado el 2026-05-17; la fila de `de` se volvió a contar para la rama actual tras completar Phase 3 (contributing + reference). El alemán ya tiene todas las páginas del idioma presentes, mientras que `docs/de/changelog.md` apunta al changelog canónico en inglés.* Esta cuenta se mantiene a mano; para volver a contar el estado actual desde la raíz del repositorio, ejecuta:
 
 ```console
 $ for loc in en ko ja zh es fr de; do
