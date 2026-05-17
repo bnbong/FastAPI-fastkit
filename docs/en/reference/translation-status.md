@@ -39,9 +39,9 @@ next section explains).
 | 🇨🇳 Chinese (`zh`) | 🔴 Skeleton | 0 / 26 | Build target only. Every page falls back to English. |
 | 🇪🇸 Spanish (`es`) | ✅ Complete | 26 / 26 | All locale pages are present. Phase 1: top-level + core user-guide; Phase 2: remaining user-guide + all tutorials; Phase 3: contributing + reference. `docs/es/changelog.md` intentionally reuses the canonical English `CHANGELOG.md`. |
 | 🇫🇷 French (`fr`) | ✅ Complete | 26 / 26 | All locale pages are present. Phase 1: top-level + core user-guide; Phase 2: remaining user-guide + all tutorials; Phase 3: contributing + reference. `docs/fr/changelog.md` intentionally reuses the canonical English `CHANGELOG.md`. |
-| 🇩🇪 German (`de`) | 🔴 Skeleton | 0 / 26 | Build target only. Every page falls back to English. |
+| 🇩🇪 German (`de`) | ✅ Complete | 26 / 26 | All locale pages are present. Phase 1: top-level + core user-guide; Phase 2: remaining user-guide + all tutorials; Phase 3: contributing + reference. `docs/de/changelog.md` intentionally reuses the canonical English `CHANGELOG.md`. |
 
-*Snapshot verified 2026-05-15; fr row recounted for the current branch after Phase 3 (contributing + reference) landed. French now has all locale pages present, while `docs/fr/changelog.md` intentionally points to the canonical English changelog.* These counts are maintained by hand;
+*Snapshot verified 2026-05-17; de row recounted for the current branch after Phase 3 (contributing + reference) landed. German now has all locale pages present, while `docs/de/changelog.md` intentionally points to the canonical English changelog.* These counts are maintained by hand;
 to recount the current state from the repo root, run:
 
 ```console
