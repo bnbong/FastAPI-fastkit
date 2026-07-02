@@ -1,5 +1,5 @@
 <p align="center">
-    <img align="top" width="70%" src="https://bnbong.github.io/projects/img/fastkit_general_logo.png" alt="FastAPI-fastkit"/>
+    <img align="top" width="70%" src=".github/fastkit_general_logo.png" alt="FastAPI-fastkit"/>
 </p>
 <p align="center">
 <em><b>FastAPI-fastkit</b>: Python と FastAPI を初めて使う方のための、速くて使いやすいスターターキット</em>
