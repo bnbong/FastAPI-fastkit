@@ -1,0 +1,2253 @@
+
+<!doctype html>
+<html lang="fr" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Fast, easy-to-use starter kit for new users of Python and FastAPI">
+      
+      
+      
+        <link rel="canonical" href="https://bnbong.github.io/FastAPI-fastkit/fr/user-guide/choosing-a-starter/">
+      
+      
+        <link rel="prev" href="../quick-start/">
+      
+      
+        <link rel="next" href="../creating-projects/">
+      
+      
+        
+          <link rel="alternate" href="../../../user-guide/choosing-a-starter/" hreflang="en">
+        
+          <link rel="alternate" href="../../../ko/user-guide/choosing-a-starter/" hreflang="ko">
+        
+          <link rel="alternate" href="../../../ja/user-guide/choosing-a-starter/" hreflang="ja">
+        
+          <link rel="alternate" href="../../../zh/user-guide/choosing-a-starter/" hreflang="zh">
+        
+          <link rel="alternate" href="../../../es/user-guide/choosing-a-starter/" hreflang="es">
+        
+          <link rel="alternate" href="./" hreflang="fr">
+        
+          <link rel="alternate" href="../../../de/user-guide/choosing-a-starter/" hreflang="de">
+        
+      
+      
+      <link rel="icon" href="../../../img/FastAPI-fastkit_logo.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Choosing a Starter - FastAPI-fastkit</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=JetBrains+Mono:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"JetBrains Mono";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../css/termynal.css">
+    
+      <link rel="stylesheet" href="../../../css/custom.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="brown">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#quel-starter-choisir" class="md-skip">
+          Aller au contenu
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="En-tête">
+    <a href="../../" title="FastAPI-fastkit" class="md-header__button md-logo" aria-label="FastAPI-fastkit" data-md-component="logo">
+      
+  <img src="../../../img/FastAPI-fastkit_logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            FastAPI-fastkit
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Choosing a Starter
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="brown"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="brown"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Sélectionner la langue">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="../../../user-guide/choosing-a-starter/" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../../ko/user-guide/choosing-a-starter/" hreflang="ko" class="md-select__link">
+              한국어
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../../ja/user-guide/choosing-a-starter/" hreflang="ja" class="md-select__link">
+              日本語
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../../zh/user-guide/choosing-a-starter/" hreflang="zh" class="md-select__link">
+              中文
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../../es/user-guide/choosing-a-starter/" hreflang="es" class="md-select__link">
+              Español
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="fr" class="md-select__link">
+              Français
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../../de/user-guide/choosing-a-starter/" hreflang="de" class="md-select__link">
+              Deutsch
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Rechercher" placeholder="Rechercher" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Recherche">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Partager" aria-label="Partager" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Effacer" aria-label="Effacer" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initialisation de la recherche
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/bnbong/FastAPI-fastkit" title="Aller au dépôt" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    bnbong/FastAPI-fastkit
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Onglets" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Accueil
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../installation/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Guide de l'Utilisateur
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../tutorial/getting-started/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Tutoriel
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../contributing/development-setup/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Contribuer
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/faq/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Référence
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../changelog/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Journal des Modifications
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../" title="FastAPI-fastkit" class="md-nav__button md-logo" aria-label="FastAPI-fastkit" data-md-component="logo">
+      
+  <img src="../../../img/FastAPI-fastkit_logo.png" alt="logo">
+
+    </a>
+    FastAPI-fastkit
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/bnbong/FastAPI-fastkit" title="Aller au dépôt" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    bnbong/FastAPI-fastkit
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Accueil
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guide de l'Utilisateur
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guide de l'Utilisateur
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Choosing a Starter
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Choosing a Starter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table des matières">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table des matières
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#tldr-choisir-selon-le-profil-dutilisateur" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TL;DR — choisir selon le profil d'utilisateur
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#startdemo-vs-init-interactive-quelle-difference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        startdemo vs init --interactive — quelle différence ?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="startdemo vs init --interactive — quelle différence ?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fastkit-startdemo-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fastkit startdemo &lt;template&gt;
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fastkit-init-interactive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fastkit init --interactive
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#les-quatre-prereglages-darchitecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Les quatre préréglages d'architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Les quatre préréglages d&#39;architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#minimal-commencer-au-plus-simple-etoffer-plus-tard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        minimal — commencer au plus simple, étoffer plus tard
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#single-module-prototype-facon-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        single-module — prototype façon script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#classic-layered-decoupe-en-couches-api-crud-schemas-core" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        classic-layered — découpe en couches (api / crud / schemas / core)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#domain-starter-oriente-domaine-option-recommandee" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        domain-starter — orienté domaine (option recommandée)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#matrice-de-comparaison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Matrice de comparaison
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#choisir-un-modele-startdemo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Choisir un modèle startdemo
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#questions-frequentes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Questions fréquentes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#etapes-suivantes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Étapes suivantes
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../creating-projects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Creating Projects
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adding-routes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Routes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../using-templates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Using Templates
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutoriel
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutoriel
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/first-project/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Your First Project
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/basic-api-server/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implementing Basic API Server
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/async-crud-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implementing Asynchronous CRUD API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/domain-starter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Domain-oriented Project (Domain Starter)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/database-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Database Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/docker-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/custom-response-handling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implementing Custom Response Handling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/mcp-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implementing MCP Server
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contribuer
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Contribuer
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/development-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/code-guidelines/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Code Guidelines
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/template-creation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Template Creation Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/translation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Translation Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Référence
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Référence
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/preset-feature-matrix/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Preset Matrix
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/template-quality-assurance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Template Quality Assurance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/translation-status/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Translation Status
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Journal des Modifications
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table des matières">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table des matières
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#tldr-choisir-selon-le-profil-dutilisateur" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TL;DR — choisir selon le profil d'utilisateur
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#startdemo-vs-init-interactive-quelle-difference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        startdemo vs init --interactive — quelle différence ?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="startdemo vs init --interactive — quelle différence ?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fastkit-startdemo-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fastkit startdemo &lt;template&gt;
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fastkit-init-interactive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fastkit init --interactive
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#les-quatre-prereglages-darchitecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Les quatre préréglages d'architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Les quatre préréglages d&#39;architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#minimal-commencer-au-plus-simple-etoffer-plus-tard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        minimal — commencer au plus simple, étoffer plus tard
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#single-module-prototype-facon-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        single-module — prototype façon script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#classic-layered-decoupe-en-couches-api-crud-schemas-core" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        classic-layered — découpe en couches (api / crud / schemas / core)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#domain-starter-oriente-domaine-option-recommandee" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        domain-starter — orienté domaine (option recommandée)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#matrice-de-comparaison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Matrice de comparaison
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#choisir-un-modele-startdemo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Choisir un modèle startdemo
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#questions-frequentes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Questions fréquentes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#etapes-suivantes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Étapes suivantes
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="quel-starter-choisir">Quel starter choisir ?</h1>
+<p>FastAPI-fastkit propose plusieurs façons d'amorcer un projet. Cette page est une <strong>aide à la décision</strong> pour les nouveaux venus : choisissez un chemin ici, puis allez sur <a href="../quick-start/">Démarrage rapide</a> pour créer concrètement le projet.</p>
+<p>Si vous hésitez, la réponse courte est :</p>
+<blockquote>
+<p><strong>Commencez par <code>fastkit init --interactive</code> et sélectionnez le préréglage <code>domain-starter</code>.</strong> C'est l'option recommandée pour les projets d'API modernes.</p>
+</blockquote>
+<p>Le reste de cette page explique pourquoi, et quand opter pour autre chose.</p>
+<h2 id="tldr-choisir-selon-le-profil-dutilisateur">TL;DR — choisir selon le profil d'utilisateur</h2>
+<table>
+<thead>
+<tr>
+<th>Vous êtes...</th>
+<th>Commencez avec</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nouveau sur FastAPI, vous voulez une démonstration guidée</td>
+<td><code>fastkit init --interactive</code> (préréglage : <strong><code>domain-starter</code></strong>)</td>
+</tr>
+<tr>
+<td>Vous voulez une démo CRUD fonctionnelle à lire et modifier</td>
+<td><code>fastkit startdemo fastapi-default</code></td>
+</tr>
+<tr>
+<td>Vous voulez le squelette le plus minimal possible</td>
+<td><code>fastkit init --interactive</code> (préréglage : <strong><code>minimal</code></strong>)</td>
+</tr>
+<tr>
+<td>Vous écrivez un prototype rapide ou un script monofichier</td>
+<td><code>fastkit init --interactive</code> (préréglage : <strong><code>single-module</code></strong>)</td>
+</tr>
+<tr>
+<td>Vous avez besoin d'une vraie base de données (PostgreSQL + SQLAlchemy + Alembic)</td>
+<td><code>fastkit startdemo fastapi-psql-orm</code></td>
+</tr>
+<tr>
+<td>Vous voulez une disposition orientée domaine pour une API de taille moyenne</td>
+<td><code>fastkit init --interactive</code> (préréglage : <strong><code>domain-starter</code></strong>)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="startdemo-vs-init-interactive-quelle-difference"><code>startdemo</code> vs <code>init --interactive</code> — quelle différence ?</h2>
+<p>Ce sont les deux points d'entrée principaux. Ils répondent à des besoins différents.</p>
+<h3 id="fastkit-startdemo-template"><code>fastkit startdemo &lt;template&gt;</code></h3>
+<p>Dépose sur disque un projet d'<strong>exemple complet et fonctionnel</strong> basé sur l'un des modèles livrés (<code>fastapi-default</code>, <code>fastapi-async-crud</code>, <code>fastapi-psql-orm</code>, <code>fastapi-domain-starter</code>, …). Le code source du modèle est copié tel quel, avec les emplacements de métadonnées (<code>&lt;project_name&gt;</code>, etc.) remplis.</p>
+<ul>
+<li>✅ Le chemin le plus rapide vers une démo exécutable.</li>
+<li>✅ Tout le code est réel et lisible — idéal pour apprendre par l'exemple.</li>
+<li>❌ La pile et la structure du modèle sont fixes ; impossible de choisir CORS mais d'abandonner l'authentification au passage.</li>
+</ul>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">$ </span>fastkit<span class="w"> </span>list-templates<span class="w">              </span><span class="c1"># show what&#39;s available</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">$ </span>fastkit<span class="w"> </span>startdemo<span class="w"> </span>fastapi-default<span class="w">   </span><span class="c1"># generate a project from one</span>
+</span></code></pre></div>
+<h3 id="fastkit-init-interactive"><code>fastkit init --interactive</code></h3>
+<p>Vous guide à travers un <strong>assistant pas à pas</strong> : métadonnées du projet → préréglage d'architecture → sélections de fonctionnalités (base de données, authentification, tests, déploiement, …) → gestionnaire de paquets → confirmation. Le générateur choisit un modèle de base approprié par préréglage et superpose les fonctionnalités sélectionnées.</p>
+<ul>
+<li>✅ Vous assemblez exactement la pile que vous voulez.</li>
+<li>✅ Le préréglage d'architecture façonne la disposition du projet (monofichier, en couches, orientée domaine, …).</li>
+<li>❌ Les préréglages les plus complets qui conservent <code>main.py</code> (<code>classic-layered</code>, <code>domain-starter</code>) génèrent bien les modules de configuration, mais vous laissent les raccorder vous-même aux routeurs fournis. Consultez la <a href="../../reference/preset-feature-matrix/">Matrice des préréglages d'architecture</a> pour voir précisément ce que couvre chaque préréglage et chaque fonctionnalité.</li>
+</ul>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="gp">$ </span>fastkit<span class="w"> </span>init<span class="w"> </span>--interactive
+</span></code></pre></div>
+<h2 id="les-quatre-prereglages-darchitecture">Les quatre préréglages d'architecture</h2>
+<p>Ils apparaissent dans <code>fastkit init --interactive</code> après les invites de saisie des informations du projet. Utilisez cette section pour décider lequel choisir.</p>
+<h3 id="minimal-commencer-au-plus-simple-etoffer-plus-tard"><code>minimal</code> — commencer au plus simple, étoffer plus tard</h3>
+<p>L'application FastAPI la plus légère possible. On part d'un squelette vide avec un unique <code>src/main.py</code>, régénéré à partir des fonctionnalités que vous sélectionnez. CORS, limitation de débit et instrumentation Prometheus sont ajoutés automatiquement à <code>main.py</code> lorsqu'ils sont choisis.</p>
+<ul>
+<li>👤 <strong>Pour qui</strong> : les personnes qui veulent ajouter elles-mêmes de la structure au fur et à mesure, ou qui explorent FastAPI sans a priori sur la disposition.</li>
+<li>📦 <strong>Modèle de base</strong> : <code>fastapi-empty</code>.</li>
+<li>🧠 <strong>Modèle mental</strong> : « donnez-moi un seul fichier avec FastAPI importé et laissez-moi faire le reste. »</li>
+</ul>
+<h3 id="single-module-prototype-facon-script"><code>single-module</code> — prototype façon script</h3>
+<p>Tout vit dans un seul module. Même superposition de régénération de <code>main.py</code> que <code>minimal</code>.</p>
+<ul>
+<li>👤 <strong>Pour qui</strong> : écrire un script glue, un petit webhook ou un prototype d'une journée qui n'a pas besoin de frontières de package.</li>
+<li>📦 <strong>Modèle de base</strong> : <code>fastapi-single-module</code>.</li>
+<li>🧠 <strong>Modèle mental</strong> : « je veux un seul fichier Python que je peux exécuter et lire d'une traite. »</li>
+</ul>
+<h3 id="classic-layered-decoupe-en-couches-api-crud-schemas-core"><code>classic-layered</code> — découpe en couches (api / crud / schemas / core)</h3>
+<p>La disposition « à la Django » : le code est réparti horizontalement par rôle. Les routeurs vont dans <code>api/</code>, la logique CRUD dans <code>crud/</code>, les schémas Pydantic dans <code>schemas/</code> et la configuration dans <code>core/</code>. Le <code>main.py</code> fourni par le modèle est <strong>conservé</strong> (il gère déjà CORS) ; les fichiers de configuration générés pour la base de données et l'authentification sont placés dans <code>src/core/</code>.</p>
+<ul>
+<li>👤 <strong>Pour qui</strong> : équipes familières des dispositions de type Django/Rails, projets avec de nombreux petits points d'extrémité partageant une plomberie CRUD commune.</li>
+<li>📦 <strong>Modèle de base</strong> : <code>fastapi-default</code>.</li>
+<li>🧠 <strong>Modèle mental</strong> : « découper le code selon ce qu'il <em>est</em>. »</li>
+</ul>
+<h3 id="domain-starter-oriente-domaine-option-recommandee"><code>domain-starter</code> — orienté domaine (option recommandée)</h3>
+<p>Le code est organisé verticalement par <strong>concept métier</strong> : chaque domaine possède son propre routeur, son service, son dépôt et ses schémas dans <code>src/app/domains/&lt;concept&gt;/</code>. Le modèle inclut aussi un endpoint <code>/health</code> et un domaine d'exemple <code>items</code>, que vous pouvez copier et renommer pour chaque nouveau concept. Le <code>main.py</code> fourni (sous <code>src/app/</code>) est conservé ; les fichiers de configuration générés sont placés dans <code>src/app/core/</code>.</p>
+<ul>
+<li>👤 <strong>Pour qui</strong> : les API de taille moyenne qui vont accueillir plusieurs concepts distincts (users, orders, billing, …). C'est l'option moderne recommandée.</li>
+<li>📦 <strong>Modèle de base</strong> : <code>fastapi-domain-starter</code>.</li>
+<li>🧠 <strong>Modèle mental</strong> : « découper le code selon ce qu'il <em>fait</em> pour le métier. »</li>
+</ul>
+<h2 id="matrice-de-comparaison">Matrice de comparaison</h2>
+<p>Une vue côte à côte d'un coup d'œil.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><code>minimal</code></th>
+<th><code>single-module</code></th>
+<th><code>classic-layered</code></th>
+<th><code>domain-starter</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Modèle de base</td>
+<td><code>fastapi-empty</code></td>
+<td><code>fastapi-single-module</code></td>
+<td><code>fastapi-default</code></td>
+<td><code>fastapi-domain-starter</code></td>
+</tr>
+<tr>
+<td>Point d'entrée du projet</td>
+<td><code>src/main.py</code></td>
+<td><code>src/main.py</code></td>
+<td><code>src/main.py</code></td>
+<td><code>src/app/main.py</code></td>
+</tr>
+<tr>
+<td>Emplacement des routeurs</td>
+<td>(vous les ajoutez)</td>
+<td>(à l'intérieur de <code>main.py</code>)</td>
+<td><code>src/api/routes/</code></td>
+<td><code>src/app/domains/&lt;concept&gt;/router.py</code></td>
+</tr>
+<tr>
+<td>Dossiers par domaine</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Point d'extrémité <code>/health</code> intégré</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>main.py</code> régénéré à partir des fonctionnalités</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>CORS pré-câblé dans <code>main.py</code></td>
+<td>ajouté si sélectionné</td>
+<td>ajouté si sélectionné</td>
+<td>oui (piloté par env)</td>
+<td>oui (piloté par env)</td>
+</tr>
+<tr>
+<td>pyproject d'abord</td>
+<td>optionnel</td>
+<td>optionnel</td>
+<td>optionnel</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Idéal pour</td>
+<td>« je ferai évoluer ma propre structure »</td>
+<td>« prototype monofichier »</td>
+<td>« découper par préoccupation »</td>
+<td>« découper par concept métier »</td>
+</tr>
+</tbody>
+</table>
+<p>Pour le contrat complet par fonctionnalité (chemins cibles de configuration base de données / authentification, sélections nécessitant un câblage manuel vs automatique, déclenchement des avertissements), consultez la <a href="../../reference/preset-feature-matrix/">Matrice des préréglages d'architecture</a>.</p>
+<h2 id="choisir-un-modele-startdemo">Choisir un modèle <code>startdemo</code></h2>
+<p><code>fastkit startdemo &lt;template&gt;</code> est idéal quand vous voulez un <strong>exemple complet et exécutable</strong> plutôt qu'un assemblage guidé. La plupart des modèles correspondent grossièrement à l'un des quatre préréglages ci-dessus, mais ils embarquent du code d'exemple supplémentaire (points d'extrémité CRUD sur un magasin factice, gestion de réponses personnalisée, outillage Docker, etc.).</p>
+<table>
+<thead>
+<tr>
+<th>Modèle</th>
+<th>Préréglage le plus proche</th>
+<th>Quand le choisir</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fastapi-default</code></td>
+<td><code>classic-layered</code></td>
+<td>Démo CRUD fonctionnelle avec la disposition en couches. Bon point de départ.</td>
+</tr>
+<tr>
+<td><code>fastapi-empty</code></td>
+<td><code>minimal</code></td>
+<td>Squelette nu ; même forme que celle obtenue par <code>minimal</code>.</td>
+</tr>
+<tr>
+<td><code>fastapi-single-module</code></td>
+<td><code>single-module</code></td>
+<td>Démo monofichier.</td>
+</tr>
+<tr>
+<td><code>fastapi-domain-starter</code></td>
+<td><code>domain-starter</code></td>
+<td>Valeur par défaut moderne recommandée ; livré avec un exemple de domaine items.</td>
+</tr>
+<tr>
+<td><code>fastapi-async-crud</code></td>
+<td><code>classic-layered</code></td>
+<td>Équivalent asynchrone de <code>fastapi-default</code>.</td>
+</tr>
+<tr>
+<td><code>fastapi-custom-response</code></td>
+<td><code>classic-layered</code></td>
+<td>Illustre les enveloppes / formats de réponses personnalisés.</td>
+</tr>
+<tr>
+<td><code>fastapi-dockerized</code></td>
+<td><code>classic-layered</code></td>
+<td>Ajoute un Dockerfile prêt pour la production à la disposition par défaut.</td>
+</tr>
+<tr>
+<td><code>fastapi-psql-orm</code></td>
+<td>(aucun préréglage direct)</td>
+<td>PostgreSQL + SQLAlchemy + Alembic. À choisir lorsque vous avez besoin d'une vraie base de données.</td>
+</tr>
+<tr>
+<td><code>fastapi-mcp</code></td>
+<td>(aucun préréglage direct)</td>
+<td>Intégration du Model Context Protocol.</td>
+</tr>
+</tbody>
+</table>
+<p><code>fastkit list-templates</code> affiche la liste à jour avec une description en une ligne.</p>
+<h2 id="questions-frequentes">Questions fréquentes</h2>
+<p><strong>Q. Faut-il choisir un préréglage / modèle dès le départ ?</strong>
+Non — vous pouvez toujours réorganiser le code généré à la main par la suite. Les préréglages sont des points de départ, pas des contrats. Ne sur-réfléchissez pas ce choix.</p>
+<p><strong>Q. Quel est le choix « moderne » ?</strong>
+<code>domain-starter</code>. Il adopte une approche pyproject-first, fournit un endpoint <code>/health</code> et suit la structure vers laquelle convergent la plupart des projets FastAPI de taille moyenne bien entretenus.</p>
+<p><strong>Q. Puis-je passer de <code>classic-layered</code> à <code>domain-starter</code> plus tard ?</strong>
+Oui, mais c'est un refactoring manuel — il n'existe pas de commande de migration. Si vous pensez que votre projet grandira au point de nécessiter des dossiers par domaine, commencez directement par là.</p>
+<p><strong>Q. Et si je veux simplement apprendre FastAPI ?</strong>
+Commencez avec <code>fastkit startdemo fastapi-default</code> — lisez le code, exécutez les tests, modifiez quelques points d'extrémité. Une fois à l'aise, <code>fastkit init --interactive</code> avec le préréglage <code>domain-starter</code> est l'étape suivante naturelle.</p>
+<p><strong>Q. Où voir les fichiers exacts générés par chaque préréglage ?</strong>
+La <a href="../../reference/preset-feature-matrix/">Matrice des préréglages d'architecture</a> est la page de référence à ce sujet.</p>
+<h2 id="etapes-suivantes">Étapes suivantes</h2>
+<ul>
+<li><a href="../quick-start/">Démarrage rapide</a> — créer concrètement votre premier projet.</li>
+<li><a href="../creating-projects/">Créer des projets</a> — visite plus approfondie des drapeaux du CLI.</li>
+<li><a href="../../tutorial/domain-starter/">Tutoriel Projet orienté domaine</a> — si vous avez choisi <code>domain-starter</code>, vous y trouverez un parcours complet de l'arborescence générée, de l'exemple <code>items</code> fourni et de la façon d'ajouter votre prochain domaine.</li>
+<li><a href="../../reference/preset-feature-matrix/">Matrice des préréglages d'architecture</a> — le contrat complet par préréglage / par fonctionnalité.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Retour en haut de la page
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Pied de page" >
+        
+          
+          <a href="../quick-start/" class="md-footer__link md-footer__link--prev" aria-label="Précédent: Quick Start">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Précédent
+              </span>
+              <div class="md-ellipsis">
+                Quick Start
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../creating-projects/" class="md-footer__link md-footer__link--next" aria-label="Suivant: Creating Projects">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Suivant
+              </span>
+              <div class="md-ellipsis">
+                Creating Projects
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.indexes", "navigation.footer", "navigation.top", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.expand", "search.highlight", "search.share", "search.suggest", "announce.dismiss", "toc.follow"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copi\u00e9 dans le presse-papier", "clipboard.copy": "Copier dans le presse-papier", "search.result.more.one": "1 de plus sur cette page", "search.result.more.other": "# de plus sur cette page", "search.result.none": "Aucun document trouv\u00e9", "search.result.one": "1 document trouv\u00e9", "search.result.other": "# documents trouv\u00e9s", "search.result.placeholder": "Taper pour d\u00e9marrer la recherche", "search.result.term.missing": "Non trouv\u00e9", "select.version": "S\u00e9lectionner la version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../../js/termynal.js"></script>
+      
+        <script src="../../../js/custom.js"></script>
+      
+    
+  </body>
+</html>
