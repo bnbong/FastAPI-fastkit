@@ -7,7 +7,9 @@
 # exactly once.
 # --------------------------------------------------------------------------
 from datetime import datetime, timezone
+from typing import Any
 
+from pydantic import field_validator
 from sqlmodel import Field, SQLModel
 
 
@@ -38,12 +40,27 @@ class ItemCreate(ItemBase):
 
 
 class ItemUpdate(SQLModel):
-    """PATCH body — every field optional so partial updates work."""
+    """PATCH body — every field optional so partial updates work.
+
+    ``name``, ``price`` and ``in_stock`` back non-nullable columns, so a
+    field omitted from the request body is left untouched (thanks to
+    ``exclude_unset`` in ``CRUDBase.update``), but an explicit ``null`` for
+    one of them is rejected with a 422 rather than being written to the
+    database. Only ``description`` is an actually-nullable column, so it
+    alone accepts an explicit ``null``.
+    """
 
     name: str | None = Field(default=None, min_length=1, max_length=128)
     description: str | None = Field(default=None, max_length=512)
     price: float | None = Field(default=None, ge=0)
     in_stock: bool | None = None
+
+    @field_validator("name", "price", "in_stock")
+    @classmethod
+    def _reject_explicit_null(cls, value: object, info: Any) -> object:
+        if value is None:
+            raise ValueError(f"{info.field_name} must not be null")
+        return value
 
 
 class ItemPublic(ItemBase):

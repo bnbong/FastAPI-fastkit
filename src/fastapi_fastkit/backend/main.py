@@ -1394,16 +1394,28 @@ def _ensure_project_structure(src_dir: str) -> Dict[str, str]:
 
 
 def _create_route_files(
-    modules_dir: str, target_dirs: Dict[str, str], route_name: str
+    modules_dir: str,
+    target_dirs: Dict[str, str],
+    route_name: str,
+    package_module: str = "src",
 ) -> None:
     """
     Create route files from templates.
 
+    The route template imports its crud/schemas siblings through the
+    ``<package_root>`` placeholder, so the generated imports follow the
+    project's real package (``src`` for the classic layout, ``src.app`` for
+    the domain-starter one) instead of a hardcoded ``src``.
+
     :param modules_dir: Path to the modules directory
     :param target_dirs: Dictionary with paths to target directories
     :param route_name: Name of the route to create
+    :param package_module: Dotted package holding ``api``/``crud``/``schemas``
     """
-    replacements = {"<new_route>": route_name}
+    replacements = {
+        "<new_route>": route_name,
+        "<package_root>": package_module or "src",
+    }
     module_types = ["api/routes", "crud", "schemas"]
 
     for module_type in module_types:
@@ -1604,7 +1616,9 @@ def add_new_route(project_dir: str, route_name: str) -> None:
         target_dirs = _ensure_project_structure(src_dir)
 
         # Create route files
-        _create_route_files(modules_dir, target_dirs, route_name)
+        _create_route_files(
+            modules_dir, target_dirs, route_name, layout["package_module"]
+        )
 
         # Handle API router file
         _handle_api_router_file(

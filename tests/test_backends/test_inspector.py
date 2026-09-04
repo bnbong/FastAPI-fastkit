@@ -210,6 +210,121 @@ class TestTemplateInspectorLifecycle(InspectorTestBase):
             assert inspector.template_config is None
 
 
+class TestTemplateInspectorCleanupAndConfigEdgeCases(InspectorTestBase):
+    """Cleanup branches and template-config parsing edge cases."""
+
+    def test_enter_removes_a_stale_existing_temp_dir(self, temp_dir: str) -> None:
+        # given: a leftover directory from a previous (crashed) run
+        self.create_valid_template_structure()
+        inspector = self.make_inspector(temp_dir)
+        os.makedirs(inspector.temp_dir)
+        (Path(inspector.temp_dir) / "stale.txt").write_text("leftover")
+
+        # when
+        with inspector:
+            # then: the stale file is gone, replaced by a fresh generation
+            assert not os.path.exists(os.path.join(inspector.temp_dir, "stale.txt"))
+
+    def test_enter_tolerates_failure_to_remove_stale_dir(self, temp_dir: str) -> None:
+        # given
+        self.create_valid_template_structure()
+        inspector = self.make_inspector(temp_dir)
+        os.makedirs(inspector.temp_dir)
+
+        # when / then: shutil.rmtree failing is only logged, not fatal
+        with patch(
+            "fastapi_fastkit.backend.inspection.core.shutil.rmtree",
+            side_effect=OSError("busy"),
+        ):
+            with inspector:
+                assert os.path.exists(inspector.temp_dir)
+
+    def test_cleanup_is_a_noop_when_not_needed(self, temp_dir: str) -> None:
+        # given: an inspector that was never entered
+        self.create_valid_template_structure()
+        inspector = self.make_inspector(temp_dir)
+
+        # when / then: no exception, nothing to clean up
+        inspector._cleanup()
+        assert inspector._cleanup_needed is False
+
+    def test_cleanup_stops_docker_services_and_waits(self, temp_dir: str) -> None:
+        # given
+        self.create_valid_template_structure()
+
+        with self.make_inspector(temp_dir) as inspector:
+            (Path(inspector.temp_dir) / "docker-compose.yml").write_text("services: {}")
+
+            # when
+            with (
+                patch.object(DockerCompose, "cleanup") as mock_cleanup,
+                patch(
+                    "fastapi_fastkit.backend.inspection.core.time.sleep"
+                ) as mock_sleep,
+            ):
+                inspector._cleanup()
+
+            # then
+            mock_cleanup.assert_called_once()
+            mock_sleep.assert_called_once_with(3)
+        assert not os.path.exists(inspector.temp_dir)
+
+    def test_cleanup_docker_services_failure_is_swallowed(self, temp_dir: str) -> None:
+        # given
+        self.create_valid_template_structure()
+
+        with self.make_inspector(temp_dir) as inspector:
+            (Path(inspector.temp_dir) / "docker-compose.yml").write_text("services: {}")
+
+            # when / then: a Docker cleanup failure must not stop the directory removal
+            with patch.object(
+                DockerCompose, "cleanup", side_effect=RuntimeError("daemon down")
+            ):
+                inspector._cleanup()
+
+        assert not os.path.exists(inspector.temp_dir)
+
+    def test_cleanup_recovers_from_unexpected_error(self, temp_dir: str) -> None:
+        # given
+        self.create_valid_template_structure()
+
+        with self.make_inspector(temp_dir) as inspector:
+            # when: force_cleanup_directory blows up once, then succeeds on retry
+            with patch(
+                "fastapi_fastkit.backend.inspection.core.force_cleanup_directory",
+                side_effect=[RuntimeError("locked"), None],
+            ) as mock_force_cleanup:
+                inspector._cleanup()
+
+            # then
+            assert mock_force_cleanup.call_count == 2
+            assert inspector._cleanup_needed is False
+
+    def test_template_config_invalid_yaml_yields_none(self, temp_dir: str) -> None:
+        # given
+        self.create_valid_template_structure()
+        (self.template_path / "template-config.yml-tpl").write_text(
+            "name: [unterminated"
+        )
+
+        # when
+        with self.make_inspector(temp_dir) as inspector:
+            # then
+            assert inspector.template_config is None
+
+    def test_template_config_non_mapping_yields_none(self, temp_dir: str) -> None:
+        # given
+        self.create_valid_template_structure()
+        (self.template_path / "template-config.yml-tpl").write_text(
+            "- just\n- a\n- list\n"
+        )
+
+        # when
+        with self.make_inspector(temp_dir) as inspector:
+            # then
+            assert inspector.template_config is None
+
+
 class TestStaticChecks(InspectorTestBase):
     """Structure, extension, dependency and implementation checks."""
 
@@ -615,6 +730,196 @@ class TestDockerStrategy:
         # then
         assert result is False
         assert any("Failed to start Docker services" in e for e in ctx.errors)
+
+
+class TestStrategyErrorPaths:
+    """Failure branches not covered by the happy-path strategy tests."""
+
+    def _context(self, tmp_path: Path, config: Optional[Dict[str, Any]] = None) -> Any:
+        venv = tmp_path / "venv" / "bin"
+        venv.mkdir(parents=True)
+        (venv / "python").write_text("")
+        return InspectionContext(
+            template_path=tmp_path,
+            temp_dir=str(tmp_path),
+            template_config=config,
+            venv_path=str(tmp_path / "venv"),
+        )
+
+    def test_prepare_environment_reports_venv_creation_failure(
+        self, tmp_path: Path
+    ) -> None:
+        # given
+        ctx = InspectionContext(template_path=tmp_path, temp_dir=str(tmp_path))
+
+        # when
+        with patch.object(
+            strategies_module,
+            "create_venv",
+            side_effect=RuntimeError("disk full"),
+        ):
+            result = strategies_module.prepare_environment(ctx)
+
+        # then
+        assert result is False
+        assert any("Failed to create virtual environment" in e for e in ctx.errors)
+
+    def test_prepare_environment_sets_venv_path_on_success(
+        self, tmp_path: Path
+    ) -> None:
+        # given
+        ctx = InspectionContext(template_path=tmp_path, temp_dir=str(tmp_path))
+
+        # when
+        with (
+            patch.object(
+                strategies_module, "create_venv", return_value=str(tmp_path / "venv")
+            ),
+            patch.object(strategies_module, "install_dependencies_with_manager"),
+        ):
+            result = strategies_module.prepare_environment(ctx)
+
+        # then
+        assert result is True
+        assert ctx.venv_path == str(tmp_path / "venv")
+
+    def test_strategy_reports_oserror(self, tmp_path: Path) -> None:
+        # given
+        ctx = self._context(tmp_path)
+
+        # when
+        with patch("subprocess.run", side_effect=OSError("no permission")):
+            result = strategies_module.StandardStrategy(ctx).run()
+
+        # then
+        assert result is False
+        assert any("Error running standard tests" in e for e in ctx.errors)
+
+    def test_run_fails_when_environment_preparation_fails(self, tmp_path: Path) -> None:
+        # given
+        ctx = self._context(tmp_path)
+
+        # when
+        with patch.object(strategies_module, "prepare_environment", return_value=False):
+            result = strategies_module.StandardStrategy(ctx).run()
+
+        # then
+        assert result is False
+
+
+class TestDockerStrategyEnvFileAndTimeout:
+    """The .env materialisation and the outer timeout/OSError handling."""
+
+    def _context(self, tmp_path: Path) -> Any:
+        return InspectionContext(
+            template_path=tmp_path,
+            temp_dir=str(tmp_path),
+            template_config={
+                "requires_docker": True,
+                "testing": {"compose_file": "docker-compose.yml"},
+                "test_env_defaults": {"POSTGRES_USER": "test_user"},
+            },
+        )
+
+    def test_existing_env_file_values_are_preserved(self, tmp_path: Path) -> None:
+        # given: an existing .env should win over the template's defaults
+        (tmp_path / ".env").write_text(
+            "POSTGRES_USER=custom_user\n# a comment\n\nBROKEN_LINE_NO_EQUALS\n"
+        )
+        ctx = self._context(tmp_path)
+        compose = MagicMock()
+        compose.containers_running.return_value = False
+        compose.up.return_value = subprocess.CompletedProcess(["up"], 0, "", "")
+        compose.verify_services_running.return_value = None
+        compose.exec_tests.return_value = subprocess.CompletedProcess(
+            ["pytest"], 0, "", ""
+        )
+
+        # when
+        with (
+            patch.object(DockerCompose, "is_available", return_value=True),
+            patch.object(strategies_module, "DockerCompose", return_value=compose),
+        ):
+            result = strategies_module.DockerStrategy(ctx).run()
+
+        # then
+        assert result is True
+        assert "POSTGRES_USER=custom_user" in (tmp_path / ".env").read_text()
+
+    def test_setup_timeout_is_reported(self, tmp_path: Path) -> None:
+        # given
+        ctx = self._context(tmp_path)
+        compose = MagicMock()
+        compose.containers_running.side_effect = subprocess.TimeoutExpired("docker", 1)
+
+        # when
+        with (
+            patch.object(DockerCompose, "is_available", return_value=True),
+            patch.object(strategies_module, "DockerCompose", return_value=compose),
+        ):
+            result = strategies_module.DockerStrategy(ctx).run()
+
+        # then
+        assert result is False
+        assert any("timed out" in e for e in ctx.errors)
+        compose.cleanup.assert_called_once()
+
+    def test_setup_oserror_is_reported(self, tmp_path: Path) -> None:
+        # given
+        ctx = self._context(tmp_path)
+        compose = MagicMock()
+        compose.containers_running.side_effect = OSError("boom")
+
+        # when
+        with (
+            patch.object(DockerCompose, "is_available", return_value=True),
+            patch.object(strategies_module, "DockerCompose", return_value=compose),
+        ):
+            result = strategies_module.DockerStrategy(ctx).run()
+
+        # then
+        assert result is False
+        assert any("Unexpected error during Docker testing" in e for e in ctx.errors)
+
+    def test_exec_tests_timeout_is_reported(self, tmp_path: Path) -> None:
+        # given
+        ctx = self._context(tmp_path)
+        compose = MagicMock()
+        compose.containers_running.return_value = True
+        compose.verify_services_running.return_value = None
+        compose.exec_tests.return_value = None
+
+        # when
+        with (
+            patch.object(DockerCompose, "is_available", return_value=True),
+            patch.object(strategies_module, "DockerCompose", return_value=compose),
+        ):
+            result = strategies_module.DockerStrategy(ctx).run()
+
+        # then
+        assert result is False
+        assert "Docker tests timed out" in ctx.errors
+
+    def test_exec_tests_failure_is_reported(self, tmp_path: Path) -> None:
+        # given
+        ctx = self._context(tmp_path)
+        compose = MagicMock()
+        compose.containers_running.return_value = True
+        compose.verify_services_running.return_value = None
+        compose.exec_tests.return_value = subprocess.CompletedProcess(
+            ["pytest"], 1, "out", "err"
+        )
+
+        # when
+        with (
+            patch.object(DockerCompose, "is_available", return_value=True),
+            patch.object(strategies_module, "DockerCompose", return_value=compose),
+        ):
+            result = strategies_module.DockerStrategy(ctx).run()
+
+        # then
+        assert result is False
+        assert any("Docker tests failed" in e for e in ctx.errors)
 
 
 class TestDockerCompose:

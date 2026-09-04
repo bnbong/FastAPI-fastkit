@@ -314,6 +314,47 @@ class TestLayoutAwareCommands:
         ).read_text()
         assert "from .routes import user" in router_content
 
+    def test_addroute_imports_resolve_for_the_domain_starter_layout(
+        self, tmp_path: Path
+    ) -> None:
+        # given
+        project_path = self._generate(
+            tmp_path, "fastapi-domain-starter", "domain-starter"
+        )
+        os.chdir(project_path)
+
+        # when
+        result = self.runner.invoke(fastkit_cli, ["addroute", "user", "."], input="Y\n")
+
+        # then
+        assert "Successfully added new route" in result.output, result.output
+        route_content = (
+            project_path / "src" / "app" / "api" / "routes" / "user.py"
+        ).read_text()
+        assert "from src.app.crud.user import *" in route_content
+        assert "from src.app.schemas.user import *" in route_content
+        assert "<package_root>" not in route_content
+        assert _unresolved_project_imports(project_path) == []
+
+    def test_addroute_imports_resolve_for_the_classic_layout(
+        self, tmp_path: Path
+    ) -> None:
+        # given
+        project_path = self._generate(tmp_path, "fastapi-default", "classic-layered")
+        os.chdir(project_path)
+
+        # when
+        result = self.runner.invoke(fastkit_cli, ["addroute", "user", "."], input="Y\n")
+
+        # then
+        assert "Successfully added new route" in result.output, result.output
+        route_content = (
+            project_path / "src" / "api" / "routes" / "user.py"
+        ).read_text()
+        assert "from src.crud.user import *" in route_content
+        assert "from src.schemas.user import *" in route_content
+        assert _unresolved_project_imports(project_path) == []
+
     def test_runserver_prefers_the_recorded_app_module(self, tmp_path: Path) -> None:
         # given
         from fastapi_fastkit.cli import _resolve_runserver_app_module
@@ -510,6 +551,177 @@ class TestConfigSchemaNormalization:
         assert reloaded == saved
         assert not validate_project_config(reloaded)
         assert normalize_project_config(reloaded) == reloaded
+
+
+class TestConfigSchemaRejectionCases:
+    """Every rejection branch of ``_normalize`` and its axis helpers."""
+
+    def test_non_dict_config_is_rejected(self) -> None:
+        # when
+        errors = validate_project_config_schema(["not", "a", "dict"])  # type: ignore[arg-type]
+
+        # then
+        assert errors == ["Project configuration must be a mapping."]
+
+    def test_unknown_config_key_is_rejected(self) -> None:
+        # given
+        config = dict(DICT_SHAPED_CONFIG, bogus_key="oops")
+
+        # when
+        errors = validate_project_config_schema(config)
+
+        # then
+        assert any("Unknown config key 'bogus_key'" in error for error in errors)
+
+    def test_scalar_choice_rejects_unknown_dict_fields(self) -> None:
+        # given: a {"type": ...} mapping with an unexpected extra field
+        config = dict(DICT_SHAPED_CONFIG, authentication={"type": "JWT", "level": "hi"})
+
+        # when
+        errors = validate_project_config_schema(config)
+
+        # then
+        assert any("may only hold 'type' and 'packages'" in error for error in errors)
+
+    def test_scalar_choice_rejects_non_string_non_dict(self) -> None:
+        # given
+        config = dict(DICT_SHAPED_CONFIG, authentication=42)
+
+        # when
+        errors = validate_project_config_schema(config)
+
+        # then
+        assert any(
+            "must be a string or a {'type': ...} mapping" in error for error in errors
+        )
+
+    def test_single_select_axis_rejects_list(self) -> None:
+        # given
+        config = dict(DICT_SHAPED_CONFIG, authentication=["JWT"])
+
+        # when
+        errors = validate_project_config_schema(config)
+
+        # then
+        assert any(
+            "'authentication' takes a single choice, not a list" in error
+            for error in errors
+        )
+
+    def test_multi_select_axis_rejects_non_list_non_string(self) -> None:
+        # given
+        config = dict(DICT_SHAPED_CONFIG, tooling=42)
+
+        # when
+        errors = validate_project_config_schema(config)
+
+        # then
+        assert any(
+            "'tooling' must be a list of choices, got int" in error for error in errors
+        )
+
+    def test_multi_select_axis_rejects_non_string_items(self) -> None:
+        # given
+        config = dict(DICT_SHAPED_CONFIG, tooling=["ruff", 42])
+
+        # when
+        errors = validate_project_config_schema(config)
+
+        # then
+        assert any(
+            "'tooling' may only contain strings, got int" in error for error in errors
+        )
+
+    def test_multi_select_axis_accepts_dict_shape(self) -> None:
+        # given: a single {"type": ...} mapping for a multi-select axis
+        config = dict(DICT_SHAPED_CONFIG, tooling={"type": "ruff"})
+
+        # when
+        normalized = normalize_project_config(config)
+
+        # then
+        assert normalized["tooling"] == ["ruff"]
+
+    def test_database_axis_rejects_list(self) -> None:
+        # given
+        config = dict(DICT_SHAPED_CONFIG, database=["PostgreSQL"])
+
+        # when
+        errors = validate_project_config_schema(config)
+
+        # then
+        assert any(
+            "'database' takes a single choice, not a list" in error for error in errors
+        )
+
+    def test_database_axis_rejects_unknown_choice(self) -> None:
+        # given
+        config = dict(DICT_SHAPED_CONFIG, database={"type": "Oracle"})
+
+        # when
+        errors = validate_project_config_schema(config)
+
+        # then
+        assert any("Unknown 'database' option 'Oracle'" in error for error in errors)
+
+    def test_conflicting_preset_aliases_are_rejected(self) -> None:
+        # given
+        config = dict(
+            DICT_SHAPED_CONFIG, preset="minimal", architecture_preset="classic-layered"
+        )
+
+        # when
+        errors = validate_project_config_schema(config)
+
+        # then
+        assert any("Conflicting presets" in error for error in errors)
+
+    def test_deployment_string_is_normalized_to_list(self) -> None:
+        # given
+        config = dict(DICT_SHAPED_CONFIG, deployment="Docker")
+
+        # when
+        normalized = normalize_project_config(config)
+
+        # then
+        assert normalized["deployment"] == ["Docker"]
+
+    def test_deployment_rejects_non_list_non_string(self) -> None:
+        # given
+        config = dict(DICT_SHAPED_CONFIG, deployment=42)
+
+        # when
+        errors = validate_project_config_schema(config)
+
+        # then
+        assert any(
+            "'deployment' must be a list of targets, got int" in error
+            for error in errors
+        )
+
+    def test_deployment_rejects_unknown_target(self) -> None:
+        # given
+        config = dict(DICT_SHAPED_CONFIG, deployment=["Kubernetes"])
+
+        # when
+        errors = validate_project_config_schema(config)
+
+        # then
+        assert any(
+            "Unknown 'deployment' target 'Kubernetes'" in error for error in errors
+        )
+
+    def test_custom_packages_must_be_a_string_list(self) -> None:
+        # given
+        config = dict(DICT_SHAPED_CONFIG, custom_packages="not-a-list")
+
+        # when
+        errors = validate_project_config_schema(config)
+
+        # then
+        assert any(
+            "'custom_packages' must be a list of strings" in error for error in errors
+        )
 
 
 class TestConfigDrivenProjectIsImportable:

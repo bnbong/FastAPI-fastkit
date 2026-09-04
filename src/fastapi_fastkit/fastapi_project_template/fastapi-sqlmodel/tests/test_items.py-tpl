@@ -53,6 +53,31 @@ async def test_partial_update_leaves_other_fields_alone(
     assert body["description"] == created["description"]
 
 
+async def test_partial_update_rejects_explicit_null_for_non_nullable_field(
+    client: AsyncClient, item_payload: dict[str, object]
+) -> None:
+    created = (await client.post(ITEMS_URL, json=item_payload)).json()
+
+    response = await client.patch(
+        f"{ITEMS_URL}/{created['id']}", json={"name": None}
+    )
+
+    assert response.status_code == 422
+
+
+async def test_partial_update_allows_explicit_null_for_nullable_field(
+    client: AsyncClient, item_payload: dict[str, object]
+) -> None:
+    created = (await client.post(ITEMS_URL, json=item_payload)).json()
+
+    response = await client.patch(
+        f"{ITEMS_URL}/{created['id']}", json={"description": None}
+    )
+
+    assert response.status_code == 200
+    assert response.json()["description"] is None
+
+
 async def test_delete_item(
     client: AsyncClient, item_payload: dict[str, object]
 ) -> None:

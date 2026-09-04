@@ -12,7 +12,7 @@ import signal
 import subprocess
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Dict, Iterator, Optional
+from typing import Any, Dict, Iterator, Optional, Tuple
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -250,6 +250,74 @@ class TestLintChecks:
         assert result is False
         assert any("mypy reported errors" in error for error in ctx.errors)
 
+    def test_mypy_passes_when_enabled_and_clean(self, tmp_path: Path) -> None:
+        # given
+        ctx = make_context(tmp_path, options=InspectionOptions(run_mypy=True))
+        completed = subprocess.CompletedProcess(
+            args=["mypy"], returncode=0, stdout="Success: no issues found", stderr=""
+        )
+
+        # when
+        with patch("subprocess.run", return_value=completed):
+            result = lint.check_mypy(ctx)
+
+        # then
+        assert result is True
+
+    def test_mypy_timeout_is_reported_as_error(self, tmp_path: Path) -> None:
+        # given
+        ctx = make_context(tmp_path, options=InspectionOptions(run_mypy=True))
+
+        # when
+        with patch(
+            "subprocess.run",
+            side_effect=subprocess.TimeoutExpired(cmd="mypy", timeout=1),
+        ):
+            result = lint.check_mypy(ctx)
+
+        # then
+        assert result is False
+        assert any("mypy timed out" in error for error in ctx.errors)
+
+    def test_mypy_oserror_is_a_warning_not_a_failure(self, tmp_path: Path) -> None:
+        # given
+        ctx = make_context(tmp_path, options=InspectionOptions(run_mypy=True))
+
+        # when
+        with patch("subprocess.run", side_effect=OSError("mypy not found")):
+            result = lint.check_mypy(ctx)
+
+        # then
+        assert result is True
+        assert any("Could not run mypy" in warning for warning in ctx.warnings)
+
+    def test_compileall_timeout_is_reported_as_error(self, tmp_path: Path) -> None:
+        # given
+        ctx = make_context(tmp_path)
+
+        # when
+        with patch(
+            "subprocess.run",
+            side_effect=subprocess.TimeoutExpired(cmd="compileall", timeout=1),
+        ):
+            result = lint.check_compileall(ctx)
+
+        # then
+        assert result is False
+        assert any("compileall timed out" in error for error in ctx.errors)
+
+    def test_compileall_oserror_is_reported_as_error(self, tmp_path: Path) -> None:
+        # given
+        ctx = make_context(tmp_path)
+
+        # when
+        with patch("subprocess.run", side_effect=OSError("no interpreter")):
+            result = lint.check_compileall(ctx)
+
+        # then
+        assert result is False
+        assert any("Failed to run compileall" in error for error in ctx.errors)
+
 
 class TestDependencyFreshnessCheck:
     """Freshness lookups are advisory and always skippable."""
@@ -312,6 +380,93 @@ class TestDependencyFreshnessCheck:
         # then
         assert result is True
         assert ctx.warnings == []
+
+    def test_no_pins_found_returns_true(self, tmp_path: Path) -> None:
+        # given - no requirements/pyproject dependency data to inspect
+        ctx = make_context(tmp_path, requirements="# only comments\n", pyproject=None)
+
+        # when
+        with patch.object(freshness, "fetch_latest_version") as mock_fetch:
+            result = freshness.check_dependency_freshness(ctx)
+
+        # then
+        assert result is True
+        mock_fetch.assert_not_called()
+
+    def test_unparsable_versions_are_skipped(self, tmp_path: Path) -> None:
+        # given - pin/latest versions that don't match the major.minor regex
+        ctx = make_context(tmp_path, requirements="fastapi==dev\n", pyproject=None)
+
+        # when
+        with patch.object(freshness, "fetch_latest_version", return_value="also-dev"):
+            result = freshness.check_dependency_freshness(ctx)
+
+        # then
+        assert result is True
+        assert ctx.warnings == []
+
+    def test_pins_collected_from_pyproject_dependencies(self, tmp_path: Path) -> None:
+        # given - only pyproject.toml-tpl carries a pinned dependency
+        pyproject = '[project]\nname = "demo"\ndependencies = ["fastapi==0.115.8"]\n'
+        ctx = make_context(tmp_path, requirements=None, pyproject=pyproject)
+
+        # when
+        with patch.object(freshness, "fetch_latest_version", return_value="1.0.0"):
+            result = freshness.check_dependency_freshness(ctx)
+
+        # then
+        assert result is True
+        assert any("major version(s) behind" in warning for warning in ctx.warnings)
+
+
+class TestFetchLatestVersion:
+    """``fetch_latest_version`` talks to PyPI and tolerates every failure mode."""
+
+    def test_returns_version_on_success(self) -> None:
+        # given
+        response = MagicMock()
+        response.__enter__.return_value = response
+        response.__exit__.return_value = False
+        response.read.return_value = b'{"info": {"version": "1.2.3"}}'
+
+        # when
+        with patch("urllib.request.urlopen", return_value=response):
+            version = freshness.fetch_latest_version("fastapi")
+
+        # then
+        assert version == "1.2.3"
+
+    def test_returns_none_when_version_missing(self) -> None:
+        # given
+        response = MagicMock()
+        response.__enter__.return_value = response
+        response.__exit__.return_value = False
+        response.read.return_value = b'{"info": {}}'
+
+        # when
+        with patch("urllib.request.urlopen", return_value=response):
+            version = freshness.fetch_latest_version("fastapi")
+
+        # then
+        assert version is None
+
+    def test_returns_none_on_url_error(self) -> None:
+        import urllib.error
+
+        with patch(
+            "urllib.request.urlopen",
+            side_effect=urllib.error.URLError("unreachable"),
+        ):
+            assert freshness.fetch_latest_version("fastapi") is None
+
+    def test_returns_none_on_invalid_json(self) -> None:
+        response = MagicMock()
+        response.__enter__.return_value = response
+        response.__exit__.return_value = False
+        response.read.return_value = b"not json"
+
+        with patch("urllib.request.urlopen", return_value=response):
+            assert freshness.fetch_latest_version("fastapi") is None
 
 
 class TestAppModuleResolution:
@@ -616,6 +771,238 @@ class TestSmokeCheck:
         assert result is False
         killpg.assert_called_once_with(FAKE_PID, signal.SIGTERM)
         process.terminate.assert_not_called()
+
+
+class TestAppModulePyprojectHelper:
+    """``_app_module_from_pyproject`` handles a malformed generated file."""
+
+    def test_returns_none_on_malformed_pyproject(self, tmp_path: Path) -> None:
+        # given
+        ctx = make_context(tmp_path)
+        pyproject_path = Path(ctx.temp_path("pyproject.toml"))
+        pyproject_path.write_text("not valid toml [[[")
+
+        # when
+        result = smoke_module._app_module_from_pyproject(ctx)
+
+        # then
+        assert result is None
+
+
+class TestWaitForServer:
+    """``_wait_for_server`` polls /docs until reachable, dead, or timed out."""
+
+    def _process(self, poll_result: Optional[int] = None) -> MagicMock:
+        process = MagicMock()
+        process.poll.return_value = poll_result
+        return process
+
+    def test_returns_true_when_docs_answers_200(self) -> None:
+        # given
+        process = self._process()
+
+        # when
+        with patch.object(smoke_module, "_probe", return_value=200):
+            reachable, reason = smoke_module._wait_for_server(
+                process, "http://127.0.0.1:1", timeout=5
+            )
+
+        # then
+        assert reachable is True
+        assert reason == ""
+
+    def test_returns_false_when_docs_answers_non_200(self) -> None:
+        # given
+        process = self._process()
+
+        # when
+        with patch.object(smoke_module, "_probe", return_value=500):
+            reachable, reason = smoke_module._wait_for_server(
+                process, "http://127.0.0.1:1", timeout=5
+            )
+
+        # then
+        assert reachable is False
+        assert "HTTP 500" in reason
+
+    def test_times_out_when_never_reachable(self) -> None:
+        # given
+        process = self._process()
+
+        # when
+        with (
+            patch.object(smoke_module, "_probe", return_value=None),
+            patch.object(smoke_module.time, "sleep"),
+        ):
+            reachable, reason = smoke_module._wait_for_server(
+                process, "http://127.0.0.1:1", timeout=0
+            )
+
+        # then
+        assert reachable is False
+        assert "did not become reachable" in reason
+
+
+class TestTerminateEscalation:
+    """``_terminate`` escalates from SIGTERM to SIGKILL when the server hangs."""
+
+    def test_returns_immediately_when_already_exited(self) -> None:
+        # given
+        process = MagicMock()
+        process.poll.return_value = 0
+
+        # when
+        smoke_module._terminate(process)
+
+        # then
+        process.terminate.assert_not_called()
+        process.wait.assert_not_called()
+
+    def test_escalates_to_sigkill_when_sigterm_does_not_stop_it(self) -> None:
+        # given: the process never dies (poll always None, wait always times out)
+        process = MagicMock()
+        process.pid = FAKE_PID
+        process.poll.return_value = None
+        process.wait.side_effect = subprocess.TimeoutExpired(cmd="uvicorn", timeout=1)
+
+        # when
+        with no_real_signals() as killpg:
+            smoke_module._terminate(process)
+
+        # then
+        assert killpg.call_args_list == [
+            ((FAKE_PID, signal.SIGTERM),),
+            ((FAKE_PID, signal.SIGKILL),),
+        ]
+        assert process.wait.call_count == 2
+
+    def test_falls_back_to_process_kill_when_group_signal_unavailable(self) -> None:
+        # given: no process group available, so it falls back to process.kill()
+        process = MagicMock()
+        process.pid = FAKE_PID
+        process.poll.return_value = None
+        process.wait.side_effect = subprocess.TimeoutExpired(cmd="uvicorn", timeout=1)
+
+        # when
+        with patch.object(
+            smoke_module.os, "getpgid", side_effect=ProcessLookupError("gone")
+        ):
+            smoke_module._terminate(process)
+
+        # then
+        process.terminate.assert_called_once()
+        process.kill.assert_called_once()
+
+
+class TestSmokeCheckPortConflictAndStartupErrors:
+    """The retry / error paths of ``check_smoke_test`` around Popen and ports."""
+
+    def _process(self) -> MagicMock:
+        process = MagicMock()
+        process.pid = FAKE_PID
+        process.poll.return_value = None
+        return process
+
+    def _context(self, tmp_path: Path) -> InspectionContext:
+        ctx = make_context(tmp_path)
+        ctx.template_config = {"app_module": "src.main:app"}
+        ctx.venv_path = str(tmp_path / "venv")
+        bin_dir = Path(ctx.venv_path) / "bin"
+        bin_dir.mkdir(parents=True)
+        (bin_dir / "python").write_text("")
+        return ctx
+
+    def test_popen_oserror_is_reported(self, tmp_path: Path) -> None:
+        # given
+        ctx = self._context(tmp_path)
+
+        # when
+        with patch.object(
+            smoke_module.subprocess, "Popen", side_effect=OSError("no such file")
+        ):
+            result = smoke_module.check_smoke_test(ctx)
+
+        # then
+        assert result is False
+        assert any("Failed to start the application server" in e for e in ctx.errors)
+
+    def test_retries_on_port_conflict_then_succeeds(self, tmp_path: Path) -> None:
+        # given: the first attempt reports a port bind conflict in its log
+        ctx = self._context(tmp_path)
+        process = self._process()
+        calls = {"n": 0}
+
+        def fake_wait_for_server(
+            process: Any, base_url: str, timeout: int
+        ) -> Tuple[bool, str]:
+            calls["n"] += 1
+            if calls["n"] == 1:
+                return False, "server did not become reachable within 5s"
+            return True, ""
+
+        # when
+        with (
+            no_real_signals(),
+            patch.object(smoke_module.subprocess, "Popen", return_value=process),
+            patch.object(
+                smoke_module, "_wait_for_server", side_effect=fake_wait_for_server
+            ),
+            patch.object(
+                smoke_module,
+                "_read_log_tail",
+                return_value="ERROR: [Errno 98] Address already in use",
+            ),
+            patch.object(smoke_module, "_probe", return_value=200),
+        ):
+            result = smoke_module.check_smoke_test(ctx)
+
+        # then
+        assert result is True
+        assert calls["n"] == 2
+
+    def test_gives_up_after_exhausting_port_attempts(self, tmp_path: Path) -> None:
+        # given: every attempt reports a port conflict
+        ctx = self._context(tmp_path)
+        process = self._process()
+
+        # when
+        with (
+            no_real_signals(),
+            patch.object(smoke_module.subprocess, "Popen", return_value=process),
+            patch.object(
+                smoke_module,
+                "_wait_for_server",
+                return_value=(False, "server did not become reachable within 5s"),
+            ),
+            patch.object(
+                smoke_module,
+                "_read_log_tail",
+                return_value="ERROR: address already in use",
+            ),
+        ):
+            result = smoke_module.check_smoke_test(ctx)
+
+        # then
+        assert result is False
+        assert any("Smoke test failed" in e for e in ctx.errors)
+
+    def test_health_endpoint_unreachable_is_a_warning(self, tmp_path: Path) -> None:
+        # given: /docs is reachable but /health never answers
+        ctx = self._context(tmp_path)
+        process = self._process()
+
+        # when
+        with (
+            no_real_signals(),
+            patch.object(smoke_module.subprocess, "Popen", return_value=process),
+            patch.object(smoke_module, "_wait_for_server", return_value=(True, "")),
+            patch.object(smoke_module, "_probe", return_value=None),
+        ):
+            result = smoke_module.check_smoke_test(ctx)
+
+        # then
+        assert result is True
+        assert any("/health did not respond" in w for w in ctx.warnings)
 
 
 class TestFreeportAndProbeHelpers:
