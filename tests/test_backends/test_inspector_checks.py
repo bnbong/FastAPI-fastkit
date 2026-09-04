@@ -7,9 +7,12 @@
 #
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
+import os
+import signal
 import subprocess
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Iterator, Optional
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -356,8 +359,123 @@ class TestAppModuleResolution:
         assert smoke_module.resolve_app_module(ctx) is None
 
 
+#: Fake pid for the mocked server process. It must be a real int: the
+#: production code refuses to signal a process group for anything else, and a
+#: MagicMock pid used to collapse into pgid 1 and take down the CI runner.
+FAKE_PID = 43210
+
+
+@contextmanager
+def no_real_signals(pid: int = FAKE_PID) -> Iterator[MagicMock]:
+    """Neuter the process-group calls so no test can ever signal a real group."""
+    with (
+        patch.object(smoke_module.os, "getpgid", return_value=pid) as getpgid,
+        patch.object(smoke_module.os, "killpg") as killpg,
+    ):
+        getpgid.side_effect = None
+        yield killpg
+
+
+class TestSignalGroup:
+    """``_signal_group`` must never signal a group that is not ours."""
+
+    def _process(self, pid: object) -> MagicMock:
+        process = MagicMock()
+        process.pid = pid
+        return process
+
+    def test_signals_own_group(self) -> None:
+        # given
+        process = self._process(FAKE_PID)
+
+        # when
+        with no_real_signals() as killpg:
+            signalled = smoke_module._signal_group(process, signal.SIGTERM)
+
+        # then
+        assert signalled is True
+        killpg.assert_called_once_with(FAKE_PID, signal.SIGTERM)
+
+    def test_refuses_non_integer_pid(self) -> None:
+        # given: an unconfigured mock, whose pid is a MagicMock
+        process = MagicMock()
+
+        # when
+        with no_real_signals() as killpg:
+            signalled = smoke_module._signal_group(process, signal.SIGTERM)
+
+        # then
+        assert signalled is False
+        killpg.assert_not_called()
+
+    @pytest.mark.parametrize("pid", [0, 1, -1])
+    def test_refuses_reserved_pids(self, pid: int) -> None:
+        # given / when
+        with no_real_signals() as killpg:
+            signalled = smoke_module._signal_group(self._process(pid), signal.SIGTERM)
+
+        # then
+        assert signalled is False
+        killpg.assert_not_called()
+
+    def test_refuses_when_process_is_not_group_leader(self) -> None:
+        # given: the process shares someone else's group
+        process = self._process(FAKE_PID)
+
+        # when
+        with (
+            patch.object(smoke_module.os, "getpgid", return_value=FAKE_PID + 1),
+            patch.object(smoke_module.os, "killpg") as killpg,
+        ):
+            signalled = smoke_module._signal_group(process, signal.SIGTERM)
+
+        # then
+        assert signalled is False
+        killpg.assert_not_called()
+
+    def test_refuses_the_current_process_group(self) -> None:
+        # given: getpgid reports this interpreter's own group
+        own_group = os.getpgrp()
+        process = self._process(own_group)
+
+        # when
+        with (
+            patch.object(smoke_module.os, "getpgid", return_value=own_group),
+            patch.object(smoke_module.os, "killpg") as killpg,
+        ):
+            signalled = smoke_module._signal_group(process, signal.SIGTERM)
+
+        # then
+        assert signalled is False
+        killpg.assert_not_called()
+
+    def test_falls_back_when_getpgid_fails(self) -> None:
+        # given
+        process = self._process(FAKE_PID)
+
+        # when
+        with (
+            patch.object(
+                smoke_module.os, "getpgid", side_effect=ProcessLookupError("gone")
+            ),
+            patch.object(smoke_module.os, "killpg") as killpg,
+        ):
+            signalled = smoke_module._signal_group(process, signal.SIGTERM)
+
+        # then
+        assert signalled is False
+        killpg.assert_not_called()
+
+
 class TestSmokeCheck:
     """The smoke test boots the app; the subprocess is mocked out here."""
+
+    def _process(self) -> MagicMock:
+        """A mock server process with a realistic integer pid."""
+        process = MagicMock()
+        process.pid = FAKE_PID
+        process.poll.return_value = None
+        return process
 
     def _context(self, tmp_path: Path) -> InspectionContext:
         ctx = make_context(tmp_path)
@@ -395,12 +513,12 @@ class TestSmokeCheck:
     def test_passes_when_docs_answers(self, tmp_path: Path) -> None:
         # given
         ctx = self._context(tmp_path)
-        process = MagicMock()
-        process.poll.return_value = None
+        process = self._process()
         statuses = {"docs": 200, "health": 200}
 
         # when
         with (
+            no_real_signals() as killpg,
             patch.object(smoke_module.subprocess, "Popen", return_value=process),
             patch.object(
                 smoke_module,
@@ -413,17 +531,19 @@ class TestSmokeCheck:
         # then
         assert result is True
         assert ctx.errors == []
-        process.terminate.assert_called_once()
+        # The server's own group is signalled, not this process's.
+        killpg.assert_called_once_with(FAKE_PID, signal.SIGTERM)
+        process.terminate.assert_not_called()
 
     def test_missing_health_endpoint_is_not_an_error(self, tmp_path: Path) -> None:
         # given
         ctx = self._context(tmp_path)
-        process = MagicMock()
-        process.poll.return_value = None
+        process = self._process()
         statuses = {"docs": 200, "health": 404}
 
         # when
         with (
+            no_real_signals() as killpg,
             patch.object(smoke_module.subprocess, "Popen", return_value=process),
             patch.object(
                 smoke_module,
@@ -440,12 +560,12 @@ class TestSmokeCheck:
     def test_broken_health_endpoint_fails(self, tmp_path: Path) -> None:
         # given
         ctx = self._context(tmp_path)
-        process = MagicMock()
-        process.poll.return_value = None
+        process = self._process()
         statuses = {"docs": 200, "health": 500}
 
         # when
         with (
+            no_real_signals() as killpg,
             patch.object(smoke_module.subprocess, "Popen", return_value=process),
             patch.object(
                 smoke_module,
@@ -462,12 +582,13 @@ class TestSmokeCheck:
     def test_server_crash_is_reported(self, tmp_path: Path) -> None:
         # given: the server process dies immediately
         ctx = self._context(tmp_path)
-        process = MagicMock()
+        process = self._process()
         process.poll.return_value = 1
         process.stdout.read.return_value = "ImportError: no module named src"
 
         # when
         with (
+            no_real_signals() as killpg,
             patch.object(smoke_module.subprocess, "Popen", return_value=process),
             patch.object(smoke_module, "_probe", return_value=None),
         ):
@@ -481,11 +602,11 @@ class TestSmokeCheck:
         # given
         ctx = self._context(tmp_path)
         ctx.options.smoke_timeout = 0
-        process = MagicMock()
-        process.poll.return_value = None
+        process = self._process()
 
         # when
         with (
+            no_real_signals() as killpg,
             patch.object(smoke_module.subprocess, "Popen", return_value=process),
             patch.object(smoke_module, "_probe", return_value=None),
         ):
@@ -493,7 +614,8 @@ class TestSmokeCheck:
 
         # then
         assert result is False
-        process.terminate.assert_called_once()
+        killpg.assert_called_once_with(FAKE_PID, signal.SIGTERM)
+        process.terminate.assert_not_called()
 
 
 class TestFreeportAndProbeHelpers:

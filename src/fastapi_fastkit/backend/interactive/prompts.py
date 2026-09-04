@@ -111,7 +111,7 @@ def prompt_architecture_preset(settings: Any) -> str:
     }
     render_selection_table("Architecture Presets", display_options)
 
-    preset_ids = list(presets.keys())
+    preset_ids: List[str] = list(presets.keys())
     default_idx = preset_ids.index(default_id) + 1
 
     choice = click.prompt(
@@ -120,7 +120,8 @@ def prompt_architecture_preset(settings: Any) -> str:
         default=default_idx,
     )
 
-    return preset_ids[choice - 1]
+    result: str = preset_ids[choice - 1]
+    return result
 
 
 def prompt_template_selection(settings: Any) -> Optional[str]:
@@ -169,7 +170,8 @@ def prompt_template_selection(settings: Any) -> Optional[str]:
         default=1,
     )
 
-    selected_key = list(options.keys())[choice - 1]
+    template_keys: List[str] = list(options.keys())
+    selected_key: str = template_keys[choice - 1]
 
     return selected_key if selected_key != "Empty Project" else None
 

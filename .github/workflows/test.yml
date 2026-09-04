@@ -14,19 +14,14 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.14"  # max
-          - "3.13"
-          - "3.12"  # min requirements
-          - "3.11"  # supported, but full functionality not guaranteed
-          - "3.10"  # supported, but full functionality not guaranteed
-          - "3.9"  # supported, but full functionality not guaranteed
+          - "3.12"  # the only supported version (requires-python = ">=3.12")
       fail-fast: false
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -47,7 +42,6 @@ jobs:
           pdm run pytest --cov=src/fastapi_fastkit --cov-report=term-missing --cov-report=xml --cov-fail-under=70
 
       - name: Upload coverage to Codecov
-        if: matrix.python-version == '3.12'
         uses: codecov/codecov-action@v4
         with:
           file: ./coverage.xml

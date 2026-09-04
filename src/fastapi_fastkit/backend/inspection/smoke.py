@@ -138,14 +138,44 @@ def _signal_group(process: "subprocess.Popen[bytes]", sig: int) -> bool:
     parent leaves them holding the port. The process is started with
     ``start_new_session=True`` so the group id equals its pid.
 
+    Only a group we created ourselves is ever signalled: the pid must be a
+    real positive integer and must be its own group leader. Anything else --
+    a mocked process object, a pid that has been reaped and rejoined another
+    group, the init group, or the group this interpreter itself belongs to --
+    falls back to signalling the single process, because signalling the wrong
+    group would tear down unrelated processes (a CI runner, for one).
+
     :return: True when the group was signalled, False to fall back
     """
     if not hasattr(os, "killpg"):  # pragma: no cover - non-POSIX
         return False
+
+    pid = process.pid
+    if type(pid) is not int or pid <= 1:
+        debug_log(f"Refusing to signal process group for pid {pid!r}", "debug")
+        return False
+
     try:
-        os.killpg(os.getpgid(process.pid), sig)
+        pgid = os.getpgid(pid)
+    except OSError as e:
+        debug_log(f"Could not read smoke test process group: {e}", "debug")
+        return False
+
+    # start_new_session=True makes the child its own group leader, so a pgid
+    # that differs from the pid means the process is sharing someone else's
+    # group -- never ours to signal.
+    if pgid != pid or pgid <= 1 or pgid == os.getpgrp():
+        debug_log(
+            f"Smoke test process {pid} is not its own group leader "
+            f"(pgid {pgid}); signalling the process only",
+            "debug",
+        )
+        return False
+
+    try:
+        os.killpg(pgid, sig)
         return True
-    except (OSError, ProcessLookupError) as e:
+    except OSError as e:
         debug_log(f"Could not signal smoke test process group: {e}", "debug")
         return False
 
