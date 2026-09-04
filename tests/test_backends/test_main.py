@@ -26,6 +26,7 @@ from fastapi_fastkit.backend.main import (
     install_dependencies,
     read_template_stack,
 )
+from fastapi_fastkit.backend.package_managers.pip_manager import PipManager
 from fastapi_fastkit.core.exceptions import BackendExceptions
 
 
@@ -141,14 +142,38 @@ class TestBackendMain:
         install_dependencies(str(self.project_path), venv_path)
 
         # then
-        # Should be called 3 times: is_available check, pip upgrade, and install requirements
-        assert mock_subprocess.call_count == 3
+        # Should be called 2 times: is_available check and install requirements.
+        # pip is no longer upgraded by default - it costs a network round trip
+        # on every project generation and is opt-in via ``upgrade_pip``.
+        assert mock_subprocess.call_count == 2
+
+    @patch("subprocess.run")
+    def test_install_dependencies_upgrades_pip_when_requested(
+        self, mock_subprocess: MagicMock
+    ) -> None:
+        """``upgrade_pip=True`` runs the pip upgrade before installing."""
+        # given
+        requirements_txt = self.project_path / "requirements.txt"
+        requirements_txt.write_text("fastapi==0.104.1")
+        venv_path = str(self.project_path / ".venv")
+        (self.project_path / ".venv").mkdir()
+        mock_subprocess.return_value.returncode = 0
+
+        # when
+        PipManager(str(self.project_path)).install_dependencies(
+            venv_path, upgrade_pip=True
+        )
+
+        # then
+        commands = [call.args[0] for call in mock_subprocess.call_args_list]
+        assert ["install", "--upgrade", "pip"] == commands[0][1:]
+        assert commands[1][1:] == ["install", "-r", "requirements.txt"]
 
     @patch("subprocess.run")
     def test_install_dependencies_pip_upgrade_failure(
         self, mock_subprocess: MagicMock
     ) -> None:
-        """Test install_dependencies function with pip upgrade failure."""
+        """A failing opt-in pip upgrade aborts before dependencies install."""
         # given
         requirements_txt = self.project_path / "requirements.txt"
         requirements_txt.write_text("fastapi==0.104.1")
@@ -159,8 +184,10 @@ class TestBackendMain:
         )
 
         # when & then
-        with pytest.raises(BackendExceptions, match="Failed to install dependencies"):
-            install_dependencies(str(self.project_path), venv_path)
+        with pytest.raises(BackendExceptions, match="Failed to upgrade pip"):
+            PipManager(str(self.project_path)).install_dependencies(
+                venv_path, upgrade_pip=True
+            )
 
     @patch("subprocess.run")
     def test_install_dependencies_requirements_failure(

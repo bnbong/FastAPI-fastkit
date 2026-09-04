@@ -1,0 +1,26 @@
+{% include "header.j2" %}
+"""Redis client wiring.
+
+The single ``redis.asyncio`` connection pool is created lazily and reused by
+every request through the :func:`get_redis` dependency.
+"""
+
+import os
+from collections.abc import AsyncIterator
+
+import redis.asyncio as redis
+
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+
+#: Shared connection pool. ``redis.asyncio`` clients are safe to share.
+redis_client: redis.Redis = redis.from_url(REDIS_URL, decode_responses=True)
+
+
+async def get_redis() -> AsyncIterator[redis.Redis]:
+    """FastAPI dependency yielding the shared Redis client."""
+    yield redis_client
+
+
+async def close_redis() -> None:
+    """Close the pool on application shutdown."""
+    await redis_client.aclose()

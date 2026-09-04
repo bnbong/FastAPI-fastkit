@@ -22,7 +22,7 @@ A FastAPI application with Model Context Protocol (MCP) integration, providing a
 │   │   └── api.py          # Main API router
 │   ├── auth/               # Authentication logic
 │   ├── core/               # Core settings and config
-│   ├── mcp/                # MCP integration
+│   ├── mcp_server/         # MCP integration
 │   ├── schemas/            # Pydantic models
 │   └── main.py             # FastAPI application
 ├── tests/                  # Test files

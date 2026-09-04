@@ -21,6 +21,7 @@ from fastapi_fastkit.backend.package_managers import (
     UvManager,
 )
 from fastapi_fastkit.core.exceptions import BackendExceptions
+from fastapi_fastkit.core.settings import settings
 
 
 class TestBasePackageManager:
@@ -475,7 +476,7 @@ class TestIntegration:
             assert isinstance(file_name, str)
             assert len(file_name) > 0
 
-    @patch("fastapi_fastkit.backend.package_managers.pip_manager.subprocess.run")
+    @patch("subprocess.run")
     def test_pip_manager_dependency_workflow(self, mock_run: Mock) -> None:
         """Test complete dependency management workflow with PIP."""
         mock_run.return_value.returncode = 0
@@ -570,8 +571,57 @@ class TestPipManagerExtended:
 
         mock_run.return_value.returncode = 0
         self.manager.install_dependencies(venv_path)
-        # Should call pip upgrade and install
+        # pip is no longer upgraded by default: only the install call runs
+        assert mock_run.call_count == 1
+        assert "--upgrade" not in mock_run.call_args_list[0].args[0]
+
+    @patch("subprocess.run")
+    def test_install_dependencies_upgrade_pip_opt_in(self, mock_run: Mock) -> None:
+        """Test pip upgrade only happens when explicitly requested."""
+        venv_path = str(Path(self.temp_dir) / ".venv")
+        Path(venv_path).mkdir(parents=True)
+
+        req_file = Path(self.temp_dir) / "requirements.txt"
+        req_file.write_text("fastapi==0.104.1\n")
+
+        mock_run.return_value.returncode = 0
+        self.manager.install_dependencies(venv_path, upgrade_pip=True)
         assert mock_run.call_count == 2
+        assert "--upgrade" in mock_run.call_args_list[0].args[0]
+
+    @patch("subprocess.run")
+    def test_install_dependencies_passes_timeout(self, mock_run: Mock) -> None:
+        """Test the install subprocess call is bounded by a timeout."""
+        venv_path = str(Path(self.temp_dir) / ".venv")
+        Path(venv_path).mkdir(parents=True)
+
+        req_file = Path(self.temp_dir) / "requirements.txt"
+        req_file.write_text("fastapi==0.104.1\n")
+
+        mock_run.return_value.returncode = 0
+        self.manager.install_dependencies(venv_path)
+        assert mock_run.call_args_list[0].kwargs["timeout"] == 900
+
+    @patch("subprocess.run")
+    def test_install_dependencies_timeout(self, mock_run: Mock) -> None:
+        """Test a timed out install surfaces a clear error."""
+        venv_path = str(Path(self.temp_dir) / ".venv")
+        Path(venv_path).mkdir(parents=True)
+
+        req_file = Path(self.temp_dir) / "requirements.txt"
+        req_file.write_text("fastapi==0.104.1\n")
+
+        mock_run.side_effect = subprocess.TimeoutExpired("pip", 900)
+        with pytest.raises(BackendExceptions) as exc_info:
+            self.manager.install_dependencies(venv_path)
+        assert "timed out" in str(exc_info.value)
+
+    @patch("subprocess.run")
+    def test_create_virtual_environment_passes_timeout(self, mock_run: Mock) -> None:
+        """Test the venv subprocess call is bounded by a timeout."""
+        mock_run.return_value.returncode = 0
+        self.manager.create_virtual_environment()
+        assert mock_run.call_args.kwargs["timeout"] == 120
 
     @patch("subprocess.run")
     def test_install_dependencies_failure(self, mock_run: Mock) -> None:
@@ -1356,3 +1406,97 @@ class TestUvManagerExtended:
         mock_run.side_effect = OSError("System error")
         with pytest.raises(BackendExceptions):
             self.manager.run_script("python test.py")
+
+
+@pytest.mark.extended
+class TestAutoDetectionPriority:
+    """Auto-detection prefers uv and falls back to pip last."""
+
+    def setup_method(self) -> None:
+        """Set up test environment."""
+        self.temp_dir = tempfile.mkdtemp()
+
+    def teardown_method(self) -> None:
+        """Clean up test environment."""
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+    def test_detection_order_prefers_uv_and_ends_with_pip(self) -> None:
+        """Test the declared detection order puts uv first and pip last."""
+        assert PackageManagerFactory.DETECTION_ORDER[0] == "uv"
+        assert PackageManagerFactory.DETECTION_ORDER[-1] == "pip"
+
+    @patch(
+        "fastapi_fastkit.backend.package_managers.pip_manager.PipManager.is_available"
+    )
+    @patch(
+        "fastapi_fastkit.backend.package_managers.pdm_manager.PdmManager.is_available"
+    )
+    @patch("fastapi_fastkit.backend.package_managers.uv_manager.UvManager.is_available")
+    def test_auto_detect_picks_uv_when_available(
+        self, mock_uv: Mock, mock_pdm: Mock, mock_pip: Mock
+    ) -> None:
+        """Test uv wins auto-detection even when pip and pdm are installed."""
+        mock_uv.return_value = True
+        mock_pdm.return_value = True
+        mock_pip.return_value = True
+
+        manager = PackageManagerFactory._auto_detect_manager(self.temp_dir)
+        assert isinstance(manager, UvManager)
+
+    @patch(
+        "fastapi_fastkit.backend.package_managers.poetry_manager.PoetryManager.is_available"
+    )
+    @patch(
+        "fastapi_fastkit.backend.package_managers.pip_manager.PipManager.is_available"
+    )
+    @patch(
+        "fastapi_fastkit.backend.package_managers.pdm_manager.PdmManager.is_available"
+    )
+    @patch("fastapi_fastkit.backend.package_managers.uv_manager.UvManager.is_available")
+    def test_auto_detect_falls_back_to_pip(
+        self, mock_uv: Mock, mock_pdm: Mock, mock_pip: Mock, mock_poetry: Mock
+    ) -> None:
+        """Test pip is only chosen when nothing else is available."""
+        mock_uv.return_value = False
+        mock_pdm.return_value = False
+        mock_poetry.return_value = False
+        mock_pip.return_value = True
+
+        manager = PackageManagerFactory._auto_detect_manager(self.temp_dir)
+        assert isinstance(manager, PipManager)
+
+    @patch("fastapi_fastkit.backend.package_managers.uv_manager.UvManager.is_available")
+    @patch(
+        "fastapi_fastkit.backend.package_managers.pip_manager.PipManager.is_available"
+    )
+    def test_explicit_selection_is_respected(
+        self, mock_pip: Mock, mock_uv: Mock
+    ) -> None:
+        """Test an explicitly requested manager is not overridden by uv."""
+        mock_pip.return_value = True
+        mock_uv.return_value = True
+
+        manager = PackageManagerFactory.create_manager("pip", self.temp_dir)
+        assert isinstance(manager, PipManager)
+
+
+@pytest.mark.extended
+class TestSubprocessTimeoutSettings:
+    """Timeout resolution for package manager subprocess calls."""
+
+    def test_default_timeouts(self) -> None:
+        """Test the built-in timeout values."""
+        assert settings.get_subprocess_timeout("venv") == 120
+        assert settings.get_subprocess_timeout("install") == 900
+        assert settings.get_subprocess_timeout("unknown-kind") == 300
+
+    def test_env_var_override(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test FASTKIT_SUBPROCESS_TIMEOUT overrides every built-in value."""
+        monkeypatch.setenv("FASTKIT_SUBPROCESS_TIMEOUT", "42")
+        assert settings.get_subprocess_timeout("install") == 42
+        assert settings.get_subprocess_timeout("venv") == 42
+
+    def test_invalid_env_var_is_ignored(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test a non-numeric override falls back to the built-in value."""
+        monkeypatch.setenv("FASTKIT_SUBPROCESS_TIMEOUT", "not-a-number")
+        assert settings.get_subprocess_timeout("venv") == 120

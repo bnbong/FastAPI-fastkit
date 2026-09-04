@@ -1,0 +1,27 @@
+# --------------------------------------------------------------------------
+# Conversation store interface.
+#
+# The agent only ever sees this interface, so swapping the bundled in-memory
+# store for Redis or a database is a new implementation plus one line in the
+# dependency wiring — no change to the agent or the routers.
+# --------------------------------------------------------------------------
+from abc import ABC, abstractmethod
+from typing import Any
+
+Message = dict[str, Any]
+
+
+class ConversationStore(ABC):
+    """Persistence boundary for conversation history."""
+
+    @abstractmethod
+    async def get(self, conversation_id: str) -> list[Message]:
+        """Return the stored messages, or an empty list for an unknown id."""
+
+    @abstractmethod
+    async def append(self, conversation_id: str, *messages: Message) -> None:
+        """Append messages to a conversation, creating it if needed."""
+
+    @abstractmethod
+    async def delete(self, conversation_id: str) -> None:
+        """Forget a conversation. Deleting an unknown id is not an error."""

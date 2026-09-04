@@ -1,0 +1,100 @@
+# --------------------------------------------------------------------------
+# Password hashing (argon2) and JWT encoding / decoding primitives.
+#
+# Everything here is transport-agnostic: no FastAPI imports, so the same
+# helpers can be reused from CLI scripts, workers, or tests.
+# --------------------------------------------------------------------------
+import uuid
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional
+
+import jwt
+from pwdlib import PasswordHash
+
+from src.app.core.config import settings
+
+# argon2id — the recommended default for new applications.
+password_hash = PasswordHash.recommended()
+
+ACCESS_TOKEN_TYPE = "access"
+REFRESH_TOKEN_TYPE = "refresh"
+
+
+class TokenError(Exception):
+    """Raised when a token is malformed, expired, or of the wrong type."""
+
+
+def hash_password(password: str) -> str:
+    return password_hash.hash(password)
+
+
+def verify_password(password: str, hashed_password: str) -> bool:
+    return password_hash.verify(password, hashed_password)
+
+
+def _create_token(
+    subject: str,
+    token_type: str,
+    expires_delta: timedelta,
+    scopes: Optional[List[str]] = None,
+) -> tuple[str, str, datetime]:
+    """Encode a JWT and return ``(token, jti, expires_at)``.
+
+    The ``jti`` is returned so refresh tokens can be tracked (and revoked)
+    in the database without storing the token itself.
+    """
+    now = datetime.now(timezone.utc)
+    expires_at = now + expires_delta
+    jti = str(uuid.uuid4())
+    payload: Dict[str, Any] = {
+        "sub": subject,
+        "type": token_type,
+        "jti": jti,
+        "iat": int(now.timestamp()),
+        "exp": int(expires_at.timestamp()),
+        "scopes": scopes or [],
+    }
+    token = jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+    return token, jti, expires_at
+
+
+def create_access_token(
+    subject: str, scopes: Optional[List[str]] = None
+) -> tuple[str, str, datetime]:
+    return _create_token(
+        subject,
+        ACCESS_TOKEN_TYPE,
+        timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
+        scopes,
+    )
+
+
+def create_refresh_token(
+    subject: str, scopes: Optional[List[str]] = None
+) -> tuple[str, str, datetime]:
+    return _create_token(
+        subject,
+        REFRESH_TOKEN_TYPE,
+        timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
+        scopes,
+    )
+
+
+def decode_token(token: str, expected_type: str) -> Dict[str, Any]:
+    """Decode and validate a JWT, enforcing the expected token type.
+
+    Raises:
+        TokenError: the signature, expiry, or ``type`` claim did not check out.
+    """
+    try:
+        payload: Dict[str, Any] = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=[settings.JWT_ALGORITHM]
+        )
+    except jwt.PyJWTError as exc:
+        raise TokenError(str(exc)) from exc
+
+    if payload.get("type") != expected_type:
+        raise TokenError(f"expected a {expected_type} token")
+    if not payload.get("sub"):
+        raise TokenError("token is missing a subject")
+    return payload

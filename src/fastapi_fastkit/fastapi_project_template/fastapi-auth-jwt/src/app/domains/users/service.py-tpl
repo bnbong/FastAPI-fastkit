@@ -1,0 +1,55 @@
+# --------------------------------------------------------------------------
+# User business logic.
+# --------------------------------------------------------------------------
+from typing import List, Optional
+
+from src.app.core.security import hash_password, verify_password
+from src.app.domains.users.models import User
+from src.app.domains.users.repository import UserRepository
+from src.app.domains.users.schemas import UserCreate
+
+
+class EmailAlreadyRegisteredError(Exception):
+    """Raised when a registration reuses an existing email address."""
+
+
+class UserService:
+    def __init__(self, repository: UserRepository) -> None:
+        self.repository = repository
+
+    def register(
+        self,
+        payload: UserCreate,
+        *,
+        is_superuser: bool = False,
+        scopes: Optional[List[str]] = None,
+    ) -> User:
+        email = payload.email.lower()
+        if self.repository.get_by_email(email) is not None:
+            raise EmailAlreadyRegisteredError(email)
+
+        granted = scopes if scopes is not None else ["me"]
+        if is_superuser and "admin" not in granted:
+            granted = granted + ["admin"]
+
+        user = User(
+            email=email,
+            full_name=payload.full_name,
+            hashed_password=hash_password(payload.password),
+            is_superuser=is_superuser,
+            scopes=",".join(granted),
+        )
+        return self.repository.add(user)
+
+    def authenticate(self, email: str, password: str) -> Optional[User]:
+        """Return the user when the credentials match, otherwise ``None``.
+
+        The hash of a non-existent user is never verified, so this leaks a
+        small timing difference; add a dummy verify if that matters to you.
+        """
+        user = self.repository.get_by_email(email.lower())
+        if user is None:
+            return None
+        if not verify_password(password, user.hashed_password):
+            return None
+        return user

@@ -7,6 +7,8 @@ from starlette.middleware.cors import CORSMiddleware
 from src.app.api.router import api_router
 from src.app.core.config import settings
 
+# fastkit:imports
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     description="<description>",
@@ -22,4 +24,5 @@ if settings.all_cors_origins:
         allow_headers=["*"],
     )
 
+# fastkit:routes
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)

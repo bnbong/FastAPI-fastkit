@@ -1,0 +1,50 @@
+{% include "header.j2" %}
+"""Task submission / status endpoints backed by Celery."""
+from typing import Any
+
+from celery.result import AsyncResult
+from fastapi import APIRouter, status
+from pydantic import BaseModel, Field
+
+from {{ pkg }}.worker import celery_app, example_task
+
+router = APIRouter(prefix="/api/v1/tasks", tags=["Tasks"])
+
+
+class TaskSubmission(BaseModel):
+    """Body of a task submission request."""
+
+    payload: dict[str, Any] = Field(default_factory=dict)
+
+
+class TaskAccepted(BaseModel):
+    """Identifier handed back so the caller can poll for the result."""
+
+    task_id: str
+    status: str
+
+
+class TaskStatus(BaseModel):
+    """Current state of a submitted task."""
+
+    task_id: str
+    status: str
+    result: Any = None
+
+
+@router.post("", response_model=TaskAccepted, status_code=status.HTTP_202_ACCEPTED)
+async def submit_task(submission: TaskSubmission) -> TaskAccepted:
+    """Queue :func:`example_task` and return its id."""
+    async_result = example_task.delay(submission.payload)
+    return TaskAccepted(task_id=async_result.id, status=async_result.status)
+
+
+@router.get("/{task_id}", response_model=TaskStatus)
+async def get_task_status(task_id: str) -> TaskStatus:
+    """Poll a previously submitted task."""
+    async_result = AsyncResult(task_id, app=celery_app)
+    return TaskStatus(
+        task_id=task_id,
+        status=async_result.status,
+        result=async_result.result if async_result.successful() else None,
+    )

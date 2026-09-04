@@ -1,7 +1,6 @@
 # --------------------------------------------------------------------------
 # Item CRUD Endpoint
 # --------------------------------------------------------------------------
-from typing import List
 
 from fastapi import APIRouter, HTTPException
 
@@ -11,7 +10,7 @@ from src.schemas.items import ItemCreate, ItemResponse
 router = APIRouter()
 
 
-@router.get("/items", response_model=List[ItemResponse])
+@router.get("/items", response_model=list[ItemResponse])
 async def read_all_items():
     return read_items()
 

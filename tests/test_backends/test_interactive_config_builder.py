@@ -474,3 +474,41 @@ class TestGetConfig:
 
         # then
         assert config == {}
+
+
+class TestCollectAllDependenciesNewAxes:
+    """Regression tests for axes added after the original hard-coded walk."""
+
+    def test_collect_dependencies_includes_migrations_and_tooling(self) -> None:
+        """Migrations / tooling / logging axes must reach the dependency set."""
+        # given
+        settings = FastkitConfig()
+        builder = InteractiveConfigBuilder(settings)
+        builder.config = {
+            "database": {"type": "None"},
+            "migrations": "Alembic",
+            "tooling": ["ruff", "pre-commit"],
+            "logging": "structured",
+        }
+
+        # when
+        dependencies = builder._collect_all_dependencies()
+
+        # then
+        assert "alembic" in dependencies
+        assert "ruff" in dependencies
+        assert "pre-commit" in dependencies
+
+    def test_collect_dependencies_sanitizes_custom_packages(self) -> None:
+        """Custom packages are still sanitized before being merged in."""
+        # given
+        settings = FastkitConfig()
+        builder = InteractiveConfigBuilder(settings)
+        builder.config = {"custom_packages": ["httpx", "bad package name!"]}
+
+        # when
+        dependencies = builder._collect_all_dependencies()
+
+        # then
+        assert "httpx" in dependencies
+        assert "bad package name!" not in dependencies

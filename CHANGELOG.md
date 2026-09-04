@@ -1,5 +1,44 @@
 # Changelog
 
+## v1.4.0 (2026-09-04)
+
+### Features
+
+- `fastkit init --config <file>` (JSON/TOML/YAML) for prompt-free, reproducible generation, plus `--save-config` to capture an interactive session. Configs are normalized and schema-validated.
+- `--dry-run`, `--no-venv`, `--no-install`, and `--yes` for `init` and `startdemo`.
+- Generated projects record a `[tool.fastapi-fastkit]` metadata block (`template`, `preset`, `package_manager`, `app_module`, `features`); `runserver` and `addroute` use it instead of guessing the layout.
+- Interactive builder now generates working code for every catalog choice (Celery/Dramatiq, Redis cache, WebSocket, Pagination, OpenTelemetry, OAuth2, Session auth) and adds three axes: `migrations` (Alembic), `tooling` (ruff, pre-commit, GitHub Actions, devcontainer, Makefile), `logging` (structured JSON). `/health` and `/ready` are always generated.
+- `# fastkit:imports` / `# fastkit:routes` anchors in templates; `addroute` falls back to AST-based insertion.
+- Package-manager subprocesses are bounded by timeouts (`FASTKIT_SUBPROCESS_TIMEOUT`); auto-detection prefers `uv`.
+
+### Templates
+
+- New: `fastapi-auth-jwt` (refresh-token rotation, argon2, scopes), `fastapi-sqlmodel` (async SQLModel + Alembic + generic CRUD), `fastapi-llm-agent` (Claude SSE streaming with tool loop).
+- Deprecated: `fastapi-dockerized`, `fastapi-async-crud` (still shipped).
+- All templates aligned on Python 3.12, `setup.py-tpl` removed, self-dependency on `FastAPI-fastkit` removed, dependency pins refreshed, `fastapi-mcp` package renamed to `mcp_server` to stop shadowing the `mcp` library.
+
+### Fixes
+
+- Rollback on a failed run no longer deletes a project directory that existed before the run; `startdemo` refuses an existing target.
+- In-place deployment only substitutes placeholders in files it copied and asks before overwriting.
+- Quotes and backslashes in project name/author/description no longer break `pyproject.toml` or generated Python.
+- Rewriting the `[tool.fastapi-fastkit]` block no longer corrupts arrays in it.
+
+### Maintenance
+
+- Interactive code generation moved from string concatenation to Jinja2 fragments (`src/fastapi_fastkit/fragments/`); generated apps use `lifespan` and `python:3.12-slim`. `jinja2` is the only new runtime dependency.
+- Template inspector split into `fastapi_fastkit.backend.inspection` with real smoke tests (boots uvicorn, probes `/docs` and `/health`), config-consistency, dependency-drift, and placeholder-residue checks. `scripts/inspect-templates.py` gained `--offline`, `--no-smoke`, `--mypy`.
+- `cli.init` orchestration extracted into `backend/scaffolder.py`; package managers share one checked-run helper.
+- Docs: tutorials for the three new templates, CLI reference and starter guide updated (EN/KO). Suite size: **781 tests passing**.
+
+### Breaking Changes
+
+- `setup.py-tpl` removed from bundled templates (pyproject-first).
+- Generated projects no longer list `FastAPI-fastkit` as a runtime dependency.
+- `pip` is no longer auto-upgraded during environment setup.
+- Auto-detection prefers `uv` over `pip`; pass `--package-manager pip` to keep the old behaviour.
+- `TemplateInspector` / `inspect_fastapi_template` take an `InspectionOptions` argument; check functions moved to `fastapi_fastkit.backend.inspection`.
+
 ## v1.3.0 (2026-05-06)
 
 ### Features

@@ -1,0 +1,23 @@
+# --------------------------------------------------------------------------
+# Shared dependencies.
+#
+# The store is a process-wide singleton; the agent is built per request from
+# it. Both are plain functions so tests can override them through
+# ``app.dependency_overrides``.
+# --------------------------------------------------------------------------
+from fastapi import Depends
+
+from src.app.llm.agent import ChatAgent
+from src.app.llm.client import build_client
+from src.app.memory.base import ConversationStore
+from src.app.memory.in_memory import InMemoryConversationStore
+
+_store = InMemoryConversationStore()
+
+
+def get_store() -> ConversationStore:
+    return _store
+
+
+def get_agent(store: ConversationStore = Depends(get_store)) -> ChatAgent:
+    return ChatAgent(build_client(), store)

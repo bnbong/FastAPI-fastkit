@@ -1,0 +1,210 @@
+# FastAPI JWT Authentication
+
+Production-shaped JWT authentication — access/refresh tokens with rotation,
+argon2 password hashing, SQLModel users, and Alembic migrations.
+
+> Generated project: **<project_name>** — <description>
+
+## When to choose this starter
+
+Pick this template when your API needs real accounts on day one:
+
+- **Access + refresh tokens.** Short-lived access tokens for requests, long-lived
+  refresh tokens that rotate on every use. Each refresh token is tracked by its
+  `jti` in the database, so a used token dies immediately and a replay is rejected.
+- **Argon2id password hashing** through `pwdlib` — the current recommended default,
+  not a legacy bcrypt setup.
+- **Real logout.** Revoke one session (`/auth/logout`) or every session of a user
+  (`/auth/logout-all`).
+- **Role and scope guards** wired as FastAPI dependencies: `get_current_user`,
+  `get_current_active_superuser`, and a reusable `require_scopes(...)` factory.
+- **SQLite by default, PostgreSQL by env var.** The project runs with zero external
+  services; point `DATABASE_URL` at PostgreSQL when you're ready.
+
+If you don't need authentication, start with `fastapi-domain-starter`. If you want
+PostgreSQL-first CRUD without auth, use `fastapi-psql-orm`.
+
+## Project structure
+
+```
+.
+├── README.md
+├── pyproject.toml
+├── requirements.txt
+├── alembic.ini
+├── Dockerfile
+├── .env
+├── .gitignore
+├── scripts/
+│   ├── format.sh
+│   ├── lint.sh
+│   ├── run-server.sh
+│   └── test.sh
+├── src/
+│   └── app/
+│       ├── main.py                 # FastAPI app entry point (lifespan)
+│       ├── core/
+│       │   ├── config.py           # pydantic-settings configuration
+│       │   └── security.py         # argon2 hashing + JWT encode/decode
+│       ├── db/
+│       │   └── session.py          # engine + get_session dependency
+│       ├── api/
+│       │   ├── router.py           # aggregates health + every domain router
+│       │   ├── health.py           # GET /health
+│       │   └── deps.py             # session, current user, role/scope guards
+│       ├── domains/
+│       │   ├── auth/               # login, refresh rotation, logout
+│       │   │   ├── models.py       # RefreshToken entity
+│       │   │   ├── schemas.py
+│       │   │   ├── repository.py
+│       │   │   ├── service.py
+│       │   │   └── router.py
+│       │   └── users/              # registration and profiles
+│       │       ├── models.py       # User entity
+│       │       ├── schemas.py
+│       │       ├── repository.py
+│       │       ├── service.py
+│       │       └── router.py
+│       └── alembic/                # migration environment + versions/
+└── tests/
+    ├── conftest.py
+    ├── test_health.py
+    ├── test_auth.py
+    └── test_users.py
+```
+
+Each domain follows the same split: `router.py` (transport), `service.py`
+(business logic), `repository.py` (data access), `models.py` (tables), and
+`schemas.py` (API I/O). Add a new domain by mirroring that layout and
+registering its router in `src/app/api/router.py`.
+
+## Running the app
+
+```bash
+# create a virtualenv and install dependencies
+$ uv sync   # or: pip install -r requirements.txt
+
+# launch the dev server
+$ bash scripts/run-server.sh
+# or directly:
+$ uvicorn src.app.main:app --reload
+```
+
+API docs are then served at:
+
+- Swagger UI: <http://127.0.0.1:8000/docs>
+- ReDoc:      <http://127.0.0.1:8000/redoc>
+
+The Swagger "Authorize" button drives the same OAuth2 password flow as
+`/api/v1/auth/login`, so you can exercise protected routes straight from the docs.
+
+## API endpoints
+
+| Method | Endpoint                    | Auth        | Description                          |
+|--------|-----------------------------|-------------|--------------------------------------|
+| GET    | `/api/v1/health`            | —           | Liveness probe                       |
+| POST   | `/api/v1/auth/register`     | —           | Create an account                    |
+| POST   | `/api/v1/auth/login`        | —           | OAuth2 password form → token pair    |
+| POST   | `/api/v1/auth/refresh`      | refresh tok | Rotate into a fresh token pair       |
+| POST   | `/api/v1/auth/logout`       | refresh tok | Revoke one refresh token             |
+| POST   | `/api/v1/auth/logout-all`   | access tok  | Revoke every session of the user     |
+| GET    | `/api/v1/users/me`          | access tok  | Current user's profile               |
+| PATCH  | `/api/v1/users/me`          | access tok  | Update the current user's profile    |
+| GET    | `/api/v1/users/me/scopes`   | scope `me`  | Scope-gated example route            |
+| GET    | `/api/v1/users`             | superuser   | Role-gated user listing              |
+
+### Walkthrough
+
+```bash
+# 1. register
+$ curl -X POST http://127.0.0.1:8000/api/v1/auth/register \
+    -H 'Content-Type: application/json' \
+    -d '{"email": "alice@example.com", "password": "s3cret-password"}'
+
+# 2. login — note the form encoding, this is the OAuth2 password flow
+$ curl -X POST http://127.0.0.1:8000/api/v1/auth/login \
+    -d 'username=alice@example.com&password=s3cret-password'
+
+# 3. call a protected route
+$ curl http://127.0.0.1:8000/api/v1/users/me \
+    -H "Authorization: Bearer $ACCESS_TOKEN"
+
+# 4. rotate — the old refresh token stops working right here
+$ curl -X POST http://127.0.0.1:8000/api/v1/auth/refresh \
+    -H 'Content-Type: application/json' \
+    -d "{\"refresh_token\": \"$REFRESH_TOKEN\"}"
+```
+
+## Roles and scopes
+
+`get_current_user` resolves the bearer token into a live `User`.
+`get_current_active_superuser` layers a `is_superuser` check on top, and
+`require_scopes("reports", "admin")` builds a dependency that demands specific
+scopes:
+
+```python
+from fastapi import Depends
+from src.app.api.deps import require_scopes
+
+@router.get("/reports", dependencies=[Depends(require_scopes("reports"))])
+def read_reports() -> list[str]:
+    ...
+```
+
+Scopes live on the user row as a comma-separated string and are copied into
+every issued token. Swap that column for a proper roles table once your
+permission model outgrows it.
+
+## Database and migrations
+
+The app starts on SQLite (`sqlite:///./app.db`) and creates its tables on
+startup, so `pytest` and `uvicorn` both work with no setup. To move to
+PostgreSQL, set `DATABASE_URL` and run the migrations instead:
+
+```bash
+$ export DATABASE_URL='postgresql+psycopg://postgres:postgres@localhost:5432/app_db'
+$ alembic upgrade head
+```
+
+A new migration after a model change:
+
+```bash
+$ alembic revision --autogenerate -m "add profile fields"
+```
+
+## Running tests
+
+```bash
+$ bash scripts/test.sh
+# or directly:
+$ pytest
+```
+
+Tests use `httpx.AsyncClient` against an in-memory SQLite database, covering the
+register → login → me → refresh → logout flow plus the rejection paths
+(wrong password, malformed token, expired token, replayed refresh token).
+
+## Configuration
+
+`src/app/core/config.py` reads settings from environment variables (or a local
+`.env`). Two of them matter before you deploy:
+
+- **`SECRET_KEY`** signs every token. Leave it unset and a random key is generated
+  per process, which logs everyone out on restart.
+- **`DATABASE_URL`** selects the database.
+
+Set `FIRST_SUPERUSER_EMAIL` and `FIRST_SUPERUSER_PASSWORD` to have a superuser
+seeded on startup.
+
+## Project Origin
+
+This project was created from the **`fastapi-auth-jwt`** template shipped with
+[FastAPI-fastkit](https://github.com/bnbong/FastAPI-fastkit).
+
+The `FastAPI-fastkit` is an open-source project that helps Python and FastAPI
+beginners quickly set up a FastAPI-based application development environment in a
+framework-like structure.
+
+### Template Information
+- Template creator: [bnbong](mailto:bbbong9@gmail.com)
+- FastAPI-fastkit project maintainer: [bnbong](mailto:bbbong9@gmail.com)

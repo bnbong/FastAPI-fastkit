@@ -1,0 +1,26 @@
+{
+    "name": {{ project_name | tojson }},
+    "image": "mcr.microsoft.com/devcontainers/python:3.12",
+    "features": {
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+    },
+    "postCreateCommand": "pip install -r requirements.txt",
+    "forwardPorts": [
+        8000
+    ],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+{% if with_ruff %}
+                "charliermarsh.ruff",
+{% endif %}
+                "ms-python.mypy-type-checker"
+            ],
+            "settings": {
+                "python.defaultInterpreterPath": "/usr/local/bin/python"
+            }
+        }
+    },
+    "remoteUser": "vscode"
+}

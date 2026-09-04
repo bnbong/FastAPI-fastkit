@@ -1,0 +1,19 @@
+# OpenTelemetry tracing — exports over OTLP/HTTP.
+# Configure with OTEL_EXPORTER_OTLP_ENDPOINT (default: http://localhost:4318).
+_otel_resource = Resource.create(
+    {SERVICE_NAME: os.getenv("OTEL_SERVICE_NAME", {{ project_slug | tojson }})}
+)
+_tracer_provider = TracerProvider(resource=_otel_resource)
+_tracer_provider.add_span_processor(
+    BatchSpanProcessor(
+        OTLPSpanExporter(
+            endpoint=os.getenv(
+                "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT",
+                os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4318")
+                + "/v1/traces",
+            )
+        )
+    )
+)
+trace.set_tracer_provider(_tracer_provider)
+FastAPIInstrumentor.instrument_app(app, tracer_provider=_tracer_provider)

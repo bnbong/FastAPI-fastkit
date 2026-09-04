@@ -1,7 +1,6 @@
 """
 Application configuration settings.
 """
-from typing import Any, Dict, List, Optional, Union
 
 from pydantic import AnyHttpUrl, ConfigDict, field_validator
 from pydantic_settings import BaseSettings
@@ -20,7 +19,7 @@ class Settings(BaseSettings):
     DEBUG: bool = False
 
     # CORS settings
-    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
+    BACKEND_CORS_ORIGINS: list[AnyHttpUrl] = []
 
     # MCP settings
     MCP_ENABLED: bool = True
@@ -34,11 +33,11 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
     # API Key for MCP authentication (optional)
-    MCP_API_KEY: Optional[str] = None
+    MCP_API_KEY: str | None = None
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
-    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
+    def assemble_cors_origins(cls, v: str | list[str]) -> list[str] | str:
         """Assemble CORS origins from environment variable."""
         if isinstance(v, str) and not v.startswith("["):
             return [i.strip() for i in v.split(",")]
@@ -47,7 +46,7 @@ class Settings(BaseSettings):
         raise ValueError(v)
 
     @property
-    def all_cors_origins(self) -> List[str]:
+    def all_cors_origins(self) -> list[str]:
         """Get all CORS origins."""
         return self.BACKEND_CORS_ORIGINS
 

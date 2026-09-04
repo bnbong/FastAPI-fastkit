@@ -1,0 +1,66 @@
+{% include "header.j2" %}
+"""WebSocket endpoint with a broadcast-capable connection manager."""
+import logging
+
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+
+logger = logging.getLogger(__name__)
+
+router = APIRouter(tags=["WebSocket"])
+
+
+class ConnectionManager:
+    """Tracks live WebSocket connections and fans messages out to them."""
+
+    def __init__(self) -> None:
+        self.active_connections: list[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket) -> None:
+        """Accept the handshake and register the connection."""
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    def disconnect(self, websocket: WebSocket) -> None:
+        """Forget a connection that has gone away."""
+        if websocket in self.active_connections:
+            self.active_connections.remove(websocket)
+
+    async def send_personal_message(self, message: str, websocket: WebSocket) -> None:
+        """Send a message to a single client."""
+        await websocket.send_text(message)
+
+    async def broadcast(self, message: str) -> None:
+        """Send a message to every connected client.
+
+        Clients that fail mid-broadcast are dropped rather than aborting the
+        whole fan-out.
+        """
+        for connection in list(self.active_connections):
+            try:
+                await connection.send_text(message)
+            except Exception:  # pragma: no cover - transport level failure
+                logger.warning("dropping dead websocket connection")
+                self.disconnect(connection)
+
+
+manager = ConnectionManager()
+
+
+@router.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket) -> None:
+    """Echo the sender and broadcast every message to the other clients."""
+    await manager.connect(websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            await manager.send_personal_message(f"you wrote: {data}", websocket)
+            await manager.broadcast(f"someone wrote: {data}")
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+        await manager.broadcast("a client left the chat")
+
+
+@router.get("/api/v1/ws/connections")
+async def connection_count() -> dict[str, int]:
+    """How many clients are currently connected."""
+    return {"active_connections": len(manager.active_connections)}

@@ -1,0 +1,12 @@
+# --------------------------------------------------------------------------
+# Metadata aggregation point.
+#
+# Alembic autogeneration and ``create_db_and_tables`` both need every table
+# model imported before they inspect ``SQLModel.metadata``. Import each new
+# domain's models here.
+# --------------------------------------------------------------------------
+from sqlmodel import SQLModel
+
+from src.app.domains.items.models import Item
+
+__all__ = ["SQLModel", "Item"]

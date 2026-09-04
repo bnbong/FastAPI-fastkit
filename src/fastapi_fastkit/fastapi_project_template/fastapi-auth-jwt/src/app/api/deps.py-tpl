@@ -1,0 +1,91 @@
+# --------------------------------------------------------------------------
+# Shared FastAPI dependencies: DB session, current user, role/scope guards.
+# --------------------------------------------------------------------------
+from typing import Annotated, Callable, List
+
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from sqlmodel import Session
+
+from src.app.core.config import settings
+from src.app.core.security import ACCESS_TOKEN_TYPE, TokenError, decode_token
+from src.app.db.session import get_session
+from src.app.domains.auth.repository import RefreshTokenRepository
+from src.app.domains.auth.service import AuthService
+from src.app.domains.users.models import User
+from src.app.domains.users.repository import UserRepository
+from src.app.domains.users.service import UserService
+
+reusable_oauth2 = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_PREFIX}/auth/login")
+
+SessionDep = Annotated[Session, Depends(get_session)]
+TokenDep = Annotated[str, Depends(reusable_oauth2)]
+
+CREDENTIALS_EXCEPTION = HTTPException(
+    status_code=status.HTTP_401_UNAUTHORIZED,
+    detail="Could not validate credentials",
+    headers={"WWW-Authenticate": "Bearer"},
+)
+
+
+def get_user_service(session: SessionDep) -> UserService:
+    return UserService(UserRepository(session))
+
+
+def get_auth_service(session: SessionDep) -> AuthService:
+    return AuthService(UserRepository(session), RefreshTokenRepository(session))
+
+
+def get_current_user(session: SessionDep, token: TokenDep) -> User:
+    """Resolve the bearer access token into a live, active user."""
+    try:
+        payload = decode_token(token, ACCESS_TOKEN_TYPE)
+    except TokenError:
+        raise CREDENTIALS_EXCEPTION
+
+    try:
+        user_id = int(payload["sub"])
+    except (KeyError, TypeError, ValueError):
+        raise CREDENTIALS_EXCEPTION
+
+    user = UserRepository(session).get(user_id)
+    if user is None:
+        raise CREDENTIALS_EXCEPTION
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Inactive user"
+        )
+    return user
+
+
+CurrentUser = Annotated[User, Depends(get_current_user)]
+
+
+def get_current_active_superuser(current_user: CurrentUser) -> User:
+    if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="The user does not have enough privileges",
+        )
+    return current_user
+
+
+def require_scopes(*required: str) -> Callable[..., User]:
+    """Build a dependency that enforces every one of ``required`` scopes.
+
+    Usage::
+
+        @router.get("/reports", dependencies=[Depends(require_scopes("reports"))])
+    """
+
+    def dependency(current_user: CurrentUser) -> User:
+        granted: List[str] = current_user.scope_list
+        missing = [scope for scope in required if scope not in granted]
+        if missing:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Missing required scope(s): {', '.join(missing)}",
+            )
+        return current_user
+
+    return dependency

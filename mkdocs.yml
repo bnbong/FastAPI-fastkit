@@ -131,6 +131,9 @@ nav:
     - Implementing Basic API Server: tutorial/basic-api-server.md
     - Implementing Asynchronous CRUD API: tutorial/async-crud-api.md
     - Domain-oriented Project (Domain Starter): tutorial/domain-starter.md
+    - JWT Authentication: tutorial/auth-jwt.md
+    - Async Persistence with SQLModel: tutorial/sqlmodel.md
+    - Streaming LLM Agent: tutorial/llm-agent.md
     - Database Integration: tutorial/database-integration.md
     - Docker Deployment: tutorial/docker-deployment.md
     - Implementing Custom Response Handling: tutorial/custom-response-handling.md

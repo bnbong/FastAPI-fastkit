@@ -7,7 +7,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.api import api_router
 from src.core.config import settings
-from src.mcp.router import setup_mcp_server
+from src.mcp_server.router import setup_mcp_server
+
+# fastkit:imports
 
 # Create FastAPI application
 app = FastAPI(
@@ -27,6 +29,7 @@ if settings.all_cors_origins:
         allow_headers=["*"],
     )
 
+# fastkit:routes
 # Include API routes
 app.include_router(api_router, prefix=settings.API_V1_STR)
 

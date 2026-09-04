@@ -356,3 +356,41 @@ def _pyproject_text_marks_fastkit(pyproject_path: str) -> bool:
     if FASTKIT_DESCRIPTION_MARKER.lower() in content:
         return True
     return False
+
+
+def read_fastkit_metadata(project_dir: str) -> Dict[str, Any]:
+    """Read the ``[tool.fastapi-fastkit]`` block of a generated project.
+
+    The block is the shared contract between generation (``init`` /
+    ``startdemo``) and the commands that operate on an existing project
+    (``runserver``, ``addroute``): it records the template, preset,
+    package manager, selected features and — most importantly — the
+    ``app_module`` entrypoint, so those commands no longer have to
+    re-derive the layout heuristically.
+
+    :param project_dir: Path to the generated project directory
+    :return: The metadata mapping, or an empty dict when the project has no
+        readable ``pyproject.toml`` / no fastkit block.
+    """
+    pyproject_path = os.path.join(project_dir, "pyproject.toml")
+    if not os.path.exists(pyproject_path):
+        return {}
+
+    try:
+        with open(pyproject_path, "rb") as f:
+            data = tomllib.load(f)
+    except (OSError, tomllib.TOMLDecodeError, UnicodeDecodeError) as e:
+        debug_log(
+            f"Could not read fastkit metadata from {pyproject_path}: {e}", "warning"
+        )
+        return {}
+
+    tool_section = data.get("tool", {})
+    if not isinstance(tool_section, dict):
+        return {}
+
+    metadata = tool_section.get(FASTKIT_TOOL_SECTION, {})
+    if not isinstance(metadata, dict):
+        return {}
+
+    return dict(metadata)

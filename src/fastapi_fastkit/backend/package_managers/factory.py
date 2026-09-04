@@ -20,6 +20,10 @@ logger = get_logger(__name__)
 class PackageManagerFactory:
     """Factory for creating package manager instances."""
 
+    # Auto-detection priority. ``uv`` wins whenever it is installed and ``pip``
+    # is only the last-resort fallback; explicit selection bypasses this order.
+    DETECTION_ORDER: List[str] = ["uv", "pdm", "poetry", "pip"]
+
     # Registry of available package managers
     _managers: Dict[str, Type[BasePackageManager]] = {
         "pip": PipManager,
@@ -86,10 +90,7 @@ class PackageManagerFactory:
         """
         exclude = exclude or []
 
-        # Priority order for auto-detection
-        detection_order = ["uv", "pdm", "poetry", "pip"]
-
-        for manager_type in detection_order:
+        for manager_type in self.DETECTION_ORDER:
             if manager_type in exclude:
                 continue
 

@@ -1,0 +1,26 @@
+# --------------------------------------------------------------------------
+# Items domain — data access.
+#
+# The generic base covers CRUD; only the domain-specific queries live here.
+# --------------------------------------------------------------------------
+from typing import Sequence
+
+from sqlmodel import select
+from sqlmodel.ext.asyncio.session import AsyncSession
+
+from src.app.crud.base import CRUDBase
+from src.app.domains.items.models import Item, ItemCreate, ItemUpdate
+
+
+class ItemCRUD(CRUDBase[Item, ItemCreate, ItemUpdate]):
+    """CRUD for :class:`Item`, extended with a name search."""
+
+    async def search_by_name(
+        self, session: AsyncSession, term: str, *, limit: int = 20
+    ) -> Sequence[Item]:
+        statement = select(Item).where(Item.name.like(f"%{term}%")).limit(limit)  # type: ignore[attr-defined]
+        result = await session.exec(statement)
+        return result.all()
+
+
+item_crud = ItemCRUD(Item)

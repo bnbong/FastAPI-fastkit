@@ -451,3 +451,6 @@ cython_debug/
 .claude/
 .codex/
 .cursor/
+
+# Template inspection artifacts (uploaded by CI, never committed)
+template_inspection_results.json

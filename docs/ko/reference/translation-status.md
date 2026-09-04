@@ -18,15 +18,15 @@ FastAPI-fastkit 문서는 여러 언어로 빌드되지만, 모든 번역이 **�
 
 | 언어 | 상태 | 마크다운 페이지 | 비고 |
 |---|---|---:|---|
-| 🇬🇧 English (`en`) | ✅ 원본 | 26 / 26 | 기준이 되는 원문입니다. |
-| 🇰🇷 한국어 (`ko`) | ✅ 완료 | 26 / 26 | 언어별 페이지는 모두 존재합니다. Phase 1: 최상위 + 핵심 user-guide, Phase 2: 나머지 user-guide + 모든 tutorial, Phase 3: contributing + reference. `docs/ko/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
-| 🇯🇵 일본어 (`ja`) | ✅ 완료 | 26 / 26 | 언어별 페이지는 모두 존재합니다. Phase 1: 최상위 + 핵심 user-guide, Phase 2: 나머지 user-guide + 모든 tutorial, Phase 3: contributing + reference. `docs/ja/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
-| 🇨🇳 중국어 (`zh`) | ✅ 완료 | 26 / 26 | 언어별 페이지는 모두 존재합니다. Phase 1: 최상위 + 핵심 user-guide, Phase 2: 나머지 user-guide + 모든 tutorial, Phase 3: contributing + reference. `docs/zh/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
-| 🇪🇸 스페인어 (`es`) | ✅ 완료 | 26 / 26 | 언어별 페이지는 모두 존재합니다. Phase 1: 최상위 + 핵심 user-guide, Phase 2: 나머지 user-guide + 모든 tutorial, Phase 3: contributing + reference. `docs/es/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
-| 🇫🇷 프랑스어 (`fr`) | ✅ 완료 | 26 / 26 | 모든 로케일 페이지가 존재합니다. Phase 1: 최상위 + 핵심 user-guide; Phase 2: 나머지 user-guide + 모든 tutorial; Phase 3: contributing + reference. `docs/fr/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 재사용합니다. |
-| 🇩🇪 독일어 (`de`) | ✅ 완료 | 26 / 26 | 모든 로케일 페이지가 존재합니다. Phase 1: 최상위 + 핵심 user-guide; Phase 2: 나머지 user-guide + 모든 tutorial; Phase 3: contributing + reference. `docs/de/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 재사용합니다. |
+| 🇬🇧 English (`en`) | ✅ 원본 | 29 / 29 | 기준이 되는 원문입니다. |
+| 🇰🇷 한국어 (`ko`) | 🟡 일부 | 26 / 29 | Phase 1~3은 모두 반영되어 있습니다. v1.4.0에서 추가된 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)은 아직 번역 전이라 영문으로 폴백됩니다. `docs/ko/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
+| 🇯🇵 일본어 (`ja`) | 🟡 일부 | 26 / 29 | Phase 1~3은 모두 반영되어 있습니다. v1.4.0에서 추가된 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)은 아직 번역 전이라 영문으로 폴백됩니다. `docs/ja/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
+| 🇨🇳 중국어 (`zh`) | 🟡 일부 | 26 / 29 | Phase 1~3은 모두 반영되어 있습니다. v1.4.0에서 추가된 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)은 아직 번역 전이라 영문으로 폴백됩니다. `docs/zh/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
+| 🇪🇸 스페인어 (`es`) | 🟡 일부 | 26 / 29 | Phase 1~3은 모두 반영되어 있습니다. v1.4.0에서 추가된 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)은 아직 번역 전이라 영문으로 폴백됩니다. `docs/es/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
+| 🇫🇷 프랑스어 (`fr`) | 🟡 일부 | 26 / 29 | Phase 1~3은 모두 반영되어 있습니다. v1.4.0에서 추가된 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)은 아직 번역 전이라 영문으로 폴백됩니다. `docs/fr/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
+| 🇩🇪 독일어 (`de`) | 🟡 일부 | 26 / 29 | Phase 1~3은 모두 반영되어 있습니다. v1.4.0에서 추가된 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)은 아직 번역 전이라 영문으로 폴백됩니다. `docs/de/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
 
-*스냅샷 검증 시점: 2026-06-18. Phase 3(contributing + reference) 작업이 반영된 현재 브랜치 기준으로 `zh` 행을 다시 집계했습니다. 중국어는 이제 26개 로케일 페이지를 모두 보유하며 ✅ 완료 상태로 추적됩니다.* 이 표는 수동으로 관리됩니다. 리포지토리 루트에서 현재 상태를 다시 세고 싶다면 다음 명령을 실행하세요:
+*스냅샷 검증 시점: 2026-09-04, v1.4.0 릴리스 기준. 영문에 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)이 추가되면서 나머지 로케일은 모두 ✅ 완료에서 🟡 일부(26 / 29)로 내려왔습니다. 같은 릴리스에서 한국어 랜딩 페이지·CLI 레퍼런스·스타터 선택 가이드는 영문 원문과 다시 동기화했고, 나머지 한국어 페이지는 존재하지만 v1.4.0 영문 갱신 이전 내용입니다.* 이 표는 수동으로 관리됩니다. 리포지토리 루트에서 현재 상태를 다시 세고 싶다면 다음 명령을 실행하세요:
 
 ```console
 $ for loc in en ko ja zh es fr de; do

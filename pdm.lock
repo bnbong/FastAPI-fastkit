@@ -5,7 +5,7 @@
 groups = ["default", "dev", "docs", "translation"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:ebbc264a845d92d7c8ff22ecb17384c5fc66a12d869c05d6e24b0dddc5c95fbe"
+content_hash = "sha256:3688fb0209beb1bc607ee7d6160bf9fd5474984277707edd4c96cae9484aff48"
 
 [[metadata.targets]]
 requires_python = ">=3.12"
@@ -581,7 +581,7 @@ name = "jinja2"
 version = "3.1.6"
 requires_python = ">=3.7"
 summary = "A very fast and expressive template engine."
-groups = ["docs"]
+groups = ["default", "docs"]
 dependencies = [
     "MarkupSafe>=2.0",
 ]
@@ -753,7 +753,7 @@ name = "markupsafe"
 version = "3.0.3"
 requires_python = ">=3.9"
 summary = "Safely add untrusted strings to HTML/XML markup."
-groups = ["docs"]
+groups = ["default", "docs"]
 files = [
     {file = "markupsafe-3.0.3-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:d53197da72cc091b024dd97249dfc7794d6a56530370992a5e1a08983ad9230e"},
     {file = "markupsafe-3.0.3-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:1872df69a4de6aead3491198eaf13810b565bdbeec3ae2dc8780f14458ec73ce"},

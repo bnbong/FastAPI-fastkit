@@ -16,10 +16,13 @@ from .prompts import (
     prompt_custom_packages,
     prompt_database_selection,
     prompt_deployment_options,
+    prompt_logging_selection,
+    prompt_migrations_selection,
     prompt_monitoring_selection,
     prompt_package_manager_selection,
     prompt_template_selection,
     prompt_testing_selection,
+    prompt_tooling_selection,
     prompt_utilities_selection,
 )
 from .selectors import confirm_selections, multi_select_prompt, render_selection_table
@@ -37,6 +40,9 @@ __all__ = [
     "prompt_database_selection",
     "prompt_authentication_selection",
     "prompt_additional_features",
+    "prompt_logging_selection",
+    "prompt_migrations_selection",
+    "prompt_tooling_selection",
     "prompt_testing_selection",
     "prompt_deployment_options",
     "prompt_custom_packages",

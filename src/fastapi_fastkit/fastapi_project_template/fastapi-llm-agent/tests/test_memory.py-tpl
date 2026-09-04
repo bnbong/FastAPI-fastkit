@@ -1,0 +1,38 @@
+# --------------------------------------------------------------------------
+# In-memory conversation store.
+# --------------------------------------------------------------------------
+from src.app.memory.in_memory import InMemoryConversationStore
+
+
+async def test_unknown_conversation_is_empty() -> None:
+    store = InMemoryConversationStore()
+
+    assert await store.get("nope") == []
+
+
+async def test_append_and_read_back() -> None:
+    store = InMemoryConversationStore()
+
+    await store.append("c1", {"role": "user", "content": "hi"})
+    await store.append("c1", {"role": "assistant", "content": "hello"})
+
+    assert [m["role"] for m in await store.get("c1")] == ["user", "assistant"]
+
+
+async def test_returned_history_is_a_copy() -> None:
+    store = InMemoryConversationStore()
+    await store.append("c1", {"role": "user", "content": "hi"})
+
+    (await store.get("c1")).append({"role": "user", "content": "injected"})
+
+    assert len(await store.get("c1")) == 1
+
+
+async def test_delete_forgets_the_conversation() -> None:
+    store = InMemoryConversationStore()
+    await store.append("c1", {"role": "user", "content": "hi"})
+
+    await store.delete("c1")
+    await store.delete("c1")  # deleting twice is not an error
+
+    assert await store.get("c1") == []

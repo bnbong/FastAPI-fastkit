@@ -222,3 +222,130 @@ class TestCompatibilityWarnings:
         )
         assert "Rate-Limiting" in affected_line
         assert "Prometheus" in affected_line
+
+
+class TestNewOverlayWarningTargets:
+    """Presets preserving main.py must warn about every overlay-only feature."""
+
+    @pytest.mark.parametrize(
+        "config,expected",
+        [
+            ({"async_tasks": "Celery"}, "Background tasks"),
+            ({"caching": "Redis"}, "Caching (Redis)"),
+            ({"utilities": ["WebSocket"]}, "WebSocket"),
+            ({"utilities": ["Pagination"]}, "Pagination"),
+            ({"authentication": "OAuth2"}, "OAuth2 session middleware"),
+            ({"logging": "structured"}, "Structured logging"),
+            ({"monitoring": "OpenTelemetry"}, "OpenTelemetry"),
+        ],
+    )
+    def test_classic_layered_warns(self, config: dict, expected: str) -> None:
+        # given / when
+        warnings = PresetLayoutStrategist("classic-layered").compatibility_warnings(
+            config
+        )
+
+        # then
+        assert any(expected in line for line in warnings), warnings
+
+    def test_domain_starter_warns_on_celery(self) -> None:
+        warnings = PresetLayoutStrategist("domain-starter").compatibility_warnings(
+            {"async_tasks": "Dramatiq"}
+        )
+        assert any("Background tasks" in line for line in warnings)
+
+    def test_wired_features_are_not_warned_about(self) -> None:
+        strategist = PresetLayoutStrategist("classic-layered")
+        config = {"utilities": ["WebSocket"], "monitoring": "Prometheus"}
+
+        warnings = strategist.compatibility_warnings(config, wired=["WebSocket"])
+
+        affected = next(
+            line for line in warnings if line.startswith("Affected selections")
+        )
+        assert "WebSocket" not in affected
+        assert "Prometheus" in affected
+
+
+class TestWireGeneratedRouters:
+    """The anchor-based auto-registration of generated feature routers."""
+
+    MAIN_PY = (
+        "from fastapi import FastAPI\n"
+        "\n"
+        "# fastkit:imports\n"
+        "\n"
+        "app = FastAPI()\n"
+        "\n"
+        "# fastkit:routes\n"
+        "app.include_router(api_router)\n"
+    )
+
+    def test_regenerating_preset_wires_nothing(self, tmp_path: Path) -> None:
+        strategist = PresetLayoutStrategist("minimal")
+        assert (
+            strategist.wire_generated_routers(str(tmp_path), {"async_tasks": "Celery"})
+            == []
+        )
+
+    def test_missing_main_py_is_a_no_op(self, tmp_path: Path) -> None:
+        strategist = PresetLayoutStrategist("classic-layered")
+        assert (
+            strategist.wire_generated_routers(str(tmp_path), {"async_tasks": "Celery"})
+            == []
+        )
+
+    def test_routers_are_inserted_at_anchors(self, tmp_path: Path) -> None:
+        # given
+        main_py = tmp_path / "src" / "main.py"
+        main_py.parent.mkdir(parents=True)
+        main_py.write_text(self.MAIN_PY, encoding="utf-8")
+        strategist = PresetLayoutStrategist("classic-layered")
+
+        # when
+        wired = strategist.wire_generated_routers(
+            str(tmp_path),
+            {"async_tasks": "Celery", "utilities": ["WebSocket", "Pagination"]},
+        )
+
+        # then
+        content = main_py.read_text(encoding="utf-8")
+        assert set(wired) == {"WebSocket", "Pagination", "Background tasks"}
+        assert "from src.features.tasks import router as tasks_router" in content
+        assert (
+            "from src.features.websocket import router as websocket_router" in content
+        )
+        assert "from fastapi_pagination import add_pagination" in content
+        assert "app.include_router(tasks_router)" in content
+        assert "add_pagination(app)" in content
+
+    def test_domain_starter_uses_nested_package_root(self, tmp_path: Path) -> None:
+        # given
+        main_py = tmp_path / "src" / "app" / "main.py"
+        main_py.parent.mkdir(parents=True)
+        main_py.write_text(self.MAIN_PY, encoding="utf-8")
+        strategist = PresetLayoutStrategist("domain-starter")
+
+        # when
+        wired = strategist.wire_generated_routers(
+            str(tmp_path), {"async_tasks": "Celery"}
+        )
+
+        # then
+        assert wired == ["Background tasks"]
+        assert (
+            "from src.app.features.tasks import router as tasks_router"
+            in main_py.read_text(encoding="utf-8")
+        )
+
+    def test_caching_is_never_auto_wired(self, tmp_path: Path) -> None:
+        main_py = tmp_path / "src" / "main.py"
+        main_py.parent.mkdir(parents=True)
+        main_py.write_text(self.MAIN_PY, encoding="utf-8")
+
+        wired = PresetLayoutStrategist("classic-layered").wire_generated_routers(
+            str(tmp_path), {"caching": "Redis"}
+        )
+
+        assert wired == []
+        assert main_py.read_text(encoding="utf-8") == self.MAIN_PY

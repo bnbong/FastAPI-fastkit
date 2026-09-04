@@ -1,7 +1,6 @@
 # --------------------------------------------------------------------------
 # Item schema module
 # --------------------------------------------------------------------------
-from typing import Optional
 
 from sqlmodel import Field, SQLModel
 
@@ -22,9 +21,9 @@ class ItemBase(SQLModel, table=True):
     """
     __tablename__ = "items"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     name: str
-    description: Optional[str] = None
+    description: str | None = None
     price: float
     category: str
 
@@ -36,7 +35,7 @@ class ItemCreate(SQLModel):
     Use this model to validate incoming data when creating new items.
     """
     name: str
-    description: Optional[str] = None
+    description: str | None = None
     price: float
     category: str
 
@@ -49,6 +48,6 @@ class ItemResponse(SQLModel):
     """
     id: int
     name: str
-    description: Optional[str] = None
+    description: str | None = None
     price: float
     category: str

@@ -1,0 +1,82 @@
+# --------------------------------------------------------------------------
+# Authentication endpoints: register, login, refresh rotation, logout.
+# --------------------------------------------------------------------------
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
+
+from src.app.api.deps import CurrentUser, get_auth_service, get_user_service
+from src.app.core.security import TokenError
+from src.app.domains.auth.schemas import RefreshRequest, TokenPair
+from src.app.domains.auth.service import AuthService
+from src.app.domains.users.schemas import UserCreate, UserRead
+from src.app.domains.users.service import EmailAlreadyRegisteredError, UserService
+
+router = APIRouter(prefix="/auth", tags=["auth"])
+
+UserServiceDep = Annotated[UserService, Depends(get_user_service)]
+AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]
+
+
+@router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
+def register(payload: UserCreate, users: UserServiceDep) -> UserRead:
+    """Create an account. Emails are unique and stored lower-cased."""
+    try:
+        user = users.register(payload)
+    except EmailAlreadyRegisteredError:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="An account with this email already exists",
+        )
+    return UserRead(
+        id=user.id or 0,
+        email=user.email,
+        full_name=user.full_name,
+        is_active=user.is_active,
+        is_superuser=user.is_superuser,
+        scopes=user.scope_list,
+        created_at=user.created_at,
+    )
+
+
+@router.post("/login", response_model=TokenPair)
+def login(
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    users: UserServiceDep,
+    auth: AuthServiceDep,
+) -> TokenPair:
+    """OAuth2 password flow — ``username`` carries the email address."""
+    user = users.authenticate(form_data.username, form_data.password)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Inactive user"
+        )
+    return auth.issue_token_pair(user)
+
+
+@router.post("/refresh", response_model=TokenPair)
+def refresh(payload: RefreshRequest, auth: AuthServiceDep) -> TokenPair:
+    """Rotate a refresh token: the presented token is revoked on success."""
+    try:
+        return auth.rotate(payload.refresh_token)
+    except TokenError as exc:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(exc))
+
+
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+def logout(payload: RefreshRequest, auth: AuthServiceDep) -> None:
+    """Revoke a single refresh token (one session)."""
+    auth.revoke(payload.refresh_token)
+
+
+@router.post("/logout-all", status_code=status.HTTP_204_NO_CONTENT)
+def logout_all(current_user: CurrentUser, auth: AuthServiceDep) -> None:
+    """Revoke every refresh token issued to the authenticated user."""
+    auth.revoke_all(current_user)

@@ -1,0 +1,32 @@
+# --------------------------------------------------------------------------
+# Process-local conversation store.
+#
+# Good enough for a single-process dev server and for tests. It does not
+# survive a restart and is not shared between workers — swap in a Redis or
+# database implementation of ``ConversationStore`` before scaling out.
+# --------------------------------------------------------------------------
+import asyncio
+from collections import defaultdict
+
+from src.app.memory.base import ConversationStore, Message
+
+
+class InMemoryConversationStore(ConversationStore):
+    """Conversation history held in a dict, guarded by a lock."""
+
+    def __init__(self) -> None:
+        self._conversations: dict[str, list[Message]] = defaultdict(list)
+        self._lock = asyncio.Lock()
+
+    async def get(self, conversation_id: str) -> list[Message]:
+        async with self._lock:
+            # Copy so callers cannot mutate stored history by accident.
+            return list(self._conversations.get(conversation_id, []))
+
+    async def append(self, conversation_id: str, *messages: Message) -> None:
+        async with self._lock:
+            self._conversations[conversation_id].extend(messages)
+
+    async def delete(self, conversation_id: str) -> None:
+        async with self._lock:
+            self._conversations.pop(conversation_id, None)

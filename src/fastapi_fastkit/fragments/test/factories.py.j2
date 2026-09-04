@@ -1,0 +1,68 @@
+{% include "header.j2" %}
+"""factory_boy factories backed by Faker.
+
+Keep test data construction here so individual tests only state the fields
+they actually care about::
+
+    user = UserFactory(email="known@example.com")
+"""
+
+from dataclasses import dataclass, field
+from datetime import UTC, datetime
+
+import factory
+from faker import Faker
+
+fake = Faker()
+
+
+@dataclass
+class User:
+    """Stand-in domain object — replace with your real model."""
+
+    id: int
+    email: str
+    full_name: str
+    is_active: bool = True
+    created_at: datetime = field(
+        default_factory=lambda: datetime.now(tz=UTC)
+    )
+
+
+@dataclass
+class Item:
+    """Stand-in domain object owned by a :class:`User`."""
+
+    id: int
+    title: str
+    description: str
+    owner_id: int
+
+
+class UserFactory(factory.Factory):
+    """Build :class:`User` instances with realistic fake data."""
+
+    class Meta:
+        model = User
+
+    id = factory.Sequence(lambda n: n + 1)
+    email = factory.LazyFunction(lambda: fake.unique.email())
+    full_name = factory.LazyFunction(lambda: fake.name())
+    is_active = True
+
+
+class ItemFactory(factory.Factory):
+    """Build :class:`Item` instances, defaulting the owner to a new user."""
+
+    class Meta:
+        model = Item
+
+    id = factory.Sequence(lambda n: n + 1)
+    title = factory.LazyFunction(lambda: fake.sentence(nb_words=4))
+    description = factory.LazyFunction(lambda: fake.paragraph())
+    owner_id = factory.LazyFunction(lambda: UserFactory().id)
+
+
+def build_users(count: int) -> list[User]:
+    """Convenience helper for tests that need a batch of users."""
+    return [UserFactory() for _ in range(count)]

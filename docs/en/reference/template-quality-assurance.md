@@ -21,6 +21,66 @@ Every Wednesday at midnight (UTC), our GitHub Actions workflow automatically ins
 - ✅ **Dependency Checking** - Confirms FastAPI and required dependencies are properly defined
 - ✅ **FastAPI Implementation** - Verifies that templates contain proper FastAPI app initialization
 - ✅ **Test Execution** - Runs template tests to ensure functionality
+- ✅ **Smoke Test** - Boots the generated project with uvicorn and probes its HTTP surface
+- ✅ **Configuration Consistency** - Python version pins, dependency drift, self-dependency
+- ✅ **Placeholder Residue** - No `<placeholder>` survives project generation
+- ✅ **Dependency Freshness** - Warns about pins lagging behind their latest PyPI release
+
+## What each check does
+
+Inspection generates a **real project** from the template — copy, `-tpl`
+conversion, metadata injection — and then runs every check against that
+generated project, not against the template source. A check that only reads
+the template can't catch a placeholder that generation failed to substitute.
+
+### Smoke test
+
+The generated project is started with uvicorn on a free port, and the
+inspector polls until the server answers or the timeout expires. Once it is
+up, `/docs` and `/health` are requested and their status codes checked. The
+server process is then terminated, escalating to `SIGKILL` if it does not
+stop.
+
+The uvicorn target is resolved in order: `[tool.fastapi-fastkit].app_module`
+in the generated `pyproject.toml`, then `app_module` in the template's
+`template-config.yml`, then the conventional `main.py` locations. That is
+the same contract `fastkit runserver` uses, so a template whose smoke test
+boots is a template whose generated project runs.
+
+This is the check that catches what static analysis cannot: an import that
+resolves only at runtime, a `lifespan` that raises, a config field with no
+default.
+
+### Configuration consistency
+
+Three things are validated against the template's `pyproject.toml-tpl`:
+
+- **Python version pins agree and target 3.12** —
+  `requires-python`, black's `target-version` and mypy's `python_version`.
+  A template that formats as `py311` while declaring `>=3.12` is a bug
+  waiting to reach a contributor.
+- **No dependency drift** — packages declared in `requirements.txt-tpl` and
+  in `[project].dependencies` must not disagree. Templates ship both files
+  for package-manager compatibility, and two lists always diverge unless
+  something checks them.
+- **No self-dependency** — a generated project must not declare
+  `FastAPI-fastkit` as a runtime dependency. The CLI is a development tool;
+  shipping it into every generated app pulls the entire fastkit dependency
+  tree into unrelated projects.
+
+### Placeholder residue
+
+Every `<project_name>`, `<description>` and friend must be substituted
+during generation. Any `<placeholder>` still present in the generated
+project is an error — it means metadata injection does not know about that
+file, and the user would receive it verbatim.
+
+### Dependency freshness
+
+Pinned versions are compared against the latest release on PyPI and
+reported as warnings, never errors — a template lagging one minor version
+is information, not a failure. This is the only check that touches the
+network, and `--offline` skips it.
 
 ## Automated Template Testing System
 
@@ -140,6 +200,30 @@ $ python scripts/inspect-templates.py --verbose
 $ python scripts/inspect-templates.py --output my_results.json
 ```
 
+#### Inspection flags
+
+| Flag | Effect | Use it when |
+|---|---|---|
+| `--offline` | Skips every network lookup (dependency freshness reporting) | No network, or you want a fast, hermetic run |
+| `--no-smoke` | Skips booting the generated project with uvicorn | Iterating on structure only; the smoke test is the slowest step |
+| `--mypy` | Type-checks the generated project with mypy | Before submitting a template — it is opt-in because it is slow |
+| `--templates` | Comma-separated list of templates to inspect | Working on one template |
+| `--verbose` | Detailed output | Debugging a failure |
+| `--output` | Path for the JSON result file | Keeping several runs side by side |
+
+A quick local loop on a single template:
+
+```console
+$ python scripts/inspect-templates.py \
+    --templates fastapi-sqlmodel --offline --no-smoke --verbose
+```
+
+...and the full check before opening a PR:
+
+```console
+$ python scripts/inspect-templates.py --templates fastapi-sqlmodel --mypy
+```
+
 ### Using Makefile Commands
 
 ```console
@@ -192,11 +276,18 @@ For a template to pass inspection, it must meet these requirements:
 - Must contain a `src/` directory with Python source files
 - Python files must use `.py-tpl` extension
 - Must include a `tests/` directory and a `README.md-tpl` file
-- Must include **at least one** metadata file:
-    - `pyproject.toml-tpl` (preferred, PEP 621), or
-    - `setup.py-tpl` (legacy, still accepted)
+- Must include `pyproject.toml-tpl` (PEP 621). Bundled templates are
+  pyproject-first and no longer ship `setup.py-tpl`; inspection still accepts
+  it so third-party templates keep working, but new templates must not add
+  one.
 - `requirements.txt-tpl` is optional when `pyproject.toml-tpl` declares
-  `[project].dependencies`
+  `[project].dependencies` — but when both are present, they must agree
+  (see *Configuration consistency*)
+- Must target Python 3.12 consistently: `requires-python = ">=3.12"`, black
+  `target-version = ["py312"]`, mypy `python_version = "3.12"`, and
+  `python:3.12-slim` for any Docker base image
+- Must not declare `FastAPI-fastkit` as a runtime dependency
+- Must not leave any `<placeholder>` unsubstituted after generation
 
 ### FastAPI Requirements
 - Must contain FastAPI app initialization

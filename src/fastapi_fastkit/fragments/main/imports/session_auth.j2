@@ -1,0 +1,4 @@
+from starlette.middleware.sessions import SessionMiddleware
+
+from {{ auth_module }} import SESSION_MAX_AGE, SESSION_SECRET_KEY
+from {{ auth_module }} import router as auth_router

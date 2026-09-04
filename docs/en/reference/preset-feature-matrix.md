@@ -37,12 +37,18 @@ also wires them up automatically.
 | Feature | `minimal` / `single-module` | `classic-layered` / `domain-starter` |
 |---|---|---|
 | **Database** (PostgreSQL, MySQL, SQLite, MongoDB) | Generates the config module **and** stubs `await init_db()` calls in the regenerated `main.py`. | Generates the config module at the preset's path. The shipped `main.py` is **preserved**, so wire `get_db()` into routers manually. |
-| **Authentication** (JWT, FastAPI-Users, OAuth2, Session-based) | Generates the auth config module. JWT also imports `HTTPBearer` in the regenerated `main.py`. | Generates the auth config module at the preset's path. No imports added to `main.py` — wire dependencies manually. |
-| **Background tasks** (Celery, Dramatiq) | Packages installed; no main.py overlay today. | Same. |
-| **Caching** (Redis) | Packages installed; no main.py overlay today. | Same. |
+| **Authentication** (JWT, FastAPI-Users, OAuth2, Session-based) | Generates the auth config module; JWT imports `HTTPBearer`, OAuth2 and Session-based also add their `main.py` middleware setup. | Generates the auth config module at the preset's path. No imports added to `main.py` — wire dependencies manually. |
+| **Background tasks** (Celery, Dramatiq) | Generates `worker.py` and `features/tasks.py`, and mounts the task router in the regenerated `main.py`. | Generates `worker.py` and `features/tasks.py`, but the shipped `main.py` is **preserved** — mount the router manually. |
+| **Caching** (Redis) | Generates `features/cache.py` and mounts/initializes it in the regenerated `main.py`. | Generates `features/cache.py`; mount it manually. |
+| **Utilities: Pagination / WebSocket** | Generates `features/pagination.py` / `features/websocket.py` and mounts the router in the regenerated `main.py`. | Generates the same module; mount it manually. |
+| **Monitoring: OpenTelemetry** | No standalone file — tracing setup is added directly to the regenerated `main.py`. | No standalone file. The shipped `main.py` is preserved, so tracing is **not wired** — add the setup manually. |
+| **Migrations** (Alembic) | Generates `alembic.ini`, `alembic/env.py`, a baseline revision and `scripts/migrate.sh` for any SQL database selection — independent of the `main.py` overlay. | Same — Alembic generation does not depend on whether `main.py` is preserved. |
+| **Tooling** (ruff, pre-commit, github-actions, devcontainer, makefile) | Generates the matching config file(s), independent of the `main.py` overlay. | Same. |
+| **Logging** (structured) | Generates `logging_config.py` and wires the request-id middleware into the regenerated `main.py`. | Generates `logging_config.py`; the shipped `main.py` is preserved, so wire the middleware manually. |
 | **CORS** (utility) | `CORSMiddleware` added to the regenerated `main.py` with `allow_origins=['*']`. | **Already wired** in the shipped `main.py` (conditional on `settings.all_cors_origins`). Activate by setting `BACKEND_CORS_ORIGINS` in `.env` — no code edits required. |
-| **Testing** (Basic / Coverage / Advanced) | `pytest.ini` is generated at the project root. | Same. |
+| **Testing** (Basic / Coverage / Advanced) | `pytest.ini` is generated at the project root; Advanced also adds `tests/factories.py` and `tests/test_factories.py`. | Same. |
 | **Deployment** (Docker, docker-compose) | `Dockerfile` and/or `docker-compose.yml` written at the project root. | Same. |
+| **`/health` / `/ready`** | Always present in the regenerated `main.py`. | Already present in the preserved, template-shipped `main.py`. |
 
 ## When you'll see a "Preset compatibility" warning
 
@@ -55,12 +61,16 @@ which selections need manual wiring:
 |---|---|
 | `CORS` (utility) | ❌ — already wired in the shipped `main.py`. Just populate `BACKEND_CORS_ORIGINS` in `.env`. |
 | `Rate-Limiting` (utility) | ✅ — `slowapi` limiter setup is not added |
-| `Prometheus` (monitoring) | ✅ — `Instrumentator().instrument(app)` is not called |
+| `Pagination` / `WebSocket` (utility) | ✅ — the generated router (`features/pagination.py` / `features/websocket.py`) is not mounted |
+| `Celery` / `Dramatiq` (async_tasks) | ✅ — the generated `worker.py` / `features/tasks.py` router is not mounted |
+| `Redis` (caching) | ✅ — the generated `features/cache.py` is not mounted or initialized |
+| `Prometheus` / `OpenTelemetry` (monitoring) | ✅ — instrumentation setup is not added to `main.py` |
+| `structured` (logging) | ✅ — `logging_config.py` is generated, but the request-id middleware is not added to `main.py` |
+| `Alembic` (migrations), `tooling` selections | ❌ — these files are generated and usable regardless of preset; nothing depends on `main.py` |
 | Any database / auth selection | ⚠️ — config files are generated, but you must `Depends()` them into your routers |
 
 For `minimal` and `single-module` presets the dynamic `main.py` overlay
-handles CORS, rate-limiting, and Prometheus instrumentation automatically;
-no warnings fire.
+handles every axis above automatically; no warnings fire.
 
 ## Unsupported combinations (stay safe)
 

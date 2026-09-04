@@ -21,6 +21,7 @@ from fastapi_fastkit.backend.transducer import (
     copy_and_convert_template,
     copy_and_convert_template_file,
 )
+from fastapi_fastkit.core.exceptions import TemplateExceptions
 
 
 class TestTransducer:
@@ -351,10 +352,9 @@ class TestTransducer:
         new_dir = self.dest_path / "new_directory"
 
         # when
-        result = _ensure_directory_exists(str(new_dir))
+        _ensure_directory_exists(str(new_dir))
 
         # then
-        assert result is True
         assert new_dir.exists()
         assert new_dir.is_dir()
 
@@ -365,22 +365,19 @@ class TestTransducer:
         existing_dir.mkdir()
 
         # when
-        result = _ensure_directory_exists(str(existing_dir))
+        _ensure_directory_exists(str(existing_dir))
 
         # then
-        assert result is True
         assert existing_dir.exists()
 
     def test_ensure_directory_exists_permission_error(self) -> None:
-        """Test _ensure_directory_exists with permission error."""
+        """Test _ensure_directory_exists raises on failure."""
         # given
         new_dir = "/invalid/path/that/cannot/be/created"
 
-        # when
-        result = _ensure_directory_exists(new_dir)
-
-        # then
-        assert result is False
+        # when & then
+        with pytest.raises(TemplateExceptions):
+            _ensure_directory_exists(new_dir)
 
     def test_copy_template_file_success(self) -> None:
         """Test _copy_template_file with successful copy."""
@@ -415,19 +412,16 @@ class TestTransducer:
         assert target_file.read_text() == content
 
     def test_copy_template_file_permission_error(self) -> None:
-        """Test _copy_template_file with permission error."""
+        """Test _copy_template_file surfaces permission errors."""
         # given
         source_file = self.source_path / "test.py-tpl"
         dest_dir = self.dest_path
         source_file.write_text("content")
 
-        # when
+        # when & then
         with patch("shutil.copy2", side_effect=PermissionError("Access denied")):
-            # Should not raise exception
-            _copy_template_file(str(source_file), str(dest_dir), "test.py-tpl")
-
-        # then
-        # No exception should be raised, error is logged
+            with pytest.raises(TemplateExceptions):
+                _copy_template_file(str(source_file), str(dest_dir), "test.py-tpl")
 
     def test_process_directory_tree_success(self) -> None:
         """Test _process_directory_tree with successful processing."""
@@ -447,20 +441,45 @@ class TestTransducer:
         assert (self.dest_path / "subdir" / "file2.txt").read_text() == "File 2 content"
 
     def test_process_directory_tree_directory_creation_failure(self) -> None:
-        """Test _process_directory_tree when directory creation fails."""
+        """Test _process_directory_tree propagates directory creation failures."""
         # given
         (self.source_path / "file.txt-tpl").write_text("content")
 
-        # when
+        # when & then
+        # The caller is responsible for rollback, so the failure must surface.
         with patch(
             "fastapi_fastkit.backend.transducer._ensure_directory_exists",
-            return_value=False,
+            side_effect=TemplateExceptions("boom"),
         ):
-            # Should handle gracefully
-            _process_directory_tree(str(self.source_path), str(self.dest_path))
+            with pytest.raises(TemplateExceptions):
+                _process_directory_tree(str(self.source_path), str(self.dest_path))
+
+    def test_copy_template_file_only_strips_trailing_marker(self) -> None:
+        """Test _copy_template_file strips only the trailing -tpl suffix."""
+        # given
+        file_name = "run-tpl-helper.py-tpl"
+        source_file = self.source_path / file_name
+        source_file.write_text("content")
+
+        # when
+        _copy_template_file(str(source_file), str(self.dest_path), file_name)
 
         # then
-        # Should not raise exception, just skip the problematic directory
+        assert (self.dest_path / "run-tpl-helper.py").exists()
+        assert not (self.dest_path / "runhelper.py").exists()
+
+    def test_copy_template_file_raises_on_copy_failure(self) -> None:
+        """Test _copy_template_file raises instead of silently logging."""
+        # given
+        source_file = self.source_path / "main.py-tpl"
+        source_file.write_text("content")
+
+        # when & then
+        with patch("shutil.copy2", side_effect=PermissionError("Access denied")):
+            with pytest.raises(TemplateExceptions):
+                _copy_template_file(
+                    str(source_file), str(self.dest_path), "main.py-tpl"
+                )
 
     def test_copy_and_convert_template_with_project_name(self) -> None:
         """Test copy_and_convert_template with project name parameter."""

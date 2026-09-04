@@ -1,0 +1,9 @@
+Async Alembic environment.
+
+    alembic revision --autogenerate -m "add widgets"
+    alembic upgrade head
+    alembic downgrade -1
+
+`env.py` reads the URL from `settings.DATABASE_URL` and imports
+`src.app.db.base`, so autogenerate sees every registered table. Import new
+domain models in `src/app/db/base.py` or they will be silently skipped.

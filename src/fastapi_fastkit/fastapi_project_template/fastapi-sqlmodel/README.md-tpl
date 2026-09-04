@@ -1,0 +1,166 @@
+# FastAPI SQLModel
+
+A persistence-first FastAPI starter: SQLModel over an async engine, Alembic
+migrations, a generic CRUD base class, and paginated list endpoints.
+
+> Generated project: **<project_name>** — <description>
+
+## When to choose this starter
+
+Pick this template when you want:
+
+- **One model definition per concept.** SQLModel classes are both the
+  SQLAlchemy table and the pydantic schema, so a new column is declared once
+  in `ItemBase` and every request/response schema inherits it.
+- **Async database access all the way down** — `sqlalchemy[asyncio]` engine,
+  `AsyncSession` request scope, async Alembic migrations.
+- **SQLite for free, PostgreSQL when you need it.** The default
+  `DATABASE_URL` is a local SQLite file; point it at
+  `postgresql+asyncpg://...` and nothing else changes.
+- **CRUD you don't rewrite per domain.** `CRUDBase` supplies create / read /
+  list / count / update / delete; each domain subclasses it and adds only
+  what is specific to it.
+
+If you don't need a database, start with `fastapi-domain-starter`. If you
+want a Docker Compose PostgreSQL stack with synchronous SQLModel, use
+`fastapi-psql-orm`.
+
+## Stack
+
+- FastAPI 0.141 / Starlette
+- Python 3.12
+- SQLModel 0.0.42 on SQLAlchemy 2.0 (async)
+- Alembic 1.19
+- aiosqlite (default) / asyncpg (optional extra)
+- pytest + pytest-asyncio + httpx
+
+## Project structure
+
+```
+.
+├── README.md
+├── pyproject.toml
+├── requirements.txt
+├── alembic.ini
+├── Dockerfile
+├── .env
+├── .gitignore
+├── scripts/
+│   ├── format.sh
+│   ├── lint.sh
+│   ├── migrate.sh          # alembic upgrade head
+│   ├── run-server.sh
+│   └── test.sh
+├── src/
+│   └── app/
+│       ├── main.py                 # FastAPI app + lifespan
+│       ├── core/
+│       │   └── config.py           # pydantic-settings configuration
+│       ├── db/
+│       │   ├── session.py          # async engine, session dependency
+│       │   └── base.py             # metadata aggregation for Alembic
+│       ├── crud/
+│       │   ├── base.py             # generic CRUDBase
+│       │   └── pagination.py       # Page[T] envelope
+│       ├── alembic/
+│       │   ├── env.py              # async migration environment
+│       │   └── versions/
+│       │       └── 0001_create_items_table.py
+│       ├── api/
+│       │   ├── router.py           # aggregates health + domain routers
+│       │   └── health.py           # GET /health
+│       └── domains/
+│           └── items/              # example domain
+│               ├── models.py       # Item table + Create/Update/Public schemas
+│               ├── crud.py         # ItemCRUD(CRUDBase)
+│               └── router.py       # FastAPI router
+└── tests/
+    ├── conftest.py                 # in-memory SQLite fixtures
+    ├── test_health.py
+    ├── test_items.py
+    └── test_crud_base.py
+```
+
+## Running the app
+
+```bash
+# create a virtualenv and install dependencies
+$ uv venv && uv pip install -r requirements.txt
+# or: uv sync
+
+# apply migrations
+$ bash scripts/migrate.sh
+
+# launch the dev server
+$ bash scripts/run-server.sh
+# or directly:
+$ uvicorn src.app.main:app --reload
+```
+
+API docs are then served at:
+
+- Swagger UI: <http://127.0.0.1:8000/docs>
+- ReDoc:      <http://127.0.0.1:8000/redoc>
+
+## API endpoints
+
+| Method | Endpoint                  | Description                          |
+|--------|---------------------------|--------------------------------------|
+| GET    | `/api/v1/health`          | Liveness probe                       |
+| GET    | `/api/v1/items`           | List items (`offset`, `limit`)       |
+| GET    | `/api/v1/items/{item_id}` | Read a single item                   |
+| POST   | `/api/v1/items`           | Create an item                       |
+| PATCH  | `/api/v1/items/{item_id}` | Partially update an item             |
+| DELETE | `/api/v1/items/{item_id}` | Delete an item                       |
+
+List responses are wrapped in a page envelope:
+
+```json
+{"items": [...], "total": 42, "offset": 0, "limit": 20}
+```
+
+## Switching to PostgreSQL
+
+```bash
+$ uv pip install "asyncpg>=0.31.0"
+$ export DATABASE_URL="postgresql+asyncpg://user:password@localhost:5432/app"
+$ bash scripts/migrate.sh
+```
+
+`CREATE_TABLES_ON_STARTUP` is convenient against SQLite but should be set to
+`false` once Alembic owns the schema.
+
+## Adding a domain
+
+1. Create `src/app/domains/<your_domain>/` mirroring `items`
+   (`models.py`, `crud.py`, `router.py`).
+2. Import the table model in `src/app/db/base.py` — Alembic autogenerate and
+   `create_db_and_tables` only see models that were imported.
+3. Register the router in `src/app/api/router.py` (the `# fastkit:imports`
+   and `# fastkit:routes` anchors mark where `fastkit addroute` inserts code).
+4. Generate a migration: `alembic revision --autogenerate -m "add <domain>"`.
+5. Add tests under `tests/test_<your_domain>.py`.
+
+## Running tests
+
+```bash
+$ bash scripts/test.sh
+# or directly:
+$ pytest
+```
+
+Tests run against a fresh in-memory SQLite database per test — no migrations,
+no fixtures files, no cleanup.
+
+## Project Origin
+
+This project was created from the **`fastapi-sqlmodel`** template shipped
+with [FastAPI-fastkit](https://github.com/bnbong/FastAPI-fastkit).
+
+The `FastAPI-fastkit` is an open-source project that helps Python and
+FastAPI beginners quickly set up a FastAPI-based application development
+environment in a framework-like structure.
+
+### Template Information
+- Template creator: [bnbong](mailto:bbbong9@gmail.com)
+- FastAPI-fastkit project maintainer: [bnbong](mailto:bbbong9@gmail.com)

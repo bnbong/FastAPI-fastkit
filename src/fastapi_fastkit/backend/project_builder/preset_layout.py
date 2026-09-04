@@ -19,14 +19,141 @@
 # --------------------------------------------------------------------------
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Callable, Dict, List, Sequence, Tuple
+
+from fastapi_fastkit.core.settings import (
+    NONE_CHOICE,
+    AsyncTaskChoice,
+    AuthChoice,
+    CachingChoice,
+    FeatureAxis,
+    LoggingChoice,
+    MonitoringChoice,
+    UtilityChoice,
+)
 
 # Canonical preset id used when a caller doesn't supply one. Picked to
 # preserve pre-#45 behaviour: interactive ``init`` historically deployed
 # ``fastapi-empty`` and regenerated ``src/main.py`` from feature flags.
 _FALLBACK_PRESET_ID: str = "minimal"
+
+
+def _utility_selected(config: Dict[str, Any], utility: str) -> bool:
+    """Whether a multi-select ``utilities`` entry was picked."""
+    return utility in set(config.get(FeatureAxis.UTILITIES) or [])
+
+
+def _axis_is(config: Dict[str, Any], axis: str, choice: str) -> bool:
+    """Whether a single-select axis holds exactly ``choice``."""
+    return config.get(axis) == choice
+
+
+@dataclass(frozen=True)
+class OverlayTarget:
+    """One feature whose wiring normally lives in the dynamic main.py overlay.
+
+    ``label`` is what the user sees in the warning, ``applies`` decides
+    whether their configuration actually triggered it, and ``wiring`` (when
+    present) is the import / statement pair that can be spliced into a
+    template-shipped ``main.py`` through its ``# fastkit:`` anchors instead
+    of only being warned about.
+    """
+
+    label: str
+    applies: Callable[[Dict[str, Any]], bool]
+    #: ``(import lines, statement lines)`` rendered with ``{pkg}``.
+    wiring: Tuple[Tuple[str, ...], Tuple[str, ...]] = ((), ())
+
+    @property
+    def is_wirable(self) -> bool:
+        return bool(self.wiring[0] or self.wiring[1])
+
+
+#: Every feature the dynamic ``main.py`` overlay is responsible for. Presets
+#: that preserve their template's ``main.py`` name the subset they care about
+#: in ``PresetProfile.extra_warning_targets``.
+OVERLAY_TARGETS: Tuple[OverlayTarget, ...] = (
+    OverlayTarget(
+        label="CORS",
+        applies=lambda c: _utility_selected(c, UtilityChoice.CORS),
+    ),
+    OverlayTarget(
+        label="Rate-Limiting",
+        applies=lambda c: _utility_selected(c, UtilityChoice.RATE_LIMITING),
+    ),
+    OverlayTarget(
+        label="WebSocket",
+        applies=lambda c: _utility_selected(c, UtilityChoice.WEBSOCKET),
+        wiring=(
+            ("from {pkg}.features.websocket import router as websocket_router",),
+            ("app.include_router(websocket_router)",),
+        ),
+    ),
+    OverlayTarget(
+        label="Pagination",
+        applies=lambda c: _utility_selected(c, UtilityChoice.PAGINATION),
+        wiring=(
+            (
+                "from fastapi_pagination import add_pagination",
+                "from {pkg}.features.pagination import router as pagination_router",
+            ),
+            ("app.include_router(pagination_router)", "add_pagination(app)"),
+        ),
+    ),
+    OverlayTarget(
+        label="Background tasks",
+        applies=lambda c: c.get(FeatureAxis.ASYNC_TASKS, NONE_CHOICE)
+        in (AsyncTaskChoice.CELERY, AsyncTaskChoice.DRAMATIQ),
+        wiring=(
+            ("from {pkg}.features.tasks import router as tasks_router",),
+            ("app.include_router(tasks_router)",),
+        ),
+    ),
+    # Caching is deliberately warn-only: mounting ``cache_router`` without the
+    # ``FastAPICache.init`` lifespan hook would ship endpoints that raise at
+    # request time, which is worse than an unmounted module plus a warning.
+    OverlayTarget(
+        label="Caching (Redis)",
+        applies=lambda c: _axis_is(c, FeatureAxis.CACHING, CachingChoice.REDIS),
+    ),
+    OverlayTarget(
+        label="Prometheus",
+        applies=lambda c: _axis_is(
+            c, FeatureAxis.MONITORING, MonitoringChoice.PROMETHEUS
+        ),
+    ),
+    OverlayTarget(
+        label="OpenTelemetry",
+        applies=lambda c: _axis_is(
+            c, FeatureAxis.MONITORING, MonitoringChoice.OPENTELEMETRY
+        ),
+    ),
+    OverlayTarget(
+        label="OAuth2 session middleware",
+        applies=lambda c: _axis_is(c, FeatureAxis.AUTHENTICATION, AuthChoice.OAUTH2),
+    ),
+    OverlayTarget(
+        label="Session-based auth middleware",
+        applies=lambda c: _axis_is(c, FeatureAxis.AUTHENTICATION, AuthChoice.SESSION),
+    ),
+    OverlayTarget(
+        label="Structured logging",
+        applies=lambda c: _axis_is(c, FeatureAxis.LOGGING, LoggingChoice.STRUCTURED),
+    ),
+)
+
+_TARGETS_BY_LABEL: Dict[str, OverlayTarget] = {
+    target.label: target for target in OVERLAY_TARGETS
+}
+
+#: Every overlay target except CORS, which template-shipped ``main.py`` files
+#: already wire from ``settings.all_cors_origins``.
+_NON_CORS_TARGETS: Tuple[str, ...] = tuple(
+    target.label for target in OVERLAY_TARGETS if target.label != "CORS"
+)
 
 
 @dataclass(frozen=True)
@@ -79,7 +206,7 @@ _PRESET_PROFILES: Dict[str, PresetProfile] = {
             "selections below need manual wiring there (CORS is already "
             "wired — set BACKEND_CORS_ORIGINS in .env to activate it)."
         ),
-        extra_warning_targets=("Rate-Limiting", "Prometheus"),
+        extra_warning_targets=_NON_CORS_TARGETS,
     ),
     "domain-starter": PresetProfile(
         preset_id="domain-starter",
@@ -93,9 +220,41 @@ _PRESET_PROFILES: Dict[str, PresetProfile] = {
             "The selections below need manual wiring there (CORS is already "
             "wired — set BACKEND_CORS_ORIGINS in .env to activate it)."
         ),
-        extra_warning_targets=("Rate-Limiting", "Prometheus"),
+        extra_warning_targets=_NON_CORS_TARGETS,
     ),
 }
+
+
+def _package_root(main_py_relpath: str) -> str:
+    """Dotted package the generated feature modules live in.
+
+    ``src/main.py`` -> ``src``; ``src/app/main.py`` -> ``src.app``. Mirrors
+    ``DynamicConfigGenerator.pkg`` so the import lines spliced into a
+    preserved ``main.py`` match where the generator actually wrote them.
+    """
+    normalized = main_py_relpath.replace("\\", "/").strip("/")
+    parent = normalized.rsplit("/", 1)[0] if "/" in normalized else "src"
+    return parent.replace("/", ".")
+
+
+def app_module_from_relpath(relpath: str) -> str:
+    """Convert a project-relative ``main.py`` path into ``module:attr``.
+
+    Single source of truth shared by the preset profiles (which know the
+    layout up-front) and by ``runserver`` (which discovers ``main.py`` on
+    disk). Both used to derive the dotted path independently, and the two
+    implementations drifted for the ``src/app/main.py`` layout.
+    """
+    normalized = relpath.replace("\\", "/").strip("/")
+    if normalized.endswith(".py"):
+        normalized = normalized[: -len(".py")]
+    module_part = normalized.replace("/", ".")
+    return f"{module_part}:app"
+
+
+def app_module_from_main_path(project_dir: str, main_path: str) -> str:
+    """Convert an absolute ``main.py`` location into ``module:attr``."""
+    return app_module_from_relpath(os.path.relpath(main_path, project_dir))
 
 
 class PresetLayoutStrategist:
@@ -134,16 +293,12 @@ class PresetLayoutStrategist:
     def app_module(self) -> str:
         """Return the ``module:attr`` string uvicorn / Docker should target.
 
-        Derived from ``main_py_relpath`` so docker generation, runserver,
-        and any future container-orchestration code all agree on the
-        entrypoint a given preset produces.
+        Derived from ``main_py_relpath`` through :func:`app_module_from_relpath`
+        so docker generation, ``runserver`` and any future
+        container-orchestration code all agree on the entrypoint a given
+        preset produces.
         """
-        # Strip the trailing ``.py`` and convert path separators to dots.
-        relpath = self.profile.main_py_relpath
-        if relpath.endswith(".py"):
-            relpath = relpath[: -len(".py")]
-        module_part = relpath.replace("/", ".").replace("\\", ".")
-        return f"{module_part}:app"
+        return app_module_from_relpath(self.profile.main_py_relpath)
 
     def db_config_target(self, project_dir: str) -> Path:
         """Absolute path for the generated database config module."""
@@ -153,20 +308,35 @@ class PresetLayoutStrategist:
         """Absolute path for the generated authentication config module."""
         return Path(project_dir) / self.profile.auth_config_relpath
 
-    def compatibility_warnings(self, config: Dict[str, Any]) -> List[str]:
+    def compatibility_warnings(
+        self, config: Dict[str, Any], wired: Sequence[str] = ()
+    ) -> List[str]:
         """Return user-facing warnings for unsupported preset/feature mixes.
 
-        The dynamic ``main.py`` overlay (CORS middleware wiring, Prometheus
-        instrumentation, rate-limit hookup) only runs for presets that
+        The dynamic ``main.py`` overlay (middleware wiring, Prometheus
+        instrumentation, feature router mounting) only runs for presets that
         regenerate ``main.py``. For the other presets we keep the
         template-shipped ``main.py`` intact and surface a single warning
         listing the affected features so users know to wire them up
         themselves rather than assuming the package install was enough.
+
+        Args:
+            config: Interactive project configuration
+            wired: Labels already spliced into ``main.py`` by
+                :meth:`wire_generated_routers`, which therefore need no warning
+
+        Returns:
+            Warning strings, empty when nothing needs manual attention
         """
         if self.profile.regenerate_main:
             return []
 
-        affected = self._affected_overlay_targets(config)
+        already_wired = set(wired)
+        affected = [
+            label
+            for label in self._affected_overlay_targets(config)
+            if label not in already_wired
+        ]
         if not affected:
             return []
 
@@ -174,8 +344,10 @@ class PresetLayoutStrategist:
         if self.profile.manual_wiring_note:
             warnings.append(self.profile.manual_wiring_note)
         warnings.append(
-            "Affected selections (packages installed, but no dynamic main.py "
-            "edits applied for the '"
+            "Affected selections (modules and packages generated, but you must "
+            "register them yourself in "
+            + self.profile.main_py_relpath
+            + " for the '"
             + self.profile.preset_id
             + "' preset): "
             + ", ".join(affected)
@@ -184,20 +356,74 @@ class PresetLayoutStrategist:
 
     def _affected_overlay_targets(self, config: Dict[str, Any]) -> List[str]:
         """Detect which of the user's selections rely on main.py overlay."""
-        triggered: List[str] = []
-        utilities = set(config.get("utilities") or [])
+        return [
+            label
+            for label in self.profile.extra_warning_targets
+            if label in _TARGETS_BY_LABEL and _TARGETS_BY_LABEL[label].applies(config)
+        ]
 
-        for target in self.profile.extra_warning_targets:
-            if target in {"CORS", "Rate-Limiting"}:
-                if target in utilities:
-                    triggered.append(target)
-            elif target == "Prometheus":
-                if config.get("monitoring") == "Prometheus":
-                    triggered.append(target)
-        return triggered
+    def wire_generated_routers(
+        self, project_dir: str, config: Dict[str, Any]
+    ) -> List[str]:
+        """Splice generated feature routers into a preserved ``main.py``.
+
+        Presets that keep their template's ``main.py`` used to leave every
+        generated router (background tasks, WebSocket, pagination) sitting on
+        disk unmounted. Templates ship ``# fastkit:imports`` /
+        ``# fastkit:routes`` anchors precisely so generated code can be added
+        without rewriting the file, so we use them here and fall back to a
+        warning for anything not safely wirable.
+
+        Args:
+            project_dir: Absolute path of the generated project
+            config: Interactive project configuration
+
+        Returns:
+            Labels of the features actually wired (empty when the preset
+            regenerates ``main.py``, or when ``main.py`` is missing)
+        """
+        if self.profile.regenerate_main:
+            return []
+
+        # Imported lazily: ``backend.main`` imports this module at load time.
+        from fastapi_fastkit.backend.main import (
+            insert_import_line,
+            insert_statement_line,
+        )
+
+        main_path = self.main_py_target(project_dir)
+        if not main_path.is_file():
+            return []
+
+        pkg = _package_root(self.profile.main_py_relpath)
+        content = original = main_path.read_text(encoding="utf-8")
+        wired: List[str] = []
+
+        for label in self.profile.extra_warning_targets:
+            target = _TARGETS_BY_LABEL.get(label)
+            if target is None or not target.is_wirable:
+                continue
+            if not target.applies(config):
+                continue
+
+            imports, statements = target.wiring
+            for line in imports:
+                content = insert_import_line(content, line.format(pkg=pkg))
+            for line in statements:
+                content = insert_statement_line(content, line.format(pkg=pkg))
+            wired.append(label)
+
+        if content != original:
+            main_path.write_text(content, encoding="utf-8")
+
+        return wired
 
 
 __all__ = [
+    "OVERLAY_TARGETS",
+    "OverlayTarget",
     "PresetLayoutStrategist",
     "PresetProfile",
+    "app_module_from_main_path",
+    "app_module_from_relpath",
 ]

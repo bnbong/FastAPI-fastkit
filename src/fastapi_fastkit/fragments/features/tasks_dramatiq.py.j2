@@ -1,0 +1,59 @@
+{% include "header.j2" %}
+"""Task submission / status endpoints backed by Dramatiq."""
+from typing import Any
+
+from dramatiq.results.errors import ResultMissing
+from fastapi import APIRouter, status
+from pydantic import BaseModel, Field
+
+from {{ pkg }}.worker import example_task
+
+router = APIRouter(prefix="/api/v1/tasks", tags=["Tasks"])
+
+
+class TaskSubmission(BaseModel):
+    """Body of a task submission request."""
+
+    payload: dict[str, Any] = Field(default_factory=dict)
+
+
+class TaskAccepted(BaseModel):
+    """Identifier handed back so the caller can poll for the result."""
+
+    task_id: str
+    status: str
+
+
+class TaskStatus(BaseModel):
+    """Current state of a submitted task."""
+
+    task_id: str
+    status: str
+    result: Any = None
+
+
+#: Dramatiq has no server-side message registry, so keep the handles we
+#: created in-process. Swap for a shared store when running multiple replicas.
+_MESSAGES: dict[str, Any] = {}
+
+
+@router.post("", response_model=TaskAccepted, status_code=status.HTTP_202_ACCEPTED)
+async def submit_task(submission: TaskSubmission) -> TaskAccepted:
+    """Queue :func:`example_task` and return its message id."""
+    message = example_task.send(submission.payload)
+    _MESSAGES[message.message_id] = message
+    return TaskAccepted(task_id=message.message_id, status="PENDING")
+
+
+@router.get("/{task_id}", response_model=TaskStatus)
+async def get_task_status(task_id: str) -> TaskStatus:
+    """Poll a previously submitted task."""
+    message = _MESSAGES.get(task_id)
+    if message is None:
+        return TaskStatus(task_id=task_id, status="UNKNOWN")
+
+    try:
+        result = message.get_result(block=False)
+    except ResultMissing:
+        return TaskStatus(task_id=task_id, status="PENDING")
+    return TaskStatus(task_id=task_id, status="SUCCESS", result=result)

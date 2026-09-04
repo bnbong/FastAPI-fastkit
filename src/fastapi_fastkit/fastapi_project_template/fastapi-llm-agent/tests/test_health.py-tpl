@@ -1,0 +1,12 @@
+# --------------------------------------------------------------------------
+# Health endpoint smoke test.
+# --------------------------------------------------------------------------
+from httpx import AsyncClient
+from src.app.core.config import settings
+
+
+async def test_health_endpoint_returns_ok(client: AsyncClient) -> None:
+    response = await client.get(f"{settings.API_V1_PREFIX}/health")
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}

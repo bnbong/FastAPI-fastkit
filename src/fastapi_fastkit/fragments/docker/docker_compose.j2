@@ -1,0 +1,84 @@
+{% include "header.j2" %}
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+{% if redis_service %}
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - DRAMATIQ_BROKER_URL=redis://redis:6379/0
+{% endif %}
+{% if depends_on %}
+    depends_on:
+{% for service in depends_on %}
+      - {{ service }}
+{% endfor %}
+{% else %}
+    # Add a database service here if needed
+{% endif %}
+{% if worker_command %}
+
+  worker:
+    build: .
+    command: {{ worker_command | tojson }}
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - DRAMATIQ_BROKER_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+{% endif %}
+{% if db_service == "postgres" %}
+
+  postgres:
+    image: postgres:16
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=dbname
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+{% elif db_service == "mysql" %}
+
+  mysql:
+    image: mysql:8
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=password
+      - MYSQL_DATABASE=dbname
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+{% elif db_service == "mongodb" %}
+
+  mongodb:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+{% endif %}
+{% if redis_service %}
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+{% endif %}
+{% if volumes %}
+
+volumes:
+{% for volume in volumes %}
+  {{ volume }}:
+{% endfor %}
+{% endif %}

@@ -1,7 +1,6 @@
 """
 Tests for MCP (Model Context Protocol) functionality.
 """
-import pytest
 from fastapi.testclient import TestClient
 
 

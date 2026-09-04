@@ -1,0 +1,160 @@
+# --------------------------------------------------------------------------
+# Chat endpoint — the SSE streaming path and the tool-call loop, driven by a
+# scripted fake Anthropic client (no network, no API key).
+# --------------------------------------------------------------------------
+from typing import Any
+
+from src.app.core.config import settings
+
+from tests.conftest import FakeAnthropic, parse_sse, text_turn, tool_turn
+
+CHAT_URL = f"{settings.API_V1_PREFIX}/chat"
+
+
+async def test_chat_streams_tokens_then_done(make_client: Any) -> None:
+    fake = FakeAnthropic([text_turn("Hello there")])
+
+    async with make_client(fake) as client:
+        response = await client.post(CHAT_URL, json={"message": "hi"})
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/event-stream")
+
+    events = parse_sse(response.text)
+    assert "".join(e["text"] for e in events if e["type"] == "token") == "Hello there"
+    assert [e["type"] for e in events][-1] == "done"
+    assert events[-1]["conversation_id"]
+
+
+async def test_chat_reports_token_usage(make_client: Any) -> None:
+    fake = FakeAnthropic([text_turn("hi", output_tokens=3)])
+
+    async with make_client(fake) as client:
+        response = await client.post(CHAT_URL, json={"message": "hi"})
+
+    usage = [e for e in parse_sse(response.text) if e["type"] == "usage"]
+    assert usage == [
+        {**usage[0], "input_tokens": 11, "output_tokens": 3, "type": "usage"}
+    ]
+
+
+async def test_chat_runs_the_tool_loop(make_client: Any) -> None:
+    fake = FakeAnthropic(
+        [
+            tool_turn("calculator", {"expression": "12 * 34"}),
+            text_turn("It is 408."),
+        ]
+    )
+
+    async with make_client(fake) as client:
+        response = await client.post(CHAT_URL, json={"message": "what is 12*34?"})
+
+    events = parse_sse(response.text)
+    types = [e["type"] for e in events]
+    assert "tool_use" in types and "tool_result" in types
+
+    tool_use = next(e for e in events if e["type"] == "tool_use")
+    assert tool_use["tool_name"] == "calculator"
+    assert tool_use["tool_input"] == {"expression": "12 * 34"}
+
+    tool_result = next(e for e in events if e["type"] == "tool_result")
+    assert tool_result["tool_output"] == "408"
+
+    assert "".join(e["text"] for e in events if e["type"] == "token") == "It is 408."
+    assert types[-1] == "done"
+
+    # Two API calls: the tool request, then the follow-up carrying the result.
+    assert len(fake.calls) == 2
+    follow_up_messages = fake.calls[1]["messages"]
+    tool_results = follow_up_messages[-1]["content"]
+    assert tool_results[0]["type"] == "tool_result"
+    assert tool_results[0]["tool_use_id"] == "toolu_1"
+    assert tool_results[0]["content"] == "408"
+
+
+async def test_tool_loop_stops_at_the_iteration_cap(make_client: Any) -> None:
+    fake = FakeAnthropic(
+        [tool_turn("calculator", {"expression": "1 + 1"}) for _ in range(10)]
+    )
+
+    async with make_client(fake) as client:
+        response = await client.post(CHAT_URL, json={"message": "loop"})
+
+    events = parse_sse(response.text)
+    assert events[-1]["type"] == "error"
+    assert "tool-call limit" in events[-1]["detail"]
+    assert len(fake.calls) == settings.MAX_TOOL_ITERATIONS
+
+
+async def test_client_failure_becomes_an_error_event(make_client: Any) -> None:
+    fake = FakeAnthropic(error=RuntimeError("upstream is down"))
+
+    async with make_client(fake) as client:
+        response = await client.post(CHAT_URL, json={"message": "hi"})
+
+    events = parse_sse(response.text)
+    assert events == [{**events[0], "type": "error", "detail": "upstream is down"}]
+
+
+async def test_history_is_stored_and_replayed(make_client: Any) -> None:
+    fake = FakeAnthropic([text_turn("first"), text_turn("second")])
+
+    async with make_client(fake) as client:
+        first = await client.post(CHAT_URL, json={"message": "one"})
+        conversation_id = parse_sse(first.text)[-1]["conversation_id"]
+
+        second = await client.post(
+            CHAT_URL,
+            json={"message": "two", "conversation_id": conversation_id},
+        )
+        assert second.status_code == 200
+
+        history = await client.get(
+            f"{settings.API_V1_PREFIX}/conversations/{conversation_id}"
+        )
+
+    assert history.status_code == 200
+    roles = [m["role"] for m in history.json()["messages"]]
+    assert roles == ["user", "assistant", "user", "assistant"]
+
+    # The second call must have carried the first exchange back to the model.
+    assert [m["role"] for m in fake.calls[1]["messages"]] == [
+        "user",
+        "assistant",
+        "user",
+    ]
+
+
+async def test_unknown_conversation_returns_404(make_client: Any) -> None:
+    async with make_client(FakeAnthropic()) as client:
+        response = await client.get(
+            f"{settings.API_V1_PREFIX}/conversations/does-not-exist"
+        )
+
+    assert response.status_code == 404
+
+
+async def test_delete_conversation(make_client: Any) -> None:
+    fake = FakeAnthropic([text_turn("hi")])
+
+    async with make_client(fake) as client:
+        first = await client.post(CHAT_URL, json={"message": "one"})
+        conversation_id = parse_sse(first.text)[-1]["conversation_id"]
+
+        deleted = await client.delete(
+            f"{settings.API_V1_PREFIX}/conversations/{conversation_id}"
+        )
+        assert deleted.status_code == 204
+
+        follow_up = await client.get(
+            f"{settings.API_V1_PREFIX}/conversations/{conversation_id}"
+        )
+
+    assert follow_up.status_code == 404
+
+
+async def test_empty_message_is_rejected(make_client: Any) -> None:
+    async with make_client(FakeAnthropic()) as client:
+        response = await client.post(CHAT_URL, json={"message": ""})
+
+    assert response.status_code == 422

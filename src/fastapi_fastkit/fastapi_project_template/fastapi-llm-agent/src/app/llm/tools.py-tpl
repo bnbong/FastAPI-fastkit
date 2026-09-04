@@ -1,0 +1,131 @@
+# --------------------------------------------------------------------------
+# Tools the agent may call.
+#
+# Two deliberately harmless examples. A tool is a JSON schema (what Claude
+# sees) plus a Python callable (what actually runs); the registry below keeps
+# the two halves together so adding a tool is a single edit.
+# --------------------------------------------------------------------------
+import ast
+import operator
+from datetime import datetime, timezone
+from typing import Any, Callable
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+
+ToolHandler = Callable[..., str]
+
+_BINARY_OPERATORS: dict[type[ast.operator], Callable[[Any, Any], Any]] = {
+    ast.Add: operator.add,
+    ast.Sub: operator.sub,
+    ast.Mult: operator.mul,
+    ast.Div: operator.truediv,
+    ast.FloorDiv: operator.floordiv,
+    ast.Mod: operator.mod,
+    ast.Pow: operator.pow,
+}
+_UNARY_OPERATORS: dict[type[ast.unaryop], Callable[[Any], Any]] = {
+    ast.UAdd: operator.pos,
+    ast.USub: operator.neg,
+}
+
+
+def _evaluate(node: ast.AST) -> float:
+    """Walk a parsed expression, allowing arithmetic and nothing else."""
+    if isinstance(node, ast.Expression):
+        return _evaluate(node.body)
+    if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)):
+        return float(node.value)
+    if isinstance(node, ast.BinOp) and type(node.op) in _BINARY_OPERATORS:
+        return float(
+            _BINARY_OPERATORS[type(node.op)](
+                _evaluate(node.left), _evaluate(node.right)
+            )
+        )
+    if isinstance(node, ast.UnaryOp) and type(node.op) in _UNARY_OPERATORS:
+        return float(_UNARY_OPERATORS[type(node.op)](_evaluate(node.operand)))
+    raise ValueError("unsupported expression")
+
+
+def calculator(expression: str) -> str:
+    """Evaluate an arithmetic expression.
+
+    Parsing to an AST and whitelisting node types keeps this away from
+    ``eval``: names, calls, attribute access and imports are all rejected.
+    """
+    try:
+        parsed = ast.parse(expression, mode="eval")
+        result = _evaluate(parsed)
+    except ZeroDivisionError:
+        return "Error: division by zero."
+    except (SyntaxError, ValueError, TypeError, OverflowError):
+        return f"Error: {expression!r} is not a supported arithmetic expression."
+    # Render whole numbers without a trailing ".0".
+    return str(int(result)) if result.is_integer() else str(result)
+
+
+def current_time(timezone_name: str = "UTC") -> str:
+    """Return the current time in an IANA timezone (default UTC)."""
+    if timezone_name.upper() == "UTC":
+        tz: Any = timezone.utc
+    else:
+        try:
+            tz = ZoneInfo(timezone_name)
+        except (ZoneInfoNotFoundError, ValueError):
+            return f"Error: unknown timezone {timezone_name!r}."
+    return datetime.now(tz).isoformat(timespec="seconds")
+
+
+# The schemas Claude sees. Descriptions matter: they are the only instructions
+# the model gets about when a tool is the right choice.
+TOOL_SCHEMAS: list[dict[str, Any]] = [
+    {
+        "name": "calculator",
+        "description": (
+            "Evaluate an arithmetic expression and return the result. "
+            "Supports + - * / // % ** and parentheses. Use this instead of "
+            "doing arithmetic yourself."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "expression": {
+                    "type": "string",
+                    "description": "The expression to evaluate, e.g. '12 * (3 + 4)'.",
+                }
+            },
+            "required": ["expression"],
+        },
+    },
+    {
+        "name": "current_time",
+        "description": (
+            "Return the current date and time as an ISO-8601 string. Use this "
+            "whenever the answer depends on the present moment."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "timezone_name": {
+                    "type": "string",
+                    "description": "IANA timezone name, e.g. 'Asia/Seoul'. Defaults to UTC.",
+                }
+            },
+            "required": [],
+        },
+    },
+]
+
+TOOL_HANDLERS: dict[str, ToolHandler] = {
+    "calculator": calculator,
+    "current_time": current_time,
+}
+
+
+def run_tool(name: str, arguments: dict[str, Any]) -> str:
+    """Dispatch a tool call, turning every failure into a message Claude can read."""
+    handler = TOOL_HANDLERS.get(name)
+    if handler is None:
+        return f"Error: unknown tool {name!r}."
+    try:
+        return handler(**arguments)
+    except TypeError as exc:
+        return f"Error: bad arguments for {name!r} ({exc})."

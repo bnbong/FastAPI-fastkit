@@ -1,15 +1,13 @@
 # --------------------------------------------------------------------------
 # Item CRUD method module
 # --------------------------------------------------------------------------
-from typing import Dict, List, Optional, Union
 
 from sqlmodel import Session, select
 
-from src.core.db import engine
 from src.schemas.items import ItemBase
 
 
-def get_item(db: Session, item_id: int) -> Optional[ItemBase]:
+def get_item(db: Session, item_id: int) -> ItemBase | None:
     """
     Retrieve a single item by its ID.
 
@@ -23,7 +21,7 @@ def get_item(db: Session, item_id: int) -> Optional[ItemBase]:
     return db.get(ItemBase, item_id)
 
 
-def get_items(db: Session, skip: int = 0, limit: int = 100) -> List[ItemBase]:
+def get_items(db: Session, skip: int = 0, limit: int = 100) -> list[ItemBase]:
     """
     Retrieve a list of items with pagination.
 
@@ -39,7 +37,7 @@ def get_items(db: Session, skip: int = 0, limit: int = 100) -> List[ItemBase]:
     return list(db.exec(statement).all())
 
 
-def create_item(db: Session, item: Dict[str, Union[str, float]]) -> ItemBase:
+def create_item(db: Session, item: dict[str, str | float]) -> ItemBase:
     """
     Create a new item in the database.
 
@@ -57,7 +55,7 @@ def create_item(db: Session, item: Dict[str, Union[str, float]]) -> ItemBase:
     return db_item
 
 
-def update_item(db: Session, item_id: int, item_data: Dict[str, Union[str, float]]) -> Optional[ItemBase]:
+def update_item(db: Session, item_id: int, item_data: dict[str, str | float]) -> ItemBase | None:
     """
     Update an existing item.
 

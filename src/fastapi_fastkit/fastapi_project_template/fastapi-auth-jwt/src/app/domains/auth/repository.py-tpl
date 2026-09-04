@@ -1,0 +1,41 @@
+# --------------------------------------------------------------------------
+# Refresh token data access.
+# --------------------------------------------------------------------------
+from datetime import datetime
+from typing import Optional
+
+from sqlmodel import Session, select
+
+from src.app.domains.auth.models import RefreshToken
+
+
+class RefreshTokenRepository:
+    def __init__(self, session: Session) -> None:
+        self.session = session
+
+    def add(self, jti: str, user_id: int, expires_at: datetime) -> RefreshToken:
+        record = RefreshToken(jti=jti, user_id=user_id, expires_at=expires_at)
+        self.session.add(record)
+        self.session.commit()
+        self.session.refresh(record)
+        return record
+
+    def get_by_jti(self, jti: str) -> Optional[RefreshToken]:
+        statement = select(RefreshToken).where(RefreshToken.jti == jti)
+        return self.session.exec(statement).first()
+
+    def revoke(self, record: RefreshToken) -> None:
+        record.revoked = True
+        self.session.add(record)
+        self.session.commit()
+
+    def revoke_all_for_user(self, user_id: int) -> int:
+        statement = select(RefreshToken).where(
+            RefreshToken.user_id == user_id, RefreshToken.revoked == False  # noqa: E712
+        )
+        records = self.session.exec(statement).all()
+        for record in records:
+            record.revoked = True
+            self.session.add(record)
+        self.session.commit()
+        return len(records)

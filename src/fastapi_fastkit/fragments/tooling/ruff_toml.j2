@@ -1,0 +1,16 @@
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+src = [{{ package_dir | tojson }}, "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "W"]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = [{{ pkg.split(".")[0] | tojson }}]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

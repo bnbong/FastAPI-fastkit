@@ -1,0 +1,25 @@
+# --------------------------------------------------------------------------
+# Refresh token records.
+#
+# Only the token id (``jti``) is persisted, never the token itself, so a
+# leaked database dump cannot be replayed as a credential.
+# --------------------------------------------------------------------------
+from datetime import datetime, timezone
+from typing import Optional
+
+from sqlmodel import Field, SQLModel
+
+
+def _utcnow() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+class RefreshToken(SQLModel, table=True):
+    __tablename__ = "refresh_tokens"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    jti: str = Field(index=True, unique=True, max_length=64)
+    user_id: int = Field(index=True, foreign_key="users.id")
+    expires_at: datetime
+    revoked: bool = Field(default=False)
+    created_at: datetime = Field(default_factory=_utcnow)

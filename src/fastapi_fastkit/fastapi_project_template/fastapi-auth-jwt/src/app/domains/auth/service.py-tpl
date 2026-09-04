@@ -1,0 +1,65 @@
+# --------------------------------------------------------------------------
+# Authentication business logic: token issuance, rotation, revocation.
+# --------------------------------------------------------------------------
+from src.app.core.security import (
+    REFRESH_TOKEN_TYPE,
+    TokenError,
+    create_access_token,
+    create_refresh_token,
+    decode_token,
+)
+from src.app.domains.auth.repository import RefreshTokenRepository
+from src.app.domains.auth.schemas import TokenPair
+from src.app.domains.users.models import User
+from src.app.domains.users.repository import UserRepository
+
+
+class AuthService:
+    def __init__(
+        self, users: UserRepository, refresh_tokens: RefreshTokenRepository
+    ) -> None:
+        self.users = users
+        self.refresh_tokens = refresh_tokens
+
+    def issue_token_pair(self, user: User) -> TokenPair:
+        scopes = user.scope_list
+        access_token, _, _ = create_access_token(str(user.id), scopes)
+        refresh_token, jti, expires_at = create_refresh_token(str(user.id), scopes)
+        self.refresh_tokens.add(jti, user.id or 0, expires_at)
+        return TokenPair(access_token=access_token, refresh_token=refresh_token)
+
+    def rotate(self, refresh_token: str) -> TokenPair:
+        """Exchange a refresh token for a brand new pair.
+
+        The presented token is revoked first, so a replay of the same token
+        fails even if the caller never uses the new pair.
+
+        Raises:
+            TokenError: the token is invalid, expired, already used, or its
+                user is gone / deactivated.
+        """
+        payload = decode_token(refresh_token, REFRESH_TOKEN_TYPE)
+        record = self.refresh_tokens.get_by_jti(str(payload.get("jti")))
+        if record is None or record.revoked:
+            raise TokenError("refresh token is no longer valid")
+
+        user = self.users.get(record.user_id)
+        if user is None or not user.is_active:
+            raise TokenError("user is not available")
+
+        self.refresh_tokens.revoke(record)
+        return self.issue_token_pair(user)
+
+    def revoke(self, refresh_token: str) -> None:
+        """Log out a single session. Unknown tokens are silently accepted."""
+        try:
+            payload = decode_token(refresh_token, REFRESH_TOKEN_TYPE)
+        except TokenError:
+            return
+        record = self.refresh_tokens.get_by_jti(str(payload.get("jti")))
+        if record is not None and not record.revoked:
+            self.refresh_tokens.revoke(record)
+
+    def revoke_all(self, user: User) -> int:
+        """Log out every session of a user."""
+        return self.refresh_tokens.revoke_all_for_user(user.id or 0)

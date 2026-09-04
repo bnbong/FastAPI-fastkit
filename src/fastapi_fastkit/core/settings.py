@@ -4,9 +4,130 @@
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
 import os
+from enum import StrEnum
 from pathlib import Path
 
 from .exceptions import BackendExceptions
+
+
+class FeatureAxis(StrEnum):
+    """Canonical keys of every axis in :attr:`FastkitConfig.PACKAGE_CATALOG`.
+
+    The interactive config dict is keyed by these strings, and both
+    ``DynamicConfigGenerator`` and ``DependencyCollector`` look choices up
+    through them. Keeping the literals in one place stops the three modules
+    from drifting apart (a typo used to mean "selected but never generated").
+    """
+
+    DATABASE = "database"
+    AUTHENTICATION = "authentication"
+    ASYNC_TASKS = "async_tasks"
+    TESTING = "testing"
+    CACHING = "caching"
+    MONITORING = "monitoring"
+    UTILITIES = "utilities"
+    MIGRATIONS = "migrations"
+    TOOLING = "tooling"
+    LOGGING = "logging"
+
+
+#: Sentinel choice meaning "user opted out of this axis".
+NONE_CHOICE = "None"
+
+#: Axes whose selection is a list of choices rather than a single choice.
+MULTI_SELECT_AXES: tuple[str, ...] = (
+    FeatureAxis.UTILITIES,
+    FeatureAxis.TOOLING,
+)
+
+
+class DatabaseChoice(StrEnum):
+    """Options of the ``database`` axis."""
+
+    POSTGRESQL = "PostgreSQL"
+    MYSQL = "MySQL"
+    MONGODB = "MongoDB"
+    REDIS = "Redis"
+    SQLITE = "SQLite"
+    NONE = NONE_CHOICE
+
+
+class AuthChoice(StrEnum):
+    """Options of the ``authentication`` axis."""
+
+    JWT = "JWT"
+    OAUTH2 = "OAuth2"
+    FASTAPI_USERS = "FastAPI-Users"
+    SESSION = "Session-based"
+    NONE = NONE_CHOICE
+
+
+class AsyncTaskChoice(StrEnum):
+    """Options of the ``async_tasks`` axis."""
+
+    CELERY = "Celery"
+    DRAMATIQ = "Dramatiq"
+    NONE = NONE_CHOICE
+
+
+class TestingChoice(StrEnum):
+    """Options of the ``testing`` axis."""
+
+    BASIC = "Basic"
+    COVERAGE = "Coverage"
+    ADVANCED = "Advanced"
+    NONE = NONE_CHOICE
+
+
+class CachingChoice(StrEnum):
+    """Options of the ``caching`` axis."""
+
+    REDIS = "Redis"
+    NONE = NONE_CHOICE
+
+
+class MonitoringChoice(StrEnum):
+    """Options of the ``monitoring`` axis."""
+
+    LOGURU = "Loguru"
+    OPENTELEMETRY = "OpenTelemetry"
+    PROMETHEUS = "Prometheus"
+    NONE = NONE_CHOICE
+
+
+class UtilityChoice(StrEnum):
+    """Options of the ``utilities`` axis (multi-select)."""
+
+    CORS = "CORS"
+    RATE_LIMITING = "Rate-Limiting"
+    PAGINATION = "Pagination"
+    WEBSOCKET = "WebSocket"
+    NONE = NONE_CHOICE
+
+
+class MigrationsChoice(StrEnum):
+    """Options of the ``migrations`` axis."""
+
+    ALEMBIC = "Alembic"
+    NONE = NONE_CHOICE
+
+
+class ToolingChoice(StrEnum):
+    """Options of the ``tooling`` axis (multi-select)."""
+
+    RUFF = "ruff"
+    PRE_COMMIT = "pre-commit"
+    GITHUB_ACTIONS = "github-actions"
+    DEVCONTAINER = "devcontainer"
+    MAKEFILE = "makefile"
+    NONE = NONE_CHOICE
+
+
+class LoggingChoice(StrEnum):
+    """Options of the ``logging`` axis."""
+
+    STRUCTURED = "structured"
+    NONE = NONE_CHOICE
 
 
 class FastkitConfig:
@@ -85,6 +206,18 @@ class FastkitConfig:
     }
 
     # Package Manager Options
+    #
+    # Subprocess timeouts (seconds). Every package manager invocation is bound
+    # by one of these so a hung child process can never block the CLI forever.
+    # ``FASTKIT_SUBPROCESS_TIMEOUT`` overrides all of them at runtime.
+    SUBPROCESS_TIMEOUT_ENV_VAR: str = "FASTKIT_SUBPROCESS_TIMEOUT"
+    SUBPROCESS_TIMEOUTS: dict[str, int] = {
+        "check": 30,
+        "venv": 120,
+        "install": 900,
+        "default": 300,
+    }
+
     DEFAULT_PACKAGE_MANAGER: str = "uv"
     SUPPORTED_PACKAGE_MANAGERS: list[str] = ["pip", "uv", "pdm", "poetry"]
     PACKAGE_MANAGER_CONFIG: dict[str, dict[str, str]] = {
@@ -113,34 +246,42 @@ class FastkitConfig:
     # Package Catalog for Interactive Mode (v1.2.0+)
     # Based on recommendations from: https://github.com/mjhea0/awesome-fastapi
     PACKAGE_CATALOG: dict[str, dict[str, list[str]]] = {
-        "database": {
-            "PostgreSQL": ["psycopg2-binary", "asyncpg", "sqlalchemy", "alembic"],
-            "MySQL": ["pymysql", "aiomysql", "sqlalchemy", "alembic"],
-            "MongoDB": ["motor", "beanie"],
-            "Redis": ["redis[hiredis]", "aioredis"],
-            "SQLite": ["sqlalchemy", "aiosqlite", "alembic"],
-            "None": [],
+        FeatureAxis.DATABASE: {
+            DatabaseChoice.POSTGRESQL: ["asyncpg", "sqlalchemy"],
+            DatabaseChoice.MYSQL: ["aiomysql", "sqlalchemy"],
+            DatabaseChoice.MONGODB: ["motor"],
+            # ``aioredis`` is abandoned (merged into redis-py) and does not
+            # install on Python 3.12 — redis[hiredis] ships the asyncio client.
+            DatabaseChoice.REDIS: ["redis[hiredis]"],
+            DatabaseChoice.SQLITE: ["sqlalchemy", "aiosqlite"],
+            DatabaseChoice.NONE: [],
         },
-        "authentication": {
-            "JWT": ["python-jose[cryptography]", "passlib[bcrypt]"],
-            "OAuth2": ["authlib"],
-            "FastAPI-Users": [
+        FeatureAxis.AUTHENTICATION: {
+            AuthChoice.JWT: ["python-jose[cryptography]", "passlib[bcrypt]"],
+            # SessionMiddleware (used by the OAuth2 login flow) needs itsdangerous.
+            AuthChoice.OAUTH2: ["authlib", "itsdangerous", "httpx"],
+            AuthChoice.FASTAPI_USERS: [
                 "fastapi-users[sqlalchemy]",
                 "python-jose[cryptography]",
                 "passlib[bcrypt]",
             ],
-            "Session-based": ["itsdangerous"],
-            "None": [],
+            AuthChoice.SESSION: ["itsdangerous"],
+            AuthChoice.NONE: [],
         },
-        "async_tasks": {
-            "Celery": ["celery[redis]", "redis"],
-            "Dramatiq": ["dramatiq[redis]", "redis"],
-            "None": [],
+        FeatureAxis.ASYNC_TASKS: {
+            AsyncTaskChoice.CELERY: ["celery[redis]", "redis[hiredis]"],
+            AsyncTaskChoice.DRAMATIQ: ["dramatiq[redis]", "redis[hiredis]"],
+            AsyncTaskChoice.NONE: [],
         },
-        "testing": {
-            "Basic": ["pytest", "pytest-asyncio", "httpx"],
-            "Coverage": ["pytest", "pytest-asyncio", "pytest-cov", "httpx"],
-            "Advanced": [
+        FeatureAxis.TESTING: {
+            TestingChoice.BASIC: ["pytest", "pytest-asyncio", "httpx"],
+            TestingChoice.COVERAGE: [
+                "pytest",
+                "pytest-asyncio",
+                "pytest-cov",
+                "httpx",
+            ],
+            TestingChoice.ADVANCED: [
                 "pytest",
                 "pytest-asyncio",
                 "pytest-cov",
@@ -148,46 +289,94 @@ class FastkitConfig:
                 "faker",
                 "factory-boy",
             ],
-            "None": [],
+            TestingChoice.NONE: [],
         },
-        "caching": {
-            "Redis": ["redis[hiredis]", "fastapi-cache2"],
-            "None": [],
+        FeatureAxis.CACHING: {
+            # fastapi-cache2 imports starlette.templating at module scope,
+            # which hard-requires jinja2 — without it the app fails to import.
+            CachingChoice.REDIS: ["redis[hiredis]", "fastapi-cache2", "jinja2"],
+            CachingChoice.NONE: [],
         },
-        "monitoring": {
-            "Loguru": ["loguru"],
-            "OpenTelemetry": [
+        FeatureAxis.MONITORING: {
+            MonitoringChoice.LOGURU: ["loguru"],
+            MonitoringChoice.OPENTELEMETRY: [
                 "opentelemetry-api",
                 "opentelemetry-sdk",
                 "opentelemetry-instrumentation-fastapi",
+                "opentelemetry-exporter-otlp-proto-http",
             ],
-            "Prometheus": ["prometheus-client", "prometheus-fastapi-instrumentator"],
-            "None": [],
+            MonitoringChoice.PROMETHEUS: [
+                "prometheus-client",
+                "prometheus-fastapi-instrumentator",
+            ],
+            MonitoringChoice.NONE: [],
         },
-        "utilities": {
-            "CORS": [],  # Built-in to FastAPI
-            "Rate-Limiting": ["slowapi"],
-            "Pagination": ["fastapi-pagination"],
-            "WebSocket": [],  # Built-in to FastAPI
-            "None": [],
+        FeatureAxis.UTILITIES: {
+            UtilityChoice.CORS: [],  # Built-in to FastAPI
+            UtilityChoice.RATE_LIMITING: ["slowapi"],
+            UtilityChoice.PAGINATION: ["fastapi-pagination"],
+            UtilityChoice.WEBSOCKET: ["websockets"],
+            UtilityChoice.NONE: [],
+        },
+        FeatureAxis.MIGRATIONS: {
+            MigrationsChoice.ALEMBIC: ["alembic"],
+            MigrationsChoice.NONE: [],
+        },
+        FeatureAxis.TOOLING: {
+            ToolingChoice.RUFF: ["ruff"],
+            ToolingChoice.PRE_COMMIT: ["pre-commit"],
+            ToolingChoice.GITHUB_ACTIONS: [],  # workflow file only
+            ToolingChoice.DEVCONTAINER: [],  # devcontainer.json only
+            ToolingChoice.MAKEFILE: [],  # Makefile only
+            ToolingChoice.NONE: [],
+        },
+        FeatureAxis.LOGGING: {
+            # Stdlib ``logging`` + ``json`` only — no third-party dependency.
+            LoggingChoice.STRUCTURED: [],
+            LoggingChoice.NONE: [],
         },
     }
 
     # Feature descriptions for display in interactive mode
     FEATURE_DESCRIPTIONS: dict[str, str] = {
-        "database": "Database and ORM selection",
-        "authentication": "User authentication and authorization",
-        "async_tasks": "Background task processing",
-        "testing": "Testing framework and tools",
-        "caching": "Response and data caching",
-        "monitoring": "Application monitoring and logging",
-        "utilities": "Additional utilities and middleware",
+        FeatureAxis.DATABASE: "Database and ORM selection",
+        FeatureAxis.AUTHENTICATION: "User authentication and authorization",
+        FeatureAxis.ASYNC_TASKS: "Background task processing",
+        FeatureAxis.TESTING: "Testing framework and tools",
+        FeatureAxis.CACHING: "Response and data caching",
+        FeatureAxis.MONITORING: "Application monitoring and logging",
+        FeatureAxis.UTILITIES: "Additional utilities and middleware",
+        FeatureAxis.MIGRATIONS: "Database schema migrations",
+        FeatureAxis.TOOLING: "Developer tooling and CI configuration",
+        FeatureAxis.LOGGING: "Application logging format",
     }
 
     # Testing Options
     TEST_SERVER_PORT: int = 8000
     TEST_DEFAULT_TERMINAL_WIDTH: int = 80
     TEST_MAX_TERMINAL_WIDTH: int = 1000
+
+    @classmethod
+    def get_subprocess_timeout(cls, kind: str = "default") -> int:
+        """
+        Resolve the subprocess timeout (in seconds) for a kind of operation.
+
+        The ``FASTKIT_SUBPROCESS_TIMEOUT`` environment variable overrides every
+        built-in value; an invalid value is ignored in favour of the default.
+
+        :param kind: One of ``check``, ``venv``, ``install`` or ``default``
+        :return: Timeout in seconds
+        """
+        override = os.environ.get(cls.SUBPROCESS_TIMEOUT_ENV_VAR)
+        if override:
+            try:
+                parsed = int(override)
+            except ValueError:
+                parsed = 0
+            if parsed > 0:
+                return parsed
+
+        return cls.SUBPROCESS_TIMEOUTS.get(kind, cls.SUBPROCESS_TIMEOUTS["default"])
 
     def set_debug_mode(self, debug_mode: bool = True) -> None:
         self.DEBUG_MODE = debug_mode

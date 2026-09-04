@@ -8,16 +8,24 @@
 # --------------------------------------------------------------------------
 import os
 import shutil
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
+from fastapi_fastkit.core.exceptions import TemplateExceptions
 from fastapi_fastkit.utils.logging import debug_log, get_logger
 
 logger = get_logger(__name__)
 
+#: Template-only metadata files that must never land in a generated project.
+#: ``template-config.yml`` drives the template inspector (test strategy, smoke
+#: test entrypoint); it is meaningless to a user's project, so it is filtered
+#: out during the copy instead of being deleted afterwards. The names listed
+#: here are the *converted* names (the ``-tpl`` marker already stripped).
+TEMPLATE_ONLY_FILES = frozenset({"template-config.yml"})
+
 
 def copy_and_convert_template(
     template_dir: str, target_dir: str, project_name: str = ""
-) -> None:
+) -> List[str]:
     """
     Copies all files from the template directory to the target directory,
     converting any files ending in `.*-tpl` during the copy process.
@@ -29,6 +37,11 @@ def copy_and_convert_template(
     :type target_dir: str
     :raises OSError: If directory operations fail
     :raises PermissionError: If file access is denied
+    :return: Absolute paths of the files this copy actually wrote. Callers use
+        the list to keep every later rewriting pass (placeholder substitution,
+        metadata injection) scoped to the deployed files, which matters when
+        the template is deployed in place into a directory that already holds
+        unrelated user files.
     """
     # If project_name is provided, create a subdirectory
     # Otherwise, copy directly to target_dir
@@ -40,16 +53,18 @@ def copy_and_convert_template(
         debug_log(f"Failed to create target directory {target_path}: {e}", "error")
         raise
 
-    _process_directory_tree(template_dir, target_path)
+    return _process_directory_tree(template_dir, target_path)
 
 
-def _process_directory_tree(template_dir: str, target_path: str) -> None:
+def _process_directory_tree(template_dir: str, target_path: str) -> List[str]:
     """
     Process directory tree and copy files with template conversion.
 
     :param template_dir: Source template directory
     :param target_path: Target directory path
+    :return: Absolute paths of the written files
     """
+    copied: List[str] = []
     for root, dirs, files in os.walk(template_dir):
         relative_path = os.path.relpath(root, template_dir)
 
@@ -60,51 +75,69 @@ def _process_directory_tree(template_dir: str, target_path: str) -> None:
             else os.path.join(target_path, relative_path)
         )
 
-        if not _ensure_directory_exists(destination_dir):
-            continue
+        _ensure_directory_exists(destination_dir)
 
         # Process files in current directory
         for file in files:
             src_file = os.path.join(root, file)
-            _copy_template_file(src_file, destination_dir, file)
+            dst_file = _copy_template_file(src_file, destination_dir, file)
+            if dst_file:
+                copied.append(dst_file)
+
+    return copied
 
 
-def _ensure_directory_exists(directory_path: str) -> bool:
+def _ensure_directory_exists(directory_path: str) -> None:
     """
     Ensure directory exists, create if it doesn't.
 
+    A failure here leaves the target tree half-written, so it is raised to the
+    caller instead of being swallowed - the caller is responsible for rollback.
+
     :param directory_path: Path to directory
-    :return: True if directory exists or was created successfully, False otherwise
+    :raises TemplateExceptions: If the directory cannot be created
     """
     try:
-        if not os.path.exists(directory_path):
-            os.makedirs(directory_path)
-        return True
+        os.makedirs(directory_path, exist_ok=True)
     except OSError as e:
         debug_log(f"Failed to create directory {directory_path}: {e}", "error")
-        return False
+        raise TemplateExceptions(
+            f"Failed to create directory {directory_path}: {e}"
+        ) from e
 
 
-def _copy_template_file(src_file: str, destination_dir: str, file_name: str) -> None:
+def _copy_template_file(
+    src_file: str, destination_dir: str, file_name: str
+) -> Optional[str]:
     """
     Copy a single template file with appropriate name conversion.
 
     :param src_file: Source file path
     :param destination_dir: Destination directory
     :param file_name: Original file name
+    :return: Absolute path of the written file, or None when the file was
+        skipped as template-only metadata
+    :raises TemplateExceptions: If the file cannot be copied
     """
-    try:
-        # Convert -tpl extension
-        dst_file_name = (
-            file_name.replace("-tpl", "") if file_name.endswith("-tpl") else file_name
-        )
-        dst_file = os.path.join(destination_dir, dst_file_name)
+    # Convert -tpl extension. ``removesuffix`` only strips the trailing marker,
+    # so a name such as "run-tpl-helper.py-tpl" keeps its inner "-tpl".
+    dst_file_name = file_name.removesuffix("-tpl")
+    if dst_file_name in TEMPLATE_ONLY_FILES:
+        debug_log(f"Skipping template-only file {src_file}", "debug")
+        return None
 
+    dst_file = os.path.join(destination_dir, dst_file_name)
+
+    try:
         shutil.copy2(src_file, dst_file)
         debug_log(f"Copied {src_file} to {dst_file}", "debug")
+        return dst_file
 
     except (OSError, PermissionError) as e:
         debug_log(f"Failed to copy file {src_file} to {dst_file}: {e}", "error")
+        raise TemplateExceptions(
+            f"Failed to copy file {src_file} to {dst_file}: {e}"
+        ) from e
 
 
 def copy_and_convert_template_file(

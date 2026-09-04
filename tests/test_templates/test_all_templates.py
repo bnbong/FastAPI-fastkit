@@ -12,7 +12,31 @@ from click.testing import CliRunner
 
 from fastapi_fastkit.cli import fastkit_cli
 from fastapi_fastkit.core.settings import FastkitConfig
-from fastapi_fastkit.utils.main import is_fastkit_project
+from fastapi_fastkit.utils.main import is_fastkit_project, read_fastkit_metadata
+
+#: Tokens a template declares for the generator to fill in.
+PLACEHOLDER_TOKENS = ("<project_name>", "<author>", "<author_email>", "<description>")
+
+#: File suffixes worth scanning for placeholder residue. "" covers extensionless
+#: files such as Dockerfile and .env, which templates do use placeholders in.
+_TEXT_SUFFIXES = {"", ".py", ".toml", ".md", ".txt", ".yml", ".yaml", ".ini", ".sh"}
+
+
+def _files_with_placeholder_residue(project_path: Path) -> List[str]:
+    """Return project-relative paths of files still carrying a placeholder."""
+    residue: List[str] = []
+    for path in project_path.rglob("*"):
+        if not path.is_file() or path.suffix.lower() not in _TEXT_SUFFIXES:
+            continue
+        if any(part in {".venv", "venv", "__pycache__"} for part in path.parts):
+            continue
+        try:
+            content = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            continue
+        if any(token in content for token in PLACEHOLDER_TOKENS):
+            residue.append(str(path.relative_to(project_path)))
+    return residue
 
 
 class TemplateTestConfig:
@@ -38,12 +62,30 @@ class TemplateTestConfig:
     @classmethod
     def get_template_metadata(cls, template_name: str) -> Dict[str, Any]:
         """Get template-specific test metadata"""
-        # You can customize test parameters per template here
+        # Every template is pyproject-first: ``pyproject.toml`` is the single
+        # metadata file, and ``setup.py-tpl`` no longer ships with any of them.
         metadata = {
-            "expected_files": ["setup.py", "README.md", "src/main.py"],
+            "expected_files": ["pyproject.toml", "README.md", "src/main.py"],
             "required_dirs": ["src", "tests"],
             "package_manager": "uv",  # Default package manager
         }
+
+        # Layout shared by the modern ``src/app/`` templates: the FastAPI app
+        # lives under ``src/app/main.py`` with routers grouped per domain.
+        app_layout_files = [
+            "README.md",
+            "pyproject.toml",
+            "src/app/main.py",
+            "src/app/core/config.py",
+            "src/app/api/health.py",
+        ]
+        app_layout_dirs = [
+            "src",
+            "tests",
+            "src/app",
+            "src/app/core",
+            "src/app/api",
+        ]
 
         # Template-specific customizations
         template_configs = {
@@ -57,28 +99,63 @@ class TemplateTestConfig:
             "fastapi-mcp": {
                 "expected_files": list(metadata["expected_files"]),
             },
-            # Pyproject-first domain-oriented starter — no setup.py, the
-            # FastAPI app entry point lives under src/app/, and domains are
-            # grouped under src/app/domains/.
+            # Pyproject-first domain-oriented starter — the FastAPI app entry
+            # point lives under src/app/, and domains are grouped under
+            # src/app/domains/.
             "fastapi-domain-starter": {
-                "expected_files": [
-                    "README.md",
-                    "pyproject.toml",
-                    "src/app/main.py",
-                    "src/app/core/config.py",
-                    "src/app/api/health.py",
+                "expected_files": app_layout_files
+                + ["src/app/domains/items/router.py"],
+                "required_dirs": app_layout_dirs
+                + ["src/app/db", "src/app/domains", "src/app/domains/items"],
+            },
+            # JWT authentication starter: auth + users domains on top of the
+            # same src/app layout, with Alembic migrations for the schema.
+            "fastapi-auth-jwt": {
+                "expected_files": app_layout_files
+                + [
+                    "alembic.ini",
+                    "src/app/core/security.py",
+                    "src/app/domains/auth/router.py",
+                    "src/app/domains/users/router.py",
+                ],
+                "required_dirs": app_layout_dirs
+                + [
+                    "src/app/db",
+                    "src/app/alembic",
+                    "src/app/domains",
+                    "src/app/domains/auth",
+                    "src/app/domains/users",
+                ],
+            },
+            # SQLModel starter: shared CRUD helpers plus an items domain.
+            "fastapi-sqlmodel": {
+                "expected_files": app_layout_files
+                + [
+                    "alembic.ini",
+                    "src/app/crud/base.py",
                     "src/app/domains/items/router.py",
                 ],
-                "required_dirs": [
-                    "src",
-                    "tests",
-                    "src/app",
-                    "src/app/core",
+                "required_dirs": app_layout_dirs
+                + [
                     "src/app/db",
-                    "src/app/api",
+                    "src/app/crud",
+                    "src/app/alembic",
                     "src/app/domains",
                     "src/app/domains/items",
                 ],
+            },
+            # LLM agent starter: chat endpoint backed by an llm/ package and a
+            # pluggable conversation memory.
+            "fastapi-llm-agent": {
+                "expected_files": app_layout_files
+                + [
+                    "src/app/api/chat.py",
+                    "src/app/llm/agent.py",
+                    "src/app/memory/base.py",
+                    "src/app/schemas/chat.py",
+                ],
+                "required_dirs": app_layout_dirs
+                + ["src/app/llm", "src/app/memory", "src/app/schemas"],
             },
         }
 
@@ -196,19 +273,35 @@ class TestAllTemplates:
         project_path = Path(temp_dir) / project_name
         assert result.exit_code == 0
 
-        # Check setup.py contains injected metadata
-        setup_py = project_path / "setup.py"
-        if setup_py.exists():
-            setup_content = setup_py.read_text()
-            assert (
-                project_name in setup_content
-            ), f"Project name not found in setup.py for {template_name}"
-            assert (
-                author in setup_content
-            ), f"Author not found in setup.py for {template_name}"
-            assert (
-                author_email in setup_content
-            ), f"Author email not found in setup.py for {template_name}"
+        # pyproject.toml is the metadata file every template ships.
+        pyproject = project_path / "pyproject.toml"
+        assert pyproject.exists(), f"pyproject.toml missing for {template_name}"
+        pyproject_content = pyproject.read_text()
+        assert (
+            project_name in pyproject_content
+        ), f"Project name not found in pyproject.toml for {template_name}"
+        assert (
+            author in pyproject_content
+        ), f"Author not found in pyproject.toml for {template_name}"
+        assert (
+            author_email in pyproject_content
+        ), f"Author email not found in pyproject.toml for {template_name}"
+
+        # Placeholders must not survive anywhere in the generated project —
+        # README.md, .env and tests/conftest.py use them too, not just the
+        # metadata files.
+        residue = _files_with_placeholder_residue(project_path)
+        assert (
+            not residue
+        ), f"Unsubstituted placeholders in {template_name}: " + ", ".join(
+            sorted(residue)
+        )
+
+        # template-config.yml drives the template inspector and must never be
+        # copied into a user's project.
+        assert not (project_path / "template-config.yml").exists(), (
+            f"template-config.yml leaked into generated project for " f"{template_name}"
+        )
 
     def test_template_discovery(self) -> None:
         """Test that template discovery works correctly"""
@@ -239,12 +332,17 @@ class TestAllTemplates:
         ``pip``, ``pdm``, or ``poetry`` from the CLI prompt — otherwise the
         recommended modern default would be silently broken on three of the
         four supported package managers.
+
+        Run with ``--no-venv``: what is under test is the generation pipeline
+        (template copy, metadata injection, dependency file for the chosen
+        manager), not whether ``pdm``/``poetry`` happen to be installed on the
+        machine running the suite.
         """
         # Given
         project_name = f"manager-test-{package_manager}"
         result = self.runner.invoke(
             fastkit_cli,
-            ["startdemo", "fastapi-domain-starter"],
+            ["startdemo", "fastapi-domain-starter", "--no-venv"],
             input="\n".join(
                 [
                     project_name,
@@ -265,11 +363,24 @@ class TestAllTemplates:
             f"{package_manager}: {result.output}"
         )
         assert (
+            "Success" in result.output
+        ), f"No success message for {package_manager}: {result.output}"
+        assert (
             project_path.exists()
         ), f"Project directory missing for {package_manager} run"
         assert is_fastkit_project(str(project_path))
         assert (project_path / "pyproject.toml").exists()
         assert (project_path / "src" / "app" / "main.py").exists()
+        assert (project_path / "src" / "app" / "api" / "health.py").exists()
+        assert (project_path / "tests").is_dir()
+
+        # The recorded package manager must match what the user picked, so
+        # later fastkit commands drive the right tool.
+        metadata = read_fastkit_metadata(str(project_path))
+        assert metadata.get("package_manager") == package_manager
+        assert metadata.get("app_module") == "src.app.main:app"
+
+        assert not _files_with_placeholder_residue(project_path)
 
     @pytest.mark.parametrize("template_name", TemplateTestConfig.discover_templates())
     def test_template_structure_validation(self, template_name: str) -> None:
@@ -287,10 +398,13 @@ class TestAllTemplates:
         readme_path = template_path / "README.md-tpl"
         assert readme_path.exists(), f"README.md-tpl not found in {template_name}"
 
-        # Should have at least one metadata file (pyproject.toml-tpl preferred,
-        # setup.py-tpl accepted for backward compatibility).
+        # Templates are pyproject-first: pyproject.toml-tpl is the metadata
+        # file, and no template may reintroduce a setup.py-tpl shim.
         pyproject_path = template_path / "pyproject.toml-tpl"
-        setup_path = template_path / "setup.py-tpl"
         assert (
-            pyproject_path.exists() or setup_path.exists()
-        ), f"Neither pyproject.toml-tpl nor setup.py-tpl found in {template_name}"
+            pyproject_path.exists()
+        ), f"pyproject.toml-tpl not found in {template_name}"
+        assert not (template_path / "setup.py-tpl").exists(), (
+            f"{template_name} ships a setup.py-tpl; declare metadata in "
+            f"pyproject.toml-tpl instead"
+        )

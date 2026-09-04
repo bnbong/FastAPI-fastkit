@@ -2,6 +2,7 @@
 # --------------------------------------------------------------------------
 # Inspect only changed FastAPI templates (for pre-commit / local use)
 # --------------------------------------------------------------------------
+import argparse
 import os
 import subprocess
 import sys
@@ -14,7 +15,10 @@ from typing import List, Set
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
-from fastapi_fastkit.backend.inspector import inspect_fastapi_template  # noqa: E402
+from fastapi_fastkit.backend.inspector import (  # noqa: E402
+    InspectionOptions,
+    inspect_fastapi_template,
+)
 
 TEMPLATE_DIR = PROJECT_ROOT / "src" / "fastapi_fastkit" / "fastapi_project_template"
 
@@ -71,7 +75,34 @@ def extract_changed_templates(changed_files: List[str]) -> List[str]:
     return sorted([t for t in templates if (TEMPLATE_DIR / t).is_dir()])
 
 
+def parse_args() -> argparse.Namespace:
+    """Parse the inspection switches shared with inspect-templates.py."""
+    parser = argparse.ArgumentParser(description="Inspect changed FastAPI templates")
+    parser.add_argument(
+        "--offline",
+        action="store_true",
+        help="Skip every network lookup (dependency freshness reporting)",
+    )
+    parser.add_argument(
+        "--no-smoke",
+        action="store_true",
+        help="Skip booting the generated project with uvicorn",
+    )
+    parser.add_argument(
+        "--mypy",
+        action="store_true",
+        help="Type check the generated project with mypy (slow)",
+    )
+    return parser.parse_args()
+
+
 def main() -> int:
+    args = parse_args()
+    options = InspectionOptions(
+        offline=args.offline,
+        run_smoke_test=not args.no_smoke,
+        run_mypy=args.mypy,
+    )
     changed_files = get_changed_files()
     changed_templates = extract_changed_templates(changed_files)
 
@@ -86,7 +117,7 @@ def main() -> int:
         t_path = TEMPLATE_DIR / template
         print(f"Inspecting changed template: {template}\n  Path: {t_path}")
         try:
-            result = inspect_fastapi_template(str(t_path))
+            result = inspect_fastapi_template(str(t_path), options=options)
             if not result.get("is_valid", False):
                 any_failed = True
         except Exception as e:

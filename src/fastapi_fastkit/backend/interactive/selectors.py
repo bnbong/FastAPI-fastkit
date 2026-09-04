@@ -13,6 +13,7 @@ from typing import Any, Dict, List, Optional
 from rich.panel import Panel
 from rich.table import Table
 
+from fastapi_fastkit.core.settings import MULTI_SELECT_AXES
 from fastapi_fastkit.utils.main import console
 
 
@@ -177,10 +178,25 @@ def confirm_selections(config: Dict[str, Any]) -> bool:
     if testing_type != "None":
         table.add_row("Testing", testing_type)
 
+    # Logging format
+    logging_type = config.get("logging", "None")
+    if logging_type != "None":
+        table.add_row("Logging", logging_type)
+
+    # Migrations
+    migrations_type = config.get("migrations", "None")
+    if migrations_type != "None":
+        table.add_row("Migrations", migrations_type)
+
     # Utilities
     utilities = config.get("utilities", [])
     if utilities:
         table.add_row("Utilities", ", ".join(utilities))
+
+    # Developer tooling
+    tooling = config.get("tooling", [])
+    if tooling:
+        table.add_row("Tooling", ", ".join(tooling))
 
     # Custom packages
     custom = config.get("custom_packages", [])
@@ -229,8 +245,8 @@ def display_feature_catalog(
     console.print(panel)
 
     for category, options in catalog.items():
-        if category == "utilities":
-            continue  # Skip utilities as they may have empty package lists
+        if category in MULTI_SELECT_AXES:
+            continue  # Skip multi-selects: several options ship no packages
 
         desc = descriptions.get(category, category.title())
         table = Table(title=f"{desc}", show_header=True, header_style="bold yellow")

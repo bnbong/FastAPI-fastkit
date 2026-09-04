@@ -1,0 +1,201 @@
+# --------------------------------------------------------------------------
+# End-to-end authentication flow:
+#   register -> login -> /users/me -> refresh rotation -> logout
+# plus the rejection paths (bad credentials, bad / expired tokens).
+# --------------------------------------------------------------------------
+from datetime import timedelta
+from typing import Any, Dict
+
+import pytest
+from httpx import AsyncClient
+from src.app.core.security import (
+    ACCESS_TOKEN_TYPE,
+    REFRESH_TOKEN_TYPE,
+    _create_token,
+)
+
+from tests.conftest import API
+
+
+@pytest.mark.asyncio
+async def test_full_auth_flow(client: AsyncClient) -> None:
+    # 1. register
+    register = await client.post(
+        f"{API}/auth/register",
+        json={
+            "email": "bob@example.com",
+            "password": "another-s3cret",
+            "full_name": "Bob",
+        },
+    )
+    assert register.status_code == 201
+    assert register.json()["email"] == "bob@example.com"
+    assert register.json()["scopes"] == ["me"]
+
+    # 2. login (OAuth2 password form)
+    login = await client.post(
+        f"{API}/auth/login",
+        data={"username": "bob@example.com", "password": "another-s3cret"},
+    )
+    assert login.status_code == 200
+    tokens = login.json()
+    assert tokens["token_type"] == "bearer"
+
+    headers = {"Authorization": f"Bearer {tokens['access_token']}"}
+
+    # 3. /users/me
+    me = await client.get(f"{API}/users/me", headers=headers)
+    assert me.status_code == 200
+    assert me.json()["email"] == "bob@example.com"
+
+    # 4. refresh rotation — new pair, old refresh token now dead
+    refreshed = await client.post(
+        f"{API}/auth/refresh", json={"refresh_token": tokens["refresh_token"]}
+    )
+    assert refreshed.status_code == 200
+    new_tokens = refreshed.json()
+    assert new_tokens["refresh_token"] != tokens["refresh_token"]
+
+    replay = await client.post(
+        f"{API}/auth/refresh", json={"refresh_token": tokens["refresh_token"]}
+    )
+    assert replay.status_code == 401
+
+    # 5. logout revokes the current refresh token
+    logout = await client.post(
+        f"{API}/auth/logout", json={"refresh_token": new_tokens["refresh_token"]}
+    )
+    assert logout.status_code == 204
+
+    after_logout = await client.post(
+        f"{API}/auth/refresh", json={"refresh_token": new_tokens["refresh_token"]}
+    )
+    assert after_logout.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_register_rejects_duplicate_email(
+    client: AsyncClient, registered_user: Dict[str, Any]
+) -> None:
+    response = await client.post(
+        f"{API}/auth/register", json=registered_user["credentials"]
+    )
+
+    assert response.status_code == 409
+
+
+@pytest.mark.asyncio
+async def test_register_rejects_short_password(client: AsyncClient) -> None:
+    response = await client.post(
+        f"{API}/auth/register", json={"email": "short@example.com", "password": "abc"}
+    )
+
+    assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_login_with_wrong_password_is_rejected(
+    client: AsyncClient, registered_user: Dict[str, Any]
+) -> None:
+    response = await client.post(
+        f"{API}/auth/login",
+        data={
+            "username": registered_user["credentials"]["email"],
+            "password": "not-the-password",
+        },
+    )
+
+    assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_login_with_unknown_email_is_rejected(client: AsyncClient) -> None:
+    response = await client.post(
+        f"{API}/auth/login",
+        data={"username": "nobody@example.com", "password": "whatever-123"},
+    )
+
+    assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_malformed_token_is_rejected(client: AsyncClient) -> None:
+    response = await client.get(
+        f"{API}/users/me", headers={"Authorization": "Bearer not-a-jwt"}
+    )
+
+    assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_expired_access_token_is_rejected(
+    client: AsyncClient, registered_user: Dict[str, Any]
+) -> None:
+    expired, _, _ = _create_token(
+        str(registered_user["user"]["id"]),
+        ACCESS_TOKEN_TYPE,
+        timedelta(minutes=-5),
+        ["me"],
+    )
+
+    response = await client.get(
+        f"{API}/users/me", headers={"Authorization": f"Bearer {expired}"}
+    )
+
+    assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_refresh_token_is_not_accepted_as_access_token(
+    client: AsyncClient, tokens: Dict[str, str]
+) -> None:
+    response = await client.get(
+        f"{API}/users/me",
+        headers={"Authorization": f"Bearer {tokens['refresh_token']}"},
+    )
+
+    assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_access_token_is_not_accepted_for_refresh(
+    client: AsyncClient, tokens: Dict[str, str]
+) -> None:
+    response = await client.post(
+        f"{API}/auth/refresh", json={"refresh_token": tokens["access_token"]}
+    )
+
+    assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_unknown_refresh_token_is_rejected(client: AsyncClient) -> None:
+    unknown, _, _ = _create_token("1", REFRESH_TOKEN_TYPE, timedelta(days=1), ["me"])
+
+    response = await client.post(f"{API}/auth/refresh", json={"refresh_token": unknown})
+
+    assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_logout_all_revokes_every_session(
+    client: AsyncClient, registered_user: Dict[str, Any]
+) -> None:
+    credentials = registered_user["credentials"]
+    form = {"username": credentials["email"], "password": credentials["password"]}
+
+    first = (await client.post(f"{API}/auth/login", data=form)).json()
+    second = (await client.post(f"{API}/auth/login", data=form)).json()
+
+    logout_all = await client.post(
+        f"{API}/auth/logout-all",
+        headers={"Authorization": f"Bearer {second['access_token']}"},
+    )
+    assert logout_all.status_code == 204
+
+    for session_tokens in (first, second):
+        response = await client.post(
+            f"{API}/auth/refresh",
+            json={"refresh_token": session_tokens["refresh_token"]},
+        )
+        assert response.status_code == 401

@@ -1,0 +1,16 @@
+name: "FastAPI SQLModel"
+description: "SQLModel + Alembic async persistence layer with a generic CRUD base and pagination"
+category: "database"
+requires_docker: false
+
+# Testing configuration
+testing:
+  strategy: "sqlite-mock"
+  database_url: "sqlite+aiosqlite:///:memory:"
+  test_command: "pytest tests/ -v"
+
+# Default values for testing
+test_env_defaults:
+  DATABASE_URL: "sqlite+aiosqlite:///:memory:"
+  SECRET_KEY: "test_secret"
+  ENVIRONMENT: "development"

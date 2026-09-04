@@ -1,5 +1,8 @@
 # Dockerized FastAPI Item Management API
 
+> **Deprecated**: This template is deprecated. Use `fastkit init --interactive` and select
+> the Docker option, or start from the `fastapi-default` template instead.
+
 This project is a Docker containerized FastAPI-based item management API application.
 
 ## Requirements

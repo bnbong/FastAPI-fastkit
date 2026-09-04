@@ -1,0 +1,41 @@
+{% include "header.j2" %}
+"""Dramatiq broker and example actors.
+
+Run the worker next to the API with::
+
+    dramatiq {{ pkg }}.worker
+"""
+
+import logging
+import os
+from typing import Any
+
+import dramatiq
+from dramatiq.brokers.redis import RedisBroker
+from dramatiq.results import Results
+from dramatiq.results.backends import RedisBackend
+
+BROKER_URL = os.getenv("DRAMATIQ_BROKER_URL", "redis://localhost:6379/0")
+
+result_backend = RedisBackend(url=BROKER_URL)
+broker = RedisBroker(url=BROKER_URL)
+broker.add_middleware(Results(backend=result_backend))
+dramatiq.set_broker(broker)
+
+logger = logging.getLogger(__name__)
+
+
+@dramatiq.actor(max_retries=3, min_backoff=1000, store_results=True)
+def example_task(payload: dict[str, Any]) -> dict[str, Any]:
+    """Example actor: echoes its payload back after a bit of "work".
+
+    ``max_retries`` + ``min_backoff`` give the same exponential-backoff
+    behaviour Celery's ``retry_backoff`` provides.
+    """
+    logger.info("processing payload %s", payload)
+    return {"received": payload}
+
+
+def enqueue_example(payload: dict[str, Any]) -> Any:
+    """Submit :func:`example_task` and return the Dramatiq message."""
+    return example_task.send(payload)

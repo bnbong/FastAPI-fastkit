@@ -21,6 +21,9 @@ The rest of this page explains why, and when to pick something else.
 | Want the smallest possible scaffold | `fastkit init --interactive` (preset: **`minimal`**) |
 | Writing a quick prototype / single-file script | `fastkit init --interactive` (preset: **`single-module`**) |
 | Need a real database (PostgreSQL + SQLAlchemy + Alembic) | `fastkit startdemo fastapi-psql-orm` |
+| Want async persistence with migrations and generic CRUD | `fastkit startdemo fastapi-sqlmodel` |
+| Need user accounts, login and protected routes on day one | `fastkit startdemo fastapi-auth-jwt` |
+| Building an LLM chat backend with streaming and tools | `fastkit startdemo fastapi-llm-agent` |
 | Want production-style domain layout for a medium-sized API | `fastkit init --interactive` (preset: **`domain-starter`**) |
 
 ## `startdemo` vs `init --interactive` — what's the difference?
@@ -154,11 +157,61 @@ Docker tooling, etc.).
 | `fastapi-empty` | `minimal` | Bare scaffold; same shape `minimal` lands on. |
 | `fastapi-single-module` | `single-module` | Single-file demo. |
 | `fastapi-domain-starter` | `domain-starter` | Recommended modern default; ships with an items domain example. |
-| `fastapi-async-crud` | `classic-layered` | Async-flavoured equivalent of `fastapi-default`. |
+| `fastapi-auth-jwt` | `domain-starter` | Your API needs accounts. Access/refresh tokens, argon2id hashing, roles and scopes, Alembic migrations. |
+| `fastapi-sqlmodel` | `domain-starter` | Async persistence first: SQLModel + async SQLAlchemy, migrations, a generic CRUD base and paginated lists. |
+| `fastapi-llm-agent` | `domain-starter` | A streaming Claude chat backend with a real tool-call loop and offline tests. |
 | `fastapi-custom-response` | `classic-layered` | Demonstrates custom response envelopes / formatting. |
-| `fastapi-dockerized` | `classic-layered` | Adds a production-ready Dockerfile to the default layout. |
-| `fastapi-psql-orm` | (no direct preset) | PostgreSQL + SQLAlchemy + Alembic. Pick this when you need a real database. |
+| `fastapi-psql-orm` | (no direct preset) | PostgreSQL + SQLAlchemy + Alembic, synchronous. Pick this when you want a Compose stack around a real database. |
 | `fastapi-mcp` | (no direct preset) | Model Context Protocol integration. |
+| `fastapi-async-crud` | `classic-layered` | ⚠️ **Deprecated.** Async-flavoured equivalent of `fastapi-default`; prefer `fastapi-sqlmodel`. |
+| `fastapi-dockerized` | `classic-layered` | ⚠️ **Deprecated.** Adds a Dockerfile to the default layout; every current template ships one. |
+
+### The three newer starters
+
+Added in v1.4.0, all three follow the `domain-starter` shape (`src/app/`
+with per-concept folders) so they compose with what you already know from
+that preset.
+
+**`fastapi-auth-jwt` — authentication that survives contact with production.**
+Access tokens are short-lived; refresh tokens rotate on every use and are
+tracked by their `jti` in the database, so a replayed token is rejected
+rather than silently accepted. Passwords are hashed with argon2id via
+`pwdlib`. Logout is real: revoke one session or every session of a user.
+Guards ship as dependencies — `get_current_user`,
+`get_current_active_superuser`, and a `require_scopes(...)` factory. It runs
+on SQLite with no external services and moves to PostgreSQL by setting
+`DATABASE_URL`. Walkthrough: [JWT Authentication](../tutorial/auth-jwt.md).
+
+**`fastapi-sqlmodel` — one model definition per concept.**
+A SQLModel class is both the SQLAlchemy table and the pydantic schema, so a
+new column is declared once and every request/response schema inherits it.
+Async all the way down, async Alembic migrations, a `CRUDBase` that supplies
+create / read / list / count / update / delete so each domain only writes
+what is specific to it, and list endpoints wrapped in a page envelope.
+Walkthrough: [SQLModel Persistence](../tutorial/sqlmodel.md).
+
+**`fastapi-llm-agent` — a chat backend, not a `POST /completion` wrapper.**
+Tokens stream to the client over SSE, and a tool-call loop runs until the
+model is done or the iteration cap fires. Conversation history sits behind a
+`ConversationStore` interface, so moving from the bundled dict to Redis is
+one implementation. The test suite replaces the Anthropic client with a
+scripted fake — deterministic, offline, no API key.
+Walkthrough: [LLM Agent](../tutorial/llm-agent.md).
+
+### About the deprecated templates
+
+`fastapi-async-crud` and `fastapi-dockerized` are still shipped and still
+generate working projects — nothing breaks if you use them. They are marked
+deprecated because the reason to pick them has gone away:
+
+- `fastapi-dockerized` existed to add a Dockerfile. Every current template
+  ships one, and interactive deployment selection generates Docker files for
+  any preset.
+- `fastapi-async-crud` demonstrated async endpoints over a mock store.
+  `fastapi-sqlmodel` does the same thing against a real async database, with
+  migrations.
+
+Existing projects generated from either template need no action.
 
 `fastkit list-templates` shows the live list with one-line descriptions.
 
@@ -190,6 +243,10 @@ is the reference page for that.
 - [Quick Start](quick-start.md) — actually create your first project.
 - [Creating Projects](creating-projects.md) — deeper walkthrough of the
   CLI flags.
+- [JWT Authentication tutorial](../tutorial/auth-jwt.md),
+  [SQLModel Persistence tutorial](../tutorial/sqlmodel.md), and
+  [LLM Agent tutorial](../tutorial/llm-agent.md) — end-to-end walkthroughs
+  of the three starters added in v1.4.0.
 - [Domain-oriented Project tutorial](../tutorial/domain-starter.md) —
   if you picked `domain-starter`, this is the end-to-end walkthrough of
   the generated tree, the bundled `items` example, and how to add your

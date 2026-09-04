@@ -1,2050 +1,1046 @@
 # --------------------------------------------------------------------------
 # Testcases of inspector module.
 #
+# The inspector's individual checks are covered in test_inspector_checks.py;
+# this module covers the TemplateInspector lifecycle, the static template
+# checks, the test strategies and the public facade.
+#
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
-import json
 import os
 import subprocess
 import tempfile
-import unittest.mock
 from pathlib import Path
-from unittest.mock import MagicMock, mock_open, patch
+from typing import Any, Dict, Optional
+from unittest.mock import MagicMock, patch
 
 import pytest
 
+from fastapi_fastkit.backend.inspection import strategies as strategies_module
+from fastapi_fastkit.backend.inspection.context import (
+    InspectionContext,
+    InspectionOptions,
+)
+from fastapi_fastkit.backend.inspection.docker import DockerCompose
 from fastapi_fastkit.backend.inspector import (
     TemplateInspector,
     inspect_fastapi_template,
 )
 
+PYPROJECT_TPL = """
+[project]
+name = "<project_name>"
+requires-python = ">=3.12"
+dependencies = ["fastapi>=0.115.8", "uvicorn>=0.34.0"]
 
-class TestTemplateInspector:
-    """Test cases for TemplateInspector class."""
+[tool.black]
+target-version = ["py312"]
+
+[tool.mypy]
+python_version = "3.12"
+"""
+
+MAIN_TPL = """
+from fastapi import FastAPI
+
+app = FastAPI()
+
+
+@app.get("/")
+def read_root() -> dict:
+    return {"Hello": "World"}
+"""
+
+
+class InspectorTestBase:
+    """Shared synthetic template fixture."""
 
     def setup_method(self) -> None:
-        """Setup method for each test."""
         self.temp_template_dir = tempfile.mkdtemp()
         self.template_path = Path(self.temp_template_dir)
 
     def teardown_method(self) -> None:
-        """Cleanup method for each test."""
-        # Clean up temp directories
         import shutil
 
         if os.path.exists(self.temp_template_dir):
             shutil.rmtree(self.temp_template_dir)
 
     def create_valid_template_structure(self) -> None:
-        """Create a valid template structure for testing."""
-        # Create required directories
+        """Create a template that satisfies every static check."""
         (self.template_path / "tests").mkdir(exist_ok=True)
         (self.template_path / "src").mkdir(exist_ok=True)
 
-        # Create required files
         (self.template_path / "requirements.txt-tpl").write_text(
-            "fastapi==0.104.1\nuvicorn==0.24.0"
+            "fastapi==0.115.8\nuvicorn==0.34.0\n"
         )
-        (self.template_path / "setup.py-tpl").write_text(
-            "from setuptools import setup\nsetup(name='test')"
-        )
+        (self.template_path / "pyproject.toml-tpl").write_text(PYPROJECT_TPL)
         (self.template_path / "README.md-tpl").write_text("# Test Template")
+        (self.template_path / "src" / "main.py-tpl").write_text(MAIN_TPL)
+        (self.template_path / "tests" / "test_example.py-tpl").write_text(
+            "def test_example() -> None:\n    assert True\n"
+        )
 
-        # Create main.py-tpl with FastAPI app
-        main_content = """
-from fastapi import FastAPI
+    def make_inspector(
+        self, temp_dir: str, options: Optional[InspectionOptions] = None
+    ) -> TemplateInspector:
+        """Build an inspector without entering the context manager."""
+        return TemplateInspector(str(self.template_path), temp_dir, options)
 
-app = FastAPI()
 
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
-"""
-        (self.template_path / "src" / "main.py-tpl").write_text(main_content)
+class TestTemplateInspectorLifecycle(InspectorTestBase):
+    """Construction, context management and cleanup."""
 
-        # Create test file
-        test_content = """
-def test_example():
-    assert True
-"""
-        (self.template_path / "tests" / "test_example.py-tpl").write_text(test_content)
-
-    def test_init(self, temp_dir: str) -> None:
-        """Test TemplateInspector initialization."""
+    def test_init_uses_template_specific_temp_dir(self, temp_dir: str) -> None:
         # given
         self.create_valid_template_structure()
 
         # when
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
+        inspector = self.make_inspector(temp_dir)
 
         # then
         assert inspector.template_path == self.template_path
+        assert inspector.temp_dir == os.path.join(
+            temp_dir, f"temp_{self.template_path.name}"
+        )
         assert inspector.errors == []
         assert inspector.warnings == []
-        # Check that temp_dir uses template name for uniqueness
-        template_name = Path(self.template_path).name
-        expected_temp_dir = f"temp_{template_name}"
-        assert inspector.temp_dir.endswith(expected_temp_dir)
-        assert temp_dir in inspector.temp_dir
 
-    def test_check_file_structure_valid(self, temp_dir: str) -> None:
-        """Test _check_file_structure with valid structure."""
+    def test_init_defaults_temp_dir_to_backend_package(self) -> None:
         # given
         self.create_valid_template_structure()
 
         # when
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-            result = inspector._check_file_structure()
+        inspector = TemplateInspector(str(self.template_path))
 
         # then
-        assert result is True
-        assert inspector.errors == []
+        assert inspector.temp_dir.endswith(f"temp_{self.template_path.name}")
+        assert os.path.basename(os.path.dirname(inspector.temp_dir)) == "backend"
 
-    def test_check_file_structure_missing_files(self, temp_dir: str) -> None:
-        """Test _check_file_structure with missing files."""
-        # given
-        # Don't create the required structure
-
-        # when
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-            result = inspector._check_file_structure()
-
-        # then
-        assert result is False
-        assert len(inspector.errors) > 0
-        assert any("Missing required path:" in error for error in inspector.errors)
-
-    def test_check_file_extensions_valid(self, temp_dir: str) -> None:
-        """Test _check_file_extensions with valid extensions."""
-        # given
-        self.create_valid_template_structure()
-
-        # when
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-            result = inspector._check_file_extensions()
-
-        # then
-        assert result is True
-        assert inspector.errors == []
-
-    def test_check_file_extensions_invalid(self, temp_dir: str) -> None:
-        """Test _check_file_extensions with invalid .py files."""
-        # given
-        self.create_valid_template_structure()
-        # Create an invalid .py file (should be .py-tpl)
-        (self.template_path / "invalid.py").write_text("# Invalid file")
-
-        # when
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-            result = inspector._check_file_extensions()
-
-        # then
-        assert result is False
-        assert len(inspector.errors) > 0
-        assert any(
-            "Found .py file instead of .py-tpl:" in error for error in inspector.errors
-        )
-
-    def test_check_dependencies_valid(self, temp_dir: str) -> None:
-        """Test _check_dependencies with valid dependencies."""
-        # given
-        self.create_valid_template_structure()
-
-        # when
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-            result = inspector._check_dependencies()
-
-        # then
-        assert result is True
-        assert inspector.errors == []
-
-    def test_check_dependencies_missing_fastapi(self, temp_dir: str) -> None:
-        """Test _check_dependencies without FastAPI dependency."""
-        # given
-        (self.template_path / "tests").mkdir(exist_ok=True)
-        (self.template_path / "requirements.txt-tpl").write_text("uvicorn==0.24.0")
-        (self.template_path / "setup.py-tpl").write_text("from setuptools import setup")
-        (self.template_path / "README.md-tpl").write_text("# Test")
-
-        # when
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-            result = inspector._check_dependencies()
-
-        # then
-        assert result is False
-        assert any(
-            "FastAPI dependency not found" in error for error in inspector.errors
-        )
-
-    def _make_pyproject_template(self, dependencies: list[str]) -> None:
-        """Scaffold a pyproject-only template with the given ``[project].dependencies``."""
-        (self.template_path / "tests").mkdir(exist_ok=True)
-        (self.template_path / "src").mkdir(exist_ok=True)
-        (self.template_path / "README.md-tpl").write_text("# Pyproject-only Template")
-        deps_block = ",\n    ".join(f'"{d}"' for d in dependencies)
-        (self.template_path / "pyproject.toml-tpl").write_text(
-            "[project]\n"
-            'name = "<project_name>"\n'
-            'version = "0.1.0"\n'
-            'description = "[fastapi-fastkit templated] pyproject-only"\n'
-            "dependencies = [\n"
-            f"    {deps_block}\n"
-            "]\n"
-        )
-        (self.template_path / "src" / "main.py-tpl").write_text(
-            "from fastapi import FastAPI\napp = FastAPI()\n"
-        )
-        (self.template_path / "tests" / "test_example.py-tpl").write_text(
-            "def test_example():\n    assert True\n"
-        )
-
-    def test_check_file_structure_pyproject_only(self, temp_dir: str) -> None:
-        """A template with only pyproject.toml-tpl (no setup.py-tpl) passes structure."""
-        # given
-        self._make_pyproject_template(["fastapi>=0.115.0"])
-
-        # when
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-            result = inspector._check_file_structure()
-
-        # then
-        assert result is True
-        assert inspector.errors == []
-
-    def test_check_file_structure_missing_metadata(self, temp_dir: str) -> None:
-        """Structure check fails when neither pyproject.toml-tpl nor setup.py-tpl exists."""
-        # given
-        (self.template_path / "tests").mkdir(exist_ok=True)
-        (self.template_path / "README.md-tpl").write_text("# Test")
-
-        # when
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-            result = inspector._check_file_structure()
-
-        # then
-        assert result is False
-        assert any(
-            "pyproject.toml-tpl" in error and "setup.py-tpl" in error
-            for error in inspector.errors
-        )
-
-    def test_check_dependencies_pyproject_with_fastapi(self, temp_dir: str) -> None:
-        """Pyproject-only template with fastapi in [project].dependencies passes."""
-        # given
-        self._make_pyproject_template(["fastapi>=0.115.8", "uvicorn[standard]>=0.34.0"])
-
-        # when
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-            result = inspector._check_dependencies()
-
-        # then
-        assert result is True
-        assert inspector.errors == []
-
-    def test_check_dependencies_pyproject_without_fastapi(self, temp_dir: str) -> None:
-        """Pyproject-only template missing fastapi fails with a clear error."""
-        # given
-        # fastapi-users must not be confused with fastapi during name normalization.
-        self._make_pyproject_template(["fastapi-users>=13.0", "uvicorn>=0.34.0"])
-
-        # when
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-            result = inspector._check_dependencies()
-
-        # then
-        assert result is False
-        assert any(
-            "FastAPI dependency not found" in error and "pyproject.toml-tpl" in error
-            for error in inspector.errors
-        )
-
-    def test_check_dependencies_any_source_satisfies(self, temp_dir: str) -> None:
-        """A stale requirements.txt-tpl does not fail when pyproject declares fastapi.
-
-        The contract is "fastapi declared in at least one source". A template
-        whose requirements.txt-tpl has drifted (missing fastapi) but whose
-        pyproject.toml-tpl is authoritative must still pass.
-        """
-        # given
-        (self.template_path / "tests").mkdir(exist_ok=True)
-        (self.template_path / "README.md-tpl").write_text("# Test")
-        # requirements.txt-tpl WITHOUT fastapi (stale)
-        (self.template_path / "requirements.txt-tpl").write_text("uvicorn==0.24.0\n")
-        # pyproject.toml-tpl WITH fastapi (authoritative)
-        (self.template_path / "pyproject.toml-tpl").write_text(
-            "[project]\n"
-            'name = "<project_name>"\n'
-            'version = "0.1.0"\n'
-            "dependencies = [\n"
-            '    "fastapi>=0.115.0",\n'
-            "]\n"
-        )
-
-        # when
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-            result = inspector._check_dependencies()
-
-        # then
-        assert result is True
-        assert inspector.errors == []
-
-    def test_check_dependencies_setup_py_only_with_fastapi(self, temp_dir: str) -> None:
-        """Legacy setup.py-tpl-only template with fastapi in install_requires passes."""
-        # given
-        (self.template_path / "tests").mkdir(exist_ok=True)
-        (self.template_path / "README.md-tpl").write_text("# Legacy Template")
-        (self.template_path / "setup.py-tpl").write_text(
-            "from setuptools import setup\n"
-            "install_requires: list[str] = [\n"
-            '    "fastapi>=0.104.0",\n'
-            '    "uvicorn>=0.24.0",\n'
-            "]\n"
-            'setup(name="legacy", install_requires=install_requires)\n'
-        )
-
-        # when
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-            result = inspector._check_dependencies()
-
-        # then
-        assert result is True
-        assert inspector.errors == []
-
-    def test_check_dependencies_pyproject_parse_error(self, temp_dir: str) -> None:
-        """Malformed pyproject.toml-tpl surfaces a parse error and fails the check."""
-        # given
-        (self.template_path / "tests").mkdir(exist_ok=True)
-        (self.template_path / "README.md-tpl").write_text("# Test")
-        # Unterminated string makes tomllib raise TOMLDecodeError.
-        (self.template_path / "pyproject.toml-tpl").write_text(
-            '[project]\nname = "demo\nversion = "0.1.0"\n'
-        )
-
-        # when
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-            result = inspector._check_dependencies()
-
-        # then
-        assert result is False
-        assert any("Invalid pyproject.toml-tpl" in error for error in inspector.errors)
-
-    def test_check_dependencies_setup_py_read_error(self, temp_dir: str) -> None:
-        """OSError while reading setup.py-tpl surfaces a descriptive error."""
-        # given
-        (self.template_path / "tests").mkdir(exist_ok=True)
-        (self.template_path / "README.md-tpl").write_text("# Test")
-        (self.template_path / "setup.py-tpl").write_text(
-            'from setuptools import setup\nsetup(name="demo")\n'
-        )
-
-        # when — selectively fail the open() targeting setup.py-tpl only.
-        real_open = open
-
-        def selective_open(file, *args, **kwargs):  # type: ignore[no-untyped-def]
-            if str(file).endswith("setup.py-tpl"):
-                raise OSError("Permission denied")
-            return real_open(file, *args, **kwargs)
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-            with patch("builtins.open", side_effect=selective_open):
-                result = inspector._check_dependencies()
-
-        # then
-        assert result is False
-        assert any("Error reading setup.py-tpl" in error for error in inspector.errors)
-
-    def test_check_dependencies_no_sources_at_all(self, temp_dir: str) -> None:
-        """Calling _check_dependencies with no metadata files yields a clear error."""
-        # given
-        (self.template_path / "tests").mkdir(exist_ok=True)
-        (self.template_path / "README.md-tpl").write_text("# Test")
-
-        # when
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-            result = inspector._check_dependencies()
-
-        # then
-        assert result is False
-        assert any("No dependency source found" in error for error in inspector.errors)
-
-    def test_extract_pyproject_dependency_names_non_list(self, temp_dir: str) -> None:
-        """Non-list [project].dependencies yields a descriptive parse error."""
-        # given
-        (self.template_path / "tests").mkdir(exist_ok=True)
-        (self.template_path / "README.md-tpl").write_text("# Test")
-        pyproject = self.template_path / "pyproject.toml-tpl"
-        pyproject.write_text(
-            '[project]\nname = "demo"\nversion = "0.1.0"\n'
-            'dependencies = "fastapi>=0.115"\n'
-        )
-
-        # when
-        names, error = TemplateInspector._extract_pyproject_dependency_names(pyproject)
-
-        # then
-        assert names == set()
-        assert error is not None
-        assert "must be a list" in error
-
-    def test_extract_pyproject_dependency_names_skips_non_strings(
+    def test_context_manager_generates_project_and_cleans_up(
         self, temp_dir: str
     ) -> None:
-        """Non-string / empty entries in [project].dependencies are ignored."""
         # given
-        (self.template_path / "tests").mkdir(exist_ok=True)
-        (self.template_path / "README.md-tpl").write_text("# Test")
-        pyproject = self.template_path / "pyproject.toml-tpl"
-        pyproject.write_text(
-            '[project]\nname = "demo"\nversion = "0.1.0"\n'
-            # Empty string and an integer-ish value are dropped without raising.
-            'dependencies = ["fastapi>=0.115", "", "   "]\n'
+        self.create_valid_template_structure()
+
+        # when
+        with self.make_inspector(temp_dir) as inspector:
+            generated = inspector.temp_dir
+            assert os.path.exists(generated)
+            # placeholders are substituted during generation
+            assert (
+                "<project_name>"
+                not in Path(os.path.join(generated, "pyproject.toml")).read_text()
+            )
+
+        # then
+        assert not os.path.exists(generated)
+
+    def test_context_manager_cleans_up_on_failure(self, temp_dir: str) -> None:
+        """A generation failure removes the half-written project directory.
+
+        The project is produced by the real ``ProjectScaffolder``, so the
+        failure is injected at the template copy the scaffolder performs.
+        """
+        # given
+        self.create_valid_template_structure()
+        inspector = self.make_inspector(temp_dir)
+
+        # when / then
+        with patch(
+            "fastapi_fastkit.backend.main.copy_and_convert_template",
+            side_effect=OSError("copy failed"),
+        ):
+            with pytest.raises(OSError):
+                inspector.__enter__()
+        assert not os.path.exists(inspector.temp_dir)
+
+    def test_generated_project_carries_fastkit_metadata(self, temp_dir: str) -> None:
+        """Generation goes through the real scaffolder, markers included."""
+        # given
+        self.create_valid_template_structure()
+
+        # when
+        with self.make_inspector(temp_dir) as inspector:
+            pyproject = Path(inspector.temp_dir) / "pyproject.toml"
+            content = pyproject.read_text()
+
+        # then
+        assert "[tool.fastapi-fastkit]" in content
+        assert "managed = true" in content
+
+    def test_template_only_files_are_not_generated(self, temp_dir: str) -> None:
+        """``template-config.yml`` drives inspection, never the user project."""
+        # given
+        self.create_valid_template_structure()
+        (self.template_path / "template-config.yml-tpl").write_text("name: Demo\n")
+
+        # when
+        with self.make_inspector(temp_dir) as inspector:
+            leaked = os.path.exists(
+                os.path.join(inspector.temp_dir, "template-config.yml")
+            )
+            config = inspector.template_config
+
+        # then
+        assert not leaked
+        assert config is not None and config["name"] == "Demo"
+
+    def test_template_config_is_loaded_when_present(self, temp_dir: str) -> None:
+        # given
+        self.create_valid_template_structure()
+        (self.template_path / "template-config.yml-tpl").write_text(
+            "name: Demo\nrequires_docker: true\n"
         )
 
         # when
-        names, error = TemplateInspector._extract_pyproject_dependency_names(pyproject)
+        with self.make_inspector(temp_dir) as inspector:
+            config = inspector.template_config
 
         # then
-        assert error is None
-        assert names == {"fastapi"}
+        assert config is not None
+        assert config["requires_docker"] is True
 
-    @patch("fastapi_fastkit.backend.inspector.find_template_core_modules")
-    def test_check_fastapi_implementation_valid(
-        self, mock_find_modules: MagicMock, temp_dir: str
-    ) -> None:
-        """Test _check_fastapi_implementation with valid FastAPI implementation."""
+    def test_template_config_absent_yields_none(self, temp_dir: str) -> None:
         # given
         self.create_valid_template_structure()
-        mock_find_modules.return_value = {
-            "main": str(self.template_path / "src" / "main.py")
-        }
-
-        # Create main.py with FastAPI content
-        main_py = self.template_path / "src" / "main.py"
-        main_py.write_text("from fastapi import FastAPI\napp = FastAPI()")
 
         # when
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-            result = inspector._check_fastapi_implementation()
+        with self.make_inspector(temp_dir) as inspector:
+            # then
+            assert inspector.template_config is None
+
+
+class TestTemplateInspectorCleanupAndConfigEdgeCases(InspectorTestBase):
+    """Cleanup branches and template-config parsing edge cases."""
+
+    def test_enter_removes_a_stale_existing_temp_dir(self, temp_dir: str) -> None:
+        # given: a leftover directory from a previous (crashed) run
+        self.create_valid_template_structure()
+        inspector = self.make_inspector(temp_dir)
+        os.makedirs(inspector.temp_dir)
+        (Path(inspector.temp_dir) / "stale.txt").write_text("leftover")
+
+        # when
+        with inspector:
+            # then: the stale file is gone, replaced by a fresh generation
+            assert not os.path.exists(os.path.join(inspector.temp_dir, "stale.txt"))
+
+    def test_enter_tolerates_failure_to_remove_stale_dir(self, temp_dir: str) -> None:
+        # given
+        self.create_valid_template_structure()
+        inspector = self.make_inspector(temp_dir)
+        os.makedirs(inspector.temp_dir)
+
+        # when / then: shutil.rmtree failing is only logged, not fatal
+        with patch(
+            "fastapi_fastkit.backend.inspection.core.shutil.rmtree",
+            side_effect=OSError("busy"),
+        ):
+            with inspector:
+                assert os.path.exists(inspector.temp_dir)
+
+    def test_cleanup_is_a_noop_when_not_needed(self, temp_dir: str) -> None:
+        # given: an inspector that was never entered
+        self.create_valid_template_structure()
+        inspector = self.make_inspector(temp_dir)
+
+        # when / then: no exception, nothing to clean up
+        inspector._cleanup()
+        assert inspector._cleanup_needed is False
+
+    def test_cleanup_stops_docker_services_and_waits(self, temp_dir: str) -> None:
+        # given
+        self.create_valid_template_structure()
+
+        with self.make_inspector(temp_dir) as inspector:
+            (Path(inspector.temp_dir) / "docker-compose.yml").write_text("services: {}")
+
+            # when
+            with (
+                patch.object(DockerCompose, "cleanup") as mock_cleanup,
+                patch(
+                    "fastapi_fastkit.backend.inspection.core.time.sleep"
+                ) as mock_sleep,
+            ):
+                inspector._cleanup()
+
+            # then
+            mock_cleanup.assert_called_once()
+            mock_sleep.assert_called_once_with(3)
+        assert not os.path.exists(inspector.temp_dir)
+
+    def test_cleanup_docker_services_failure_is_swallowed(self, temp_dir: str) -> None:
+        # given
+        self.create_valid_template_structure()
+
+        with self.make_inspector(temp_dir) as inspector:
+            (Path(inspector.temp_dir) / "docker-compose.yml").write_text("services: {}")
+
+            # when / then: a Docker cleanup failure must not stop the directory removal
+            with patch.object(
+                DockerCompose, "cleanup", side_effect=RuntimeError("daemon down")
+            ):
+                inspector._cleanup()
+
+        assert not os.path.exists(inspector.temp_dir)
+
+    def test_cleanup_recovers_from_unexpected_error(self, temp_dir: str) -> None:
+        # given
+        self.create_valid_template_structure()
+
+        with self.make_inspector(temp_dir) as inspector:
+            # when: force_cleanup_directory blows up once, then succeeds on retry
+            with patch(
+                "fastapi_fastkit.backend.inspection.core.force_cleanup_directory",
+                side_effect=[RuntimeError("locked"), None],
+            ) as mock_force_cleanup:
+                inspector._cleanup()
+
+            # then
+            assert mock_force_cleanup.call_count == 2
+            assert inspector._cleanup_needed is False
+
+    def test_template_config_invalid_yaml_yields_none(self, temp_dir: str) -> None:
+        # given
+        self.create_valid_template_structure()
+        (self.template_path / "template-config.yml-tpl").write_text(
+            "name: [unterminated"
+        )
+
+        # when
+        with self.make_inspector(temp_dir) as inspector:
+            # then
+            assert inspector.template_config is None
+
+    def test_template_config_non_mapping_yields_none(self, temp_dir: str) -> None:
+        # given
+        self.create_valid_template_structure()
+        (self.template_path / "template-config.yml-tpl").write_text(
+            "- just\n- a\n- list\n"
+        )
+
+        # when
+        with self.make_inspector(temp_dir) as inspector:
+            # then
+            assert inspector.template_config is None
+
+
+class TestStaticChecks(InspectorTestBase):
+    """Structure, extension, dependency and implementation checks."""
+
+    def test_file_structure_passes(self, temp_dir: str) -> None:
+        self.create_valid_template_structure()
+        inspector = self.make_inspector(temp_dir)
+        assert inspector._check_file_structure() is True
+        assert inspector.errors == []
+
+    def test_file_structure_reports_missing_readme(self, temp_dir: str) -> None:
+        # given
+        self.create_valid_template_structure()
+        (self.template_path / "README.md-tpl").unlink()
+
+        # when / then
+        inspector = self.make_inspector(temp_dir)
+        assert inspector._check_file_structure() is False
+        assert any("README.md-tpl" in error for error in inspector.errors)
+
+    def test_file_structure_requires_metadata_file(self, temp_dir: str) -> None:
+        # given
+        self.create_valid_template_structure()
+        (self.template_path / "pyproject.toml-tpl").unlink()
+
+        # when / then
+        inspector = self.make_inspector(temp_dir)
+        assert inspector._check_file_structure() is False
+        assert any("metadata file" in error for error in inspector.errors)
+
+    def test_setup_py_only_template_still_passes(self, temp_dir: str) -> None:
+        # given
+        self.create_valid_template_structure()
+        (self.template_path / "pyproject.toml-tpl").unlink()
+        (self.template_path / "setup.py-tpl").write_text(
+            "from setuptools import setup\nsetup(install_requires=['fastapi'])\n"
+        )
+
+        # when / then
+        inspector = self.make_inspector(temp_dir)
+        assert inspector._check_file_structure() is True
+        assert inspector._check_dependencies() is True
+
+    def test_file_extensions_reject_plain_py(self, temp_dir: str) -> None:
+        # given
+        self.create_valid_template_structure()
+        (self.template_path / "src" / "leaked.py").write_text("x = 1\n")
+
+        # when / then
+        inspector = self.make_inspector(temp_dir)
+        assert inspector._check_file_extensions() is False
+        assert any("leaked.py" in error for error in inspector.errors)
+
+    def test_dependencies_pass_from_pyproject_alone(self, temp_dir: str) -> None:
+        # given
+        self.create_valid_template_structure()
+        (self.template_path / "requirements.txt-tpl").unlink()
+
+        # when / then
+        inspector = self.make_inspector(temp_dir)
+        assert inspector._check_dependencies() is True
+
+    def test_dependencies_fail_without_fastapi(self, temp_dir: str) -> None:
+        # given
+        self.create_valid_template_structure()
+        (self.template_path / "requirements.txt-tpl").write_text("uvicorn==0.34.0\n")
+        (self.template_path / "pyproject.toml-tpl").write_text(
+            PYPROJECT_TPL.replace('"fastapi>=0.115.8", ', "")
+        )
+
+        # when / then
+        inspector = self.make_inspector(temp_dir)
+        assert inspector._check_dependencies() is False
+        assert any("FastAPI dependency not found" in e for e in inspector.errors)
+
+    def test_dependencies_fail_on_invalid_pyproject(self, temp_dir: str) -> None:
+        # given
+        self.create_valid_template_structure()
+        (self.template_path / "pyproject.toml-tpl").write_text("not = = toml")
+
+        # when / then
+        inspector = self.make_inspector(temp_dir)
+        assert inspector._check_dependencies() is False
+        assert any("Invalid pyproject.toml-tpl" in e for e in inspector.errors)
+
+    def test_fastapi_implementation_detects_app(self, temp_dir: str) -> None:
+        # given
+        self.create_valid_template_structure()
+
+        # when / then
+        with self.make_inspector(temp_dir) as inspector:
+            assert inspector._check_fastapi_implementation() is True
+
+    def test_fastapi_implementation_rejects_missing_main(self, temp_dir: str) -> None:
+        # given
+        self.create_valid_template_structure()
+
+        # when / then
+        with self.make_inspector(temp_dir) as inspector:
+            with patch(
+                "fastapi_fastkit.backend.inspection.checks.find_template_core_modules",
+                return_value={"main": "", "setup": "", "pyproject": "", "config": ""},
+            ):
+                assert inspector._check_fastapi_implementation() is False
+        assert any("main.py not found" in e for e in inspector.errors)
+
+    def test_fastapi_implementation_rejects_module_without_app(
+        self, temp_dir: str
+    ) -> None:
+        """A mere mention of FastAPI in a comment must not pass the check."""
+        # given
+        self.create_valid_template_structure()
+        (self.template_path / "src" / "main.py-tpl").write_text(
+            "# this module will host a FastAPI app one day\napp = 1\n"
+        )
+
+        # when / then
+        with self.make_inspector(temp_dir) as inspector:
+            assert inspector._check_fastapi_implementation() is False
+        assert any("FastAPI app creation not found" in e for e in inspector.errors)
+
+
+class TestStrategySelection:
+    """Which strategy runs for which template configuration."""
+
+    def _context(self, tmp_path: Path, config: Optional[Dict[str, Any]]) -> Any:
+        return InspectionContext(
+            template_path=tmp_path,
+            temp_dir=str(tmp_path),
+            template_config=config,
+        )
+
+    def test_standard_strategy_by_default(self, tmp_path: Path) -> None:
+        strategy = strategies_module.select_strategy(self._context(tmp_path, None))
+        assert isinstance(strategy, strategies_module.StandardStrategy)
+
+    def test_docker_strategy_when_required(self, tmp_path: Path) -> None:
+        strategy = strategies_module.select_strategy(
+            self._context(tmp_path, {"requires_docker": True})
+        )
+        assert isinstance(strategy, strategies_module.DockerStrategy)
+
+    def test_fallback_selected_when_configured(self, tmp_path: Path) -> None:
+        strategy = strategies_module.select_fallback_strategy(
+            self._context(tmp_path, {"fallback_testing": {"database_url": "sqlite://"}})
+        )
+        assert isinstance(strategy, strategies_module.FallbackStrategy)
+
+    def test_fallback_degrades_to_standard(self, tmp_path: Path) -> None:
+        strategy = strategies_module.select_fallback_strategy(
+            self._context(tmp_path, {})
+        )
+        assert isinstance(strategy, strategies_module.StandardStrategy)
+
+    def test_package_manager_detection(self, tmp_path: Path) -> None:
+        assert strategies_module.detect_package_manager(str(tmp_path)) == "pip"
+        (tmp_path / "pyproject.toml").write_text("[project]\n")
+        assert strategies_module.detect_package_manager(str(tmp_path)) == "uv"
+
+
+class TestStrategyExecution:
+    """The shared strategy base: environment setup and result grading."""
+
+    def _context(self, tmp_path: Path, config: Optional[Dict[str, Any]] = None) -> Any:
+        venv = tmp_path / "venv" / "bin"
+        venv.mkdir(parents=True)
+        (venv / "python").write_text("")
+        return InspectionContext(
+            template_path=tmp_path,
+            temp_dir=str(tmp_path),
+            template_config=config,
+            venv_path=str(tmp_path / "venv"),
+        )
+
+    def test_standard_strategy_passes_on_zero_exit(self, tmp_path: Path) -> None:
+        # given
+        ctx = self._context(tmp_path)
+        completed = subprocess.CompletedProcess(["pytest"], 0, "ok", "")
+
+        # when
+        with patch("subprocess.run", return_value=completed) as mock_run:
+            result = strategies_module.StandardStrategy(ctx).run()
 
         # then
         assert result is True
-        assert inspector.errors == []
+        assert ctx.errors == []
+        assert "-m" in mock_run.call_args[0][0]
 
-    @patch("fastapi_fastkit.backend.inspector.find_template_core_modules")
-    def test_check_fastapi_implementation_no_main(
-        self, mock_find_modules: MagicMock, temp_dir: str
-    ) -> None:
-        """Test _check_fastapi_implementation without main.py."""
+    def test_standard_strategy_reports_failure_output(self, tmp_path: Path) -> None:
         # given
-        mock_find_modules.return_value = {"main": None}
+        ctx = self._context(tmp_path)
+        completed = subprocess.CompletedProcess(["pytest"], 1, "out", "err")
 
         # when
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-            result = inspector._check_fastapi_implementation()
+        with patch("subprocess.run", return_value=completed):
+            result = strategies_module.StandardStrategy(ctx).run()
 
         # then
         assert result is False
-        assert any("main.py not found" in error for error in inspector.errors)
+        assert any("STDERR" in error and "err" in error for error in ctx.errors)
 
-    @patch("fastapi_fastkit.backend.inspector.create_venv")
-    @patch("fastapi_fastkit.backend.inspector.install_dependencies_with_manager")
-    @patch("subprocess.run")
-    def test_test_template_success(
-        self,
-        mock_subprocess: MagicMock,
-        mock_install: MagicMock,
-        mock_create_venv: MagicMock,
-        temp_dir: str,
-    ) -> None:
-        """Test _test_template with successful tests."""
+    def test_strategy_prefers_template_test_script(self, tmp_path: Path) -> None:
         # given
-        self.create_valid_template_structure()
-        mock_create_venv.return_value = "/fake/venv"
-        mock_subprocess.return_value.returncode = 0
+        scripts_dir = tmp_path / "scripts"
+        scripts_dir.mkdir()
+        (scripts_dir / "test.sh").write_text("#!/bin/sh\r\npytest\r\n")
+        ctx = self._context(tmp_path)
+        completed = subprocess.CompletedProcess(["test.sh"], 0, "", "")
 
         # when
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-            # Create tests directory in temp_dir
-            os.makedirs(os.path.join(inspector.temp_dir, "tests"), exist_ok=True)
-            # Create a requirements.txt file to avoid package manager detection issues
-            requirements_file = os.path.join(inspector.temp_dir, "requirements.txt")
-            with open(requirements_file, "w") as f:
-                f.write("fastapi>=0.100.0\n")
-            result = inspector._test_template()
+        with patch("subprocess.run", return_value=completed) as mock_run:
+            result = strategies_module.StandardStrategy(ctx).run()
 
         # then
         assert result is True
-        assert inspector.errors == []
+        assert mock_run.call_args[0][0] == [str(scripts_dir / "test.sh")]
+        # line endings are normalised before execution
+        assert b"\r\n" not in (scripts_dir / "test.sh").read_bytes()
 
-    def test_inspect_template_function(self, temp_dir: str) -> None:
-        """Test the inspect_template function."""
+    def test_strategy_reports_timeout(self, tmp_path: Path) -> None:
+        # given
+        ctx = self._context(tmp_path)
+
+        # when
+        with patch(
+            "subprocess.run", side_effect=subprocess.TimeoutExpired("pytest", 300)
+        ):
+            result = strategies_module.StandardStrategy(ctx).run()
+
+        # then
+        assert result is False
+        assert any("timed out" in error for error in ctx.errors)
+
+    def test_fallback_strategy_sets_database_url_and_warns(
+        self, tmp_path: Path
+    ) -> None:
+        # given
+        ctx = self._context(
+            tmp_path,
+            {
+                "fallback_testing": {
+                    "database_url": "sqlite:///:memory:",
+                    "test_command": "pytest tests/ -q",
+                }
+            },
+        )
+        completed = subprocess.CompletedProcess(["pytest"], 0, "", "")
+
+        # when
+        with patch("subprocess.run", return_value=completed) as mock_run:
+            result = strategies_module.FallbackStrategy(ctx).run()
+
+        # then
+        assert result is True
+        env = mock_run.call_args.kwargs["env"]
+        assert env["DATABASE_URL"] == "sqlite:///:memory:"
+        assert mock_run.call_args[0][0][-3:] == ["pytest", "tests/", "-q"]
+        assert any("fallback strategy" in w for w in ctx.warnings)
+
+    def test_prepare_environment_reports_install_failure(self, tmp_path: Path) -> None:
+        # given
+        ctx = InspectionContext(template_path=tmp_path, temp_dir=str(tmp_path))
+
+        # when
+        with (
+            patch.object(
+                strategies_module, "create_venv", return_value=str(tmp_path / "venv")
+            ),
+            patch.object(
+                strategies_module,
+                "install_dependencies_with_manager",
+                side_effect=RuntimeError("resolution failed"),
+            ),
+        ):
+            result = strategies_module.prepare_environment(ctx)
+
+        # then
+        assert result is False
+        assert any("Failed to install dependencies" in e for e in ctx.errors)
+
+    def test_prepare_environment_is_idempotent(self, tmp_path: Path) -> None:
+        # given
+        ctx = self._context(tmp_path)
+
+        # when
+        with patch.object(strategies_module, "create_venv") as mock_create:
+            result = strategies_module.prepare_environment(ctx)
+
+        # then
+        assert result is True
+        mock_create.assert_not_called()
+
+    def test_disabled_tests_still_prepare_environment(self, tmp_path: Path) -> None:
+        # given
+        ctx = InspectionContext(
+            template_path=tmp_path,
+            temp_dir=str(tmp_path),
+            options=InspectionOptions(run_template_tests=False),
+        )
+
+        # when
+        with patch.object(
+            strategies_module, "prepare_environment", return_value=True
+        ) as mock_prepare:
+            result = strategies_module.run_template_tests(ctx)
+
+        # then
+        assert result is True
+        mock_prepare.assert_called_once_with(ctx)
+
+
+class TestDockerStrategy:
+    """Docker orchestration is fully mocked - no daemon is required."""
+
+    def _context(self, tmp_path: Path) -> Any:
+        return InspectionContext(
+            template_path=tmp_path,
+            temp_dir=str(tmp_path),
+            template_config={
+                "requires_docker": True,
+                "testing": {"compose_file": "docker-compose.yml"},
+                "test_env_defaults": {"POSTGRES_USER": "test_user"},
+            },
+        )
+
+    def test_falls_back_when_docker_missing(self, tmp_path: Path) -> None:
+        # given
+        ctx = self._context(tmp_path)
+        ctx.template_config = dict(ctx.template_config or {})
+        ctx.template_config["fallback_testing"] = {"database_url": "sqlite://"}
+
+        # when
+        with (
+            patch.object(DockerCompose, "is_available", return_value=False),
+            patch.object(
+                strategies_module.FallbackStrategy, "run", return_value=True
+            ) as mock_run,
+        ):
+            result = strategies_module.DockerStrategy(ctx).run()
+
+        # then
+        assert result is True
+        mock_run.assert_called_once()
+        assert any("Docker not available" in w for w in ctx.warnings)
+
+    def test_successful_docker_run(self, tmp_path: Path) -> None:
+        # given
+        ctx = self._context(tmp_path)
+        compose = MagicMock()
+        compose.containers_running.return_value = False
+        compose.up.return_value = subprocess.CompletedProcess(["up"], 0, "", "")
+        compose.verify_services_running.return_value = None
+        compose.exec_tests.return_value = subprocess.CompletedProcess(
+            ["pytest"], 0, "", ""
+        )
+
+        # when
+        with (
+            patch.object(DockerCompose, "is_available", return_value=True),
+            patch.object(strategies_module, "DockerCompose", return_value=compose),
+        ):
+            result = strategies_module.DockerStrategy(ctx).run()
+
+        # then
+        assert result is True
+        compose.cleanup.assert_called_once()
+        # test_env_defaults are materialised into a .env file
+        assert "POSTGRES_USER=test_user" in (tmp_path / ".env").read_text()
+
+    def test_service_verification_failure_is_reported(self, tmp_path: Path) -> None:
+        # given
+        ctx = self._context(tmp_path)
+        compose = MagicMock()
+        compose.containers_running.return_value = True
+        compose.verify_services_running.return_value = "Database service is not running"
+
+        # when
+        with (
+            patch.object(DockerCompose, "is_available", return_value=True),
+            patch.object(strategies_module, "DockerCompose", return_value=compose),
+        ):
+            result = strategies_module.DockerStrategy(ctx).run()
+
+        # then
+        assert result is False
+        assert "Database service is not running" in ctx.errors
+
+    def test_failed_startup_is_reported(self, tmp_path: Path) -> None:
+        # given
+        ctx = self._context(tmp_path)
+        compose = MagicMock()
+        compose.containers_running.return_value = False
+        compose.up.return_value = subprocess.CompletedProcess(
+            ["up"], 1, "", "no such image"
+        )
+
+        # when
+        with (
+            patch.object(DockerCompose, "is_available", return_value=True),
+            patch.object(strategies_module, "DockerCompose", return_value=compose),
+        ):
+            result = strategies_module.DockerStrategy(ctx).run()
+
+        # then
+        assert result is False
+        assert any("Failed to start Docker services" in e for e in ctx.errors)
+
+
+class TestStrategyErrorPaths:
+    """Failure branches not covered by the happy-path strategy tests."""
+
+    def _context(self, tmp_path: Path, config: Optional[Dict[str, Any]] = None) -> Any:
+        venv = tmp_path / "venv" / "bin"
+        venv.mkdir(parents=True)
+        (venv / "python").write_text("")
+        return InspectionContext(
+            template_path=tmp_path,
+            temp_dir=str(tmp_path),
+            template_config=config,
+            venv_path=str(tmp_path / "venv"),
+        )
+
+    def test_prepare_environment_reports_venv_creation_failure(
+        self, tmp_path: Path
+    ) -> None:
+        # given
+        ctx = InspectionContext(template_path=tmp_path, temp_dir=str(tmp_path))
+
+        # when
+        with patch.object(
+            strategies_module,
+            "create_venv",
+            side_effect=RuntimeError("disk full"),
+        ):
+            result = strategies_module.prepare_environment(ctx)
+
+        # then
+        assert result is False
+        assert any("Failed to create virtual environment" in e for e in ctx.errors)
+
+    def test_prepare_environment_sets_venv_path_on_success(
+        self, tmp_path: Path
+    ) -> None:
+        # given
+        ctx = InspectionContext(template_path=tmp_path, temp_dir=str(tmp_path))
+
+        # when
+        with (
+            patch.object(
+                strategies_module, "create_venv", return_value=str(tmp_path / "venv")
+            ),
+            patch.object(strategies_module, "install_dependencies_with_manager"),
+        ):
+            result = strategies_module.prepare_environment(ctx)
+
+        # then
+        assert result is True
+        assert ctx.venv_path == str(tmp_path / "venv")
+
+    def test_strategy_reports_oserror(self, tmp_path: Path) -> None:
+        # given
+        ctx = self._context(tmp_path)
+
+        # when
+        with patch("subprocess.run", side_effect=OSError("no permission")):
+            result = strategies_module.StandardStrategy(ctx).run()
+
+        # then
+        assert result is False
+        assert any("Error running standard tests" in e for e in ctx.errors)
+
+    def test_run_fails_when_environment_preparation_fails(self, tmp_path: Path) -> None:
+        # given
+        ctx = self._context(tmp_path)
+
+        # when
+        with patch.object(strategies_module, "prepare_environment", return_value=False):
+            result = strategies_module.StandardStrategy(ctx).run()
+
+        # then
+        assert result is False
+
+
+class TestDockerStrategyEnvFileAndTimeout:
+    """The .env materialisation and the outer timeout/OSError handling."""
+
+    def _context(self, tmp_path: Path) -> Any:
+        return InspectionContext(
+            template_path=tmp_path,
+            temp_dir=str(tmp_path),
+            template_config={
+                "requires_docker": True,
+                "testing": {"compose_file": "docker-compose.yml"},
+                "test_env_defaults": {"POSTGRES_USER": "test_user"},
+            },
+        )
+
+    def test_existing_env_file_values_are_preserved(self, tmp_path: Path) -> None:
+        # given: an existing .env should win over the template's defaults
+        (tmp_path / ".env").write_text(
+            "POSTGRES_USER=custom_user\n# a comment\n\nBROKEN_LINE_NO_EQUALS\n"
+        )
+        ctx = self._context(tmp_path)
+        compose = MagicMock()
+        compose.containers_running.return_value = False
+        compose.up.return_value = subprocess.CompletedProcess(["up"], 0, "", "")
+        compose.verify_services_running.return_value = None
+        compose.exec_tests.return_value = subprocess.CompletedProcess(
+            ["pytest"], 0, "", ""
+        )
+
+        # when
+        with (
+            patch.object(DockerCompose, "is_available", return_value=True),
+            patch.object(strategies_module, "DockerCompose", return_value=compose),
+        ):
+            result = strategies_module.DockerStrategy(ctx).run()
+
+        # then
+        assert result is True
+        assert "POSTGRES_USER=custom_user" in (tmp_path / ".env").read_text()
+
+    def test_setup_timeout_is_reported(self, tmp_path: Path) -> None:
+        # given
+        ctx = self._context(tmp_path)
+        compose = MagicMock()
+        compose.containers_running.side_effect = subprocess.TimeoutExpired("docker", 1)
+
+        # when
+        with (
+            patch.object(DockerCompose, "is_available", return_value=True),
+            patch.object(strategies_module, "DockerCompose", return_value=compose),
+        ):
+            result = strategies_module.DockerStrategy(ctx).run()
+
+        # then
+        assert result is False
+        assert any("timed out" in e for e in ctx.errors)
+        compose.cleanup.assert_called_once()
+
+    def test_setup_oserror_is_reported(self, tmp_path: Path) -> None:
+        # given
+        ctx = self._context(tmp_path)
+        compose = MagicMock()
+        compose.containers_running.side_effect = OSError("boom")
+
+        # when
+        with (
+            patch.object(DockerCompose, "is_available", return_value=True),
+            patch.object(strategies_module, "DockerCompose", return_value=compose),
+        ):
+            result = strategies_module.DockerStrategy(ctx).run()
+
+        # then
+        assert result is False
+        assert any("Unexpected error during Docker testing" in e for e in ctx.errors)
+
+    def test_exec_tests_timeout_is_reported(self, tmp_path: Path) -> None:
+        # given
+        ctx = self._context(tmp_path)
+        compose = MagicMock()
+        compose.containers_running.return_value = True
+        compose.verify_services_running.return_value = None
+        compose.exec_tests.return_value = None
+
+        # when
+        with (
+            patch.object(DockerCompose, "is_available", return_value=True),
+            patch.object(strategies_module, "DockerCompose", return_value=compose),
+        ):
+            result = strategies_module.DockerStrategy(ctx).run()
+
+        # then
+        assert result is False
+        assert "Docker tests timed out" in ctx.errors
+
+    def test_exec_tests_failure_is_reported(self, tmp_path: Path) -> None:
+        # given
+        ctx = self._context(tmp_path)
+        compose = MagicMock()
+        compose.containers_running.return_value = True
+        compose.verify_services_running.return_value = None
+        compose.exec_tests.return_value = subprocess.CompletedProcess(
+            ["pytest"], 1, "out", "err"
+        )
+
+        # when
+        with (
+            patch.object(DockerCompose, "is_available", return_value=True),
+            patch.object(strategies_module, "DockerCompose", return_value=compose),
+        ):
+            result = strategies_module.DockerStrategy(ctx).run()
+
+        # then
+        assert result is False
+        assert any("Docker tests failed" in e for e in ctx.errors)
+
+
+class TestDockerCompose:
+    """The compose wrapper's own process handling."""
+
+    def test_is_available_false_without_binaries(self) -> None:
+        with patch("subprocess.run", side_effect=FileNotFoundError):
+            assert DockerCompose.is_available() is False
+
+    def test_is_available_true_when_both_respond(self) -> None:
+        completed = subprocess.CompletedProcess(["docker"], 0, "v1", "")
+        with patch("subprocess.run", return_value=completed):
+            assert DockerCompose.is_available() is True
+
+    def test_containers_running_false_without_containers(self, tmp_path: Path) -> None:
+        completed = subprocess.CompletedProcess(["ps"], 0, "\n", "")
+        with patch("subprocess.run", return_value=completed):
+            assert DockerCompose(str(tmp_path)).containers_running() is False
+
+    def test_verify_services_running_detects_missing_app(self, tmp_path: Path) -> None:
+        # given
+        payload = '{"Name": "demo-db-1", "State": "running"}'
+        completed = subprocess.CompletedProcess(["ps"], 0, payload, "")
+
+        # when
+        with patch("subprocess.run", return_value=completed):
+            error = DockerCompose(str(tmp_path)).verify_services_running()
+
+        # then
+        assert error is not None and "Application service" in error
+
+
+class TestReportAndFacade(InspectorTestBase):
+    """Report shape and the inspect_fastapi_template entry point."""
+
+    def test_report_is_valid_without_errors(self, temp_dir: str) -> None:
+        # given
+        self.create_valid_template_structure()
+        inspector = self.make_inspector(temp_dir)
+
+        # when
+        report = inspector.get_report()
+
+        # then
+        assert report["is_valid"] is True
+        assert report["errors"] == []
+        assert report["template_path"] == str(self.template_path)
+
+    def test_report_is_invalid_with_errors(self, temp_dir: str) -> None:
+        # given
+        self.create_valid_template_structure()
+        inspector = self.make_inspector(temp_dir)
+        inspector.ctx.add_error("boom")
+        inspector.ctx.add_warning("careful")
+
+        # when
+        report = inspector.get_report()
+
+        # then
+        assert report["is_valid"] is False
+        assert report["errors"] == ["boom"]
+        assert report["warnings"] == ["careful"]
+
+    def test_inspect_fastapi_template_returns_report(self, temp_dir: str) -> None:
         # given
         self.create_valid_template_structure()
 
         # when
         with patch.object(TemplateInspector, "inspect_template", return_value=True):
-            with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-                result = inspect_fastapi_template(str(self.template_path), temp_dir)
+            report = inspect_fastapi_template(str(self.template_path), temp_dir)
 
         # then
-        assert "is_valid" in result
-        assert "errors" in result
-        assert "warnings" in result
-
-    def test_context_manager_enter_exit(self, temp_dir: str) -> None:
-        """Test context manager enter and exit functionality."""
-        # given
-        self.create_valid_template_structure()
-
-        # when & then
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            with TemplateInspector(str(self.template_path), temp_dir) as inspector:
-                # Should be properly initialized
-                assert inspector.template_path == self.template_path
-                assert inspector._cleanup_needed is True
-                assert os.path.exists(inspector.temp_dir)
-
-        # After exiting, cleanup should have been called
-        # Note: In test environment, temp_dir might still exist due to mocking
-
-    def test_context_manager_exception_handling(self, temp_dir: str) -> None:
-        """Test context manager cleanup on exception."""
-        # given
-        self.create_valid_template_structure()
-
-        # Mock os.makedirs to raise an exception
-        with patch("os.makedirs", side_effect=OSError("Permission denied")):
-            # when & then
-            with pytest.raises(OSError, match="Permission denied"):
-                with TemplateInspector(str(self.template_path), temp_dir):
-                    pass  # Exception should be raised during __enter__
-
-    def test_cleanup_method(self, temp_dir: str) -> None:
-        """Test _cleanup method functionality."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-            # Simulate entering context
-            inspector._cleanup_needed = True
-
-            # Create mock temp directory
-            import tempfile
-
-            mock_temp_dir = tempfile.mkdtemp()
-            inspector.temp_dir = mock_temp_dir
-
-        # when
-        inspector._cleanup()
-
-        # then
-        assert inspector._cleanup_needed is False
-        assert not os.path.exists(mock_temp_dir)
-
-    def test_cleanup_method_no_cleanup_needed(self, temp_dir: str) -> None:
-        """Test _cleanup method when cleanup is not needed."""
-        # given
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-            inspector._cleanup_needed = False
-
-            import tempfile
-
-            mock_temp_dir = tempfile.mkdtemp()
-            inspector.temp_dir = mock_temp_dir
-
-        # when
-        inspector._cleanup()
-
-        # then
-        # Directory should still exist since cleanup wasn't needed
-        assert os.path.exists(mock_temp_dir)
-
-        # Manual cleanup for test
-        import shutil
-
-        shutil.rmtree(mock_temp_dir)
-
-    def test_cleanup_method_permission_error(self, temp_dir: str) -> None:
-        """Test _cleanup method handling permission errors."""
-        # given
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-            inspector._cleanup_needed = True
-            # Create an actual temp directory first
-            import tempfile
-
-            mock_temp_dir = tempfile.mkdtemp()
-            inspector.temp_dir = mock_temp_dir
-
-        # Mock shutil.rmtree to raise OSError
-        with patch("shutil.rmtree", side_effect=OSError("Permission denied")):
-            # when & then (should not raise exception)
-            inspector._cleanup()
-
-        # Cleanup should still set _cleanup_needed to False even on error
-        assert inspector._cleanup_needed is False
-
-    def test_get_report_method(self, temp_dir: str) -> None:
-        """Test get_report method functionality."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-            # Add some test data
-            inspector.errors = ["Error 1", "Error 2"]
-            inspector.warnings = ["Warning 1"]
-
-        # when
-        report = inspector.get_report()
-
-        # then
+        assert report["is_valid"] is True
         assert report["template_path"] == str(self.template_path)
-        assert report["errors"] == ["Error 1", "Error 2"]
-        assert report["warnings"] == ["Warning 1"]
-        assert report["is_valid"] is False  # Should be False due to errors
 
-    def test_get_report_method_valid_template(self, temp_dir: str) -> None:
-        """Test get_report method with valid template (no errors)."""
+    def test_inspect_fastapi_template_surfaces_errors(self, temp_dir: str) -> None:
         # given
         self.create_valid_template_structure()
 
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-            # No errors or warnings
-            inspector.errors = []
-            inspector.warnings = []
+        def fail(self: TemplateInspector) -> bool:
+            self.ctx.add_error("check failed")
+            return False
 
         # when
-        report = inspector.get_report()
+        with patch.object(TemplateInspector, "inspect_template", fail):
+            report = inspect_fastapi_template(str(self.template_path), temp_dir)
 
         # then
-        assert report["template_path"] == str(self.template_path)
-        assert report["errors"] == []
-        assert report["warnings"] == []
-        assert report["is_valid"] is True  # Should be True with no errors
+        assert report["is_valid"] is False
+        assert report["errors"] == ["check failed"]
 
-    def test_inspect_template_with_all_checks_passing(self, temp_dir: str) -> None:
-        """Test inspect_template method with all checks passing."""
-        # given
+    def test_inspect_template_stops_at_first_failure(self, temp_dir: str) -> None:
+        # given: a template without a README fails the very first check
         self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        # Mock all check methods to return True
-        with (
-            patch.object(inspector, "_check_file_structure", return_value=True),
-            patch.object(inspector, "_check_file_extensions", return_value=True),
-            patch.object(inspector, "_check_dependencies", return_value=True),
-            patch.object(inspector, "_check_fastapi_implementation", return_value=True),
-            patch.object(inspector, "_test_template", return_value=True),
-        ):
-            # when
-            result = inspector.inspect_template()
-
-            # then
-            assert result is True
-
-    def test_inspect_template_with_failing_check(self, temp_dir: str) -> None:
-        """Test inspect_template method with one check failing."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        # Mock one check to fail
-        with (
-            patch.object(inspector, "_check_file_structure", return_value=False),
-            patch.object(inspector, "_check_file_extensions", return_value=True),
-            patch.object(inspector, "_check_dependencies", return_value=True),
-            patch.object(inspector, "_check_fastapi_implementation", return_value=True),
-            patch.object(inspector, "_test_template", return_value=True),
-        ):
-            # when
-            result = inspector.inspect_template()
-
-            # then
-            assert result is False
-
-    def test_check_dependencies_missing_requirements_file_falls_back_to_setup(
-        self, temp_dir: str
-    ) -> None:
-        """Without requirements.txt-tpl, the setup.py-tpl install_requires is consulted.
-
-        The setup.py-tpl here declares no fastapi dependency, so the check should
-        fail with an error referencing setup.py-tpl.
-        """
-        # given
-        (self.template_path / "tests").mkdir(exist_ok=True)
-        (self.template_path / "setup.py-tpl").write_text("from setuptools import setup")
-        (self.template_path / "README.md-tpl").write_text("# Test")
+        (self.template_path / "README.md-tpl").unlink()
 
         # when
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-            result = inspector._check_dependencies()
+        with self.make_inspector(temp_dir) as inspector:
+            with patch.object(
+                TemplateInspector, "_test_template", return_value=True
+            ) as mock_tests:
+                result = inspector.inspect_template()
 
         # then
         assert result is False
-        assert any(
-            "FastAPI dependency not found" in error and "setup.py-tpl" in error
-            for error in inspector.errors
+        mock_tests.assert_not_called()
+
+    def test_inspect_template_runs_every_check(self, temp_dir: str) -> None:
+        # given: all expensive steps stubbed out
+        self.create_valid_template_structure()
+        options = InspectionOptions(
+            offline=True, run_smoke_test=False, run_template_tests=False
         )
 
-    def test_check_dependencies_requirements_without_setup_passes(
-        self, temp_dir: str
-    ) -> None:
-        """A template with requirements.txt-tpl (declaring fastapi) but no setup.py-tpl passes.
-
-        Under the pyproject-first contract, setup.py-tpl is not required as long
-        as fastapi is declared in requirements.txt-tpl.
-        """
-        # given
-        (self.template_path / "tests").mkdir(exist_ok=True)
-        (self.template_path / "requirements.txt-tpl").write_text("fastapi==0.104.1")
-        (self.template_path / "README.md-tpl").write_text("# Test")
-
         # when
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-            result = inspector._check_dependencies()
+        with self.make_inspector(temp_dir, options) as inspector:
+            with patch.object(
+                strategies_module, "prepare_environment", return_value=True
+            ):
+                result = inspector.inspect_template()
 
         # then
-        assert result is True
+        assert result is True, inspector.errors
         assert inspector.errors == []
-
-    def test_check_dependencies_file_read_error(self, temp_dir: str) -> None:
-        """Test _check_dependencies with file read error."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        # Mock open to raise an exception
-        with patch("builtins.open", side_effect=OSError("Permission denied")):
-            # when
-            result = inspector._check_dependencies()
-
-            # then
-            assert result is False
-            assert any(
-                "Error reading requirements.txt-tpl" in error
-                for error in inspector.errors
-            )
-
-    # ===== NEW TESTS FOR ADDED FEATURES =====
-
-    def test_load_template_config_no_file(self, temp_dir: str) -> None:
-        """Test _load_template_config when template-config.yml doesn't exist."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        # when
-        config = inspector._load_template_config()
-
-        # then
-        assert config is None
-
-    def test_load_template_config_valid_file(self, temp_dir: str) -> None:
-        """Test _load_template_config with valid template-config.yml."""
-        # given
-        self.create_valid_template_structure()
-        config_content = """
-name: fastapi-psql-orm
-description: FastAPI template with PostgreSQL
-testing:
-  strategy: docker
-  compose_file: docker-compose.yml
-  health_check_timeout: 180
-fallback_testing:
-  strategy: sqlite
-  env_vars:
-    DATABASE_URL: sqlite:///./test.db
-"""
-        (self.template_path / "template-config.yml-tpl").write_text(config_content)
-
-        with patch(
-            "fastapi_fastkit.backend.transducer.copy_and_convert_template"
-        ) as mock_copy:
-            # Mock that config file exists in temp dir
-            mock_copy.return_value = None
-
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-            # Mock the temp dir to have the config file
-            with (
-                patch("os.path.exists", return_value=True),
-                patch("builtins.open", mock_open(read_data=config_content)),
-            ):
-                # when
-                config = inspector._load_template_config()
-
-        # then
-        assert config is not None
-        assert config["name"] == "fastapi-psql-orm"
-        assert config["testing"]["strategy"] == "docker"
-
-    def test_load_template_config_invalid_yaml(self, temp_dir: str) -> None:
-        """Test _load_template_config with invalid YAML."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-            with (
-                patch("os.path.exists", return_value=True),
-                patch(
-                    "builtins.open", mock_open(read_data="invalid: yaml: content: [")
-                ),
-            ):
-                # when
-                config = inspector._load_template_config()
-
-        # then
-        assert config is None
-
-    def test_check_docker_available_success(self, temp_dir: str) -> None:
-        """Test _check_docker_available when Docker is available."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        # Mock subprocess.run for Docker commands
-        with patch("subprocess.run") as mock_run:
-            mock_run.side_effect = [
-                MagicMock(
-                    returncode=0, stdout="Docker version 20.10.0"
-                ),  # docker --version
-                MagicMock(
-                    returncode=0, stdout="Docker Compose version 2.0.0"
-                ),  # docker-compose --version
-            ]
-
-            # when
-            result = inspector._check_docker_available()
-
-        # then
-        assert result is True
-
-    def test_check_docker_available_docker_not_found(self, temp_dir: str) -> None:
-        """Test _check_docker_available when Docker is not installed."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        # Mock subprocess.run to raise FileNotFoundError
-        with patch("subprocess.run", side_effect=FileNotFoundError()):
-            # when
-            result = inspector._check_docker_available()
-
-        # then
-        assert result is False
-
-    def test_check_docker_available_docker_compose_not_found(
-        self, temp_dir: str
-    ) -> None:
-        """Test _check_docker_available when Docker is available but Docker Compose is not."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        # Mock subprocess.run
-        with patch("subprocess.run") as mock_run:
-            mock_run.side_effect = [
-                MagicMock(
-                    returncode=0, stdout="Docker version 20.10.0"
-                ),  # docker --version
-                MagicMock(
-                    returncode=1, stderr="docker-compose: command not found"
-                ),  # docker-compose --version
-            ]
-
-            # when
-            result = inspector._check_docker_available()
-
-        # then
-        assert result is False
-
-    def test_check_containers_running_no_containers(self, temp_dir: str) -> None:
-        """Test _check_containers_running when no containers are running."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        # Mock subprocess.run to return no containers
-        with patch("subprocess.run") as mock_run:
-            mock_run.return_value = MagicMock(returncode=0, stdout="")
-
-            # when
-            result = inspector._check_containers_running("docker-compose.yml")
-
-        # then
-        assert result is False
-
-    def test_check_containers_running_containers_exist(self, temp_dir: str) -> None:
-        """Test _check_containers_running when containers are running."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        # Mock subprocess.run
-        with patch("subprocess.run") as mock_run:
-            mock_run.side_effect = [
-                MagicMock(
-                    returncode=0, stdout="container1\ncontainer2"
-                ),  # docker-compose ps -q
-                MagicMock(returncode=0, stdout="true"),  # docker inspect container1
-                MagicMock(returncode=0, stdout="true"),  # docker inspect container2
-            ]
-
-            # when
-            result = inspector._check_containers_running("docker-compose.yml")
-
-        # then
-        assert result is True
-
-    def test_fix_script_line_endings(self, temp_dir: str) -> None:
-        """Test _fix_script_line_endings method."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        # Create a test script with Windows line endings
-        test_script = self.template_path / "test_script.sh"
-        test_script.write_bytes(b"#!/bin/bash\r\necho 'Hello'\r\necho 'World'\r\n")
-
-        # when
-        inspector._fix_script_line_endings(str(test_script))
-
-        # then
-        content = test_script.read_bytes()
-        assert b"\r\n" not in content
-        assert b"#!/bin/bash\necho 'Hello'\necho 'World'\n" == content
-
-    def test_fix_all_script_line_endings(self, temp_dir: str) -> None:
-        """Test _fix_all_script_line_endings method."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        # Create test scripts with Windows line endings
-        scripts_dir = self.template_path / "scripts"
-        scripts_dir.mkdir(exist_ok=True)
-
-        script1 = scripts_dir / "test1.sh"
-        script2 = scripts_dir / "test2.bash"
-        script1.write_bytes(b"#!/bin/bash\r\necho 'test1'\r\n")
-        script2.write_bytes(b"#!/bin/bash\r\necho 'test2'\r\n")
-
-        # Mock temp_dir to point to our test directory
-        inspector.temp_dir = str(self.template_path)
-
-        # when
-        inspector._fix_all_script_line_endings()
-
-        # then
-        assert b"\r\n" not in script1.read_bytes()
-        assert b"\r\n" not in script2.read_bytes()
-
-    @patch("subprocess.run")
-    def test_run_test_script_success(self, mock_run: MagicMock, temp_dir: str) -> None:
-        """Test _run_test_script with successful execution."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        # Create test script
-        test_script = self.template_path / "test.sh"
-        test_script.write_text("#!/bin/bash\necho 'test passed'\n")
-        test_script.chmod(0o755)
-
-        mock_run.return_value = MagicMock(returncode=0, stdout="test passed", stderr="")
-
-        # when
-        result = inspector._run_test_script(str(test_script), "/fake/venv")
-
-        # then
-        assert result.returncode == 0
-        assert "test passed" in result.stdout
-
-    @patch("subprocess.run")
-    def test_run_test_script_with_env_success(
-        self, mock_run: MagicMock, temp_dir: str
-    ) -> None:
-        """Test _run_test_script_with_env with successful execution."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        test_script = self.template_path / "test.sh"
-        test_script.write_text("#!/bin/bash\necho $TEST_VAR\n")
-        test_script.chmod(0o755)
-
-        mock_run.return_value = MagicMock(returncode=0, stdout="test_value", stderr="")
-
-        env_vars = {"TEST_VAR": "test_value"}
-
-        # when
-        result = inspector._run_test_script_with_env(
-            str(test_script), "/fake/venv", env_vars
-        )
-
-        # then
-        assert result.returncode == 0
-        assert "test_value" in result.stdout
-
-    def test_setup_test_environment(self, temp_dir: str) -> None:
-        """Test _setup_test_environment method."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        inspector.temp_dir = str(self.template_path)
-        # Set template config with test environment defaults
-        inspector.template_config = {
-            "test_env_defaults": {
-                "DATABASE_URL": "sqlite:///./test.db",
-                "DEBUG": "true",
-            }
-        }
-
-        # when
-        inspector._setup_test_environment()
-
-        # then
-        env_file = self.template_path / ".env"
-        assert env_file.exists()
-
-        content = env_file.read_text()
-        assert "DATABASE_URL=sqlite:///./test.db" in content
-        assert "DEBUG=true" in content
-
-    def test_setup_test_environment_existing_env_file(self, temp_dir: str) -> None:
-        """Test _setup_test_environment with existing .env file."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        inspector.temp_dir = str(self.template_path)
-
-        # Create existing .env file
-        env_file = self.template_path / ".env"
-        env_file.write_text("EXISTING_VAR=existing_value\n")
-
-        # Set template config with test environment defaults
-        inspector.template_config = {
-            "test_env_defaults": {"DATABASE_URL": "sqlite:///./test.db"}
-        }
-
-        # when
-        inspector._setup_test_environment()
-
-        # then
-        content = env_file.read_text()
-        assert "EXISTING_VAR=existing_value" in content
-        assert "DATABASE_URL=sqlite:///./test.db" in content
-
-    @patch("subprocess.run")
-    def test_verify_services_running_success(
-        self, mock_run: MagicMock, temp_dir: str
-    ) -> None:
-        """Test _verify_services_running with all services running."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        # Mock docker-compose ps output
-        mock_services = [
-            {"Name": "test_db_1", "State": "running"},
-            {"Name": "test_app_1", "State": "running"},
-        ]
-
-        mock_run.return_value = MagicMock(
-            returncode=0,
-            stdout="\n".join([json.dumps(service) for service in mock_services]),
-        )
-
-        # when
-        result = inspector._verify_services_running("docker-compose.yml")
-
-        # then
-        assert result is True
-
-    @patch("subprocess.run")
-    def test_verify_services_running_app_not_running(
-        self, mock_run: MagicMock, temp_dir: str
-    ) -> None:
-        """Test _verify_services_running when app service is not running."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        # Mock docker-compose ps output with app not running
-        mock_services = [
-            {"Name": "test_db_1", "State": "running"},
-            {"Name": "test_app_1", "State": "exited"},
-        ]
-
-        mock_run.side_effect = [
-            MagicMock(
-                returncode=0,
-                stdout="\n".join([json.dumps(service) for service in mock_services]),
-            ),
-            MagicMock(
-                returncode=0, stdout="App service logs..."
-            ),  # docker-compose logs
-        ]
-
-        # when
-        result = inspector._verify_services_running("docker-compose.yml")
-
-        # then
-        assert result is False
-
-    @patch("subprocess.run")
-    @patch("time.sleep")
-    def test_wait_for_services_healthy_success(
-        self, mock_sleep: MagicMock, mock_run: MagicMock, temp_dir: str
-    ) -> None:
-        """Test _wait_for_services_healthy with services becoming healthy."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        # Mock first call returns not running, second call returns running
-        mock_services_not_ready = [
-            {"Name": "test_db_1", "State": "starting"},
-            {"Name": "test_app_1", "State": "starting"},
-        ]
-        mock_services_ready = [
-            {"Name": "test_db_1", "State": "running"},
-            {"Name": "test_app_1", "State": "running"},
-        ]
-
-        mock_run.side_effect = [
-            MagicMock(
-                returncode=0,
-                stdout="\n".join(
-                    [json.dumps(service) for service in mock_services_not_ready]
-                ),
-            ),
-            MagicMock(
-                returncode=0,
-                stdout="\n".join(
-                    [json.dumps(service) for service in mock_services_ready]
-                ),
-            ),
-        ]
-
-        # when
-        inspector._wait_for_services_healthy("docker-compose.yml", 30)
-
-        # then
-        assert mock_run.call_count == 2
-        mock_sleep.assert_called()
-
-    @patch("subprocess.run")
-    def test_test_with_docker_strategy_no_docker(
-        self, mock_run: MagicMock, temp_dir: str
-    ) -> None:
-        """Test _test_with_docker_strategy when Docker is not available."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        # Mock Docker not available
-        with (
-            patch.object(inspector, "_check_docker_available", return_value=False),
-            patch.object(
-                inspector, "_test_with_fallback_strategy", return_value=True
-            ) as mock_fallback,
-        ):
-            # when
-            result = inspector._test_with_docker_strategy()
-
-            # then
-            assert result is True
-            mock_fallback.assert_called_once()
-
-    @patch("subprocess.run")
-    def test_test_with_fallback_strategy_success(
-        self, mock_run: MagicMock, temp_dir: str
-    ) -> None:
-        """Test _test_with_fallback_strategy with successful execution."""
-        # given
-        self.create_valid_template_structure()
-
-        # Create template config with fallback testing
-        config_content = {
-            "fallback_testing": {
-                "env_vars": {"DATABASE_URL": "sqlite:///./test.db"},
-                "timeout": 180,
-            }
-        }
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        inspector.template_config = config_content
-
-        # Mock virtual environment and dependencies
-        with (
-            patch("fastapi_fastkit.backend.inspector.create_venv") as mock_create_venv,
-            patch(
-                "fastapi_fastkit.backend.inspector.install_dependencies_with_manager"
-            ) as mock_install,
-            patch.object(inspector, "_run_test_script_with_env") as mock_run_script,
-        ):
-            mock_create_venv.return_value = "/fake/venv"
-            mock_install.return_value = True
-            mock_run_script.return_value = MagicMock(
-                returncode=0, stdout="All tests passed"
-            )
-
-            # Create test script
-            scripts_dir = self.template_path / "scripts"
-            scripts_dir.mkdir(exist_ok=True)
-            test_script = scripts_dir / "test.sh"
-            test_script.write_text("#!/bin/bash\necho 'test passed'\n")
-
-            inspector.temp_dir = str(self.template_path)
-
-            # Create a requirements.txt file to avoid package manager detection issues
-            requirements_file = os.path.join(inspector.temp_dir, "requirements.txt")
-            with open(requirements_file, "w") as f:
-                f.write("fastapi>=0.100.0\n")
-
-            # when
-            result = inspector._test_with_fallback_strategy()
-
-            # then
-            assert result is True
-
-    def test_test_with_fallback_strategy_no_config(self, temp_dir: str) -> None:
-        """Test _test_with_fallback_strategy when no fallback config is available."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        inspector.template_config = None
-
-        # Mock standard strategy
-        with patch.object(
-            inspector, "_test_with_standard_strategy", return_value=True
-        ) as mock_standard:
-            # when
-            result = inspector._test_with_fallback_strategy()
-
-            # then
-            assert result is True
-            mock_standard.assert_called_once()
-
-    # ===== ADDITIONAL TESTS FOR BETTER COVERAGE =====
-
-    @patch("fastapi_fastkit.backend.inspector.create_venv")
-    @patch("fastapi_fastkit.backend.inspector.install_dependencies_with_manager")
-    def test_test_with_standard_strategy_success(
-        self, mock_install: MagicMock, mock_create_venv: MagicMock, temp_dir: str
-    ) -> None:
-        """Test _test_with_standard_strategy with successful execution."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        # Create test script
-        scripts_dir = self.template_path / "scripts"
-        scripts_dir.mkdir(exist_ok=True)
-        test_script = scripts_dir / "test.sh"
-        test_script.write_text("#!/bin/bash\necho 'test passed'\n")
-
-        inspector.temp_dir = str(self.template_path)
-
-        # Create a requirements.txt file to avoid package manager detection issues
-        requirements_file = os.path.join(inspector.temp_dir, "requirements.txt")
-        with open(requirements_file, "w") as f:
-            f.write("fastapi>=0.100.0\n")
-
-        # Mock dependencies
-        mock_create_venv.return_value = "/fake/venv"
-        mock_install.return_value = True
-
-        # Mock test script execution
-        with patch.object(inspector, "_run_test_script") as mock_run_script:
-            mock_run_script.return_value = MagicMock(
-                returncode=0, stdout="All tests passed"
-            )
-
-            # when
-            result = inspector._test_with_standard_strategy()
-
-            # then
-            assert result is True
-            mock_create_venv.assert_called_once()
-            mock_install.assert_called_once()
-            mock_run_script.assert_called_once()
-
-    @patch("fastapi_fastkit.backend.inspector.create_venv")
-    @patch("fastapi_fastkit.backend.inspector.install_dependencies_with_manager")
-    def test_test_with_standard_strategy_no_test_script(
-        self, mock_install: MagicMock, mock_create_venv: MagicMock, temp_dir: str
-    ) -> None:
-        """Test _test_with_standard_strategy when no test script exists."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        inspector.temp_dir = str(self.template_path)
-
-        # Create a requirements.txt file to avoid package manager detection issues
-        requirements_file = os.path.join(inspector.temp_dir, "requirements.txt")
-        with open(requirements_file, "w") as f:
-            f.write("fastapi>=0.100.0\n")
-
-        # Mock dependencies
-        mock_create_venv.return_value = "/fake/venv"
-        mock_install.return_value = True
-
-        # Mock pytest execution
-        with patch.object(inspector, "_run_pytest_directly") as mock_pytest:
-            mock_pytest.return_value = MagicMock(
-                returncode=0, stdout="All tests passed"
-            )
-
-            # when
-            result = inspector._test_with_standard_strategy()
-
-            # then
-            assert result is True
-            mock_pytest.assert_called_once()
-
-    @patch("fastapi_fastkit.backend.inspector.create_venv")
-    def test_test_with_standard_strategy_venv_creation_failed(
-        self, mock_create_venv: MagicMock, temp_dir: str
-    ) -> None:
-        """Test _test_with_standard_strategy when virtual environment creation fails."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        # Mock venv creation failure
-        mock_create_venv.return_value = None
-
-        # when
-        result = inspector._test_with_standard_strategy()
-
-        # then
-        assert result is False
-        assert len(inspector.errors) > 0
-
-    @patch("fastapi_fastkit.backend.inspector.create_venv")
-    @patch("fastapi_fastkit.backend.inspector.install_dependencies_with_manager")
-    def test_test_with_standard_strategy_dependency_installation_failed(
-        self, mock_install: MagicMock, mock_create_venv: MagicMock, temp_dir: str
-    ) -> None:
-        """Test _test_with_standard_strategy when dependency installation fails."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        # Mock dependencies
-        mock_create_venv.return_value = "/fake/venv"
-        mock_install.return_value = False
-
-        # when
-        result = inspector._test_with_standard_strategy()
-
-        # then
-        assert result is False
-        assert len(inspector.errors) > 0
-
-    @patch("subprocess.run")
-    def test_run_pytest_directly_success(
-        self, mock_run: MagicMock, temp_dir: str
-    ) -> None:
-        """Test _run_pytest_directly with successful execution."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        mock_run.return_value = MagicMock(
-            returncode=0, stdout="All tests passed", stderr=""
-        )
-
-        # when
-        result = inspector._run_pytest_directly("/fake/venv")
-
-        # then
-        assert result.returncode == 0
-        assert "All tests passed" in result.stdout
-
-    def test_check_fastapi_implementation_no_fastapi_import(
-        self, temp_dir: str
-    ) -> None:
-        """Test _check_fastapi_implementation when FastAPI is not imported."""
-        # given
-        self.create_valid_template_structure()
-
-        # Create main.py without FastAPI
-        main_content = """
-def hello():
-    return "Hello World"
-"""
-        (self.template_path / "src" / "main.py").write_text(main_content)
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        with patch(
-            "fastapi_fastkit.backend.inspector.find_template_core_modules"
-        ) as mock_find:
-            mock_find.return_value = {
-                "main": str(self.template_path / "src" / "main.py")
-            }
-
-            # when
-            result = inspector._check_fastapi_implementation()
-
-            # then
-            assert result is False
-            assert any(
-                "FastAPI app creation not found" in error for error in inspector.errors
-            )
-
-    def test_check_fastapi_implementation_no_app_instance(self, temp_dir: str) -> None:
-        """Test _check_fastapi_implementation when no FastAPI app instance is found."""
-        # given
-        self.create_valid_template_structure()
-
-        # Create main.py with FastAPI import but without 'app' variable
-        main_content = """
-from fastapi import FastAPI
-
-def create_fastapi():
-    return FastAPI()
-"""
-        (self.template_path / "src" / "main.py").write_text(main_content)
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        with patch(
-            "fastapi_fastkit.backend.inspector.find_template_core_modules"
-        ) as mock_find:
-            mock_find.return_value = {
-                "main": str(self.template_path / "src" / "main.py")
-            }
-
-            # when
-            result = inspector._check_fastapi_implementation()
-
-            # then
-            assert result is False
-            assert any(
-                "FastAPI app creation not found" in error for error in inspector.errors
-            )
-
-    def test_check_fastapi_implementation_file_read_error(self, temp_dir: str) -> None:
-        """Test _check_fastapi_implementation when file cannot be read."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        with (
-            patch(
-                "fastapi_fastkit.backend.inspector.find_template_core_modules"
-            ) as mock_find,
-            patch("builtins.open", side_effect=OSError("Permission denied")),
-        ):
-            mock_find.return_value = {
-                "main": str(self.template_path / "src" / "main.py")
-            }
-
-            # when
-            result = inspector._check_fastapi_implementation()
-
-            # then
-            assert result is False
-            assert any(
-                "Error checking FastAPI implementation" in error
-                for error in inspector.errors
-            )
-
-    def test_setup_test_environment_no_config(self, temp_dir: str) -> None:
-        """Test _setup_test_environment when no template config exists."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        inspector.temp_dir = str(self.template_path)
-        inspector.template_config = None
-
-        # when
-        inspector._setup_test_environment()
-
-        # then
-        env_file = self.template_path / ".env"
-        assert not env_file.exists()
-
-    def test_setup_test_environment_env_file_read_error(self, temp_dir: str) -> None:
-        """Test _setup_test_environment when existing .env file cannot be read."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        inspector.temp_dir = str(self.template_path)
-        inspector.template_config = {"test_env_defaults": {"TEST_VAR": "test_value"}}
-
-        # Create existing .env file
-        env_file = self.template_path / ".env"
-        env_file.write_text("EXISTING_VAR=existing_value\n")
-
-        # Mock file reading to raise exception for reading, but allow writing
-        read_mock = mock_open()
-        read_mock.side_effect = OSError("Permission denied")
-        write_mock = mock_open()
-
-        with patch("builtins.open") as mock_file:
-            # First call (reading) raises exception, second call (writing) succeeds
-            mock_file.side_effect = [
-                OSError("Permission denied"),
-                write_mock.return_value,
-            ]
-
-            # when
-            inspector._setup_test_environment()
-
-            # then
-            # Should complete without crashing and write defaults
-            assert mock_file.call_count == 2
-
-    @patch("subprocess.run")
-    def test_verify_services_running_command_failure(
-        self, mock_run: MagicMock, temp_dir: str
-    ) -> None:
-        """Test _verify_services_running when docker-compose command fails."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        mock_run.return_value = MagicMock(
-            returncode=1, stderr="Docker compose command failed"
-        )
-
-        # when
-        result = inspector._verify_services_running("docker-compose.yml")
-
-        # then
-        assert result is False
-
-    @patch("subprocess.run")
-    def test_verify_services_running_invalid_json(
-        self, mock_run: MagicMock, temp_dir: str
-    ) -> None:
-        """Test _verify_services_running when docker-compose returns invalid JSON."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        mock_run.return_value = MagicMock(returncode=0, stdout="invalid json output")
-
-        # when
-        result = inspector._verify_services_running("docker-compose.yml")
-
-        # then
-        assert result is False
-
-    @patch("subprocess.run")
-    def test_run_docker_exec_tests_success(
-        self, mock_run: MagicMock, temp_dir: str
-    ) -> None:
-        """Test _run_docker_exec_tests with successful execution."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        # Create test script
-        scripts_dir = self.template_path / "scripts"
-        scripts_dir.mkdir(exist_ok=True)
-        test_script = scripts_dir / "test.sh"
-        test_script.write_text("#!/bin/bash\necho 'test passed'\n")
-
-        inspector.temp_dir = str(self.template_path)
-
-        mock_run.return_value = MagicMock(
-            returncode=0, stdout="All tests passed", stderr=""
-        )
-
-        # when
-        result = inspector._run_docker_exec_tests("docker-compose.yml")
-
-        # then
-        assert result is True
-
-    @patch("subprocess.run")
-    def test_run_docker_exec_tests_failure(
-        self, mock_run: MagicMock, temp_dir: str
-    ) -> None:
-        """Test _run_docker_exec_tests when tests fail."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        inspector.temp_dir = str(self.template_path)
-
-        mock_run.return_value = MagicMock(
-            returncode=1, stdout="", stderr="Tests failed"
-        )
-
-        # when
-        result = inspector._run_docker_exec_tests("docker-compose.yml")
-
-        # then
-        assert result is False
-
-    def test_context_manager_cleanup_existing_temp_dir(self, temp_dir: str) -> None:
-        """Test context manager cleans up existing temp directory before creating new one."""
-        # given
-        self.create_valid_template_structure()
-
-        # First, create an inspector to get the temp_dir path
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-            temp_dir_path = inspector.temp_dir
-
-            # Create the temp directory manually to simulate existing directory
-            os.makedirs(temp_dir_path, exist_ok=True)
-
-            # Create a file in the temp directory to verify it gets cleaned up
-            test_file = os.path.join(temp_dir_path, "test_file.txt")
-            with open(test_file, "w") as f:
-                f.write("test content")
-
-            assert os.path.exists(test_file)
-
-        # when
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            with TemplateInspector(str(self.template_path), temp_dir) as inspector:
-                # Should be properly initialized
-                assert inspector.template_path == self.template_path
-                assert inspector._cleanup_needed is True
-                assert os.path.exists(inspector.temp_dir)
-
-                # The temp directory should be clean (no previous test file)
-                test_file = os.path.join(inspector.temp_dir, "test_file.txt")
-                assert not os.path.exists(test_file)
-
-        # then
-        # The test verifies that existing temp directory gets cleaned up
-        # and new one is created properly
-
-    @patch(
-        "fastapi_fastkit.backend.inspector.TemplateInspector._cleanup_docker_services"
-    )
-    @patch(
-        "fastapi_fastkit.backend.inspector.TemplateInspector._force_cleanup_directory"
-    )
-    @patch("time.sleep")
-    def test_cleanup_method_with_retry_mechanism(
-        self,
-        mock_sleep: MagicMock,
-        mock_force_cleanup: MagicMock,
-        mock_docker_cleanup: MagicMock,
-        temp_dir: str,
-    ) -> None:
-        """Test _cleanup method with retry mechanism for directory removal."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-            inspector._cleanup_needed = True
-
-            # Create mock temp directory
-            import tempfile
-
-            mock_temp_dir = tempfile.mkdtemp()
-            inspector.temp_dir = mock_temp_dir
-
-        # when
-        inspector._cleanup()
-
-        # then
-        assert inspector._cleanup_needed is False
-        assert mock_docker_cleanup.called
-        assert mock_sleep.call_count == 1  # Should sleep once after Docker cleanup
-        assert mock_force_cleanup.called
-
-        # Manual cleanup for test
-        import shutil
-
-        shutil.rmtree(mock_temp_dir, ignore_errors=True)
-
-    @patch(
-        "fastapi_fastkit.backend.inspector.TemplateInspector._cleanup_docker_services"
-    )
-    @patch(
-        "fastapi_fastkit.backend.inspector.TemplateInspector._force_cleanup_directory"
-    )
-    @patch("time.sleep")
-    def test_cleanup_method_max_retries_exceeded(
-        self,
-        mock_sleep: MagicMock,
-        mock_force_cleanup: MagicMock,
-        mock_docker_cleanup: MagicMock,
-        temp_dir: str,
-    ) -> None:
-        """Test _cleanup method when max retries are exceeded."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-            inspector._cleanup_needed = True
-
-            # Create mock temp directory
-            import tempfile
-
-            mock_temp_dir = tempfile.mkdtemp()
-            inspector.temp_dir = mock_temp_dir
-
-        # when
-        inspector._cleanup()
-
-        # then
-        assert inspector._cleanup_needed is False
-        assert mock_docker_cleanup.called
-        assert mock_sleep.call_count == 1  # Should sleep once after Docker cleanup
-        assert mock_force_cleanup.called
-
-        # Manual cleanup for test
-        import shutil
-
-        shutil.rmtree(mock_temp_dir, ignore_errors=True)
-
-    @patch("subprocess.run")
-    def test_cleanup_docker_services_success(
-        self, mock_run: MagicMock, temp_dir: str
-    ) -> None:
-        """Test _cleanup_docker_services with successful cleanup."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-            inspector.temp_dir = str(self.template_path)
-
-        # Mock successful Docker cleanup commands
-        mock_run.return_value = MagicMock(returncode=0)
-
-        # when
-        inspector._cleanup_docker_services()
-
-        # then
-        # Should call docker-compose down with proper arguments
-        expected_calls = [
-            unittest.mock.call(
-                ["docker-compose", "down", "-v", "--remove-orphans"],
-                cwd=str(self.template_path),
-                capture_output=True,
-                text=True,
-                timeout=60,
-            ),
-            unittest.mock.call(
-                ["docker", "system", "prune", "-f"],
-                capture_output=True,
-                text=True,
-                timeout=30,
-            ),
-        ]
-        mock_run.assert_has_calls(expected_calls)
-
-    @patch("subprocess.run")
-    def test_cleanup_docker_services_with_exception(
-        self, mock_run: MagicMock, temp_dir: str
-    ) -> None:
-        """Test _cleanup_docker_services when Docker commands fail."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-            inspector.temp_dir = str(self.template_path)
-
-        # Mock Docker cleanup to raise exception
-        mock_run.side_effect = subprocess.CalledProcessError(1, "docker-compose")
-
-        # when & then (should not raise exception)
-        inspector._cleanup_docker_services()
-
-        # Should have attempted to run the command
-        mock_run.assert_called()
-
-    @patch("subprocess.run")
-    def test_cleanup_docker_services_system_prune_fails(
-        self, mock_run: MagicMock, temp_dir: str
-    ) -> None:
-        """Test _cleanup_docker_services when system prune fails but main cleanup succeeds."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-            inspector.temp_dir = str(self.template_path)
-
-        # Mock first call succeeds, second call (system prune) fails
-        mock_run.side_effect = [
-            MagicMock(returncode=0),  # docker-compose down succeeds
-            subprocess.CalledProcessError(1, "docker"),  # system prune fails
-        ]
-
-        # when & then (should not raise exception)
-        inspector._cleanup_docker_services()
-
-        # Should have attempted both commands
-        assert mock_run.call_count == 2
-
-    def test_force_cleanup_directory_success(self, temp_dir: str) -> None:
-        """Test _force_cleanup_directory with successful cleanup."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        # Create a test directory
-        import tempfile
-
-        test_dir = tempfile.mkdtemp()
-
-        try:
-            # Create some test files
-            test_file = os.path.join(test_dir, "test.txt")
-            with open(test_file, "w") as f:
-                f.write("test content")
-
-            # when
-            with patch("fastapi_fastkit.backend.inspector.debug_log"):
-                inspector._force_cleanup_directory(test_dir)
-
-            # then
-            assert not os.path.exists(test_dir)
-        finally:
-            # Cleanup in case test fails
-            if os.path.exists(test_dir):
-                import shutil
-
-                shutil.rmtree(test_dir, ignore_errors=True)
-
-    @patch("shutil.rmtree")
-    @patch("fastapi_fastkit.backend.inspector.debug_log")
-    def test_force_cleanup_directory_with_retry(
-        self, mock_debug_log: MagicMock, mock_rmtree: MagicMock, temp_dir: str
-    ) -> None:
-        """Test _force_cleanup_directory with retry mechanism."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        # Mock rmtree to fail twice, then succeed
-        mock_rmtree.side_effect = [
-            OSError("Permission denied"),  # First attempt fails
-            OSError("Device busy"),  # Second attempt fails
-            None,  # Third attempt succeeds
-        ]
-
-        test_dir = "/fake/temp/dir"
-
-        # when
-        inspector._force_cleanup_directory(test_dir)
-
-        # then
-        assert mock_rmtree.call_count == 3  # Should try 3 times
-
-    @patch("shutil.rmtree")
-    @patch("subprocess.run")
-    @patch("fastapi_fastkit.backend.inspector.debug_log")
-    def test_force_cleanup_directory_fallback_to_subprocess(
-        self,
-        mock_debug_log: MagicMock,
-        mock_subprocess: MagicMock,
-        mock_rmtree: MagicMock,
-        temp_dir: str,
-    ) -> None:
-        """Test _force_cleanup_directory fallback to subprocess when all else fails."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        # Mock rmtree to always fail
-        mock_rmtree.side_effect = OSError("Permission denied")
-
-        test_dir = "/fake/temp/dir"
-
-        # when
-        inspector._force_cleanup_directory(test_dir)
-
-        # then
-        # Should try multiple times (5 main attempts + additional attempts in _fix_directory_permissions)
-        assert mock_rmtree.call_count >= 5  # Should try at least 5 times
-        # Should fallback to subprocess
-        mock_subprocess.assert_called()
-
-    def test_fix_directory_permissions(self, temp_dir: str) -> None:
-        """Test _fix_directory_permissions method."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        # Create a test directory with files
-        import tempfile
-
-        test_dir = tempfile.mkdtemp()
-
-        try:
-            # Create subdirectory and file
-            subdir = os.path.join(test_dir, "subdir")
-            os.makedirs(subdir)
-            test_file = os.path.join(subdir, "test.txt")
-            with open(test_file, "w") as f:
-                f.write("test content")
-
-            # when
-            inspector._fix_directory_permissions(test_dir)
-
-            # then
-            # Should complete without errors
-            assert os.path.exists(test_dir)
-            assert os.path.exists(subdir)
-            assert os.path.exists(test_file)
-        finally:
-            # Cleanup
-            import shutil
-
-            shutil.rmtree(test_dir, ignore_errors=True)
-
-    def test_remove_directory_contents(self, temp_dir: str) -> None:
-        """Test _remove_directory_contents method."""
-        # given
-        self.create_valid_template_structure()
-
-        with patch("fastapi_fastkit.backend.transducer.copy_and_convert_template"):
-            inspector = TemplateInspector(str(self.template_path), temp_dir)
-
-        # Create a test directory with files
-        import tempfile
-
-        test_dir = tempfile.mkdtemp()
-
-        try:
-            # Create subdirectory and file
-            subdir = os.path.join(test_dir, "subdir")
-            os.makedirs(subdir)
-            test_file = os.path.join(subdir, "test.txt")
-            with open(test_file, "w") as f:
-                f.write("test content")
-
-            # when
-            inspector._remove_directory_contents(test_dir)
-
-            # then
-            # Directory should exist but be empty
-            assert os.path.exists(test_dir)
-            assert not os.path.exists(subdir)
-            assert not os.path.exists(test_file)
-        finally:
-            # Cleanup
-            import shutil
-
-            shutil.rmtree(test_dir, ignore_errors=True)

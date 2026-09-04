@@ -1,15 +1,11 @@
 # --------------------------------------------------------------------------
 # pytest runtime configuration module
 # --------------------------------------------------------------------------
-import json
-import os
 from collections.abc import Generator
-from typing import Dict, List
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session, SQLModel, delete, select
-
+from sqlmodel import Session, delete
 from src.core.db import engine, init_db
 from src.main import app
 from src.schemas.items import ItemBase

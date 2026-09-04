@@ -10,6 +10,8 @@ from typing import Any, Dict, List
 
 from fastapi_fastkit.utils.main import console, print_warning
 
+from ..project_builder.config_schema import normalize_project_config
+from ..project_builder.dependency_collector import DependencyCollector
 from .prompts import (
     prompt_additional_features,
     prompt_architecture_preset,
@@ -107,6 +109,32 @@ class InteractiveConfigBuilder:
         features = prompt_additional_features(self.settings)
         self.config.update(features)
 
+    def build_config_from_mapping(self, config: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Complete a configuration that came from a file instead of prompts.
+
+        ``fastkit init --config`` accepts a hand-written file that lists only
+        feature selections; running them back through the same dependency
+        collection the interactive flow uses keeps both entry points in
+        agreement about which packages a selection implies.
+
+        The mapping is normalised first, so a file that spells an axis
+        differently than the prompts do (a ``{"type": ...}`` block for a
+        single-select axis, say) still resolves to the catalog choice the
+        rest of the pipeline reads.
+
+        Args:
+            config: Configuration mapping (interactive builder shape)
+
+        Returns:
+            The normalised mapping with ``all_dependencies`` filled in
+
+        Raises:
+            ConfigSchemaError: If the mapping holds an unknown key or choice
+        """
+        self.config = normalize_project_config(config, self.settings)
+        return self._build_final_config()
+
     def _build_final_config(self) -> Dict[str, Any]:
         """
         Build and validate final configuration.
@@ -114,6 +142,10 @@ class InteractiveConfigBuilder:
         Returns:
             Complete configuration dictionary with collected dependencies
         """
+        # Normalise before anything reads the selections, so an interactive
+        # session and a ``--config`` file hand the pipeline the same shape.
+        self.config = normalize_project_config(self.config, self.settings)
+
         # Collect all dependencies
         all_deps = self._collect_all_dependencies()
 
@@ -126,74 +158,24 @@ class InteractiveConfigBuilder:
         """
         Collect all dependencies from selected features.
 
+        Delegates to :class:`DependencyCollector`, which walks every axis in
+        ``PACKAGE_CATALOG`` generically. Duplicating the walk here meant a
+        newly added axis (logging, migrations, tooling) was silently skipped
+        for interactive projects while ``fastkit init --config`` picked it up.
+
         Returns:
             Deduplicated list of all package dependencies
         """
-        dependencies = set()
+        config = dict(self.config)
 
-        # Always add base FastAPI dependencies
-        dependencies.update(["fastapi", "uvicorn", "pydantic", "pydantic-settings"])
-
-        # Database dependencies
-        db_info = self.config.get("database", {})
-        if isinstance(db_info, dict) and db_info.get("packages"):
-            dependencies.update(db_info["packages"])
-
-        # Authentication dependencies
-        auth_type = self.config.get("authentication", "None")
-        if auth_type != "None":
-            auth_packages = self.settings.PACKAGE_CATALOG["authentication"].get(
-                auth_type, []
-            )
-            dependencies.update(auth_packages)
-
-        # Async tasks dependencies
-        tasks_type = self.config.get("async_tasks", "None")
-        if tasks_type != "None":
-            task_packages = self.settings.PACKAGE_CATALOG["async_tasks"].get(
-                tasks_type, []
-            )
-            dependencies.update(task_packages)
-
-        # Caching dependencies
-        cache_type = self.config.get("caching", "None")
-        if cache_type != "None":
-            cache_packages = self.settings.PACKAGE_CATALOG["caching"].get(
-                cache_type, []
-            )
-            dependencies.update(cache_packages)
-
-        # Monitoring dependencies
-        monitoring_type = self.config.get("monitoring", "None")
-        if monitoring_type != "None":
-            monitoring_packages = self.settings.PACKAGE_CATALOG["monitoring"].get(
-                monitoring_type, []
-            )
-            dependencies.update(monitoring_packages)
-
-        # Testing dependencies
-        testing_type = self.config.get("testing", "None")
-        if testing_type != "None":
-            testing_packages = self.settings.PACKAGE_CATALOG["testing"].get(
-                testing_type, []
-            )
-            dependencies.update(testing_packages)
-
-        # Utilities dependencies
-        utilities = self.config.get("utilities", [])
-        for util in utilities:
-            if util in self.settings.PACKAGE_CATALOG["utilities"]:
-                util_packages = self.settings.PACKAGE_CATALOG["utilities"][util]
-                dependencies.update(util_packages)
-
-        # Custom packages
-        custom_packages = self.config.get("custom_packages", [])
+        # Custom packages are free-form user input, so they are sanitized
+        # before the collector merges them with the catalog-derived set.
+        custom_packages = config.get("custom_packages", [])
         if custom_packages:
-            sanitized = sanitize_custom_packages(custom_packages)
-            dependencies.update(sanitized)
+            config["custom_packages"] = sanitize_custom_packages(custom_packages)
 
-        # Convert to sorted list
-        return sorted(list(dependencies))
+        collector = DependencyCollector(self.settings)
+        return collector.collect_from_config(config)
 
     def get_config(self) -> Dict[str, Any]:
         """

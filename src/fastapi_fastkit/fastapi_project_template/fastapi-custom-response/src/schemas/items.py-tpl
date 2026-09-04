@@ -1,14 +1,13 @@
 # --------------------------------------------------------------------------
 # Item schema module
 # --------------------------------------------------------------------------
-from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
 
 class ItemBase(BaseModel):
     name: str
-    description: Optional[str] = None
+    description: str | None = None
     price: float
     category: str
 

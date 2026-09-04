@@ -1,0 +1,46 @@
+# --------------------------------------------------------------------------
+# Chat API request bodies and the event envelope streamed back over SSE.
+# --------------------------------------------------------------------------
+from typing import Any, Literal
+
+from pydantic import BaseModel, Field
+
+EventType = Literal["token", "tool_use", "tool_result", "usage", "done", "error"]
+
+
+class ChatRequest(BaseModel):
+    """A single user turn."""
+
+    message: str = Field(min_length=1, max_length=8000)
+    # Omit to start a new conversation; pass the id back to continue one.
+    conversation_id: str | None = None
+
+
+class AgentEvent(BaseModel):
+    """One item in the response stream.
+
+    A single envelope type keeps the client's parsing trivial: read
+    ``type``, then look at the fields that type populates.
+    """
+
+    type: EventType
+    # token
+    text: str | None = None
+    # tool_use / tool_result
+    tool_name: str | None = None
+    tool_input: dict[str, Any] | None = None
+    tool_output: str | None = None
+    # usage
+    input_tokens: int | None = None
+    output_tokens: int | None = None
+    # done
+    conversation_id: str | None = None
+    # error
+    detail: str | None = None
+
+
+class ConversationHistory(BaseModel):
+    """The raw message list stored for a conversation."""
+
+    conversation_id: str
+    messages: list[dict[str, Any]]

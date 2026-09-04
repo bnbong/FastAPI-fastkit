@@ -1,0 +1,57 @@
+{% include "header.j2" %}
+
+{% for group in import_groups %}
+{% for line in group %}
+{{ line }}
+{% endfor %}
+
+{% endfor %}
+# fastkit:imports
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    """Application lifespan handler (startup / shutdown)."""
+{% for fragment in lifespan_fragments %}
+{% include fragment %}
+{% endfor %}
+    yield
+
+
+app = FastAPI(
+    title={{ project_name | tojson }},
+    description={{ description | tojson }},
+    version={{ version | tojson }},
+    lifespan=lifespan,
+)
+{% for fragment in setup_fragments %}
+
+{% include fragment %}
+{% endfor %}
+
+
+@app.get("/", tags=["Health"])
+async def root() -> dict[str, str]:
+    return {
+        "message": {{ ("Welcome to " ~ project_name) | tojson }},
+        "status": "healthy",
+    }
+
+
+@app.get("/health", tags=["Health"])
+async def health_check() -> dict[str, str]:
+    """Liveness probe — the process is up."""
+    return {"status": "ok"}
+
+
+@app.get("/ready", tags=["Health"])
+async def readiness_check() -> dict[str, str]:
+    """Readiness probe — the app is ready to serve traffic.
+
+    Extend this with real dependency checks (database ping, cache ping)
+    before pointing an orchestrator's readiness probe at it.
+    """
+    return {"status": "ready"}
+
+
+# fastkit:routes

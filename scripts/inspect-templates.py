@@ -23,7 +23,10 @@ from typing import Any, Dict, List
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root / "src"))
 
-from fastapi_fastkit.backend.inspector import inspect_fastapi_template  # noqa: E402
+from fastapi_fastkit.backend.inspector import (  # noqa: E402
+    InspectionOptions,
+    inspect_fastapi_template,
+)
 
 
 def get_templates_to_inspect(specific_templates: str = "") -> List[str]:
@@ -46,7 +49,7 @@ def get_templates_to_inspect(specific_templates: str = "") -> List[str]:
     return sorted(all_templates)
 
 
-def inspect_template(template_name: str) -> Dict[str, Any]:
+def inspect_template(template_name: str, options: InspectionOptions) -> Dict[str, Any]:
     """Inspect a single template."""
     template_path = (
         project_root
@@ -60,7 +63,7 @@ def inspect_template(template_name: str) -> Dict[str, Any]:
     print(f"   Path: {template_path}")
 
     try:
-        result = inspect_fastapi_template(str(template_path))
+        result = inspect_fastapi_template(str(template_path), options=options)
         result["template_name"] = template_name
         result["inspection_time"] = datetime.now(timezone.utc).isoformat()
 
@@ -105,8 +108,28 @@ def main() -> None:
         help="Output JSON file for results",
     )
     parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
+    parser.add_argument(
+        "--offline",
+        action="store_true",
+        help="Skip every network lookup (dependency freshness reporting)",
+    )
+    parser.add_argument(
+        "--no-smoke",
+        action="store_true",
+        help="Skip booting the generated project with uvicorn",
+    )
+    parser.add_argument(
+        "--mypy",
+        action="store_true",
+        help="Type check the generated project with mypy (slow)",
+    )
 
     args = parser.parse_args()
+    options = InspectionOptions(
+        offline=args.offline,
+        run_smoke_test=not args.no_smoke,
+        run_mypy=args.mypy,
+    )
 
     # Change to project root directory
     os.chdir(project_root)
@@ -129,7 +152,7 @@ def main() -> None:
     failed_templates = []
 
     for template in templates:
-        result = inspect_template(template)
+        result = inspect_template(template, options)
         results.append(result)
 
         if not result.get("is_valid", False):

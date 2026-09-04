@@ -3,8 +3,8 @@
 # --------------------------------------------------------------------------
 from fastapi import APIRouter
 
-from src.crud.<new_route> import *
-from src.schemas.<new_route> import *
+from <package_root>.crud.<new_route> import *
+from <package_root>.schemas.<new_route> import *
 
 router = APIRouter()
 

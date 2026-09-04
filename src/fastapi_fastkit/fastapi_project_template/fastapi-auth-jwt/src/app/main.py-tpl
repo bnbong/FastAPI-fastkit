@@ -1,0 +1,69 @@
+# --------------------------------------------------------------------------
+# FastAPI application entry point for <project_name>.
+# --------------------------------------------------------------------------
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+from sqlmodel import Session
+from starlette.middleware.cors import CORSMiddleware
+
+from src.app.api.router import api_router
+from src.app.core.config import settings
+from src.app.db.session import create_db_and_tables, engine
+from src.app.domains.users.repository import UserRepository
+from src.app.domains.users.schemas import UserCreate
+from src.app.domains.users.service import UserService
+
+# fastkit:imports
+
+
+def _seed_first_superuser() -> None:
+    """Create the bootstrap superuser when configured and not yet present."""
+    if not (settings.FIRST_SUPERUSER_EMAIL and settings.FIRST_SUPERUSER_PASSWORD):
+        return
+    with Session(engine) as session:
+        service = UserService(UserRepository(session))
+        if service.repository.get_by_email(settings.FIRST_SUPERUSER_EMAIL.lower()):
+            return
+        service.register(
+            UserCreate(
+                email=settings.FIRST_SUPERUSER_EMAIL,
+                password=settings.FIRST_SUPERUSER_PASSWORD,
+                full_name="Initial Superuser",
+            ),
+            is_superuser=True,
+            scopes=["me", "admin"],
+        )
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    """Startup / shutdown hooks.
+
+    ``create_db_and_tables`` keeps the SQLite quick-start working out of the
+    box; on PostgreSQL prefer ``alembic upgrade head`` and drop this call.
+    """
+    create_db_and_tables()
+    _seed_first_superuser()
+    yield
+
+
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    description="<description>",
+    version="0.1.0",
+    lifespan=lifespan,
+)
+
+if settings.all_cors_origins:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.all_cors_origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+app.include_router(api_router, prefix=settings.API_V1_PREFIX)
+# fastkit:routes

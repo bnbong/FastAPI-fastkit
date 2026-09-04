@@ -310,6 +310,7 @@ name = "fastapi-fastkit"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
+    { name = "jinja2" },
     { name = "rich" },
 ]
 
@@ -322,6 +323,7 @@ dev = [
     { name = "pygments" },
     { name = "pytest" },
     { name = "pytest-cov" },
+    { name = "types-pyyaml" },
 ]
 
 [package.dev-dependencies]
@@ -346,12 +348,14 @@ requires-dist = [
     { name = "black", marker = "extra == 'dev'", specifier = ">=26.3.1" },
     { name = "click", specifier = ">=8.1.7" },
     { name = "isort", marker = "extra == 'dev'", specifier = ">=5.13.2" },
+    { name = "jinja2", specifier = ">=3.1" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.12.0" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.0.1" },
     { name = "pygments", marker = "extra == 'dev'", specifier = ">=2.20.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=9.0.3" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.2.1" },
     { name = "rich", specifier = ">=13.9.2" },
+    { name = "types-pyyaml", marker = "extra == 'dev'", specifier = ">=6.0.12.20260408" },
 ]
 provides-extras = ["dev"]
 

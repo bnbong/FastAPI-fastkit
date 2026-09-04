@@ -83,12 +83,12 @@
 #       - "setup.py"
 #       - "README.md"
 #       - "src/main.py"
-#       - "src/mcp"
+#       - "src/mcp_server"
 #       - "src/auth"
 #     required_dirs:
 #       - "src"
 #       - "tests"
-#       - "src/mcp"
+#       - "src/mcp_server"
 #       - "src/auth"
 #     package_manager: "uv"
 #     has_auth: true

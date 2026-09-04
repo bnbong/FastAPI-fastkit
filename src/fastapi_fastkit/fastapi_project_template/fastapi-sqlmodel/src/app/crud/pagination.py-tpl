@@ -1,0 +1,21 @@
+# --------------------------------------------------------------------------
+# Offset/limit pagination envelope shared by every list endpoint.
+# --------------------------------------------------------------------------
+from typing import Generic, Sequence, TypeVar
+
+from pydantic import BaseModel
+
+ItemType = TypeVar("ItemType")
+
+
+class Page(BaseModel, Generic[ItemType]):
+    """A single page of results plus the cursor the client needs to move on."""
+
+    items: Sequence[ItemType]
+    total: int
+    offset: int
+    limit: int
+
+    @property
+    def has_next(self) -> bool:
+        return self.offset + len(self.items) < self.total

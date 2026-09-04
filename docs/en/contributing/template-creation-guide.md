@@ -97,8 +97,7 @@ fastapi-{template-name}/
 │   ├── lint.sh-tpl             # Linting
 │   ├── run-server.sh-tpl       # Server execution
 │   └── test.sh-tpl             # Test execution
-├── pyproject.toml-tpl           # ✅ Primary metadata (PEP 621, preferred)
-├── setup.py-tpl                # 🟡 Legacy metadata (accepted for back-compat)
+├── pyproject.toml-tpl           # ✅ Primary metadata (PEP 621, required)
 ├── requirements.txt-tpl         # 🟡 Optional when pyproject declares deps
 ├── setup.cfg-tpl               # Development tools configuration
 ├── README.md-tpl               # ✅ Project documentation (required)
@@ -110,15 +109,26 @@ fastapi-{template-name}/
 
 - `tests/` directory
 - `README.md-tpl`
-- At least one metadata file: `pyproject.toml-tpl` (preferred, PEP 621) or
-  `setup.py-tpl` (legacy, still accepted)
-- A declaration of `fastapi` as a dependency in at least one of:
-  `pyproject.toml-tpl` `[project].dependencies`, `requirements.txt-tpl`, or
-  `setup.py-tpl` `install_requires`
+- `pyproject.toml-tpl` (PEP 621)
+- A declaration of `fastapi` as a dependency in `pyproject.toml-tpl`
+  `[project].dependencies` or `requirements.txt-tpl`
 
-`requirements.txt-tpl` is no longer strictly required when `pyproject.toml-tpl`
-declares `[project].dependencies`. Modern templates SHOULD adopt
-`pyproject.toml-tpl` as their primary metadata file.
+`requirements.txt-tpl` is not required when `pyproject.toml-tpl` declares
+`[project].dependencies` — but when a template ships both, they must agree:
+inspection fails on dependency drift between them.
+
+**New templates are pyproject-first and must not ship `setup.py-tpl`.** No
+bundled template has one as of v1.4.0. Inspection still accepts the file so
+out-of-tree templates keep working, but it is a legacy path.
+
+**Target Python 3.12 consistently**: `requires-python = ">=3.12"`, black
+`target-version = ["py312"]`, mypy `python_version = "3.12"`, and
+`python:3.12-slim` for any Docker base image. Inspection checks that the
+three pins agree.
+
+**Never declare `FastAPI-fastkit` as a runtime dependency** of a generated
+project. The CLI is a development tool; a template's dependency list should
+contain only what the generated application itself imports.
 
 ### File Writing Guide
 
@@ -250,52 +260,26 @@ isort==5.12.0
 mypy==1.7.1
 ```
 
-#### 4. Writing setup.py-tpl (legacy — optional when pyproject is present)
+#### 4. Route anchors
 
-Retained for legacy templates. New templates do not need this file if they
-ship `pyproject.toml-tpl`.
+Templates that ship a `main.py-tpl` or an API aggregator module should mark
+where `fastkit addroute` inserts code:
 
 ```python
-"""
-<project_name> package setup
+from src.app.api import health
 
-Project created with FastAPI-fastkit.
-"""
-from setuptools import find_packages, setup
+# fastkit:imports
 
-# Dependencies list (type annotation required)
-install_requires: list[str] = [
-    "fastapi>=0.104.0",
-    "uvicorn[standard]>=0.24.0",
-    "pydantic>=2.5.0",
-    "pydantic-settings>=2.1.0",
-    "python-dotenv>=1.0.0",
-]
+api_router = APIRouter()
+api_router.include_router(health.router)
 
-setup(
-    name="<project_name>",
-    version="1.0.0",
-    description="[FastAPI-fastkit templated] <description>",  # Identity marker used by is_fastkit_project()
-    long_description=open("README.md").read(),
-    long_description_content_type="text/markdown",
-    author="<author>",
-    author_email="<author_email>",
-    packages=find_packages(),
-    install_requires=install_requires,
-    python_requires=">=3.8",
-    classifiers=[
-        "Development Status :: 4 - Beta",
-        "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
-        "Programming Language :: Python :: 3.12",
-    ],
-)
+# fastkit:routes
 ```
+
+Without the anchors, `addroute` falls back to an AST-based insertion that
+locates the import block and the router registrations itself — so a template
+missing them still works, but the result is less predictable. Keep the
+comments in place when editing these files.
 
 #### 5. Writing Test Files
 
@@ -356,7 +340,20 @@ make inspect-template TEMPLATES="fastapi-your-template"
 
 # Validate with verbose output
 python scripts/inspect-templates.py --templates "fastapi-your-template" --verbose
+
+# Fast local loop: no network, no server boot
+python scripts/inspect-templates.py --templates "fastapi-your-template" \
+    --offline --no-smoke
+
+# Full check before opening a PR (adds mypy over the generated project)
+python scripts/inspect-templates.py --templates "fastapi-your-template" --mypy
 ```
+
+`--offline` skips the PyPI dependency-freshness lookups, `--no-smoke` skips
+booting the generated project (the slowest step), and `--mypy` type-checks
+the generated project. See
+[Template Quality Assurance](../reference/template-quality-assurance.md) for
+what every check does.
 
 !!! note
 
@@ -370,8 +367,7 @@ The inspector automatically validates the following items:
 
 - [ ] `tests/` directory exists
 - [ ] `README.md-tpl` file exists
-- [ ] At least one of `pyproject.toml-tpl` (preferred) or `setup.py-tpl`
-      (legacy) exists
+- [ ] `pyproject.toml-tpl` exists (no `setup.py-tpl` in new templates)
 
 #### ✅ File Extension Validation
 
@@ -383,7 +379,8 @@ The inspector automatically validates the following items:
 - [ ] `fastapi` is declared in at least one of:
     - [ ] `pyproject.toml-tpl` under `[project].dependencies` (preferred)
     - [ ] `requirements.txt-tpl`
-    - [ ] `setup.py-tpl` under `install_requires`
+- [ ] `requirements.txt-tpl` and `[project].dependencies` do not disagree
+- [ ] `FastAPI-fastkit` is **not** a runtime dependency
 
 #### ✅ FastAPI Implementation Validation
 
@@ -395,6 +392,28 @@ The inspector automatically validates the following items:
 - [ ] Virtual environment creation successful
 - [ ] Dependencies installation successful
 - [ ] All pytest tests pass
+
+#### ✅ Smoke Test
+
+- [ ] The generated project boots under uvicorn
+- [ ] `/docs` responds
+- [ ] `/health` responds
+
+The uvicorn target is resolved from `[tool.fastapi-fastkit].app_module` in
+the generated `pyproject.toml`, then from `app_module` in
+`template-config.yml`, then from the conventional `main.py` locations.
+
+#### ✅ Configuration Consistency
+
+- [ ] `requires-python`, black `target-version` and mypy `python_version`
+      all say Python 3.12
+- [ ] No dependency drift between `requirements.txt-tpl` and
+      `[project].dependencies`
+- [ ] No `FastAPI-fastkit` self-dependency
+
+#### ✅ Placeholder Residue
+
+- [ ] No `<placeholder>` survives project generation
 
 #### ✅ Automated Template Testing
 

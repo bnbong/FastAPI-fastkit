@@ -1,0 +1,17 @@
+# --------------------------------------------------------------------------
+# Top-level API router — aggregates the health probe with every domain
+# module under ``src/app/domains/``.
+# --------------------------------------------------------------------------
+from fastapi import APIRouter
+
+from src.app.api import health
+from src.app.domains.auth import router as auth_router
+from src.app.domains.users import router as users_router
+
+# fastkit:imports
+
+api_router = APIRouter()
+api_router.include_router(health.router)
+api_router.include_router(auth_router.router)
+api_router.include_router(users_router.router)
+# fastkit:routes

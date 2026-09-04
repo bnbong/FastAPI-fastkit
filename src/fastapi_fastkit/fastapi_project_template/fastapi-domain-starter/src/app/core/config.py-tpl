@@ -2,13 +2,13 @@
 # Application settings (pydantic-settings).
 # --------------------------------------------------------------------------
 import secrets
-from typing import Annotated, Any, List, Literal, Union
+from typing import Annotated, Any, Literal
 
 from pydantic import AnyUrl, BeforeValidator, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-def _parse_cors(v: Any) -> Union[List[str], str]:
+def _parse_cors(v: Any) -> list[str] | str:
     if isinstance(v, str) and not v.startswith("["):
         return [item.strip() for item in v.split(",") if item.strip()]
     if isinstance(v, (list, str)):
@@ -37,12 +37,12 @@ class Settings(BaseSettings):
     API_V1_PREFIX: str = "/api/v1"
 
     BACKEND_CORS_ORIGINS: Annotated[
-        Union[List[AnyUrl], str], BeforeValidator(_parse_cors)
+        list[AnyUrl] | str, BeforeValidator(_parse_cors)
     ] = []
 
     @computed_field  # type: ignore[prop-decorator]
     @property
-    def all_cors_origins(self) -> List[str]:
+    def all_cors_origins(self) -> list[str]:
         return [str(origin).rstrip("/") for origin in self.BACKEND_CORS_ORIGINS]
 
 

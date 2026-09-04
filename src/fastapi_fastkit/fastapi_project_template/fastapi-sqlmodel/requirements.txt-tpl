@@ -1,0 +1,21 @@
+fastapi==0.141.1
+uvicorn[standard]==0.52.4
+pydantic==2.13.5
+pydantic-settings==2.15.0
+python-dotenv==1.2.3
+sqlmodel==0.0.42
+sqlalchemy==2.0.52
+alembic==1.19.1
+aiosqlite==0.22.1
+greenlet==3.5.5
+
+# PostgreSQL driver — needed only when DATABASE_URL points at PostgreSQL.
+# asyncpg==0.31.0
+
+# Development / test tooling
+pytest==9.1.1
+pytest-asyncio==1.4.0
+httpx==0.28.1
+black==26.5.1
+isort==9.0.1
+mypy==2.3.1

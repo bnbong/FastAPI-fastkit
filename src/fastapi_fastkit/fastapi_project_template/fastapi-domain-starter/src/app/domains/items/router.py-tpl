@@ -1,7 +1,6 @@
 # --------------------------------------------------------------------------
 # Items domain — HTTP transport (FastAPI router).
 # --------------------------------------------------------------------------
-from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 
@@ -16,8 +15,8 @@ def get_item_service() -> ItemService:
     return ItemService()
 
 
-@router.get("", response_model=List[ItemRead])
-def list_items(service: ItemService = Depends(get_item_service)) -> List[ItemRead]:
+@router.get("", response_model=list[ItemRead])
+def list_items(service: ItemService = Depends(get_item_service)) -> list[ItemRead]:
     return [ItemRead.model_validate(item) for item in service.list_items()]
 
 

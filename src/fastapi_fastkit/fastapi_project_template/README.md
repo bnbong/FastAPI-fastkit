@@ -20,19 +20,29 @@ template-name/
 │ └── utils/
 ├── tests/                    # required
 ├── scripts/
-├── pyproject.toml-tpl        # preferred primary metadata file (PEP 621)
-├── setup.py-tpl              # legacy alternative, still accepted
+├── pyproject.toml-tpl        # required primary metadata file (PEP 621)
 ├── requirements.txt-tpl      # optional when pyproject.toml-tpl declares deps
 └── README.md-tpl             # required
 ```
 
 The minimum required files for a modern template are `tests/`, `README.md-tpl`,
-and at least one metadata file (`pyproject.toml-tpl` or `setup.py-tpl`).
-`requirements.txt-tpl` is optional when the template's dependencies are
-declared under `[project].dependencies` in `pyproject.toml-tpl`.
+and `pyproject.toml-tpl`. `requirements.txt-tpl` is optional when the
+template's dependencies are declared under `[project].dependencies` in
+`pyproject.toml-tpl`.
 
-Modern templates **SHOULD** ship `pyproject.toml-tpl` as the primary metadata
-file. `setup.py-tpl` remains supported for backward compatibility.
+Templates are **pyproject-first**: as of v1.4.0 no bundled template ships a
+`setup.py-tpl`, and new templates must not add one. Inspection still accepts
+`setup.py-tpl` so third-party templates keep working, but it is a legacy
+path.
+
+Generated projects must **not** declare `FastAPI-fastkit` as a runtime
+dependency — the CLI is a development tool, and a template's dependency list
+should contain only what the generated application itself imports. Template
+inspection fails a template that declares it.
+
+Every template targets **Python 3.12**: `requires-python = ">=3.12"`, black
+`target-version = ["py312"]`, mypy `python_version = "3.12"`, and
+`python:3.12-slim` as the Docker base image.
 
 ### Key Requirements:
 
@@ -92,12 +102,18 @@ file. `setup.py-tpl` remains supported for backward compatibility.
 | `fastapi-default` | Quick CRUD demo with the classic layered layout (`api/routes`, `crud`, `schemas`). Good first stop. |
 | `fastapi-empty` | Minimal scaffold for users who want to add their own structure on top. |
 | `fastapi-single-module` | Single-file sandbox for tiny prototypes / scripts. |
-| `fastapi-async-crud` | Async-flavoured equivalent of `fastapi-default`. |
 | `fastapi-custom-response` | Demonstrates custom response formatting / envelope patterns. |
-| `fastapi-dockerized` | Adds a production-ready Dockerfile to the default layout. |
-| `fastapi-psql-orm` | PostgreSQL + SQLAlchemy + Alembic; pick this when you need a real database. |
+| `fastapi-psql-orm` | PostgreSQL + SQLAlchemy + Alembic (synchronous); pick this for a Compose stack around a real database. |
 | `fastapi-mcp` | Model Context Protocol integration. |
 | `fastapi-domain-starter` | **Recommended modern default for medium-sized APIs.** Pyproject-first, domain-oriented layout (`src/app/domains/<concept>/`) with a clean transport / service / repository split, plus a built-in `/health` probe. |
+| `fastapi-auth-jwt` | JWT authentication: access/refresh rotation tracked by `jti`, argon2id hashing, role and scope guards, SQLModel users, Alembic migrations. |
+| `fastapi-sqlmodel` | Persistence-first: SQLModel over an async SQLAlchemy engine, async Alembic, a generic `CRUDBase`, paginated list endpoints. |
+| `fastapi-llm-agent` | Streaming Claude chat agent: SSE token delivery, a tool-call loop with an iteration cap, conversation memory, offline tests. |
+| `fastapi-async-crud` | ⚠️ **Deprecated.** Async-flavoured equivalent of `fastapi-default`; use `fastapi-sqlmodel` instead. |
+| `fastapi-dockerized` | ⚠️ **Deprecated.** Added a production-ready Dockerfile to the default layout; every current template now ships one. |
+
+Deprecated templates are still shipped and still generate working projects.
+They are kept for existing users and are not recommended for new projects.
 
 ## Base structure of modules template
 

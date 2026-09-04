@@ -1,16 +1,15 @@
 """
 Pydantic schemas for items endpoints.
 """
-from typing import Optional
 from pydantic import BaseModel, Field
 
 
 class ItemBase(BaseModel):
     """Base item schema."""
     name: str = Field(..., min_length=1, max_length=100, description="Item name")
-    description: Optional[str] = Field(None, max_length=500, description="Item description")
+    description: str | None = Field(None, max_length=500, description="Item description")
     price: float = Field(..., gt=0, description="Item price")
-    tax: Optional[float] = Field(None, ge=0, description="Item tax")
+    tax: float | None = Field(None, ge=0, description="Item tax")
 
 
 class ItemCreate(ItemBase):
@@ -20,10 +19,10 @@ class ItemCreate(ItemBase):
 
 class ItemUpdate(BaseModel):
     """Schema for updating an item."""
-    name: Optional[str] = Field(None, min_length=1, max_length=100)
-    description: Optional[str] = Field(None, max_length=500)
-    price: Optional[float] = Field(None, gt=0)
-    tax: Optional[float] = Field(None, ge=0)
+    name: str | None = Field(None, min_length=1, max_length=100)
+    description: str | None = Field(None, max_length=500)
+    price: float | None = Field(None, gt=0)
+    tax: float | None = Field(None, ge=0)
 
 
 class ItemResponse(ItemBase):

@@ -1,0 +1,62 @@
+# --------------------------------------------------------------------------
+# Chat endpoints.
+#
+# The response is Server-Sent Events: each agent event is one SSE message
+# whose ``event`` field is the event type and whose ``data`` is the JSON
+# envelope, so a browser can attach a listener per type.
+# --------------------------------------------------------------------------
+import uuid
+from collections.abc import AsyncIterator
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from sse_starlette.sse import EventSourceResponse, ServerSentEvent
+
+from src.app.api.deps import get_agent, get_store
+from src.app.llm.agent import ChatAgent
+from src.app.memory.base import ConversationStore
+from src.app.schemas.chat import AgentEvent, ChatRequest, ConversationHistory
+
+router = APIRouter(tags=["chat"])
+
+
+async def _event_source(
+    agent: ChatAgent, conversation_id: str, message: str
+) -> AsyncIterator[ServerSentEvent]:
+    try:
+        async for event in agent.stream(conversation_id, message):
+            yield ServerSentEvent(event=event.type, data=event.model_dump_json())
+    except Exception as exc:  # noqa: BLE001
+        # The status line is long gone by now, so a failure mid-stream can
+        # only be reported as another event.
+        failure = AgentEvent(type="error", detail=str(exc))
+        yield ServerSentEvent(event="error", data=failure.model_dump_json())
+
+
+@router.post("/chat")
+async def chat(
+    payload: ChatRequest, agent: ChatAgent = Depends(get_agent)
+) -> EventSourceResponse:
+    """Stream the assistant's reply to one user message."""
+    conversation_id = payload.conversation_id or uuid.uuid4().hex
+    return EventSourceResponse(_event_source(agent, conversation_id, payload.message))
+
+
+@router.get("/conversations/{conversation_id}", response_model=ConversationHistory)
+async def read_conversation(
+    conversation_id: str, store: ConversationStore = Depends(get_store)
+) -> ConversationHistory:
+    messages = await store.get(conversation_id)
+    if not messages:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Conversation not found"
+        )
+    return ConversationHistory(conversation_id=conversation_id, messages=messages)
+
+
+@router.delete(
+    "/conversations/{conversation_id}", status_code=status.HTTP_204_NO_CONTENT
+)
+async def delete_conversation(
+    conversation_id: str, store: ConversationStore = Depends(get_store)
+) -> None:
+    await store.delete(conversation_id)
