@@ -1,5 +1,96 @@
 # Changelog
 
+## v1.4.0 (2026-09-04)
+
+### Features
+
+- **Reproducible project configuration files**
+  - `fastkit init --config <path>` creates a project without a single prompt, replaying a saved configuration. `.json` and `.toml` are always available; `.yaml` / `.yml` work when PyYAML happens to be installed (fastkit does not add it as a runtime dependency).
+  - `fastkit init --interactive --save-config <path>` writes the answered configuration to disk. Without the flag, an interactive session that reached the end offers to save the answers — but only when a human is at the terminal, so scripted runs stay silent.
+  - Loaded configs are validated with the same rules the interactive prompts use (project name, author email, `all_dependencies` shape) and every problem is reported before anything is written.
+  - A hand-written config that lists only feature selections is expanded through the interactive builder, so a file and a wizard session resolve dependencies identically.
+  - Every config, hand-written or `--save-config`-produced, is normalized and schema-validated (`normalize_project_config`) before it reaches the generator: unknown keys, unknown axis choices and wrong-typed values are rejected with the offending name and the allowed values.
+- **`--dry-run` preview for `init` and `startdemo`**
+  - Prints the file tree that would be created and the packages that would be installed (with the package manager that would install them), then exits without touching the disk.
+- **`--no-venv` and `--no-install` for `init` and `startdemo`**
+  - `--no-install` skips dependency installation; `--no-venv` skips virtual environment creation and implies `--no-install`. Useful in containers, CI, and on machines where the environment is managed elsewhere.
+- **`[tool.fastapi-fastkit]` project metadata block**
+  - Every generated project now records how it was produced in its `pyproject.toml`: `managed`, `version`, `template`, `preset` (interactive runs only), `package_manager`, `app_module` and `features` (a flat `"<category>:<choice>"` list).
+  - `fastkit runserver` reads `app_module` from that block first and only falls back to scanning the tree, so non-standard layouts start correctly. Generated Dockerfiles use the same entrypoint.
+  - The block is rewritten (never duplicated) when generation runs again, and it is stamped after the package manager has finished rewriting `pyproject.toml`.
+- **Explicit route anchors for `addroute`**
+  - Templates and generated entrypoints carry `# fastkit:imports` and `# fastkit:routes` comments marking where `fastkit addroute` inserts imports and router registrations. Projects without the anchors still work through the AST-based fallback.
+- **Configurable subprocess timeouts**
+  - Every package manager invocation is bounded (availability check, virtualenv creation, dependency install). `FASTKIT_SUBPROCESS_TIMEOUT` overrides all of them with a single value in seconds; an unparsable or non-positive value is ignored.
+- **`--yes` / `-y` skips the overwrite confirmation for in-place deployment**
+  - Added to both `fastkit init` and `fastkit startdemo`. When a project is deployed in place (no new project folder), fastkit no longer asks "Overwrite these files?" before replacing existing files. It has no effect on the separate "Do you want to proceed with project creation?" prompt. Non-interactive runs (stdin not a TTY, e.g. CI) already skipped the overwrite confirmation automatically and continue to do so without the flag.
+
+- **Interactive builder now generates real code for every catalog selection**
+  - Previously, choosing Celery/Dramatiq, Redis caching, WebSocket, Pagination, OpenTelemetry, OAuth2 or Session-based auth only installed packages and left the wiring to the user. Every one of those selections now generates working code: a `worker.py` + `features/tasks.py` router for background tasks, `features/cache.py` for Redis caching, `features/websocket.py` and `features/pagination.py` for the matching utilities, `main.py` OpenTelemetry tracing setup, and OAuth2 / session-based auth modules with the matching `main.py` middleware.
+- **Three new interactive builder axes**
+  - `logging`: a `structured` choice adds stdlib `logging` + `json` structured output with a request-id middleware (`logging_config.py`), no new dependency.
+  - `migrations`: an `Alembic` choice generates a full async migration environment (`alembic.ini`, `alembic/env.py`, `alembic/script.py.mako`, a baseline revision, `scripts/migrate.sh`) for any SQL database selection.
+  - `tooling` (multi-select): `ruff`, `pre-commit`, `github-actions`, `devcontainer` and `makefile` choices generate the matching config file(s); `ruff` also merges a `[tool.ruff]` block into `pyproject.toml` (or writes a standalone `ruff.toml` for `pip` projects).
+- **`/health` and `/ready` endpoints generated for every project**
+  - Every `main.py` overlay now always includes a liveness (`/health`) and readiness (`/ready`) probe, regardless of feature selection.
+- **`--dry-run` lists every file a run would create**
+  - The preview now enumerates the exact same file set `generate_all_files()` would write, including the new logging/migrations/tooling artifacts.
+- **Preset compatibility warnings cover the new axes**
+  - `classic-layered` and `domain-starter` preserve their template-shipped `main.py`, so feature validation now warns when a selection under the new axes (or the existing ones) needs manual wiring into that preserved entrypoint.
+
+### Templates
+
+- **Add `fastapi-auth-jwt` template** — production-shaped JWT authentication: access/refresh token pairs with rotation (each refresh token tracked by `jti`, so a replay is rejected), argon2id hashing via `pwdlib`, single-session and all-session logout, `require_scopes(...)` and superuser dependencies, SQLModel users with Alembic migrations, SQLite by default and PostgreSQL via `DATABASE_URL`.
+- **Add `fastapi-sqlmodel` template** — persistence-first starter: SQLModel over an async SQLAlchemy 2.0 engine, async Alembic migrations, a generic `CRUDBase`, and paginated list endpoints behind a `Page[T]` envelope. Runs on SQLite out of the box, switches to PostgreSQL by changing `DATABASE_URL`.
+- **Add `fastapi-llm-agent` template** — streaming Claude chat agent: SSE token delivery, a real tool-call loop with an iteration cap, conversation history behind a `ConversationStore` interface, bundled `calculator` / `current_time` tools, and a test suite that runs offline against a scripted fake client.
+- **Deprecate `fastapi-dockerized` and `fastapi-async-crud`** — both remain shipped and generate working projects, but they are no longer recommended starting points. Docker tooling is now part of the newer templates and of interactive deployment selection, and async CRUD is better served by `fastapi-sqlmodel`.
+- **Template hygiene pass across every shipped template**
+  - Aligned on Python 3.12 (`requires-python`, black `target-version`, mypy `python_version`, `python:3.12-slim` base images).
+  - Removed `setup.py-tpl` in favour of a pyproject-first contract.
+  - Refreshed dependency pins to current stable releases (in progress at the time of the release).
+
+### Documentation
+
+- Add tutorials for the three new templates: JWT authentication, SQLModel persistence, and the LLM agent.
+- Rewrite `Choosing a Starter` around the expanded template set, with deprecation notes for `fastapi-dockerized` and `fastapi-async-crud`.
+- Document `--config`, `--save-config`, `--dry-run`, `--no-venv`, `--no-install`, the `[tool.fastapi-fastkit]` metadata contract, the route anchors, and `FASTKIT_SUBPROCESS_TIMEOUT` in the CLI reference.
+- Expand the Template Quality Assurance reference with the smoke test, configuration-consistency, dependency-drift and placeholder-residue checks, plus the `--offline` / `--no-smoke` / `--mypy` inspection flags.
+- Link the fragment authoring procedure (`src/fastapi_fastkit/fragments/README.md`) from the contributor guides.
+- Sync the Korean landing page, CLI reference and starter guide; refresh translation status counts for every locale.
+
+### Tests
+
+- Coverage for config-file round-trips (JSON / TOML / YAML), validation failures, and the `--config` / `--save-config` paths.
+- Coverage for `--dry-run`, `--no-venv` and `--no-install` across `init` and `startdemo`.
+- Coverage for metadata block rendering, idempotent rewrites, and `runserver` app-module resolution from recorded metadata.
+- Rendered-fragment tests asserting every generated Python file parses, across the feature combination matrix.
+- End-to-end coverage for the three new templates, including their own test suites.
+
+### Maintenances
+
+- **Interactive code generation moved to Jinja2 fragments** — the generated `main.py`, database/auth modules, Docker files and pytest configuration are now rendered from templates under `src/fastapi_fastkit/fragments/` instead of being assembled from strings. Generated apps use the `lifespan` context manager (not the deprecated `@app.on_event`) and `python:3.12-slim` images. `jinja2` is the one new runtime dependency.
+- **Package manager auto-detection prefers `uv`** — detection order is now `uv` → `pdm` → `poetry` → `pip`, with `pip` as the last resort. An explicitly requested manager still wins.
+- **Removed the automatic `pip` self-upgrade** during environment setup — fastkit no longer mutates the freshly created virtual environment's `pip`.
+- **Template inspector restructured** into `fastapi_fastkit.backend.inspection` (context / checks / consistency / freshness / smoke / lint / report modules) driven by an `InspectionOptions` dataclass. `fastapi_fastkit.backend.inspector` remains as a facade for the historical import path.
+- `scripts/inspect-templates.py` gained `--offline`, `--no-smoke` and `--mypy`.
+
+### Fixes
+
+- **`fastkit startdemo` now refuses to target an existing project directory**
+  - Like `init`, `startdemo` stops with `Error: Project '{name}' already exists.` when the target project directory is already there. `--dry-run` is unaffected, since it never writes to disk. Rollback on a failed run only removes a project folder that this run created — a directory that already existed beforehand is never deleted.
+- **Project name, author and description are escaped correctly for every generated file type**
+  - Values containing quotes (`"`, `'`) or backslashes no longer produce a broken `pyproject.toml` or invalid Python source; each generated file escapes the value according to its own syntax (TOML string escaping, Python string escaping). `startdemo` and non-interactive `init` now also validate the project name before generating anything.
+- **Template smoke tests capture full server output and retry on port conflicts**
+  - The internal template inspector's smoke test now captures the `uvicorn` subprocess output to a file and includes the tail of that log when a smoke test fails, and retries with a different port (up to 3 attempts) if the chosen port is already in use.
+
+### Breaking Changes
+
+- **`setup.py-tpl` removed from shipped templates.** Template metadata is pyproject-first. Inspection still accepts `setup.py-tpl` for third-party templates, but no bundled template ships one and new templates should not add one.
+- **Generated projects no longer depend on `FastAPI-fastkit` at runtime.** The CLI is a development tool; a generated project's dependency list now contains only what the application itself imports. Projects generated by earlier versions can drop the dependency safely.
+- **The automatic `pip` upgrade during environment setup is gone.** Environments that relied on fastkit refreshing `pip` need to run `pip install --upgrade pip` themselves.
+- **Package manager auto-detection now prefers `uv` over `pip`.** A machine with `uv` installed that previously fell through to `pip` will now get a `pyproject.toml`-based project. Pass `--package-manager pip` to keep the old outcome.
+- **Template inspector API changed.** `TemplateInspector` and `inspect_fastapi_template` now take an `InspectionOptions` argument and the individual checks live in `fastapi_fastkit.backend.inspection`. Code importing check functions directly from `fastapi_fastkit.backend.inspector` must be updated.
+
 ## v1.3.0 (2026-05-06)
 
 ### Features

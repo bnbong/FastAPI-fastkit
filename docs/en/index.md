@@ -37,6 +37,8 @@ This project was inspired by the `SpringBoot initializer` & Python Django's `dja
 - **🔍 Automated template quality assurance** : Weekly automated testing ensures all templates remain functional and up-to-date
 - **🚀 Multiple project templates** : Choose from various pre-configured templates for different use cases (async CRUD, Docker, PostgreSQL, etc.)
 - **📦 Multiple package manager support** : Choose your preferred Python package manager (pip, uv, pdm, poetry) for dependency management
+- **🧾 Reproducible project configs** : Save an interactive session with `--save-config` and replay it later with `fastkit init --config` — no prompts, same project
+- **🏷️ Self-describing projects** : Every generated project records its template, preset, package manager, entrypoint and selected features in a `[tool.fastapi-fastkit]` block that `runserver` and `addroute` read back
 
 ## Installation
 
@@ -353,6 +355,25 @@ The interactive mode provides:
 - **Smart dependency management** with automatic pip compatibility
 - **Feature validation** with manual-wiring warnings for selections the preset cannot auto-wire
 - **Identity markers** in the generated `pyproject.toml` (description marker + `[tool.fastapi-fastkit]` table) so `is_fastkit_project()` can recognize generated projects later
+- **Project metadata** recorded in `[tool.fastapi-fastkit]` — template, preset, package manager, `app_module` and the selected `features` — which `fastkit runserver` and `fastkit addroute` read back
+- **Reproducible runs**: `--save-config <path>` records the answers, `--config <path>` replays them without a single prompt, and `--dry-run` previews the result without writing anything
+
+Every catalog selection now generates real, working code rather than just
+installing a package — background tasks (Celery/Dramatiq), Redis caching,
+WebSocket, Pagination, OpenTelemetry tracing, and OAuth2 / session-based
+auth all ship with a matching module and `main.py` wiring. Three new axes
+round out the catalog:
+
+- **Logging**: `structured` adds stdlib `logging` + `json` structured output with a request-id middleware — no new dependency
+- **Migrations**: `Alembic` generates a full async migration environment (`alembic.ini`, `alembic/env.py`, a baseline revision, `scripts/migrate.sh`) for any SQL database selection
+- **Tooling** (multi-select): `ruff`, `pre-commit`, `github-actions`, `devcontainer`, `makefile` — each generates its own config file; `ruff` also merges a `[tool.ruff]` block into `pyproject.toml`
+
+Every generated project also gets `/health` and `/ready` endpoints, and
+`--dry-run` lists the exact same file set a real run would write, including
+these new artifacts. `classic-layered` and `domain-starter` preserve their
+shipped `main.py`, so feature validation warns when a selection under any
+of these axes needs manual wiring — see the
+[preset / feature matrix](reference/preset-feature-matrix.md) for details.
 
 ### Add a new route to the FastAPI project
 
@@ -477,6 +498,7 @@ For comprehensive guides and detailed usage instructions, explore our documentat
 
 - 📚 **[User Guide](user-guide/quick-start.md)** - Detailed installation and usage guides
 - 🎯 **[Tutorial](tutorial/getting-started.md)** - Step-by-step tutorials for beginners
+- 🧭 **[Which starter should I choose?](user-guide/choosing-a-starter.md)** - Decision guide for templates and interactive presets
 - 📖 **[CLI Reference](user-guide/cli-reference.md)** - Complete command reference
 - 🔍 **[Template Quality Assurance](reference/template-quality-assurance.md)** - Automated testing and quality standards
 
@@ -489,16 +511,19 @@ Learn FastAPI development through practical use cases with our pre-built templat
 - **[Building a Basic API Server](tutorial/basic-api-server.md)** - Create your first FastAPI server using the `fastapi-default` template
 - **[Building an Asynchronous CRUD API](tutorial/async-crud-api.md)** - Develop a high-performance async API with the `fastapi-async-crud` template
 - **[Domain-oriented Project (Domain Starter)](tutorial/domain-starter.md)** - Build a medium-sized API with the `fastapi-domain-starter` template, the recommended modern default
+- **[JWT Authentication](tutorial/auth-jwt.md)** - Add real accounts with the `fastapi-auth-jwt` template: rotating refresh tokens, argon2id hashing, role and scope guards
 
 ### 🗄️ Database & Infrastructure
 
 - **[Integrating with a Database](tutorial/database-integration.md)** - Utilize PostgreSQL + SQLAlchemy with the `fastapi-psql-orm` template
-- **[Dockerizing and Deploying](tutorial/docker-deployment.md)** - Set up a production deployment environment using the `fastapi-dockerized` template
+- **[Async Persistence with SQLModel](tutorial/sqlmodel.md)** - Async SQLModel, Alembic migrations, a generic CRUD base and paginated lists with the `fastapi-sqlmodel` template
+- **[Dockerizing and Deploying](tutorial/docker-deployment.md)** - Set up a production deployment environment using the `fastapi-dockerized` template *(deprecated template — kept for existing users)*
 
 ### ⚡ Advanced Features
 
 - **[Custom Response Handling & Advanced API Design](tutorial/custom-response-handling.md)** - Build enterprise-grade APIs with the `fastapi-custom-response` template
 - **[Integrating with MCP](tutorial/mcp-integration.md)** - Create an API server integrated with AI models using the `fastapi-mcp` template
+- **[Streaming LLM Agent](tutorial/llm-agent.md)** - Build a streaming Claude chat backend with a real tool-call loop using the `fastapi-llm-agent` template
 
 Each tutorial provides:
 

@@ -1,0 +1,62 @@
+"""initial auth schema
+
+Revision ID: 0001_initial_auth
+Revises:
+Create Date: 2025-01-01 00:00:00.000000
+
+"""
+
+import sqlalchemy as sa
+import sqlmodel
+from alembic import op
+
+revision = "0001_initial_auth"
+down_revision = None
+branch_labels = None
+depends_on = None
+
+
+def upgrade() -> None:
+    op.create_table(
+        "users",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("email", sqlmodel.sql.sqltypes.AutoString(length=320), nullable=False),
+        sa.Column(
+            "full_name", sqlmodel.sql.sqltypes.AutoString(length=255), nullable=True
+        ),
+        sa.Column(
+            "hashed_password",
+            sqlmodel.sql.sqltypes.AutoString(length=255),
+            nullable=False,
+        ),
+        sa.Column("is_active", sa.Boolean(), nullable=False),
+        sa.Column("is_superuser", sa.Boolean(), nullable=False),
+        sa.Column("scopes", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+        sa.Column("created_at", sa.DateTime(), nullable=False),
+        sa.PrimaryKeyConstraint("id"),
+    )
+    op.create_index(op.f("ix_users_email"), "users", ["email"], unique=True)
+
+    op.create_table(
+        "refresh_tokens",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("jti", sqlmodel.sql.sqltypes.AutoString(length=64), nullable=False),
+        sa.Column("user_id", sa.Integer(), nullable=False),
+        sa.Column("expires_at", sa.DateTime(), nullable=False),
+        sa.Column("revoked", sa.Boolean(), nullable=False),
+        sa.Column("created_at", sa.DateTime(), nullable=False),
+        sa.ForeignKeyConstraint(["user_id"], ["users.id"]),
+        sa.PrimaryKeyConstraint("id"),
+    )
+    op.create_index(op.f("ix_refresh_tokens_jti"), "refresh_tokens", ["jti"], unique=True)
+    op.create_index(
+        op.f("ix_refresh_tokens_user_id"), "refresh_tokens", ["user_id"], unique=False
+    )
+
+
+def downgrade() -> None:
+    op.drop_index(op.f("ix_refresh_tokens_user_id"), table_name="refresh_tokens")
+    op.drop_index(op.f("ix_refresh_tokens_jti"), table_name="refresh_tokens")
+    op.drop_table("refresh_tokens")
+    op.drop_index(op.f("ix_users_email"), table_name="users")
+    op.drop_table("users")

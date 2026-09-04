@@ -1,0 +1,43 @@
+# --------------------------------------------------------------------------
+# FastAPI application entry point for <project_name>.
+# --------------------------------------------------------------------------
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+from starlette.middleware.cors import CORSMiddleware
+
+from src.app.api.router import api_router
+from src.app.core.config import settings
+from src.app.db.session import create_db_and_tables, engine
+
+# fastkit:imports
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    """Open the database on startup, dispose the pool on shutdown."""
+    if settings.CREATE_TABLES_ON_STARTUP:
+        await create_db_and_tables()
+    yield
+    await engine.dispose()
+
+
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    description="<description>",
+    version="0.1.0",
+    lifespan=lifespan,
+)
+
+if settings.all_cors_origins:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.all_cors_origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+app.include_router(api_router, prefix=settings.API_V1_PREFIX)
+# fastkit:routes

@@ -1,16 +1,15 @@
 """
 Item-related API endpoints.
 """
-from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from src.auth.dependencies import get_current_active_user, optional_auth
 from src.schemas.items import (
     ItemCreate,
+    ItemListResponse,
     ItemResponse,
     ItemUpdate,
-    ItemListResponse,
 )
 
 router = APIRouter()
@@ -48,7 +47,7 @@ mock_items = [
 def get_items(
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(10, ge=1, le=100, description="Items per page"),
-    current_user: Optional[dict] = Depends(optional_auth),
+    current_user: dict | None = Depends(optional_auth),
 ):
     """
     Get a list of items with pagination.
@@ -78,7 +77,7 @@ def get_items(
 
 
 @router.get("/{item_id}", response_model=ItemResponse, summary="Get item by ID")
-def get_item(item_id: int, current_user: Optional[dict] = Depends(optional_auth)):
+def get_item(item_id: int, current_user: dict | None = Depends(optional_auth)):
     """
     Get a specific item by ID.
 

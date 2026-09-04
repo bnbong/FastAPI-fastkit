@@ -2,7 +2,7 @@
 # Item CRUD Endpoint
 # --------------------------------------------------------------------------
 from datetime import datetime, timezone
-from typing import Any, List, Union
+from typing import Any
 
 from fastapi import APIRouter, Request
 
@@ -13,7 +13,7 @@ from src.schemas.items import ItemCreate, ItemResponse
 
 router = APIRouter(tags=["items"])
 
-error_responses: dict[Union[int, str], dict[str, Any]] = {
+error_responses: dict[int | str, dict[str, Any]] = {
     404: {"model": ResponseSchema[str], "description": "Item not found"},
     500: {"model": ResponseSchema[str], "description": "Server error"},
 }
@@ -22,7 +22,7 @@ error_responses: dict[Union[int, str], dict[str, Any]] = {
 @router.get(
     "/",
     summary="Get all items",
-    response_model=ResponseSchema[List[ItemResponse]],
+    response_model=ResponseSchema[list[ItemResponse]],
     responses=error_responses,
 )
 async def read_all_items(request: Request):

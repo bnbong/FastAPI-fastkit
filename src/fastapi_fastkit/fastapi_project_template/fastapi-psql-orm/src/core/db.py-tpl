@@ -1,7 +1,7 @@
 # --------------------------------------------------------------------------
 # Database configuration module
 # --------------------------------------------------------------------------
-from sqlmodel import Session, SQLModel, create_engine, select
+from sqlmodel import Session, create_engine, select
 
 from src.core.config import settings
 from src.schemas.items import ItemBase

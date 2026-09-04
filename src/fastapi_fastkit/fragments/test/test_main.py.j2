@@ -1,0 +1,46 @@
+{% include "header.j2" %}
+"""Tests for the generated application entry point.
+
+Regenerated alongside ``main.py``: the base template ships tests asserting
+*its* root message, which no longer hold once the dynamic overlay replaces
+the entry point.
+"""
+
+from fastapi.testclient import TestClient
+
+
+def test_root_endpoint(client: TestClient) -> None:
+    """The root endpoint greets the project by name."""
+    response = client.get("/")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["message"] == {{ ("Welcome to " ~ project_name) | tojson }}
+    assert data["status"] == "healthy"
+
+
+def test_health_check(client: TestClient) -> None:
+    """The liveness probe reports the process is up."""
+    response = client.get("/health")
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
+
+def test_readiness_check(client: TestClient) -> None:
+    """The readiness probe reports the app can serve traffic."""
+    response = client.get("/ready")
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "ready"}
+
+
+def test_openapi_json(client: TestClient) -> None:
+    """The schema is served and describes both health probes."""
+    response = client.get("/openapi.json")
+
+    assert response.status_code == 200
+    schema = response.json()
+    assert schema["info"]["title"] == {{ project_name | tojson }}
+    assert "/health" in schema["paths"]
+    assert "/ready" in schema["paths"]

@@ -1,0 +1,193 @@
+# FastAPI LLM Agent
+
+A streaming Claude chat agent: SSE token delivery, conversation history, and
+a working tool-call loop — with a test suite that never touches the network.
+
+> Generated project: **<project_name>** — <description>
+
+## When to choose this starter
+
+Pick this template when you want:
+
+- **Token-by-token streaming over SSE**, so a browser can render the reply as
+  it is generated instead of waiting for the whole response.
+- **A real tool-call loop**, not a single request/response. Claude asks for a
+  tool, the server runs it, the result goes back, and the loop repeats until
+  the model is done or the iteration cap fires.
+- **Conversation history behind an interface.** The bundled store is a dict;
+  swapping in Redis or a database is one new `ConversationStore`
+  implementation.
+- **Tests you can run on a plane.** The Anthropic client is replaced by a
+  scripted fake, so the streaming path and the tool loop are both covered
+  with no API key and no network calls.
+
+If you want an MCP server rather than a chat agent, use `fastapi-mcp`. If
+you need a database-backed API, use `fastapi-sqlmodel`.
+
+## Stack
+
+- FastAPI 0.141 / Starlette
+- Python 3.12
+- Anthropic Python SDK 1.3 (`claude-sonnet-5` by default)
+- sse-starlette 3.4
+- pytest + pytest-asyncio + httpx
+
+## Project structure
+
+```
+.
+├── README.md
+├── pyproject.toml
+├── requirements.txt
+├── Dockerfile
+├── .env
+├── .gitignore
+├── scripts/
+│   ├── chat.sh             # send one message to a running server
+│   ├── format.sh
+│   ├── lint.sh
+│   ├── run-server.sh
+│   └── test.sh
+├── src/
+│   └── app/
+│       ├── main.py                 # FastAPI app + lifespan
+│       ├── core/
+│       │   └── config.py           # pydantic-settings (API key lives here)
+│       ├── llm/
+│       │   ├── client.py           # AsyncAnthropic factory
+│       │   ├── tools.py            # tool schemas + handlers
+│       │   └── agent.py            # streaming agent + tool loop
+│       ├── memory/
+│       │   ├── base.py             # ConversationStore interface
+│       │   └── in_memory.py        # process-local implementation
+│       ├── schemas/
+│       │   └── chat.py             # request bodies + SSE event envelope
+│       └── api/
+│           ├── router.py           # aggregates health + chat
+│           ├── deps.py             # store / agent dependencies
+│           ├── health.py           # GET /health
+│           └── chat.py             # POST /chat (SSE), conversation history
+└── tests/
+    ├── conftest.py                 # scripted fake Anthropic client
+    ├── test_health.py
+    ├── test_chat.py                # streaming + tool loop
+    ├── test_tools.py
+    └── test_memory.py
+```
+
+## Configuration
+
+Set your key in `.env` before the first run:
+
+```bash
+ANTHROPIC_API_KEY=sk-ant-...
+LLM_MODEL=claude-sonnet-5
+LLM_MAX_TOKENS=4096
+MAX_TOOL_ITERATIONS=5
+```
+
+The key is read by pydantic-settings and handed to the client at
+construction — it is never written into source or into the Docker image.
+
+To run against an Anthropic-compatible gateway (LiteLLM, an internal proxy,
+a local server) instead of the Anthropic API, set `LLM_BASE_URL` and, if the
+gateway uses bearer auth, `LLM_AUTH_TOKEN`. The wire format stays the
+Anthropic Messages API; a gateway is what translates for other providers.
+
+## Running the app
+
+```bash
+# create a virtualenv and install dependencies
+$ uv venv && uv pip install -r requirements.txt
+
+# launch the dev server
+$ bash scripts/run-server.sh
+
+# talk to it
+$ bash scripts/chat.sh "What is 12 * 34?"
+```
+
+API docs are then served at:
+
+- Swagger UI: <http://127.0.0.1:8000/docs>
+- ReDoc:      <http://127.0.0.1:8000/redoc>
+
+## API endpoints
+
+| Method | Endpoint                                | Description                       |
+|--------|-----------------------------------------|-----------------------------------|
+| GET    | `/api/v1/health`                        | Liveness probe                    |
+| POST   | `/api/v1/chat`                          | Stream a reply as SSE             |
+| GET    | `/api/v1/conversations/{id}`            | Read stored history               |
+| DELETE | `/api/v1/conversations/{id}`            | Forget a conversation             |
+
+`POST /api/v1/chat` takes `{"message": "...", "conversation_id": "..."}` —
+omit `conversation_id` to start a new conversation and read it back from the
+final `done` event.
+
+### Stream events
+
+Each SSE message carries the event type in its `event:` field and a JSON
+envelope in `data:`:
+
+| Event         | Fields                              | Meaning                        |
+|---------------|-------------------------------------|--------------------------------|
+| `token`       | `text`                              | A chunk of the assistant reply |
+| `tool_use`    | `tool_name`, `tool_input`           | Claude requested a tool        |
+| `tool_result` | `tool_name`, `tool_output`          | The tool ran                   |
+| `usage`       | `input_tokens`, `output_tokens`     | Per-turn token spend           |
+| `done`        | `conversation_id`                   | The turn finished              |
+| `error`       | `detail`                            | Something failed mid-stream    |
+
+Token usage is also written to the `app.agent` logger on every turn, so
+spend is visible in the server logs without a client.
+
+## Bundled tools
+
+| Tool           | Purpose                                                    |
+|----------------|------------------------------------------------------------|
+| `calculator`   | Arithmetic, parsed to an AST and whitelisted — not `eval`  |
+| `current_time` | Current time in an IANA timezone                            |
+
+To add one, append a schema to `TOOL_SCHEMAS` and register the handler in
+`TOOL_HANDLERS` (`src/app/llm/tools.py`). The description is the only
+instruction Claude gets about when to reach for it, so write it carefully.
+Handlers should return a string and should turn their own failures into a
+readable message rather than raising — the loop feeds that text straight back
+to the model.
+
+## Running tests
+
+```bash
+$ bash scripts/test.sh
+# or directly:
+$ pytest
+```
+
+`tests/conftest.py` replays scripted turns through a fake that mimics
+`AsyncAnthropic.messages.stream`, so the suite is deterministic, offline, and
+free.
+
+## Extension points
+
+- **Persistent history** — implement `ConversationStore` against Redis or a
+  database and return it from `get_store()` in `src/app/api/deps.py`.
+- **RAG** — retrieval is deliberately out of scope here. The natural seam is
+  `ChatAgent.stream`: fetch context before the first request and prepend it to
+  the system prompt, or expose your index as one more tool so the model
+  decides when to search.
+- **Auth and rate limiting** — `POST /chat` is unauthenticated as shipped.
+  Put a dependency on the router before exposing it publicly.
+
+## Project Origin
+
+This project was created from the **`fastapi-llm-agent`** template shipped
+with [FastAPI-fastkit](https://github.com/bnbong/FastAPI-fastkit).
+
+The `FastAPI-fastkit` is an open-source project that helps Python and
+FastAPI beginners quickly set up a FastAPI-based application development
+environment in a framework-like structure.
+
+### Template Information
+- Template creator: [bnbong](mailto:bbbong9@gmail.com)
+- FastAPI-fastkit project maintainer: [bnbong](mailto:bbbong9@gmail.com)

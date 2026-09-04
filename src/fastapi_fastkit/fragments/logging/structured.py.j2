@@ -1,0 +1,88 @@
+{% include "header.j2" %}
+"""Structured (JSON) logging plus a request-id correlation middleware.
+
+Every log record emitted while handling a request carries the same
+``request_id``; the value is echoed back in the ``X-Request-ID`` response
+header so a client can quote it in a bug report.
+
+Implemented on the standard library alone — no logging dependency needed.
+"""
+
+import contextvars
+import json
+import logging
+import sys
+import uuid
+from collections.abc import Awaitable, Callable
+from typing import Any
+
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
+from starlette.responses import Response
+
+REQUEST_ID_HEADER = "X-Request-ID"
+
+#: Set per request by :class:`RequestIDMiddleware`, read by :class:`JsonFormatter`.
+request_id_var: contextvars.ContextVar[str] = contextvars.ContextVar(
+    "request_id", default="-"
+)
+
+#: ``LogRecord`` attributes that are metadata rather than user-supplied extras.
+_RESERVED_ATTRS = frozenset(logging.LogRecord("", 0, "", 0, "", None, None).__dict__)
+
+
+class JsonFormatter(logging.Formatter):
+    """Render each log record as a single JSON object."""
+
+    def format(self, record: logging.LogRecord) -> str:
+        payload: dict[str, Any] = {
+            "timestamp": self.formatTime(record, "%Y-%m-%dT%H:%M:%S%z"),
+            "level": record.levelname,
+            "logger": record.name,
+            "message": record.getMessage(),
+            "request_id": request_id_var.get(),
+        }
+        if record.exc_info:
+            payload["exception"] = self.formatException(record.exc_info)
+
+        # Anything passed through ``logger.info(..., extra={...})``.
+        for key, value in record.__dict__.items():
+            if key not in _RESERVED_ATTRS and key not in payload:
+                payload[key] = value
+
+        return json.dumps(payload, default=str)
+
+
+class RequestIDMiddleware(BaseHTTPMiddleware):
+    """Attach an id to every request and expose it on the response."""
+
+    async def dispatch(
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
+        request_id = request.headers.get(REQUEST_ID_HEADER) or uuid.uuid4().hex
+        token = request_id_var.set(request_id)
+        try:
+            response = await call_next(request)
+        finally:
+            request_id_var.reset(token)
+        response.headers[REQUEST_ID_HEADER] = request_id
+        return response
+
+
+def configure_logging(level: str = "INFO") -> None:
+    """Install :class:`JsonFormatter` as the only root handler.
+
+    Uvicorn's own loggers are re-pointed at the same handler so access logs
+    come out in the same JSON shape as application logs.
+    """
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setFormatter(JsonFormatter())
+
+    root = logging.getLogger()
+    root.handlers = [handler]
+    root.setLevel(level)
+
+    for name in ("uvicorn", "uvicorn.access", "uvicorn.error"):
+        uvicorn_logger = logging.getLogger(name)
+        uvicorn_logger.handlers = [handler]
+        uvicorn_logger.propagate = False

@@ -1,0 +1,67 @@
+# --------------------------------------------------------------------------
+# Application settings (pydantic-settings).
+#
+# The API key never appears in source: it is read from the environment (or a
+# local ``.env``) and passed to the Anthropic client at construction time.
+# --------------------------------------------------------------------------
+import secrets
+from typing import Annotated, Any, List, Literal, Union
+
+from pydantic import AnyUrl, BeforeValidator, computed_field
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+def _parse_cors(v: Any) -> Union[List[str], str]:
+    if isinstance(v, str) and not v.startswith("["):
+        return [item.strip() for item in v.split(",") if item.strip()]
+    if isinstance(v, (list, str)):
+        return v
+    raise ValueError(v)
+
+
+class Settings(BaseSettings):
+    """Centralized configuration for the application."""
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_ignore_empty=True,
+        extra="ignore",
+    )
+
+    PROJECT_NAME: str = "<project_name>"
+    ENVIRONMENT: Literal["development", "staging", "production"] = "development"
+    SECRET_KEY: str = secrets.token_urlsafe(32)
+
+    API_V1_PREFIX: str = "/api/v1"
+
+    # --- LLM -------------------------------------------------------------
+    ANTHROPIC_API_KEY: str = ""
+    LLM_MODEL: str = "claude-sonnet-5"
+    LLM_MAX_TOKENS: int = 4096
+
+    # Point these at an Anthropic-compatible gateway (LiteLLM, an internal
+    # proxy, a local server) to run the same agent against another backend.
+    # Leave LLM_BASE_URL empty to talk to the Anthropic API directly.
+    LLM_BASE_URL: str = ""
+    LLM_AUTH_TOKEN: str = ""
+
+    SYSTEM_PROMPT: str = (
+        "You are a concise, helpful assistant. Use the tools you are given "
+        "whenever they can answer more reliably than you can from memory."
+    )
+
+    # Hard stop for the tool-call loop so a misbehaving conversation cannot
+    # spend an unbounded number of API calls.
+    MAX_TOOL_ITERATIONS: int = 5
+
+    BACKEND_CORS_ORIGINS: Annotated[
+        Union[List[AnyUrl], str], BeforeValidator(_parse_cors)
+    ] = []
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def all_cors_origins(self) -> List[str]:
+        return [str(origin).rstrip("/") for origin in self.BACKEND_CORS_ORIGINS]
+
+
+settings = Settings()  # type: ignore[call-arg]

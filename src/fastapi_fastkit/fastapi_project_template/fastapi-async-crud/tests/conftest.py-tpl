@@ -9,7 +9,6 @@ from pathlib import Path
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
-
 from src.main import app
 
 MOCK_PATH = os.path.join(os.path.dirname(__file__), "../src/mocks/mock_items.json")

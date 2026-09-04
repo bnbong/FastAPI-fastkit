@@ -1,0 +1,105 @@
+{% include "header.j2" %}
+"""OAuth2 social login (Google / GitHub) built on Authlib.
+
+Wire it up by mounting :data:`router` and adding ``SessionMiddleware`` — both
+are done for you in the generated ``main.py``.
+
+Set the following environment variables before using a provider:
+
+    GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET
+    GITHUB_CLIENT_ID / GITHUB_CLIENT_SECRET
+    SESSION_SECRET_KEY
+"""
+
+import os
+from typing import Any
+
+from authlib.integrations.starlette_client import OAuth, OAuthError
+from fastapi import APIRouter, HTTPException, Request, status
+from starlette.responses import RedirectResponse
+
+SESSION_SECRET_KEY = os.getenv("SESSION_SECRET_KEY", "change-me-in-production")
+
+oauth = OAuth()
+
+oauth.register(
+    name="google",
+    client_id=os.getenv("GOOGLE_CLIENT_ID", ""),
+    client_secret=os.getenv("GOOGLE_CLIENT_SECRET", ""),
+    server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
+    client_kwargs={"scope": "openid email profile"},
+)
+
+oauth.register(
+    name="github",
+    client_id=os.getenv("GITHUB_CLIENT_ID", ""),
+    client_secret=os.getenv("GITHUB_CLIENT_SECRET", ""),
+    access_token_url="https://github.com/login/oauth/access_token",
+    authorize_url="https://github.com/login/oauth/authorize",
+    api_base_url="https://api.github.com/",
+    client_kwargs={"scope": "user:email"},
+)
+
+SUPPORTED_PROVIDERS = ("google", "github")
+
+router = APIRouter(prefix="/auth", tags=["Authentication"])
+
+
+def _client(provider: str) -> Any:
+    """Return the registered Authlib client, 404-ing on unknown providers."""
+    if provider not in SUPPORTED_PROVIDERS:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Unsupported OAuth provider: {provider}",
+        )
+    return oauth.create_client(provider)
+
+
+@router.get("/login/{provider}")
+async def login(provider: str, request: Request) -> RedirectResponse:
+    """Kick off the authorization-code flow for ``provider``."""
+    client = _client(provider)
+    redirect_uri = request.url_for("auth_callback", provider=provider)
+    redirected: RedirectResponse = await client.authorize_redirect(
+        request, str(redirect_uri)
+    )
+    return redirected
+
+
+@router.get("/callback/{provider}", name="auth_callback")
+async def auth_callback(provider: str, request: Request) -> dict[str, Any]:
+    """Exchange the callback code for a token and stash the user in session."""
+    client = _client(provider)
+    try:
+        token = await client.authorize_access_token(request)
+    except OAuthError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail=str(exc)
+        ) from exc
+
+    if provider == "google":
+        user_info = token.get("userinfo") or {}
+    else:
+        response = await client.get("user", token=token)
+        user_info = response.json()
+
+    request.session["user"] = dict(user_info)
+    return {"provider": provider, "user": user_info}
+
+
+@router.get("/me")
+async def current_user(request: Request) -> dict[str, Any]:
+    """Return the user stored in the session cookie."""
+    user = request.session.get("user")
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated"
+        )
+    return {"user": user}
+
+
+@router.post("/logout")
+async def logout(request: Request) -> dict[str, str]:
+    """Drop the session cookie contents."""
+    request.session.pop("user", None)
+    return {"status": "logged out"}

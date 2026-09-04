@@ -1,0 +1,16 @@
+name: "FastAPI LLM Agent"
+description: "Streaming Claude chat agent with SSE, conversation history, and a tool-call loop"
+category: "ai"
+requires_docker: false
+
+# Testing configuration — the Anthropic client is mocked, so the suite never
+# touches the network and needs no API key.
+testing:
+  strategy: "mocked-llm"
+  test_command: "pytest tests/ -v"
+
+test_env_defaults:
+  ANTHROPIC_API_KEY: "test-key"
+  LLM_MODEL: "claude-sonnet-5"
+  SECRET_KEY: "test_secret"
+  ENVIRONMENT: "development"

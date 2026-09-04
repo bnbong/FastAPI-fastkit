@@ -1,12 +1,13 @@
 # --------------------------------------------------------------------------
 # Main server application module
 # --------------------------------------------------------------------------
-from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from src.core.config import settings
+
+# fastkit:imports
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -22,6 +23,7 @@ if settings.all_cors_origins:
     )
 
 
+# fastkit:routes
 @app.get("/")
 async def root():
     """Root endpoint."""

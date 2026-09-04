@@ -1,0 +1,2 @@
+configure_logging(os.getenv("LOG_LEVEL", "INFO"))
+app.add_middleware(RequestIDMiddleware)

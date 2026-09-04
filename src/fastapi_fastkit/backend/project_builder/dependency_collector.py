@@ -14,6 +14,12 @@
 # --------------------------------------------------------------------------
 from typing import Any, Dict, List, Set
 
+from fastapi_fastkit.core.settings import (
+    MULTI_SELECT_AXES,
+    NONE_CHOICE,
+    FeatureAxis,
+)
+
 
 class DependencyCollector:
     """
@@ -37,6 +43,11 @@ class DependencyCollector:
         """
         Collect all dependencies from configuration.
 
+        Every axis in ``PACKAGE_CATALOG`` is walked generically through
+        :class:`~fastapi_fastkit.core.settings.FeatureAxis`, so a new axis
+        only has to be added to the catalog — there is no per-axis branch
+        here to forget to update.
+
         Args:
             config: Project configuration dictionary
 
@@ -49,40 +60,9 @@ class DependencyCollector:
         # Add base dependencies
         self.add_base_dependencies()
 
-        # Add database dependencies
-        db_info = config.get("database", {})
-        if isinstance(db_info, dict) and db_info.get("type") != "None":
-            self.add_database_dependencies(db_info.get("type", ""))
-
-        # Add authentication dependencies
-        auth_type = config.get("authentication", "None")
-        if auth_type != "None":
-            self.add_authentication_dependencies(auth_type)
-
-        # Add async tasks dependencies
-        tasks_type = config.get("async_tasks", "None")
-        if tasks_type != "None":
-            self.add_async_tasks_dependencies(tasks_type)
-
-        # Add caching dependencies
-        cache_type = config.get("caching", "None")
-        if cache_type != "None":
-            self.add_caching_dependencies(cache_type)
-
-        # Add monitoring dependencies
-        monitoring_type = config.get("monitoring", "None")
-        if monitoring_type != "None":
-            self.add_monitoring_dependencies(monitoring_type)
-
-        # Add testing dependencies
-        testing_type = config.get("testing", "None")
-        if testing_type != "None":
-            self.add_testing_dependencies(testing_type)
-
-        # Add utilities dependencies
-        utilities = config.get("utilities", [])
-        for util in utilities:
-            self.add_utility_dependencies(util)
+        for axis in FeatureAxis:
+            for choice in self._selected_choices(config, axis):
+                self.add_axis_dependencies(axis, choice)
 
         # Add custom packages
         custom = config.get("custom_packages", [])
@@ -90,6 +70,47 @@ class DependencyCollector:
             self.dependencies.update(custom)
 
         return self.get_final_dependencies()
+
+    @staticmethod
+    def _selected_choices(config: Dict[str, Any], axis: str) -> List[str]:
+        """
+        Normalise one axis' selection into a list of catalog keys.
+
+        Handles the three shapes the interactive config uses: the database
+        axis stores ``{"type": ..., "packages": [...]}``, multi-select axes
+        store a list, and every other axis stores a bare string.
+
+        Args:
+            config: Project configuration dictionary
+            axis: Axis key to read
+
+        Returns:
+            Selected choice names, with the ``None`` sentinel filtered out
+        """
+        raw = config.get(axis)
+
+        if axis == FeatureAxis.DATABASE and isinstance(raw, dict):
+            raw = raw.get("type", NONE_CHOICE)
+
+        if raw is None:
+            return []
+        if axis in MULTI_SELECT_AXES or isinstance(raw, list):
+            selected = [str(item) for item in raw]
+        else:
+            selected = [str(raw)]
+
+        return [choice for choice in selected if choice != NONE_CHOICE]
+
+    def add_axis_dependencies(self, axis: str, choice: str) -> None:
+        """
+        Add the packages one catalog choice implies.
+
+        Args:
+            axis: Catalog axis key (see :class:`FeatureAxis`)
+            choice: Selected option within that axis
+        """
+        catalog = self.settings.PACKAGE_CATALOG.get(axis, {})
+        self.dependencies.update(catalog.get(choice, []))
 
     def add_base_dependencies(self) -> None:
         """Add core FastAPI dependencies."""
@@ -109,87 +130,105 @@ class DependencyCollector:
         Args:
             db_type: Database type name
         """
-        catalog = self.settings.PACKAGE_CATALOG.get("database", {})
-        packages = catalog.get(db_type, [])
-        self.dependencies.update(packages)
+        self.add_axis_dependencies(FeatureAxis.DATABASE, db_type)
 
     def add_authentication_dependencies(self, auth_type: str) -> None:
         """
-        Add authentication dependencies.
+        Add authentication-specific dependencies.
 
         Args:
             auth_type: Authentication type name
         """
-        catalog = self.settings.PACKAGE_CATALOG.get("authentication", {})
-        packages = catalog.get(auth_type, [])
-        self.dependencies.update(packages)
+        self.add_axis_dependencies(FeatureAxis.AUTHENTICATION, auth_type)
 
     def add_async_tasks_dependencies(self, tasks_type: str) -> None:
         """
-        Add async tasks dependencies.
+        Add async tasks-specific dependencies.
 
         Args:
             tasks_type: Task queue type name
         """
-        catalog = self.settings.PACKAGE_CATALOG.get("async_tasks", {})
-        packages = catalog.get(tasks_type, [])
-        self.dependencies.update(packages)
+        self.add_axis_dependencies(FeatureAxis.ASYNC_TASKS, tasks_type)
 
     def add_caching_dependencies(self, cache_type: str) -> None:
         """
-        Add caching dependencies.
+        Add caching-specific dependencies.
 
         Args:
             cache_type: Caching type name
         """
-        catalog = self.settings.PACKAGE_CATALOG.get("caching", {})
-        packages = catalog.get(cache_type, [])
-        self.dependencies.update(packages)
+        self.add_axis_dependencies(FeatureAxis.CACHING, cache_type)
 
     def add_monitoring_dependencies(self, monitoring_type: str) -> None:
         """
-        Add monitoring dependencies.
+        Add monitoring-specific dependencies.
 
         Args:
             monitoring_type: Monitoring type name
         """
-        catalog = self.settings.PACKAGE_CATALOG.get("monitoring", {})
-        packages = catalog.get(monitoring_type, [])
-        self.dependencies.update(packages)
+        self.add_axis_dependencies(FeatureAxis.MONITORING, monitoring_type)
 
     def add_testing_dependencies(self, testing_type: str) -> None:
         """
-        Add testing dependencies.
+        Add testing-specific dependencies.
 
         Args:
             testing_type: Testing framework type name
         """
-        catalog = self.settings.PACKAGE_CATALOG.get("testing", {})
-        packages = catalog.get(testing_type, [])
-        self.dependencies.update(packages)
+        self.add_axis_dependencies(FeatureAxis.TESTING, testing_type)
 
     def add_utility_dependencies(self, utility: str) -> None:
         """
-        Add utility dependencies.
+        Add utilities-specific dependencies.
 
         Args:
             utility: Utility name
         """
-        catalog = self.settings.PACKAGE_CATALOG.get("utilities", {})
-        packages = catalog.get(utility, [])
-        self.dependencies.update(packages)
+        self.add_axis_dependencies(FeatureAxis.UTILITIES, utility)
+
+    def add_migrations_dependencies(self, migrations_type: str) -> None:
+        """
+        Add migrations-specific dependencies.
+
+        Args:
+            migrations_type: Migration tool name
+        """
+        self.add_axis_dependencies(FeatureAxis.MIGRATIONS, migrations_type)
+
+    def add_tooling_dependencies(self, tooling: str) -> None:
+        """
+        Add tooling-specific dependencies.
+
+        Args:
+            tooling: Developer tooling option name
+        """
+        self.add_axis_dependencies(FeatureAxis.TOOLING, tooling)
+
+    def add_logging_dependencies(self, logging_type: str) -> None:
+        """
+        Add logging-specific dependencies.
+
+        Args:
+            logging_type: Logging style name
+        """
+        self.add_axis_dependencies(FeatureAxis.LOGGING, logging_type)
 
     def add_feature_dependencies(self, features: List[str]) -> None:
         """
-        Add dependencies for selected features.
+        Add dependencies for ``"<axis>:<choice>"`` feature strings.
+
+        This is the shape project metadata records selections in, so a
+        previously generated project's ``[tool.fastapi-fastkit] features``
+        list can be replayed straight back into a dependency set.
 
         Args:
-            features: List of feature names
+            features: List of ``"<axis>:<choice>"`` entries
         """
         for feature in features:
-            # This is a generic method that can be extended
-            # Currently handled by specific methods above
-            pass
+            axis, _, choice = feature.partition(":")
+            if not choice or choice == NONE_CHOICE:
+                continue
+            self.add_axis_dependencies(axis, choice)
 
     def get_final_dependencies(self) -> List[str]:
         """

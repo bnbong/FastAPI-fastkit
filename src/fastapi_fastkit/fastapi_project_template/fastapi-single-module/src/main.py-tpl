@@ -3,9 +3,12 @@
 # --------------------------------------------------------------------------
 from fastapi import FastAPI
 
+# fastkit:imports
+
 app = FastAPI(title="<project_name>")
 
 
+# fastkit:routes
 @app.get("/")
 async def root() -> dict[str, str]:
     return {"message": "Hello from FastAPI Single Module!"}

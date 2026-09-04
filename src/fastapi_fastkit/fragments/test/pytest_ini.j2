@@ -1,0 +1,16 @@
+{% include "header.j2" %}
+[pytest]
+testpaths = tests
+python_files = test_*.py
+python_classes = Test*
+python_functions = test_*
+asyncio_mode = auto
+{% if with_coverage %}
+
+[coverage:run]
+source = .
+omit =
+    tests/*
+    .venv/*
+    */__pycache__/*
+{% endif %}

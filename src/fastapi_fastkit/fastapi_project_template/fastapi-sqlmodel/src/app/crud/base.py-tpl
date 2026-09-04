@@ -1,0 +1,62 @@
+# --------------------------------------------------------------------------
+# Generic CRUD base class.
+#
+# Every domain gets create / read / list / update / delete for free by
+# instantiating ``CRUDBase`` with its table model and its I/O schemas. Add
+# domain-specific queries by subclassing.
+# --------------------------------------------------------------------------
+from typing import Any, Generic, Sequence, TypeVar
+
+from sqlmodel import SQLModel, func, select
+from sqlmodel.ext.asyncio.session import AsyncSession
+
+ModelType = TypeVar("ModelType", bound=SQLModel)
+CreateSchemaType = TypeVar("CreateSchemaType", bound=SQLModel)
+UpdateSchemaType = TypeVar("UpdateSchemaType", bound=SQLModel)
+
+
+class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
+    """Reusable data-access layer for a single SQLModel table."""
+
+    def __init__(self, model: type[ModelType]) -> None:
+        self.model = model
+
+    async def get(self, session: AsyncSession, obj_id: int) -> ModelType | None:
+        return await session.get(self.model, obj_id)
+
+    async def list(
+        self, session: AsyncSession, *, offset: int = 0, limit: int = 20
+    ) -> Sequence[ModelType]:
+        statement = select(self.model).offset(offset).limit(limit)
+        result = await session.exec(statement)
+        return result.all()
+
+    async def count(self, session: AsyncSession) -> int:
+        statement = select(func.count()).select_from(self.model)
+        result = await session.exec(statement)  # type: ignore[call-overload]
+        return int(result.one())
+
+    async def create(
+        self, session: AsyncSession, obj_in: CreateSchemaType
+    ) -> ModelType:
+        db_obj = self.model.model_validate(obj_in)
+        session.add(db_obj)
+        await session.commit()
+        await session.refresh(db_obj)
+        return db_obj
+
+    async def update(
+        self, session: AsyncSession, db_obj: ModelType, obj_in: UpdateSchemaType
+    ) -> ModelType:
+        # ``exclude_unset`` keeps a PATCH from clobbering untouched columns.
+        changes: dict[str, Any] = obj_in.model_dump(exclude_unset=True)
+        for field, value in changes.items():
+            setattr(db_obj, field, value)
+        session.add(db_obj)
+        await session.commit()
+        await session.refresh(db_obj)
+        return db_obj
+
+    async def delete(self, session: AsyncSession, db_obj: ModelType) -> None:
+        await session.delete(db_obj)
+        await session.commit()

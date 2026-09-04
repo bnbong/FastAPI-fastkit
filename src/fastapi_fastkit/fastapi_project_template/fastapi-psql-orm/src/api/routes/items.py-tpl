@@ -1,20 +1,18 @@
 # --------------------------------------------------------------------------
 # Item CRUD Endpoint
 # --------------------------------------------------------------------------
-from typing import List
-from collections.abc import Generator
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session
 
 from src.api.deps import get_db
 from src.crud.items import create_item, delete_item, get_item, get_items, update_item
-from src.schemas.items import ItemBase, ItemCreate, ItemResponse
+from src.schemas.items import ItemCreate, ItemResponse
 
 router = APIRouter()
 
 
-@router.get("/items", response_model=List[ItemResponse])
+@router.get("/items", response_model=list[ItemResponse])
 def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """
     Retrieve a list of items with optional pagination.

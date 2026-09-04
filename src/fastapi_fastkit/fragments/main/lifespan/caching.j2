@@ -1,0 +1,7 @@
+    # Initialize the fastapi-cache2 Redis backend
+    redis_client = aioredis.from_url(
+        os.getenv("REDIS_URL", "redis://localhost:6379/0"),
+        encoding="utf-8",
+        decode_responses=False,
+    )
+    FastAPICache.init(RedisBackend(redis_client), prefix="{{ project_slug }}-cache")

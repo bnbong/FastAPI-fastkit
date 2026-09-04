@@ -3,8 +3,8 @@ Test configuration and fixtures.
 """
 import pytest
 from fastapi.testclient import TestClient
-from src.main import app
 from src.api.routes.auth import create_access_token
+from src.main import app
 
 
 @pytest.fixture

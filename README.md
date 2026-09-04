@@ -34,6 +34,8 @@ This project was inspired by the `SpringBoot initializer` & Python Django's `dja
 - **🔍 Automated template quality assurance** : Weekly automated testing ensures all templates remain functional and up-to-date
 - **🚀 Multiple project templates** : Choose from various pre-configured templates for different use cases (async CRUD, Docker, PostgreSQL, etc.)
 - **📦 Multiple package manager support** : Choose your preferred Python package manager (pip, uv, pdm, poetry) for dependency management
+- **🧾 Reproducible project configs** : Save an interactive session to a `.json` / `.toml` / `.yaml` file and replay it with `fastkit init --config`
+- **🏷️ Self-describing projects** : Every generated project records its template, preset, package manager, entrypoint and selected features in a `[tool.fastapi-fastkit]` block that `runserver` and `addroute` read back
 
 ## Installation
 
@@ -59,6 +61,12 @@ fastkit init [OPTIONS]
 - Key options:
   - `--project-name`, `--author`, `--author-email`, `--description`
   - `--package-manager` [pip|uv|pdm|poetry]
+  - `--config <path>`: create the project from a saved config file (`.json` / `.toml`, and `.yaml` when PyYAML is installed) with no prompts
+  - `--save-config <path>`: with `--interactive`, record the answers for later reuse
+  - `--dry-run`: print the files and packages that would be created, write nothing
+  - `--no-venv`: skip virtual environment creation (implies `--no-install`)
+  - `--no-install`: skip dependency installation
+  - `--yes` / `-y`: skip the "Overwrite these files?" confirmation when deploying in place
   - Stack selection: `minimal` | `standard` | `full` (interactive)
 
 ### Create a project with interactive mode
@@ -75,6 +83,9 @@ fastkit init --interactive
   - **Monitoring**: Loguru, OpenTelemetry, Prometheus
   - **Testing**: Basic (pytest), Coverage, Advanced (with faker, factory-boy)
   - **Utilities**: CORS, Rate-Limiting, Pagination, WebSocket
+  - **Logging**: structured JSON logging with a request-id middleware
+  - **Migrations**: Alembic (async env, baseline revision)
+  - **Tooling**: ruff, pre-commit, GitHub Actions, devcontainer, Makefile (multi-select)
   - **Deployment**: Docker, docker-compose with auto-generated configs
   - **Package manager**: pip, uv, pdm, poetry
   - **Custom packages**: Add your own dependencies
@@ -83,6 +94,9 @@ fastkit init --interactive
   - Database and authentication configuration files at preset-specific paths
   - Docker deployment files (`Dockerfile`, `docker-compose.yml`) with the preset's correct uvicorn entrypoint
   - Test configuration (pytest with coverage)
+  - `/health` and `/ready` endpoints on every generated project
+  - Real working code — not just installed packages — for background tasks, caching, WebSocket, pagination, OpenTelemetry, OAuth2 and session-based auth
+  - `--dry-run` previews the exact file tree a run would create, including logging/migrations/tooling artifacts
 
 ### Create a project from a template
 ```console
@@ -92,7 +106,15 @@ fastkit startdemo [TEMPLATE] [OPTIONS]
 - Key options:
   - `--project-name`, `--author`, `--author-email`, `--description`
   - `--package-manager` [pip|uv|pdm|poetry]
+  - `--dry-run`, `--no-venv`, `--no-install`, `--yes`/`-y` — same meaning as on `init`
+  - Refuses to run if the target project directory already exists (`--dry-run` excepted)
 - Tip: List available templates with `fastkit list-templates`
+
+New in v1.4.0: `fastapi-auth-jwt` (JWT auth with refresh rotation),
+`fastapi-sqlmodel` (async SQLModel + Alembic + generic CRUD), and
+`fastapi-llm-agent` (streaming Claude agent with a tool loop).
+`fastapi-dockerized` and `fastapi-async-crud` are deprecated — they still
+work, but are no longer recommended starting points.
 
 ### Add a new route
 ```console

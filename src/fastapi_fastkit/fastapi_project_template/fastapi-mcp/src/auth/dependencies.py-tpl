@@ -1,10 +1,9 @@
 """
 Authentication dependencies for API and MCP endpoints.
 """
-from typing import Optional
 
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 
 from src.core.config import settings
@@ -25,7 +24,7 @@ def verify_token(token: str) -> dict:
         )
 
 
-def get_current_user(credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)):
+def get_current_user(credentials: HTTPAuthorizationCredentials | None = Depends(security)):
     """Get current authenticated user from JWT token."""
     if not credentials:
         raise HTTPException(
@@ -53,7 +52,7 @@ def get_current_active_user(current_user: dict = Depends(get_current_user)):
     return current_user
 
 
-def verify_mcp_access(credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)):
+def verify_mcp_access(credentials: HTTPAuthorizationCredentials | None = Depends(security)):
     """Verify MCP access permissions."""
     if settings.MCP_API_KEY:
         # Use API key authentication for MCP
@@ -76,7 +75,7 @@ def verify_mcp_access(credentials: Optional[HTTPAuthorizationCredentials] = Depe
     return True
 
 
-def optional_auth(credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)):
+def optional_auth(credentials: HTTPAuthorizationCredentials | None = Depends(security)):
     """Optional authentication for endpoints that work with or without auth."""
     if not credentials:
         return None

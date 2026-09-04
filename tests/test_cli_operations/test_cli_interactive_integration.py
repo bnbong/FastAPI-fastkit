@@ -130,8 +130,11 @@ class TestCLIInteractiveMode:
                     "1",  # Background Tasks: Celery (1st option)
                     "1",  # Caching: Redis (1st option)
                     "3",  # Monitoring: Prometheus (3rd option)
+                    "1",  # Logging: structured (1st option)
                     "1",  # Testing: Basic (1st option)
+                    "1",  # Migrations: Alembic (recommended for SQL)
                     "1",  # Utilities: CORS (option 1)
+                    "1,5",  # Tooling: ruff + makefile
                     "1",  # Deployment: Docker (1st option)
                     "2",  # Package manager: uv (2nd option)
                     "",  # Custom packages: skip
@@ -248,12 +251,37 @@ class TestCLIInteractiveMode:
                 "[pytest]" not in conftest_content
             ), "conftest.py must remain a Python module, not INI content"
 
+        # Every catalog selection must produce real code, not just a package
+        # install. The domain-starter preset (the default accepted above)
+        # roots the application package at ``src/app``.
+        for relative, marker in (
+            ("src/app/worker.py", "Celery("),
+            ("src/app/features/tasks.py", "/api/v1/tasks"),
+            ("src/app/features/cache.py", "@cache(expire=60)"),
+            ("src/app/logging_config.py", "class RequestIDMiddleware"),
+            ("src/app/core/database.py", "sqlalchemy"),
+            ("src/app/core/auth.py", "JWT"),
+            ("alembic/env.py", "async_engine_from_config"),
+            ("alembic.ini", "script_location = alembic"),
+            ("scripts/migrate.sh", "alembic upgrade"),
+            ("Makefile", "run:"),
+        ):
+            target = project_path / relative
+            assert target.exists(), f"{relative} was promised but not generated"
+            assert marker in target.read_text(), f"{relative} missing {marker!r}"
+
+        # ruff was selected, so its configuration belongs in pyproject.toml.
+        assert "[tool.ruff]" in (project_path / "pyproject.toml").read_text()
+
+        # Alembic ships on the migrations axis, so it must be installed too.
+        assert "alembic" in deps_lower, "Alembic should be in dependencies"
+
         # Verify subprocess was called for venv and installation
         assert (
             mock_subprocess.call_count >= 2
         ), "subprocess should be called for venv creation and dependency installation"
 
-    @patch("fastapi_fastkit.cli.create_venv_with_manager")
+    @patch("fastapi_fastkit.backend.scaffolder.create_venv_with_manager")
     @patch("fastapi_fastkit.backend.package_managers.uv_manager.UvManager.is_available")
     def test_init_interactive_cleans_up_on_failure(
         self,
@@ -287,8 +315,11 @@ class TestCLIInteractiveMode:
                     "1",  # Background Tasks: Celery
                     "1",  # Caching: Redis
                     "3",  # Monitoring: Prometheus
+                    "2",  # Logging: None (last option)
                     "1",  # Testing: Basic
+                    "1",  # Migrations: Alembic (recommended for SQL)
                     "1",  # Utilities: CORS
+                    "",  # Tooling: skip
                     "1",  # Deployment: Docker
                     "2",  # Package manager: uv
                     "",  # Custom packages: skip
@@ -396,8 +427,11 @@ class TestCLIInteractiveMode:
                     "3",  # Background Tasks: None (last option)
                     "2",  # Caching: None (last option)
                     "4",  # Monitoring: None (last option)
+                    "2",  # Logging: None (last option)
                     "1",  # Testing: Basic
+                    "2",  # Migrations: None (no SQL database selected)
                     "",  # Utilities: skip
+                    "",  # Tooling: skip
                     "1",  # Deployment: Docker
                     "2",  # Package manager: uv
                     "",  # Custom packages: skip
@@ -496,8 +530,11 @@ class TestCLIInteractiveMode:
                     "3",  # Background Tasks: None (last option)
                     "2",  # Caching: None (last option)
                     "3",  # Monitoring: Prometheus
+                    "2",  # Logging: None (last option)
                     "1",  # Testing: Basic
+                    "1",  # Migrations: Alembic (recommended for SQL)
                     "1",  # Utilities: CORS
+                    "",  # Tooling: skip
                     "3",  # Deployment: None
                     "2",  # Package manager: uv
                     "",  # Custom packages: skip

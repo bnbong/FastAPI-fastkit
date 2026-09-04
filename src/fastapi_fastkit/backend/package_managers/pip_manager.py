@@ -3,19 +3,13 @@
 #
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
-import os
-import subprocess
 import sys
 from typing import List
 
 from fastapi_fastkit.core.exceptions import BackendExceptions
+from fastapi_fastkit.core.settings import settings
 from fastapi_fastkit.utils.logging import debug_log, get_logger
-from fastapi_fastkit.utils.main import (
-    console,
-    handle_exception,
-    print_error,
-    print_success,
-)
+from fastapi_fastkit.utils.main import print_success
 
 from .base import BasePackageManager
 
@@ -27,16 +21,7 @@ class PipManager(BasePackageManager):
 
     def is_available(self) -> bool:
         """Check if pip is available on the system."""
-        try:
-            subprocess.run(
-                [sys.executable, "-m", "pip", "--version"],
-                check=True,
-                capture_output=True,
-                text=True,
-            )
-            return True
-        except (subprocess.CalledProcessError, FileNotFoundError):
-            return False
+        return self._check_command_available([sys.executable, "-m", "pip", "--version"])
 
     def get_dependency_file_name(self) -> str:
         """Get the dependency file name for pip."""
@@ -51,87 +36,48 @@ class PipManager(BasePackageManager):
         """
         venv_path = str(self.project_dir / ".venv")
 
-        try:
-            with console.status("[bold green]Creating virtual environment..."):
-                subprocess.run(
-                    [sys.executable, "-m", "venv", venv_path],
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                )
+        self._run_checked(
+            [sys.executable, "-m", "venv", venv_path],
+            status_msg="Creating virtual environment...",
+            error_prefix="Failed to create venv",
+            timeout=settings.get_subprocess_timeout("venv"),
+        )
 
-            debug_log(f"Virtual environment created at {venv_path}", "info")
-            print_success("Virtual environment created successfully")
-            return venv_path
+        debug_log(f"Virtual environment created at {venv_path}", "info")
+        print_success("Virtual environment created successfully")
+        return venv_path
 
-        except subprocess.CalledProcessError as e:
-            debug_log(f"Error creating virtual environment: {e.stderr}", "error")
-            handle_exception(e, f"Error creating virtual environment: {str(e)}")
-            raise BackendExceptions("Failed to create venv")
-        except OSError as e:
-            debug_log(f"System error creating virtual environment: {e}", "error")
-            handle_exception(e, f"Error creating virtual environment: {str(e)}")
-            raise BackendExceptions(f"Failed to create venv: {str(e)}")
-
-    def install_dependencies(self, venv_path: str) -> None:
+    def install_dependencies(self, venv_path: str, upgrade_pip: bool = False) -> None:
         """
         Install dependencies using pip in the virtual environment.
 
         :param venv_path: Path to the virtual environment
+        :param upgrade_pip: Upgrade pip inside the venv before installing
         :raises: BackendExceptions if dependency installation fails
         """
-        try:
-            if not os.path.exists(venv_path):
-                debug_log(
-                    "Virtual environment does not exist. Creating it first.", "warning"
-                )
-                print_error("Virtual environment does not exist. Creating it first.")
-                venv_path = self.create_virtual_environment()
-                if not venv_path:
-                    raise BackendExceptions("Failed to create venv")
+        venv_path = self._ensure_venv(venv_path)
+        requirements_path = self._require_dependency_file("Requirements file not found")
 
-            requirements_path = self.get_dependency_file_path()
-            if not requirements_path.exists():
-                debug_log(
-                    f"Requirements file not found at {requirements_path}", "error"
-                )
-                print_error(f"Requirements file not found at {requirements_path}")
-                raise BackendExceptions("Requirements file not found")
+        pip_path = self.get_executable_path("pip", venv_path)
 
-            # Get pip path
-            pip_path = self.get_executable_path("pip", venv_path)
-
-            # Upgrade pip first
-            subprocess.run(
+        if upgrade_pip:
+            self._run_checked(
                 [pip_path, "install", "--upgrade", "pip"],
-                check=True,
-                capture_output=True,
-                text=True,
+                status_msg="Upgrading pip...",
+                error_prefix="Failed to upgrade pip",
+                timeout=settings.get_subprocess_timeout("install"),
             )
 
-            # Install dependencies
-            with console.status("[bold green]Installing dependencies..."):
-                subprocess.run(
-                    [pip_path, "install", "-r", str(requirements_path.name)],
-                    cwd=str(self.project_dir),
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                )
+        self._run_checked(
+            [pip_path, "install", "-r", str(requirements_path.name)],
+            status_msg="Installing dependencies...",
+            error_prefix="Failed to install dependencies",
+            timeout=settings.get_subprocess_timeout("install"),
+            summarize_output=True,
+        )
 
-            debug_log("Dependencies installed successfully", "info")
-            print_success("Dependencies installed successfully")
-
-        except subprocess.CalledProcessError as e:
-            debug_log(f"Error during dependency installation: {e.stderr}", "error")
-            handle_exception(e, f"Error during dependency installation: {str(e)}")
-            if hasattr(e, "stderr"):
-                print_error(f"Error details: {e.stderr}")
-            raise BackendExceptions("Failed to install dependencies")
-        except OSError as e:
-            debug_log(f"System error during dependency installation: {e}", "error")
-            handle_exception(e, f"Error during dependency installation: {str(e)}")
-            raise BackendExceptions(f"Failed to install dependencies: {str(e)}")
+        debug_log("Dependencies installed successfully", "info")
+        print_success("Dependencies installed successfully")
 
     def generate_dependency_file(
         self,

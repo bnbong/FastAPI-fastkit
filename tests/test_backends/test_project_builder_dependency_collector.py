@@ -316,8 +316,11 @@ class TestDependencyDeduplication:
         dependencies = collector.collect_from_config(config)
 
         # then
-        redis_count = dependencies.count("redis")
+        # Celery's broker extra and the cache backend resolve to the same
+        # distribution, so it must be listed exactly once.
+        redis_count = dependencies.count("redis[hiredis]")
         assert redis_count == 1, "Redis should appear only once"
+        assert "aioredis" not in dependencies, "aioredis is abandoned"
 
     def test_deduplication_with_duplicate_custom_packages(self) -> None:
         """Test deduplication of duplicate custom packages."""
@@ -500,3 +503,121 @@ class TestGetFinalDependencies:
         assert "asyncpg" not in deps2
         # But PostgreSQL was in first collection
         assert "asyncpg" in deps1
+
+
+class TestNewFeatureAxes:
+    """The axes added in #57 must contribute their packages like any other."""
+
+    @staticmethod
+    def _collect(**overrides: object) -> list:
+        settings = FastkitConfig()
+        config = {
+            "database": {"type": "None"},
+            "authentication": "None",
+            "utilities": [],
+        }
+        config.update(overrides)
+        return DependencyCollector(settings).collect_from_config(config)
+
+    def test_alembic_is_collected_from_the_migrations_axis(self) -> None:
+        """Alembic moved out of the database lists onto its own axis."""
+        # given / when
+        dependencies = self._collect(migrations="Alembic")
+
+        # then
+        assert "alembic" in dependencies
+
+    def test_tooling_is_multi_select(self) -> None:
+        """Several tooling options can be picked at once."""
+        # given / when
+        dependencies = self._collect(tooling=["ruff", "pre-commit"])
+
+        # then
+        assert "ruff" in dependencies
+        assert "pre-commit" in dependencies
+
+    def test_structured_logging_adds_no_dependency(self) -> None:
+        """Structured logging is implemented on the standard library alone."""
+        # given / when
+        baseline = self._collect()
+        with_logging = self._collect(logging="structured")
+
+        # then
+        assert with_logging == baseline
+
+    def test_oauth2_pulls_in_session_support(self) -> None:
+        """SessionMiddleware signs its cookie with itsdangerous."""
+        # given / when
+        dependencies = self._collect(authentication="OAuth2")
+
+        # then
+        assert "authlib" in dependencies
+        assert "itsdangerous" in dependencies
+
+    def test_opentelemetry_includes_an_exporter(self) -> None:
+        """Tracing without an exporter emits nothing anywhere."""
+        # given / when
+        dependencies = self._collect(monitoring="OpenTelemetry")
+
+        # then
+        assert "opentelemetry-instrumentation-fastapi" in dependencies
+        assert "opentelemetry-exporter-otlp-proto-http" in dependencies
+
+    def test_every_catalog_axis_is_walked(self) -> None:
+        """A new catalog axis must not need a new branch in the collector."""
+        # given
+        settings = FastkitConfig()
+        config = {
+            "database": {"type": "PostgreSQL"},
+            "authentication": "JWT",
+            "async_tasks": "Celery",
+            "caching": "Redis",
+            "monitoring": "Loguru",
+            "testing": "Advanced",
+            "migrations": "Alembic",
+            "logging": "structured",
+            "utilities": ["Rate-Limiting", "Pagination"],
+            "tooling": ["ruff", "pre-commit"],
+        }
+
+        # when
+        dependencies = DependencyCollector(settings).collect_from_config(config)
+
+        # then — one representative package per axis that ships any
+        for expected in (
+            "asyncpg",
+            "python-jose[cryptography]",
+            "celery[redis]",
+            "fastapi-cache2",
+            "loguru",
+            "factory-boy",
+            "alembic",
+            "slowapi",
+            "fastapi-pagination",
+            "ruff",
+            "pre-commit",
+        ):
+            assert expected in dependencies, expected
+
+    def test_add_feature_dependencies_replays_metadata_strings(self) -> None:
+        """Project metadata records ``"<axis>:<choice>"`` — replay it back."""
+        # given
+        settings = FastkitConfig()
+        collector = DependencyCollector(settings)
+
+        # when
+        collector.add_feature_dependencies(
+            [
+                "database:PostgreSQL",
+                "migrations:Alembic",
+                "tooling:ruff",
+                "caching:None",
+            ]
+        )
+
+        # then
+        dependencies = collector.get_final_dependencies()
+        assert "asyncpg" in dependencies
+        assert "alembic" in dependencies
+        assert "ruff" in dependencies
+        assert "fastapi-cache2" not in dependencies

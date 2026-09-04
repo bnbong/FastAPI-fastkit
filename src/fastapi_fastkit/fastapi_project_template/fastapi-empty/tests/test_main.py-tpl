@@ -1,7 +1,6 @@
 # --------------------------------------------------------------------------
 # Main application testcases
 # --------------------------------------------------------------------------
-import pytest
 from fastapi.testclient import TestClient
 
 

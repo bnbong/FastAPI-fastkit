@@ -1,0 +1,26 @@
+{% include "header.j2" %}
+"""Example endpoints demonstrating ``fastapi-cache2``.
+
+``FastAPICache`` is initialised in the application lifespan; the ``@cache``
+decorator below stores the response in Redis for ``expire`` seconds.
+"""
+
+import time
+
+from fastapi import APIRouter
+from fastapi_cache.decorator import cache
+
+router = APIRouter(prefix="/api/v1/cache", tags=["Cache"])
+
+
+@router.get("/expensive")
+@cache(expire=60)
+async def expensive_operation() -> dict[str, float]:
+    """Cached for 60s — the timestamp only moves once per minute."""
+    return {"computed_at": time.time()}
+
+
+@router.get("/uncached")
+async def uncached_operation() -> dict[str, float]:
+    """Same payload without caching, for comparison."""
+    return {"computed_at": time.time()}

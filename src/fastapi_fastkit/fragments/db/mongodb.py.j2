@@ -1,0 +1,19 @@
+{% include "header.j2" %}
+from motor.motor_asyncio import AsyncIOMotorClient
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class DatabaseSettings(BaseSettings):
+    """MongoDB configuration settings."""
+
+    MONGODB_URL: str = "mongodb://localhost:27017"
+    MONGODB_DB_NAME: str = "fastapi_db"
+
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+
+settings = DatabaseSettings()
+
+# MongoDB client
+client = AsyncIOMotorClient(settings.MONGODB_URL)
+database = client[settings.MONGODB_DB_NAME]

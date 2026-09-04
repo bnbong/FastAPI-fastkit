@@ -271,3 +271,187 @@ class TestPromptDeploymentOptions:
         # then
         assert "Docker" in result
         assert "docker-compose" in result
+
+
+class TestPromptLoggingSelection:
+    """Test cases for prompt_logging_selection function."""
+
+    @patch("fastapi_fastkit.backend.interactive.prompts.click.prompt")
+    def test_selects_structured_logging(self, mock_prompt) -> None:
+        """Test picking the structured (JSON) logging option."""
+        # given
+        settings = FastkitConfig()
+        mock_prompt.return_value = 1
+
+        # when
+        result = prompts.prompt_logging_selection(settings)
+
+        # then
+        assert result == "structured"
+
+    @patch("fastapi_fastkit.backend.interactive.prompts.click.prompt")
+    def test_defaults_to_none(self, mock_prompt) -> None:
+        """Test that the prompt defaults to the last (None) option."""
+        # given
+        settings = FastkitConfig()
+        mock_prompt.return_value = 2
+
+        # when
+        result = prompts.prompt_logging_selection(settings)
+
+        # then
+        assert result == "None"
+        assert mock_prompt.call_args.kwargs["default"] == 2
+
+
+class TestPromptMigrationsSelection:
+    """Test cases for prompt_migrations_selection function."""
+
+    @patch("fastapi_fastkit.backend.interactive.prompts.click.prompt")
+    def test_recommends_alembic_for_sql_databases(self, mock_prompt) -> None:
+        """A relational database pre-selects Alembic as the default."""
+        # given
+        settings = FastkitConfig()
+        mock_prompt.return_value = 1
+
+        # when
+        result = prompts.prompt_migrations_selection(settings, "PostgreSQL")
+
+        # then
+        assert result == "Alembic"
+        assert mock_prompt.call_args.kwargs["default"] == 1
+
+    @patch("fastapi_fastkit.backend.interactive.prompts.click.prompt")
+    def test_defaults_to_none_without_a_sql_database(self, mock_prompt) -> None:
+        """Alembic has nothing to migrate on MongoDB, so it is not default."""
+        # given
+        settings = FastkitConfig()
+        mock_prompt.return_value = 2
+
+        # when
+        result = prompts.prompt_migrations_selection(settings, "MongoDB")
+
+        # then
+        assert result == "None"
+        assert mock_prompt.call_args.kwargs["default"] == 2
+
+
+class TestPromptToolingSelection:
+    """Test cases for prompt_tooling_selection function."""
+
+    @patch("fastapi_fastkit.backend.interactive.prompts.console")
+    def test_parses_a_comma_separated_multi_select(self, mock_console) -> None:
+        """Test selecting several tooling options at once."""
+        # given
+        settings = FastkitConfig()
+        mock_console.input.return_value = "1,5"
+
+        # when
+        result = prompts.prompt_tooling_selection(settings)
+
+        # then
+        assert result == ["ruff", "makefile"]
+
+    @patch("fastapi_fastkit.backend.interactive.prompts.console")
+    def test_empty_input_skips_tooling(self, mock_console) -> None:
+        """Test that pressing Enter selects nothing."""
+        # given
+        settings = FastkitConfig()
+        mock_console.input.return_value = ""
+
+        # when
+        result = prompts.prompt_tooling_selection(settings)
+
+        # then
+        assert result == []
+
+    @patch("fastapi_fastkit.backend.interactive.prompts.console")
+    def test_invalid_input_is_ignored(self, mock_console) -> None:
+        """Test that a non-numeric answer degrades to no selection."""
+        # given
+        settings = FastkitConfig()
+        mock_console.input.return_value = "ruff, makefile"
+
+        # when
+        result = prompts.prompt_tooling_selection(settings)
+
+        # then
+        assert result == []
+
+    @patch("fastapi_fastkit.backend.interactive.prompts.console")
+    def test_never_offers_the_none_sentinel(self, mock_console) -> None:
+        """``None`` is the absence of a selection, not a selectable option."""
+        # given
+        settings = FastkitConfig()
+        mock_console.input.return_value = "1,2,3,4,5,6"
+
+        # when
+        result = prompts.prompt_tooling_selection(settings)
+
+        # then
+        assert "None" not in result
+        assert len(result) == 5
+
+
+class TestPromptAdditionalFeaturesCoversEveryAxis:
+    """The aggregate flow must ask about every catalog axis."""
+
+    @patch("fastapi_fastkit.backend.interactive.prompts.prompt_custom_packages")
+    @patch(
+        "fastapi_fastkit.backend.interactive.prompts.prompt_package_manager_selection"
+    )
+    @patch("fastapi_fastkit.backend.interactive.prompts.prompt_deployment_options")
+    @patch("fastapi_fastkit.backend.interactive.prompts.prompt_tooling_selection")
+    @patch("fastapi_fastkit.backend.interactive.prompts.prompt_utilities_selection")
+    @patch("fastapi_fastkit.backend.interactive.prompts.prompt_migrations_selection")
+    @patch("fastapi_fastkit.backend.interactive.prompts.prompt_testing_selection")
+    @patch("fastapi_fastkit.backend.interactive.prompts.prompt_logging_selection")
+    @patch("fastapi_fastkit.backend.interactive.prompts.prompt_monitoring_selection")
+    @patch("fastapi_fastkit.backend.interactive.prompts.prompt_caching_selection")
+    @patch("fastapi_fastkit.backend.interactive.prompts.prompt_async_tasks_selection")
+    @patch(
+        "fastapi_fastkit.backend.interactive.prompts.prompt_authentication_selection"
+    )
+    @patch("fastapi_fastkit.backend.interactive.prompts.prompt_database_selection")
+    def test_collects_every_axis(
+        self,
+        mock_database,
+        mock_auth,
+        mock_tasks,
+        mock_caching,
+        mock_monitoring,
+        mock_logging,
+        mock_testing,
+        mock_migrations,
+        mock_utilities,
+        mock_tooling,
+        mock_deployment,
+        mock_package_manager,
+        mock_custom,
+    ) -> None:
+        """Every axis the generator reads must be present in the result."""
+        # given
+        settings = FastkitConfig()
+        mock_database.return_value = {"type": "PostgreSQL", "packages": []}
+        mock_auth.return_value = "JWT"
+        mock_tasks.return_value = "Celery"
+        mock_caching.return_value = "Redis"
+        mock_monitoring.return_value = "Prometheus"
+        mock_logging.return_value = "structured"
+        mock_testing.return_value = "Advanced"
+        mock_migrations.return_value = "Alembic"
+        mock_utilities.return_value = ["CORS"]
+        mock_tooling.return_value = ["ruff"]
+        mock_deployment.return_value = ["Docker"]
+        mock_package_manager.return_value = "uv"
+        mock_custom.return_value = []
+
+        # when
+        features = prompts.prompt_additional_features(settings)
+
+        # then
+        assert features["logging"] == "structured"
+        assert features["migrations"] == "Alembic"
+        assert features["tooling"] == ["ruff"]
+        # The migrations prompt needs the database choice to pick its default.
+        mock_migrations.assert_called_once_with(settings, "PostgreSQL")

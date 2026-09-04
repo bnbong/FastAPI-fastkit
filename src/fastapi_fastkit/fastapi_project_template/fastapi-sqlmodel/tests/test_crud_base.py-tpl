@@ -1,0 +1,43 @@
+# --------------------------------------------------------------------------
+# The generic CRUD base is what every future domain inherits, so it gets
+# direct coverage rather than only being exercised through HTTP.
+# --------------------------------------------------------------------------
+from sqlmodel.ext.asyncio.session import AsyncSession
+from src.app.domains.items.crud import item_crud
+from src.app.domains.items.models import ItemCreate, ItemUpdate
+
+
+async def test_create_and_count(session: AsyncSession) -> None:
+    await item_crud.create(session, ItemCreate(name="Mug", price=9.0))
+    await item_crud.create(session, ItemCreate(name="Cup", price=4.0))
+
+    assert await item_crud.count(session) == 2
+
+
+async def test_update_applies_only_set_fields(session: AsyncSession) -> None:
+    item = await item_crud.create(
+        session, ItemCreate(name="Mug", description="ceramic", price=9.0)
+    )
+
+    updated = await item_crud.update(session, item, ItemUpdate(price=12.0))
+
+    assert updated.price == 12.0
+    assert updated.description == "ceramic"
+
+
+async def test_search_by_name(session: AsyncSession) -> None:
+    await item_crud.create(session, ItemCreate(name="Blue Mug", price=9.0))
+    await item_crud.create(session, ItemCreate(name="Red Keychain", price=4.0))
+
+    found = await item_crud.search_by_name(session, "Mug")
+
+    assert [item.name for item in found] == ["Blue Mug"]
+
+
+async def test_delete_removes_the_row(session: AsyncSession) -> None:
+    item = await item_crud.create(session, ItemCreate(name="Pen", price=1.0))
+    assert item.id is not None
+
+    await item_crud.delete(session, item)
+
+    assert await item_crud.get(session, item.id) is None

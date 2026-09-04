@@ -1,5 +1,8 @@
 # Async Item Management API Server
 
+> **Deprecated**: This template is deprecated. Use `fastkit init --interactive` and select
+> the Docker option, or start from the `fastapi-default` template instead.
+
 A FastAPI-based item management API implemented with asynchronous processing.
 
 ## Tech Stack

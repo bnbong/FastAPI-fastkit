@@ -2,16 +2,15 @@
 Authentication-related API endpoints.
 """
 from datetime import datetime, timedelta, timezone
-from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import jwt
 from passlib.context import CryptContext
 
-from src.core.config import settings
-from src.schemas.items import AuthToken, UserLogin, UserInfo
 from src.auth.dependencies import get_current_active_user
+from src.core.config import settings
+from src.schemas.items import AuthToken, UserInfo, UserLogin
 
 router = APIRouter()
 
@@ -54,7 +53,7 @@ def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
 
-def authenticate_user(username: str, password: str) -> Optional[dict]:
+def authenticate_user(username: str, password: str) -> dict | None:
     """Authenticate user with username and password."""
     user = mock_users.get(username)
     if not user:
@@ -64,7 +63,7 @@ def authenticate_user(username: str, password: str) -> Optional[dict]:
     return user
 
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     """Create JWT access token."""
     to_encode = data.copy()
     if expires_delta:

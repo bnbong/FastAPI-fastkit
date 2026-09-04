@@ -1,0 +1,67 @@
+{% include "header.j2" %}
+"""Cookie-session authentication.
+
+``SessionMiddleware`` (Starlette + itsdangerous) signs the session cookie; the
+routes below show the minimal login / logout / whoami cycle. Replace
+:func:`authenticate_user` with a real user-store lookup.
+"""
+
+import os
+import secrets
+
+from fastapi import APIRouter, HTTPException, Request, status
+from pydantic import BaseModel
+
+SESSION_SECRET_KEY = os.getenv("SESSION_SECRET_KEY", "change-me-in-production")
+SESSION_MAX_AGE = int(os.getenv("SESSION_MAX_AGE", "1209600"))  # 14 days
+
+#: Demo credential store. Swap for your database before going to production.
+_DEMO_USERS: dict[str, str] = {"demo": "demo-password"}
+
+router = APIRouter(prefix="/auth", tags=["Authentication"])
+
+
+class LoginRequest(BaseModel):
+    """Credentials posted to ``/auth/login``."""
+
+    username: str
+    password: str
+
+
+def authenticate_user(username: str, password: str) -> str | None:
+    """Return the username when the credentials match, else ``None``."""
+    expected = _DEMO_USERS.get(username)
+    if expected is None or not secrets.compare_digest(expected, password):
+        return None
+    return username
+
+
+@router.post("/login")
+async def login(payload: LoginRequest, request: Request) -> dict[str, str]:
+    """Verify credentials and store the user in the signed session cookie."""
+    username = authenticate_user(payload.username, payload.password)
+    if username is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid username or password",
+        )
+    request.session["user"] = username
+    return {"status": "logged in", "user": username}
+
+
+@router.post("/logout")
+async def logout(request: Request) -> dict[str, str]:
+    """Clear the session cookie."""
+    request.session.clear()
+    return {"status": "logged out"}
+
+
+@router.get("/me")
+async def current_user(request: Request) -> dict[str, str]:
+    """Return the currently signed-in user."""
+    user = request.session.get("user")
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated"
+        )
+    return {"user": user}

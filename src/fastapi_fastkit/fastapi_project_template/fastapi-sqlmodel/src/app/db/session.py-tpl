@@ -1,0 +1,50 @@
+# --------------------------------------------------------------------------
+# Async SQLModel engine and session management.
+#
+# One engine is created per process; sessions are created per request and
+# handed to routers through the ``get_session`` dependency.
+# --------------------------------------------------------------------------
+from collections.abc import AsyncGenerator
+
+from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker, create_async_engine
+from sqlmodel import SQLModel
+from sqlmodel.ext.asyncio.session import AsyncSession
+
+from src.app.core.config import settings
+
+
+def create_engine(url: str | None = None) -> AsyncEngine:
+    """Build an async engine for ``url`` (defaults to ``settings.DATABASE_URL``)."""
+    return create_async_engine(
+        url or settings.DATABASE_URL,
+        echo=settings.DB_ECHO,
+        future=True,
+    )
+
+
+engine: AsyncEngine = create_engine()
+
+async_session_factory = async_sessionmaker(
+    bind=engine,
+    class_=AsyncSession,
+    expire_on_commit=False,
+)
+
+
+async def create_db_and_tables() -> None:
+    """Create every table declared on the SQLModel metadata.
+
+    Convenient for the SQLite default and for tests. Production deployments
+    should run ``alembic upgrade head`` instead.
+    """
+    # Importing the models registers them on ``SQLModel.metadata``.
+    from src.app.db import base  # noqa: F401
+
+    async with engine.begin() as connection:
+        await connection.run_sync(SQLModel.metadata.create_all)
+
+
+async def get_session() -> AsyncGenerator[AsyncSession, None]:
+    """FastAPI dependency yielding a request-scoped session."""
+    async with async_session_factory() as session:
+        yield session

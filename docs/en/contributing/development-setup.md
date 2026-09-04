@@ -212,6 +212,48 @@ The project Makefile provides convenient commands for common development tasks:
 | `make inspect-templates-verbose` | Run template inspection with verbose output |
 | `make inspect-template` | Inspect specific template(s) (TEMPLATES parameter) |
 
+The underlying script takes three flags worth knowing while iterating:
+`--offline` (skip the PyPI freshness lookups), `--no-smoke` (skip booting
+the generated project with uvicorn — the slowest step), and `--mypy`
+(type-check the generated project; opt-in because it is slow). See
+[Template Quality Assurance](../reference/template-quality-assurance.md)
+for what each check actually does.
+
+```console
+$ python scripts/inspect-templates.py --templates fastapi-sqlmodel --offline --no-smoke
+```
+
+### Generated code lives in Jinja2 fragments
+
+Everything `fastkit init --interactive` writes into a project — `main.py`,
+database and auth modules, Docker files, pytest configuration — is rendered
+from templates under `src/fastapi_fastkit/fragments/`, not assembled from
+strings in Python. `main.py.j2` hard-codes no feature: it iterates over the
+`import_fragments`, `lifespan_fragments` and `setup_fragments` lists supplied
+by `DynamicConfigGenerator` and includes each one, so features compose
+freely.
+
+Adding a feature is roughly:
+
+1. Drop the pieces into `main/imports/`, `main/lifespan/` and/or
+   `main/setup/` (lifespan fragments are indented by four spaces; the other
+   two are not).
+2. Register them in `DynamicConfigGenerator._main_fragments()`, guarded by
+   the relevant config lookup.
+3. For a standalone module, add `<area>/<feature>.py.j2` and render it with
+   `self._render(...)`.
+4. Extend the combination matrix in
+   `tests/test_backends/test_project_builder_config_generator.py` — it
+   asserts every rendered Python file parses with `ast.parse`.
+
+Two constraints that are easy to trip over: every fragment must end with a
+trailing newline (the environment is built with `keep_trailing_newline=True`),
+and `main.py.j2` must keep its `# fastkit:imports` / `# fastkit:routes`
+anchors — `fastkit addroute` inserts at them.
+
+The authoritative procedure lives next to the fragments themselves, in
+[`src/fastapi_fastkit/fragments/README.md`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fragments/README.md).
+
 ### Documentation Commands
 
 | Command | Description |
@@ -353,13 +395,16 @@ FastAPI-fastkit/
 - **`src/fastapi_fastkit/`** - Main package source code
     - **`cli.py`** - Main CLI entry point
     - **`backend/`** - Core backend logic
-        - **`inspector.py`** - Template inspector
+        - **`inspection/`** - Template inspection pipeline (context, checks, consistency, freshness, smoke, lint, report)
+        - **`inspector.py`** - Facade over `inspection/`, kept for the historical import path
         - **`interactive/`** - Interactive mode components (prompts, selectors, validators)
         - **`package_managers/`** - Package manager implementations (pip, uv, pdm, poetry)
-        - **`project_builder/`** - Project building utilities
+        - **`project_builder/`** - Project building utilities, including the fragment-driven config generator
+        - **`scaffolder.py`** - The generation pipeline shared by `init` and `startdemo`
         - **`transducer.py`** - Template transducer
     - **`core/`** - Core configuration and exceptions
-    - **`fastapi_project_template/`** - Project templates (fastapi-default, fastapi-async-crud, etc.)
+    - **`fragments/`** - Jinja2 fragments rendered into generated projects (see below)
+    - **`fastapi_project_template/`** - Project templates (fastapi-default, fastapi-domain-starter, etc.)
     - **`utils/`** - Shared utility functions
 - **`tests/`** - Test suite
     - **`test_backends/`** - Backend-specific tests

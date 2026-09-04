@@ -1,0 +1,77 @@
+# --------------------------------------------------------------------------
+# /users endpoints: profile access, scope and role guards.
+# --------------------------------------------------------------------------
+from typing import Any, Dict
+
+import pytest
+from httpx import AsyncClient
+from sqlmodel import Session
+from src.app.domains.users.repository import UserRepository
+from src.app.domains.users.schemas import UserCreate
+from src.app.domains.users.service import UserService
+
+from tests.conftest import API
+
+
+@pytest.mark.asyncio
+async def test_me_requires_authentication(client: AsyncClient) -> None:
+    response = await client.get(f"{API}/users/me")
+
+    assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_update_current_user(client: AsyncClient, tokens: Dict[str, str]) -> None:
+    headers = {"Authorization": f"Bearer {tokens['access_token']}"}
+
+    response = await client.patch(
+        f"{API}/users/me", json={"full_name": "Alice Liddell"}, headers=headers
+    )
+
+    assert response.status_code == 200
+    assert response.json()["full_name"] == "Alice Liddell"
+
+
+@pytest.mark.asyncio
+async def test_me_scopes_endpoint(client: AsyncClient, tokens: Dict[str, str]) -> None:
+    headers = {"Authorization": f"Bearer {tokens['access_token']}"}
+
+    response = await client.get(f"{API}/users/me/scopes", headers=headers)
+
+    assert response.status_code == 200
+    assert response.json() == ["me"]
+
+
+@pytest.mark.asyncio
+async def test_listing_users_requires_superuser(
+    client: AsyncClient, tokens: Dict[str, str]
+) -> None:
+    headers = {"Authorization": f"Bearer {tokens['access_token']}"}
+
+    response = await client.get(f"{API}/users", headers=headers)
+
+    assert response.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_superuser_can_list_users(
+    client: AsyncClient, session: Session, registered_user: Dict[str, Any]
+) -> None:
+    UserService(UserRepository(session)).register(
+        UserCreate(
+            email="root@example.com", password="root-password", full_name="Root"
+        ),
+        is_superuser=True,
+        scopes=["me", "admin"],
+    )
+    login = await client.post(
+        f"{API}/auth/login",
+        data={"username": "root@example.com", "password": "root-password"},
+    )
+    headers = {"Authorization": f"Bearer {login.json()['access_token']}"}
+
+    response = await client.get(f"{API}/users", headers=headers)
+
+    assert response.status_code == 200
+    emails = {user["email"] for user in response.json()}
+    assert {"root@example.com", registered_user["user"]["email"]} <= emails

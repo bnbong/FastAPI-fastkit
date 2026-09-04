@@ -1,0 +1,64 @@
+# --------------------------------------------------------------------------
+# Application settings (pydantic-settings).
+# --------------------------------------------------------------------------
+import secrets
+from typing import Annotated, Any, List, Literal, Union
+
+from pydantic import AnyUrl, BeforeValidator, computed_field
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+def _parse_cors(v: Any) -> Union[List[str], str]:
+    if isinstance(v, str) and not v.startswith("["):
+        return [item.strip() for item in v.split(",") if item.strip()]
+    if isinstance(v, (list, str)):
+        return v
+    raise ValueError(v)
+
+
+class Settings(BaseSettings):
+    """Centralized configuration for the application.
+
+    Values are populated from environment variables (or a local ``.env``
+    file) so the same image / build can run in development, staging, and
+    production without code changes.
+    """
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_ignore_empty=True,
+        extra="ignore",
+    )
+
+    PROJECT_NAME: str = "<project_name>"
+    ENVIRONMENT: Literal["development", "staging", "production"] = "development"
+
+    # Signing key for JWTs. Generated per-process when unset, which logs every
+    # user out on restart — always pin SECRET_KEY outside of development.
+    SECRET_KEY: str = secrets.token_urlsafe(32)
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 14
+
+    API_V1_PREFIX: str = "/api/v1"
+
+    # SQLite by default so the template runs with no external service.
+    # Point DATABASE_URL at PostgreSQL to switch, e.g.
+    #   postgresql+psycopg://postgres:postgres@localhost:5432/app_db
+    DATABASE_URL: str = "sqlite:///./app.db"
+
+    # Superuser seeded on startup when both values are set.
+    FIRST_SUPERUSER_EMAIL: str = ""
+    FIRST_SUPERUSER_PASSWORD: str = ""
+
+    BACKEND_CORS_ORIGINS: Annotated[
+        Union[List[AnyUrl], str], BeforeValidator(_parse_cors)
+    ] = []
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def all_cors_origins(self) -> List[str]:
+        return [str(origin).rstrip("/") for origin in self.BACKEND_CORS_ORIGINS]
+
+
+settings = Settings()

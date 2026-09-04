@@ -1,0 +1,73 @@
+# --------------------------------------------------------------------------
+# pytest fixtures for <project_name>.
+#
+# Every test runs against a throwaway in-memory SQLite database; the app's
+# ``get_session`` dependency is overridden so no test ever touches app.db.
+# --------------------------------------------------------------------------
+from collections.abc import AsyncGenerator, Generator
+from typing import Any, Dict
+
+import pytest
+import pytest_asyncio
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy.pool import StaticPool
+from sqlmodel import Session, SQLModel, create_engine
+from src.app.core.config import settings
+from src.app.db.session import get_session
+from src.app.domains.auth import models as auth_models  # noqa: F401
+from src.app.domains.users import models as user_models  # noqa: F401
+from src.app.main import app
+
+API = settings.API_V1_PREFIX
+
+
+@pytest.fixture(name="session")
+def session_fixture() -> Generator[Session, None, None]:
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    SQLModel.metadata.create_all(engine)
+    with Session(engine) as session:
+        yield session
+    SQLModel.metadata.drop_all(engine)
+
+
+@pytest_asyncio.fixture(name="client")
+async def client_fixture(session: Session) -> AsyncGenerator[AsyncClient, None]:
+    def get_session_override() -> Generator[Session, None, None]:
+        yield session
+
+    app.dependency_overrides[get_session] = get_session_override
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        yield client
+    app.dependency_overrides.clear()
+
+
+@pytest_asyncio.fixture(name="registered_user")
+async def registered_user_fixture(client: AsyncClient) -> Dict[str, Any]:
+    """Register a user and hand back the credentials used."""
+    credentials = {
+        "email": "alice@example.com",
+        "password": "s3cret-password",
+        "full_name": "Alice",
+    }
+    response = await client.post(f"{API}/auth/register", json=credentials)
+    assert response.status_code == 201, response.text
+    return {"credentials": credentials, "user": response.json()}
+
+
+@pytest_asyncio.fixture(name="tokens")
+async def tokens_fixture(
+    client: AsyncClient, registered_user: Dict[str, Any]
+) -> Dict[str, str]:
+    credentials = registered_user["credentials"]
+    response = await client.post(
+        f"{API}/auth/login",
+        data={"username": credentials["email"], "password": credentials["password"]},
+    )
+    assert response.status_code == 200, response.text
+    payload: Dict[str, str] = response.json()
+    return payload

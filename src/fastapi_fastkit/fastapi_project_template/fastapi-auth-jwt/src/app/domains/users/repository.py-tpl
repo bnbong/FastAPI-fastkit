@@ -1,0 +1,33 @@
+# --------------------------------------------------------------------------
+# User data access.
+# --------------------------------------------------------------------------
+from typing import List, Optional, Sequence
+
+from sqlmodel import Session, select
+
+from src.app.domains.users.models import User
+
+
+class UserRepository:
+    """All SQL touching the ``users`` table lives here."""
+
+    def __init__(self, session: Session) -> None:
+        self.session = session
+
+    def get(self, user_id: int) -> Optional[User]:
+        return self.session.get(User, user_id)
+
+    def get_by_email(self, email: str) -> Optional[User]:
+        statement = select(User).where(User.email == email)
+        return self.session.exec(statement).first()
+
+    def list(self, offset: int = 0, limit: int = 100) -> List[User]:
+        statement = select(User).offset(offset).limit(limit)
+        rows: Sequence[User] = self.session.exec(statement).all()
+        return list(rows)
+
+    def add(self, user: User) -> User:
+        self.session.add(user)
+        self.session.commit()
+        self.session.refresh(user)
+        return user

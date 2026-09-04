@@ -1,0 +1,31 @@
+{% include "header.j2" %}
+"""Example endpoint demonstrating ``fastapi-pagination``.
+
+``add_pagination(app)`` is called for you in the generated ``main.py``; it is
+what turns the ``Page[...]`` return annotation into ``?page=&size=`` query
+parameters.
+"""
+
+from fastapi import APIRouter
+from fastapi_pagination import Page, paginate
+from pydantic import BaseModel
+
+router = APIRouter(prefix="/api/v1/items", tags=["Items"])
+
+
+class Item(BaseModel):
+    """A trivial demo record."""
+
+    id: int
+    name: str
+
+
+#: Stand-in dataset. Replace ``paginate(...)`` with a database-backed
+#: paginator (``fastapi_pagination.ext.sqlalchemy``) for real data.
+_ITEMS: list[Item] = [Item(id=i, name=f"item-{i}") for i in range(1, 101)]
+
+
+@router.get("", response_model=Page[Item])
+async def list_items() -> Page[Item]:
+    """Return the demo dataset one page at a time."""
+    return paginate(_ITEMS)

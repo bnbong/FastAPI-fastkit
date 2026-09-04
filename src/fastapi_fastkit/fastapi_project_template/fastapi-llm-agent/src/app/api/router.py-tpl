@@ -1,0 +1,13 @@
+# --------------------------------------------------------------------------
+# Top-level API router — aggregates the health probe with the chat endpoints.
+# --------------------------------------------------------------------------
+from fastapi import APIRouter
+
+from src.app.api import chat, health
+
+# fastkit:imports
+
+api_router = APIRouter()
+api_router.include_router(health.router)
+api_router.include_router(chat.router)
+# fastkit:routes

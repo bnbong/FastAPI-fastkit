@@ -9,33 +9,32 @@ readme = "README.md"
 license = "MIT"
 requires-python = ">=3.12"
 dependencies = [
-    "fastapi>=0.115.8",
-    "uvicorn[standard]>=0.34.0",
-    "pydantic>=2.10.6",
-    "pydantic-settings>=2.7.1",
-    "SQLAlchemy>=2.0.38",
-    "python-dotenv>=1.0.1",
-    "fastapi-fastkit>=1.1.5",
+    "fastapi>=0.141.1",
+    "uvicorn[standard]>=0.52.4",
+    "pydantic>=2.13.5",
+    "pydantic-settings>=2.15.0",
+    "SQLAlchemy>=2.0.52",
+    "python-dotenv>=1.2.3",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=8.3.4",
+    "pytest>=9.1.1",
     "httpx>=0.28.1",
-    "black>=25.1.0",
-    "isort>=6.0.0",
-    "mypy>=1.15.0",
-    "PyYAML>=6.0.2",
+    "black>=26.5.1",
+    "isort>=9.0.1",
+    "mypy>=2.3.1",
+    "PyYAML>=6.0.3",
 ]
 
 [dependency-groups]
 dev = [
-    "pytest>=8.3.4",
+    "pytest>=9.1.1",
     "httpx>=0.28.1",
-    "black>=25.1.0",
-    "isort>=6.0.0",
-    "mypy>=1.15.0",
-    "PyYAML>=6.0.2",
+    "black>=26.5.1",
+    "isort>=9.0.1",
+    "mypy>=2.3.1",
+    "PyYAML>=6.0.3",
 ]
 
 [tool.fastapi-fastkit]
@@ -50,7 +49,7 @@ packages = ["src"]
 
 [tool.black]
 line-length = 88
-target-version = ["py39"]
+target-version = ["py312"]
 include = '\.pyi?$'
 exclude = '''
 /(
@@ -71,7 +70,7 @@ line_length = 88
 known_first_party = ["src"]
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.12"
 strict = true
 warn_return_any = true
 warn_unused_configs = true

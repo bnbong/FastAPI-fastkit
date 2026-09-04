@@ -1,0 +1,29 @@
+# --------------------------------------------------------------------------
+# User API I/O schemas.
+# --------------------------------------------------------------------------
+from datetime import datetime
+from typing import List, Optional
+
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
+
+
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=8, max_length=128)
+    full_name: Optional[str] = Field(default=None, max_length=255)
+
+
+class UserUpdate(BaseModel):
+    full_name: Optional[str] = Field(default=None, max_length=255)
+
+
+class UserRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    email: EmailStr
+    full_name: Optional[str] = None
+    is_active: bool
+    is_superuser: bool
+    scopes: List[str]
+    created_at: datetime

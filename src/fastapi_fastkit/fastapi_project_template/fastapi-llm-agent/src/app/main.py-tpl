@@ -1,0 +1,53 @@
+# --------------------------------------------------------------------------
+# FastAPI application entry point for <project_name>.
+# --------------------------------------------------------------------------
+import logging
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+from starlette.middleware.cors import CORSMiddleware
+
+from src.app.api.router import api_router
+from src.app.core.config import settings
+
+# fastkit:imports
+
+logger = logging.getLogger("app")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    """Configure logging and warn early about a missing API key."""
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)-8s %(name)s %(message)s",
+    )
+    if not settings.ANTHROPIC_API_KEY and not settings.LLM_AUTH_TOKEN:
+        logger.warning(
+            "Neither ANTHROPIC_API_KEY nor LLM_AUTH_TOKEN is set — "
+            "chat requests will fail until one is configured."
+        )
+    logger.info("agent ready on model %s", settings.LLM_MODEL)
+    yield
+    logger.info("shutting down")
+
+
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    description="<description>",
+    version="0.1.0",
+    lifespan=lifespan,
+)
+
+if settings.all_cors_origins:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.all_cors_origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+app.include_router(api_router, prefix=settings.API_V1_PREFIX)
+# fastkit:routes

@@ -7,13 +7,9 @@ import subprocess
 from typing import List, Tuple
 
 from fastapi_fastkit.core.exceptions import BackendExceptions
+from fastapi_fastkit.core.settings import settings
 from fastapi_fastkit.utils.logging import debug_log, get_logger
-from fastapi_fastkit.utils.main import (
-    console,
-    handle_exception,
-    print_error,
-    print_success,
-)
+from fastapi_fastkit.utils.main import console, handle_exception, print_success
 
 from .base import BasePackageManager
 
@@ -66,16 +62,7 @@ class PoetryManager(BasePackageManager):
 
     def is_available(self) -> bool:
         """Check if Poetry is available on the system."""
-        try:
-            subprocess.run(
-                ["poetry", "--version"],
-                check=True,
-                capture_output=True,
-                text=True,
-            )
-            return True
-        except (subprocess.CalledProcessError, FileNotFoundError):
-            return False
+        return self._check_command_available(["poetry", "--version"])
 
     def get_dependency_file_name(self) -> str:
         """Get the dependency file name for Poetry."""
@@ -88,59 +75,60 @@ class PoetryManager(BasePackageManager):
         :return: Path to the virtual environment
         :raises: BackendExceptions if virtual environment creation fails
         """
-        try:
-            with console.status(
-                "[bold green]Creating virtual environment with Poetry..."
-            ):
-                # Poetry automatically creates virtual environment when installing
-                # First ensure we have a basic pyproject.toml
-                pyproject_path = self.get_dependency_file_path()
-                if not pyproject_path.exists():
-                    # Create minimal pyproject.toml for Poetry
-                    self._create_minimal_pyproject()
+        # Poetry automatically creates a virtual environment when installing,
+        # so make sure a pyproject.toml exists before asking Poetry about it.
+        if not self.get_dependency_file_path().exists():
+            self._create_minimal_pyproject()
 
-                # Get the virtual environment path from Poetry
+        venv_timeout = settings.get_subprocess_timeout("venv")
+
+        try:
+            with console.status("[bold green]Querying Poetry environment..."):
                 result = subprocess.run(
                     ["poetry", "env", "info", "--path"],
                     cwd=str(self.project_dir),
                     capture_output=True,
                     text=True,
                     check=False,  # Don't fail if venv doesn't exist yet
+                    timeout=venv_timeout,
                 )
-
-                if result.returncode != 0:
-                    # Create virtual environment with Poetry
-                    subprocess.run(
-                        ["poetry", "install", "--no-deps"],
-                        cwd=str(self.project_dir),
-                        check=True,
-                        capture_output=True,
-                        text=True,
-                    )
-
-                    # Get the path again
-                    result = subprocess.run(
-                        ["poetry", "env", "info", "--path"],
-                        cwd=str(self.project_dir),
-                        capture_output=True,
-                        text=True,
-                        check=True,
-                    )
-
-                venv_path = result.stdout.strip()
-
-            debug_log(f"Virtual environment created at {venv_path}", "info")
-            print_success("Virtual environment created successfully with Poetry")
-            return venv_path
-
         except subprocess.CalledProcessError as e:
-            debug_log(f"Error creating virtual environment: {e.stderr}", "error")
+            debug_log(f"Error querying Poetry environment: {e}", "error")
             handle_exception(e, f"Error creating virtual environment: {str(e)}")
             raise BackendExceptions("Failed to create venv with Poetry")
+        except subprocess.TimeoutExpired as e:
+            message = (
+                f"Failed to create venv with Poetry: command timed out after "
+                f"{venv_timeout}s. Set {settings.SUBPROCESS_TIMEOUT_ENV_VAR} "
+                f"to raise the limit."
+            )
+            debug_log(message, "error")
+            handle_exception(e, message)
+            raise BackendExceptions(message)
         except OSError as e:
             debug_log(f"System error creating virtual environment: {e}", "error")
             handle_exception(e, f"Error creating virtual environment: {str(e)}")
             raise BackendExceptions(f"Failed to create venv with Poetry: {str(e)}")
+
+        if result.returncode != 0:
+            self._run_checked(
+                ["poetry", "install", "--no-deps"],
+                status_msg="Creating virtual environment with Poetry...",
+                error_prefix="Failed to create venv with Poetry",
+                timeout=settings.get_subprocess_timeout("install"),
+            )
+            result = self._run_checked(
+                ["poetry", "env", "info", "--path"],
+                status_msg="Resolving Poetry environment path...",
+                error_prefix="Failed to create venv with Poetry",
+                timeout=venv_timeout,
+            )
+
+        venv_path = result.stdout.strip() if isinstance(result.stdout, str) else ""
+
+        debug_log(f"Virtual environment created at {venv_path}", "info")
+        print_success("Virtual environment created successfully with Poetry")
+        return venv_path
 
     def _create_minimal_pyproject(self) -> None:
         """Create a minimal pyproject.toml for Poetry."""
@@ -170,38 +158,18 @@ build-backend = "poetry.core.masonry.api"
         :param venv_path: Path to the virtual environment
         :raises: BackendExceptions if dependency installation fails
         """
-        try:
-            pyproject_path = self.get_dependency_file_path()
-            if not pyproject_path.exists():
-                debug_log(f"pyproject.toml file not found at {pyproject_path}", "error")
-                print_error(f"pyproject.toml file not found at {pyproject_path}")
-                raise BackendExceptions("pyproject.toml file not found")
+        self._require_dependency_file()
 
-            # Install dependencies using Poetry
-            with console.status("[bold green]Installing dependencies with Poetry..."):
-                subprocess.run(
-                    ["poetry", "install"],
-                    cwd=str(self.project_dir),
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                )
+        self._run_checked(
+            ["poetry", "install"],
+            status_msg="Installing dependencies with Poetry...",
+            error_prefix="Failed to install dependencies with Poetry",
+            timeout=settings.get_subprocess_timeout("install"),
+            summarize_output=True,
+        )
 
-            debug_log("Dependencies installed successfully with Poetry", "info")
-            print_success("Dependencies installed successfully with Poetry")
-
-        except subprocess.CalledProcessError as e:
-            debug_log(f"Error during dependency installation: {e.stderr}", "error")
-            handle_exception(e, f"Error during dependency installation: {str(e)}")
-            if hasattr(e, "stderr"):
-                print_error(f"Error details: {e.stderr}")
-            raise BackendExceptions("Failed to install dependencies with Poetry")
-        except OSError as e:
-            debug_log(f"System error during dependency installation: {e}", "error")
-            handle_exception(e, f"Error during dependency installation: {str(e)}")
-            raise BackendExceptions(
-                f"Failed to install dependencies with Poetry: {str(e)}"
-            )
+        debug_log("Dependencies installed successfully with Poetry", "info")
+        print_success("Dependencies installed successfully with Poetry")
 
     def generate_dependency_file(
         self,
@@ -306,6 +274,7 @@ build-backend = "poetry.core.masonry.api"
                 check=True,
                 capture_output=True,
                 text=True,
+                timeout=settings.get_subprocess_timeout("install"),
             )
 
             debug_log(
@@ -313,7 +282,7 @@ build-backend = "poetry.core.masonry.api"
                 "info",
             )
 
-        except subprocess.CalledProcessError as e:
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
             debug_log(f"Error adding dependency with Poetry: {e}", "error")
             raise BackendExceptions(f"Failed to add dependency with Poetry: {str(e)}")
         except OSError as e:
@@ -353,11 +322,12 @@ build-backend = "poetry.core.masonry.api"
                 check=True,
                 capture_output=True,
                 text=True,
+                timeout=settings.get_subprocess_timeout(),
             )
 
             debug_log(f"Initialized Poetry project: {project_name}", "info")
 
-        except subprocess.CalledProcessError as e:
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
             debug_log(f"Error initializing Poetry project: {e}", "error")
             raise BackendExceptions(f"Failed to initialize Poetry project: {str(e)}")
         except OSError as e:
@@ -370,27 +340,15 @@ build-backend = "poetry.core.masonry.api"
 
         :raises: BackendExceptions if lock generation fails
         """
-        try:
-            with console.status("[bold green]Generating Poetry lock file..."):
-                subprocess.run(
-                    ["poetry", "lock"],
-                    cwd=str(self.project_dir),
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                )
+        self._run_checked(
+            ["poetry", "lock"],
+            status_msg="Generating Poetry lock file...",
+            error_prefix="Failed to generate Poetry lock file",
+            timeout=settings.get_subprocess_timeout("install"),
+        )
 
-            debug_log("Poetry lock file generated successfully", "info")
-            print_success("Poetry lock file generated successfully")
-
-        except subprocess.CalledProcessError as e:
-            debug_log(f"Error generating Poetry lock file: {e.stderr}", "error")
-            handle_exception(e, f"Error generating Poetry lock file: {str(e)}")
-            raise BackendExceptions("Failed to generate Poetry lock file")
-        except OSError as e:
-            debug_log(f"System error generating Poetry lock file: {e}", "error")
-            handle_exception(e, f"Error generating Poetry lock file: {str(e)}")
-            raise BackendExceptions(f"Failed to generate Poetry lock file: {str(e)}")
+        debug_log("Poetry lock file generated successfully", "info")
+        print_success("Poetry lock file generated successfully")
 
     def run_script(self, script_command: str) -> None:
         """
@@ -406,12 +364,13 @@ build-backend = "poetry.core.masonry.api"
                 check=True,
                 capture_output=True,
                 text=True,
+                timeout=settings.get_subprocess_timeout(),
             )
 
             debug_log(f"Poetry script executed successfully: {script_command}", "info")
 
-        except subprocess.CalledProcessError as e:
-            debug_log(f"Error running Poetry script: {e.stderr}", "error")
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
+            debug_log(f"Error running Poetry script: {e.stderr!r}", "error")
             raise BackendExceptions(f"Failed to run Poetry script: {str(e)}")
         except OSError as e:
             debug_log(f"System error running Poetry script: {e}", "error")
@@ -431,12 +390,13 @@ build-backend = "poetry.core.masonry.api"
                 check=True,
                 capture_output=True,
                 text=True,
+                timeout=settings.get_subprocess_timeout(),
             )
 
             return result.stdout
 
-        except subprocess.CalledProcessError as e:
-            debug_log(f"Error showing Poetry dependencies: {e.stderr}", "error")
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
+            debug_log(f"Error showing Poetry dependencies: {e.stderr!r}", "error")
             raise BackendExceptions(f"Failed to show Poetry dependencies: {str(e)}")
         except OSError as e:
             debug_log(f"System error showing Poetry dependencies: {e}", "error")

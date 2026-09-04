@@ -1,6 +1,5 @@
 import json
 import os
-from typing import List
 
 MOCK_FILE = os.path.join(os.path.dirname(__file__), "../mocks/mock_items.json")
 
@@ -10,6 +9,6 @@ def read_items():
         return json.load(file)
 
 
-def write_items(items: List[dict]):
+def write_items(items: list[dict]):
     with open(MOCK_FILE, "w") as file:
         json.dump(items, file, indent=2)

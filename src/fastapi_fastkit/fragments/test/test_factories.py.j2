@@ -1,0 +1,27 @@
+{% include "header.j2" %}
+"""Sanity checks for the generated factories."""
+from tests.factories import ItemFactory, UserFactory, build_users
+
+
+def test_user_factory_produces_unique_emails() -> None:
+    """Each built user gets its own email address."""
+    users = build_users(5)
+
+    assert len(users) == 5
+    assert len({user.email for user in users}) == 5
+
+
+def test_user_factory_overrides_are_respected() -> None:
+    """Explicit attributes win over the generated defaults."""
+    user = UserFactory(email="known@example.com", is_active=False)
+
+    assert user.email == "known@example.com"
+    assert user.is_active is False
+
+
+def test_item_factory_links_to_an_owner() -> None:
+    """Items get an owner id even when none is supplied."""
+    item = ItemFactory()
+
+    assert item.owner_id > 0
+    assert item.title

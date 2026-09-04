@@ -1,0 +1,37 @@
+# --------------------------------------------------------------------------
+# Tool implementations.
+#
+# The calculator is the one place user-controlled text is evaluated, so its
+# rejection cases get as much coverage as its happy path.
+# --------------------------------------------------------------------------
+from src.app.llm.tools import calculator, current_time, run_tool
+
+
+def test_calculator_evaluates_arithmetic() -> None:
+    assert calculator("12 * (3 + 4)") == "84"
+    assert calculator("7 / 2") == "3.5"
+    assert calculator("-2 ** 3") == "-8"
+
+
+def test_calculator_reports_division_by_zero() -> None:
+    assert calculator("1 / 0").startswith("Error: division by zero")
+
+
+def test_calculator_rejects_non_arithmetic_input() -> None:
+    for hostile in ("__import__('os').system('ls')", "open('/etc/passwd')", "x + 1"):
+        assert calculator(hostile).startswith("Error:")
+
+
+def test_current_time_returns_iso_string() -> None:
+    assert "T" in current_time()
+    assert current_time("Asia/Seoul").endswith("+09:00")
+
+
+def test_current_time_rejects_unknown_timezone() -> None:
+    assert current_time("Mars/Olympus").startswith("Error: unknown timezone")
+
+
+def test_run_tool_dispatches_and_guards() -> None:
+    assert run_tool("calculator", {"expression": "2+2"}) == "4"
+    assert run_tool("nope", {}).startswith("Error: unknown tool")
+    assert run_tool("calculator", {"wrong": 1}).startswith("Error: bad arguments")

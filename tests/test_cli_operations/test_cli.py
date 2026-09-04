@@ -61,17 +61,18 @@ class TestCLI:
         assert project_path.exists() and project_path.is_dir()
         assert "Success" in result.output
 
-        # Check core module files
+        # Check core module files. Templates are pyproject-first: metadata
+        # lives in pyproject.toml, not a setup.py shim.
         expected_files = {
             "main": ["src/main.py", "main.py"],
-            "setup": ["setup.py", "src/setup.py"],
+            "pyproject": ["pyproject.toml"],
             "config": {
                 "files": ["settings.py", "config.py"],
                 "paths": ["src/core", "src", ""],
             },
         }
 
-        found_files = {"main": False, "setup": False, "config": False}
+        found_files = {"main": False, "pyproject": False, "config": False}
 
         # Check main.py
         for main_path in expected_files["main"]:
@@ -80,17 +81,20 @@ class TestCLI:
                 found_files["main"] = True
                 break
 
-        # Check setup.py
-        for setup_path in expected_files["setup"]:
-            file_path = project_path / setup_path
+        # Check pyproject.toml carries the injected metadata
+        for pyproject_path in expected_files["pyproject"]:
+            file_path = project_path / pyproject_path
             if file_path.exists() and file_path.is_file():
-                found_files["setup"] = True
+                found_files["pyproject"] = True
                 with open(file_path, "r") as f:
                     content = f.read()
                     assert "test-project" in content
                     assert "bnbong" in content
                     assert "bbbong9@gmail.com" in content
                 break
+
+        # No template may reintroduce a setup.py shim.
+        assert not (project_path / "setup.py").exists()
 
         # Check config files
         for config_path in expected_files["config"]["paths"]:  # type: ignore
@@ -139,7 +143,7 @@ class TestCLI:
             ["startdemo", "fastapi-default"],
             input="\n".join(
                 [
-                    "test-project",
+                    "test-project-cancel",
                     "bnbong",
                     "bbbong9@gmail.com",
                     "test project",
@@ -187,7 +191,7 @@ class TestCLI:
     def test_delete_demoproject(self, temp_dir: str) -> None:
         # given
         os.chdir(temp_dir)
-        project_name = "test-project"
+        project_name = "test-project-delete"
         result = self.runner.invoke(
             fastkit_cli,
             ["startdemo", "fastapi-default"],
@@ -221,7 +225,7 @@ class TestCLI:
     def test_delete_demoproject_cancel(self, temp_dir: str) -> None:
         # given
         os.chdir(temp_dir)
-        project_name = "test-project"
+        project_name = "test-project-delete-cancel"
         self.runner.invoke(
             fastkit_cli,
             ["startdemo", "fastapi-default"],
@@ -334,14 +338,14 @@ class TestCLI:
         assert project_path.exists() and project_path.is_dir()
         assert "Success" in result.output
 
-        setup_py = project_path / "setup.py"
-        if setup_py.exists():
-            with open(setup_py, "r") as f:
-                content = f.read()
-                assert project_name in content
-                assert author in content
-                assert author_email in content
-                assert description in content
+        # Metadata is injected into pyproject.toml (pyproject-first templates).
+        pyproject = project_path / "pyproject.toml"
+        assert pyproject.exists()
+        pyproject_content = pyproject.read_text()
+        assert project_name in pyproject_content
+        assert author in pyproject_content
+        assert author_email in pyproject_content
+        assert description in pyproject_content
 
         # Check dependency file (pyproject.toml for uv)
         if (project_path / "pyproject.toml").exists():
@@ -421,14 +425,14 @@ class TestCLI:
         assert project_path.exists() and project_path.is_dir()
         assert "Success" in result.output
 
-        setup_py = project_path / "setup.py"
-        if setup_py.exists():
-            with open(setup_py, "r") as f:
-                content = f.read()
-                assert project_name in content
-                assert author in content
-                assert author_email in content
-                assert description in content
+        # Metadata is injected into pyproject.toml (pyproject-first templates).
+        pyproject = project_path / "pyproject.toml"
+        assert pyproject.exists()
+        pyproject_content = pyproject.read_text()
+        assert project_name in pyproject_content
+        assert author in pyproject_content
+        assert author_email in pyproject_content
+        assert description in pyproject_content
 
         # Check dependency file (pyproject.toml for uv)
         if (project_path / "pyproject.toml").exists():
@@ -542,7 +546,7 @@ class TestCLI:
     def test_is_fastkit_project_function(self, temp_dir: str) -> None:
         # given
         os.chdir(temp_dir)
-        project_name = "test-project"
+        project_name = "test-project-isfastkit"
         result = self.runner.invoke(
             fastkit_cli,
             ["startdemo", "fastapi-default"],
@@ -583,7 +587,7 @@ class TestCLI:
     def test_runserver_command(self, temp_dir: str) -> None:
         # given
         os.chdir(temp_dir)
-        project_name = "test-project"
+        project_name = "test-project-runserver"
         result = self.runner.invoke(
             fastkit_cli,
             ["startdemo", "fastapi-default"],
@@ -669,7 +673,7 @@ class TestCLI:
     def test_addroute_command(self, temp_dir: str) -> None:
         # given
         os.chdir(temp_dir)
-        project_name = "test-project"
+        project_name = "test-project-addroute"
         result = self.runner.invoke(
             fastkit_cli,
             ["startdemo", "fastapi-default"],
@@ -717,7 +721,7 @@ class TestCLI:
     def test_addroute_cancel_confirmation(self, temp_dir: str) -> None:
         # given
         os.chdir(temp_dir)
-        project_name = "test-project"
+        project_name = "test-project-addroute-cancel"
         result = self.runner.invoke(
             fastkit_cli,
             ["startdemo", "fastapi-default"],
@@ -752,7 +756,7 @@ class TestCLI:
         """Test addroute command with current directory (.)"""
         # given
         os.chdir(temp_dir)
-        project_name = "test-project"
+        project_name = "test-project-addroute-cwd"
 
         # First create a project
         result = self.runner.invoke(

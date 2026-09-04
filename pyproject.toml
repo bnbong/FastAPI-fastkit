@@ -8,6 +8,7 @@ authors = [
 dependencies = [
     "click>=8.1.7",
     "rich>=13.9.2",
+    "jinja2>=3.1",
 ]
 requires-python = ">=3.12"
 readme = "README.md"
@@ -32,6 +33,7 @@ dev = [
     "mypy>=1.12.0",
     "isort>=5.13.2",
     "pygments>=2.20.0",
+    "types-pyyaml>=6.0.12.20260408",
 ]
 
 [project.scripts]
@@ -49,11 +51,21 @@ addopts = [
     "--strict-config",
     "--disable-warnings",
 ]
+# ``--strict-markers`` rejects any marker not declared here, so every custom
+# marker used in the suite must be registered.
+markers = [
+    "extended: slower end-to-end coverage, excluded from the fast feedback loop",
+    "slow: tests that shell out to real package managers or network services",
+]
+
+[tool.black]
+target-version = ["py312"]
 
 [tool.isort]
 profile = "black"
 
 [tool.mypy]
+python_version = "3.12"
 strict = true
 
 [[tool.mypy.overrides]]

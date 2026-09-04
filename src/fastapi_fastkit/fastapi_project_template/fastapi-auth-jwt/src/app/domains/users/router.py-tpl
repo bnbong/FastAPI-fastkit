@@ -1,0 +1,71 @@
+# --------------------------------------------------------------------------
+# User endpoints — /users/me and a superuser-only listing.
+# --------------------------------------------------------------------------
+from typing import List
+
+from fastapi import APIRouter, Depends
+
+from src.app.api.deps import (
+    CurrentUser,
+    SessionDep,
+    get_current_active_superuser,
+    require_scopes,
+)
+from src.app.domains.users.models import User
+from src.app.domains.users.repository import UserRepository
+from src.app.domains.users.schemas import UserRead, UserUpdate
+
+router = APIRouter(prefix="/users", tags=["users"])
+
+
+def _to_read(user: User) -> UserRead:
+    return UserRead(
+        id=user.id or 0,
+        email=user.email,
+        full_name=user.full_name,
+        is_active=user.is_active,
+        is_superuser=user.is_superuser,
+        scopes=user.scope_list,
+        created_at=user.created_at,
+    )
+
+
+@router.get("/me", response_model=UserRead)
+def read_current_user(current_user: CurrentUser) -> UserRead:
+    """Return the profile of the authenticated user."""
+    return _to_read(current_user)
+
+
+@router.patch("/me", response_model=UserRead)
+def update_current_user(
+    payload: UserUpdate, current_user: CurrentUser, session: SessionDep
+) -> UserRead:
+    if payload.full_name is not None:
+        current_user.full_name = payload.full_name
+    session.add(current_user)
+    session.commit()
+    session.refresh(current_user)
+    return _to_read(current_user)
+
+
+@router.get(
+    "",
+    response_model=List[UserRead],
+    dependencies=[Depends(get_current_active_superuser)],
+)
+def list_users(
+    session: SessionDep, offset: int = 0, limit: int = 100
+) -> List[UserRead]:
+    """Superuser-only listing — an example of a role-gated route."""
+    users = UserRepository(session).list(offset=offset, limit=limit)
+    return [_to_read(user) for user in users]
+
+
+@router.get(
+    "/me/scopes",
+    response_model=List[str],
+    dependencies=[Depends(require_scopes("me"))],
+)
+def read_current_user_scopes(current_user: CurrentUser) -> List[str]:
+    """Example of a scope-gated route (requires the ``me`` scope)."""
+    return current_user.scope_list

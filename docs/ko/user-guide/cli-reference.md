@@ -60,8 +60,153 @@ $ fastkit init [OPTIONS]
 
 | 옵션 | 설명 | 기본값 |
 |--------|-------------|---------|
+| `--interactive` | 아키텍처 프리셋과 기능을 단계별로 고르는 가이드형 설정 | 꺼짐 |
+| `--config <경로>` | 저장해 둔 설정 파일로 프롬프트 없이 프로젝트 생성 | - |
+| `--save-config <경로>` | `--interactive` 와 함께 쓰면 답변한 설정을 이 경로에 저장 | - |
+| `--project-name` | 프로젝트 이름 (생략하면 물어봄) | - |
+| `--author` | 작성자 이름 (생략하면 물어봄) | - |
+| `--author-email` | 작성자 이메일 (생략하면 물어봄) | - |
+| `--description` | 프로젝트 설명 (생략하면 물어봄) | - |
 | `--package-manager` | 사용할 패키지 매니저 (pip, uv, pdm, poetry) | uv |
+| `--dry-run` | 무엇이 만들어질지만 보여주고 아무것도 쓰지 않음 | 꺼짐 |
+| `--no-venv` | 가상환경 생성을 건너뜀 (`--no-install` 포함) | 꺼짐 |
+| `--no-install` | 의존성 설치를 건너뜀 | 꺼짐 |
+| `--yes` / `-y` | 프로젝트를 그 자리에(in-place) 배포할 때 기존 파일을 덮어쓰기 전에 확인을 묻지 않음 | 꺼짐 |
 | `--help` | 명령 도움말 표시 | - |
+
+#### 설정 파일 (`--config` / `--save-config`)
+
+대화형 세션에서 고른 답변은 결국 평범한 매핑이고, 그 매핑은 파일에 담아
+옮길 수 있습니다. 덕분에 프로젝트 생성을 커밋하고 리뷰하고 다시 실행할 수
+있게 됩니다.
+
+```console
+# 대화형 세션의 선택을 기록
+$ fastkit init --interactive --save-config fastkit.config.json
+
+# 나중에 프롬프트 없이 그대로 재생성
+$ fastkit init --config fastkit.config.json
+```
+
+`--save-config` 를 주지 않아도, 끝까지 진행한 대화형 실행은 선택을 저장할지
+와 저장 위치를 물어봅니다. 이 질문은 사람이 터미널 앞에 있을 때만 나오며,
+파이프로 입력을 받거나 CI에서 도는 실행은 조용히 넘어가고 대신 플래그로
+저장을 요청합니다.
+
+**지원 형식** 은 확장자로 결정됩니다.
+
+| 확장자 | 사용 가능 여부 |
+|---|---|
+| `.json` | 항상 (표준 라이브러리) |
+| `.toml` | 항상 (표준 라이브러리) |
+| `.yaml` / `.yml` | PyYAML 이 설치돼 있을 때만 — fastkit 은 이를 런타임 의존성으로 추가하지 않습니다 |
+
+불러올 파일은 최상위가 매핑이어야 하고 최소한 `project_name`, `author`,
+`author_email` 을 담아야 합니다. 이후 대화형 프롬프트와 똑같은 규칙(프로젝트
+이름 형식, 이메일 형식, `all_dependencies` 는 리스트)으로 검증하며, 문제가
+있으면 아무것도 쓰기 전에 모두 알려 줍니다. `all_dependencies` 없이 기능
+선택만 적힌 파일은 대화형 빌더를 통해 확장되므로, 직접 쓴 설정 파일과 마법사
+세션이 동일한 패키지 집합으로 수렴합니다.
+
+최소 예시:
+
+```json
+{
+  "project_name": "orders-api",
+  "author": "Developer Kim",
+  "author_email": "developer@example.com",
+  "description": "Domain-oriented orders service",
+  "architecture_preset": "domain-starter",
+  "package_manager": "uv"
+}
+```
+
+#### 설정 파일 스키마
+
+직접 쓴 파일이든 `--save-config` 로 저장한 파일이든, 모든 설정 파일은
+생성기에 전달되기 전에 동일한 정규화 과정을 거칩니다
+(`backend/project_builder/config_schema.py` 의 `normalize_project_config`).
+알 수 없는 키, 알려진 축의 알 수 없는 선택지, 잘못된 타입의 값은 어떤 것이
+문제인지와 실제로 허용되는 값 목록을 함께 알려 주며 거부됩니다.
+
+| 키 | 형태 | 비고 |
+|---|---|---|
+| `project_name`, `author`, `author_email` | 문자열 | 필수 |
+| `description` | 문자열 | 필수 |
+| `architecture_preset` (별칭 `preset`) | `"minimal"` \| `"single-module"` \| `"classic-layered"` \| `"domain-starter"` | 둘 다 있으면 값이 일치해야 함 |
+| `package_manager` | `"pip"` \| `"uv"` \| `"pdm"` \| `"poetry"` | |
+| `database` | 문자열, 또는 `{"type": <선택지>}` | `PostgreSQL`, `MySQL`, `MongoDB`, `Redis`, `SQLite`, `None` |
+| `authentication`, `async_tasks`, `testing`, `caching`, `monitoring`, `migrations`, `logging` | 문자열, 또는 `{"type": <선택지>}` | 단일 선택 축 — 각 축의 선택지는 위의 [기능 카탈로그](#-interactive) 참고 |
+| `utilities`, `tooling` | 문자열 리스트 | 다중 선택 축 — 선택지는 동일한 카탈로그 참고 |
+| `deployment` | 문자열 리스트 | `Docker`, `docker-compose` 의 부분집합; `docker-compose` 를 고르면 `Docker` 도 자동으로 함께 포함됨 |
+| `custom_packages` | 문자열 리스트 | 그대로 설치할 추가 패키지 |
+
+모든 축은 값을 그대로(`"authentication": "JWT"`) 받거나, `database` 와
+프로젝트 자체의 `[tool.fastapi-fastkit]` 메타데이터가 쓰는
+`{"type": ...}` 매핑 형태(`"authentication": {"type": "JWT"}`)로도 받을 수
+있습니다 — 둘 다 동일한 정규 형태로 변환되며, `--save-config` 는 항상 정규
+형태인 순수 문자열 형태로 저장합니다.
+
+대부분의 축을 활용한 설정 예시:
+
+```json
+{
+  "project_name": "orders-api",
+  "author": "Developer Kim",
+  "author_email": "developer@example.com",
+  "description": "Domain-oriented orders service",
+  "architecture_preset": "domain-starter",
+  "package_manager": "uv",
+  "database": "PostgreSQL",
+  "authentication": "JWT",
+  "async_tasks": "Celery",
+  "caching": "Redis",
+  "migrations": "Alembic",
+  "tooling": ["ruff", "makefile"],
+  "deployment": ["Docker"]
+}
+```
+
+같은 설정을 TOML 로 쓰면:
+
+```toml
+project_name = "orders-api"
+author = "Developer Kim"
+author_email = "developer@example.com"
+description = "Domain-oriented orders service"
+architecture_preset = "domain-starter"
+package_manager = "uv"
+database = "PostgreSQL"
+authentication = "JWT"
+async_tasks = "Celery"
+caching = "Redis"
+migrations = "Alembic"
+tooling = ["ruff", "makefile"]
+deployment = ["Docker"]
+```
+
+#### 미리 보기와 단계 건너뛰기
+
+`--dry-run` 은 만들어질 트리와 설치될 패키지를(그리고 어떤 패키지 매니저가
+설치할지를) 출력한 뒤, 디스크는 건드리지 않고 종료합니다.
+
+```console
+$ fastkit init --config fastkit.config.json --dry-run
+```
+
+`--no-install` 은 가상환경까지만 만들고 멈추며, `--no-venv` 는 가상환경도
+건너뜁니다(따라서 설치도 하지 않습니다). 컨테이너, CI, 그리고 환경을 fastkit
+바깥에서 관리하는 모든 상황에서 유용합니다.
+
+#### 그 자리 배포(in-place)와 덮어쓰기 확인 (`--yes` / `-y`)
+
+프로젝트를 새 프로젝트 폴더가 아니라 지금 작업 중인 워크스페이스에 그
+자리에서(in-place) 배포하면, fastkit 은 이미 존재하는 파일을 덮어쓰기 전에
+"Overwrite these files?" 확인을 물어봅니다. `--yes`(또는 짧은 형태
+`-y`)를 주면 이 확인을 건너뛰고 바로 덮어씁니다. 이는 별도의 "Do you want
+to proceed with project creation?" 확인 프롬프트에는 영향을 주지 않으며, 그
+질문은 그대로 나옵니다. 표준 입력이 TTY 가 아닌 비대화형 환경(CI 나 파이프
+실행 등)에서는 `--yes` 없이도 이 덮어쓰기 확인이 자동으로 생략됩니다.
 
 #### 대화형 프롬프트
 
@@ -95,6 +240,37 @@ $ fastkit init [OPTIONS]
 - 모든 STANDARD 스택 패키지
 - `redis` - 인메모리 데이터 저장소
 - `celery` - 분산 작업 큐
+
+#### 대화형 빌더 기능 카탈로그 (`--interactive`)
+
+`fastkit init --interactive` 는 위의 minimal/standard/full 스택과는 별개로,
+축(axis) 기반 카탈로그를 순서대로 물어봅니다 (근거: `core/settings.py` 의
+`FastkitConfig.PACKAGE_CATALOG`, 그리고 각 선택지가 무엇을 생성하는지는
+`DynamicConfigGenerator.build_artifacts()`). 모든 축은 기본값이 `None`(건너뛰기)
+이며, `utilities` 와 `tooling` 은 다중 선택입니다.
+
+이제 모든 선택지가 패키지 설치에 그치지 않고 실제 코드를 생성합니다.
+`minimal` / `single-module` (main.py 재생성) 과 `classic-layered` /
+`domain-starter` (main.py 보존 + 수동 연결 경고) 의 차이는
+[아키텍처 프리셋 / 기능 매트릭스](../reference/preset-feature-matrix.md) 를
+참고하세요.
+
+| 축 | 선택지 | 설치되는 패키지 | 생성되는 파일 |
+|---|---|---|---|
+| `database` | PostgreSQL, MySQL, MongoDB, Redis, SQLite, None | PostgreSQL: `asyncpg`, `sqlalchemy` · MySQL: `aiomysql`, `sqlalchemy` · MongoDB: `motor` · Redis: `redis[hiredis]` · SQLite: `sqlalchemy`, `aiosqlite` | 프리셋 경로에 데이터베이스 설정 모듈 (예: `src/config/database.py`) |
+| `authentication` | JWT, OAuth2, FastAPI-Users, Session-based, None | JWT: `python-jose[cryptography]`, `passlib[bcrypt]` · OAuth2: `authlib`, `itsdangerous`, `httpx` · FastAPI-Users: `fastapi-users[sqlalchemy]`, `python-jose[cryptography]`, `passlib[bcrypt]` · Session-based: `itsdangerous` | 프리셋 경로에 인증 설정 모듈 생성; OAuth2 · Session-based 는 `main.py` 미들웨어 설정도 추가 |
+| `async_tasks` | Celery, Dramatiq, None | Celery: `celery[redis]`, `redis[hiredis]` · Dramatiq: `dramatiq[redis]`, `redis[hiredis]` | `<pkg>/worker.py`(백그라운드 워커) + `<pkg>/features/tasks.py`(작업 라우트) |
+| `testing` | Basic, Coverage, Advanced, None | Basic: `pytest`, `pytest-asyncio`, `httpx` · Coverage: + `pytest-cov` · Advanced: + `faker`, `factory-boy` | `pytest.ini`; Advanced 는 `tests/factories.py`, `tests/test_factories.py` 도 추가 |
+| `caching` | Redis, None | Redis: `redis[hiredis]`, `fastapi-cache2`, `jinja2` | `<pkg>/features/cache.py`(캐시된 엔드포인트) |
+| `monitoring` | Loguru, OpenTelemetry, Prometheus, None | Loguru: `loguru` · OpenTelemetry: `opentelemetry-api`, `opentelemetry-sdk`, `opentelemetry-instrumentation-fastapi`, `opentelemetry-exporter-otlp-proto-http` · Prometheus: `prometheus-client`, `prometheus-fastapi-instrumentator` | 별도 파일 없음 — `main.py` 에 직접 연결(import / lifespan / setup) |
+| `utilities` (다중 선택) | CORS, Rate-Limiting, Pagination, WebSocket, None | CORS: 없음(FastAPI 내장) · Rate-Limiting: `slowapi` · Pagination: `fastapi-pagination` · WebSocket: `websockets` | CORS · Rate-Limiting 은 `main.py` 에 직접 연결; Pagination 은 `<pkg>/features/pagination.py`, WebSocket 은 `<pkg>/features/websocket.py` 추가 |
+| `migrations` | Alembic, None | Alembic: `alembic` | `alembic.ini`, `alembic/env.py`, `alembic/script.py.mako`, 베이스라인 `alembic/versions/<id>_initial.py`, `scripts/migrate.sh` — 데이터베이스 축이 SQL 데이터베이스일 때만 |
+| `tooling` (다중 선택) | ruff, pre-commit, github-actions, devcontainer, makefile, None | ruff: `ruff` · pre-commit: `pre-commit` · github-actions / devcontainer / makefile: 없음 | ruff 는 `pyproject.toml` 에 `[tool.ruff]` 블록 병합(`pip` 프로젝트는 `ruff.toml` 생성); pre-commit 은 `.pre-commit-config.yaml`; github-actions 는 `.github/workflows/test.yml`; devcontainer 는 `.devcontainer/devcontainer.json`; makefile 은 `Makefile` |
+| `logging` | structured, None | 없음(표준 라이브러리 `logging` + `json` 만 사용) | `<pkg>/logging_config.py`(구조화 JSON 로깅 + request-id 미들웨어), `main.py` 에 연결 |
+
+선택과 무관하게 모든 생성 프로젝트는 `main.py` 에 `/health`, `/ready`
+엔드포인트를 포함하며, `--dry-run` 은 실제로 작성되기 전에 이 파일 목록을
+그대로 미리 보여줍니다.
 
 #### 예시
 
@@ -227,6 +403,34 @@ $ fastkit addroute users my-api
 | `PUT` | `/api/v1/users/{user_id}` | 사용자 갱신 |
 | `DELETE` | `/api/v1/users/{user_id}` | 사용자 삭제 |
 
+#### 코드가 삽입되는 위치
+
+`addroute` 가 프로젝트에서 알아야 하는 것은 두 가지입니다. 새 import 를 어디에
+넣을지, 그리고 라우터를 어디에 등록할지. 템플릿과 생성된 진입점은 두 지점을
+앵커 주석으로 표시해 둡니다.
+
+```python
+# src/app/api/router.py
+from src.app.api import health
+
+# fastkit:imports
+
+api_router = APIRouter()
+api_router.include_router(health.router)
+
+# fastkit:routes
+```
+
+이 파일을 직접 수정할 때도 주석은 그대로 두세요 — `addroute` 는
+`# fastkit:imports` 와 `# fastkit:routes` 바로 위에 코드를 넣습니다. 주석을
+잃어버린 프로젝트(또는 앵커가 생기기 전에 만들어진 프로젝트)도 동작합니다.
+fastkit 이 AST 기반 삽입으로 되돌아가 import 블록과 라우터 등록부를 스스로
+찾습니다. 앵커는 그 결과를 예측 가능하게 만들어 줄 뿐입니다.
+
+`addroute` 는 진입점을 찾을 때도 프로젝트의 `[tool.fastapi-fastkit]` 블록을
+읽으므로, 디스크 스캔만으로는 잘못 고를 수 있는 레이아웃에서도 정확히
+동작합니다.
+
 ### `startdemo`
 
 사전 구축된 템플릿으로부터 FastAPI 프로젝트를 생성합니다.
@@ -241,8 +445,24 @@ $ fastkit startdemo [OPTIONS]
 
 | 옵션 | 설명 | 기본값 |
 |--------|-------------|---------|
+| `--project-name` | 프로젝트 이름 (생략하면 물어봄) | - |
+| `--author` | 작성자 이름 (생략하면 물어봄) | - |
+| `--author-email` | 작성자 이메일 (생략하면 물어봄) | - |
+| `--description` | 프로젝트 설명 (생략하면 물어봄) | - |
 | `--package-manager` | 사용할 패키지 매니저 (pip, uv, pdm, poetry) | uv |
+| `--dry-run` | 무엇이 만들어질지만 보여주고 아무것도 쓰지 않음 | 꺼짐 |
+| `--no-venv` | 가상환경 생성을 건너뜀 (`--no-install` 포함) | 꺼짐 |
+| `--no-install` | 의존성 설치를 건너뜀 | 꺼짐 |
+| `--yes` / `-y` | 프로젝트를 그 자리에(in-place) 배포할 때 기존 파일을 덮어쓰기 전에 확인을 묻지 않음 | 꺼짐 |
 | `--help` | 명령 도움말 표시 | - |
+
+`init` 과 마찬가지로 `startdemo` 도 대상 프로젝트 디렉터리가 이미 존재하면
+실행을 거부합니다(`Error: Project '{name}' already exists.`). 예외는
+`--dry-run` 입니다. 디스크에 아무것도 쓰지 않으므로, 이미 디렉터리가 있는
+이름을 대상으로 지정해도 여전히 허용됩니다. 워크스페이스에 그 자리에서
+배포할 때 `--yes` 가 하는 일은 위의
+[그 자리 배포(in-place)와 덮어쓰기 확인](#in-place-yes-y)
+절을 참고하세요.
 
 #### 대화형 프롬프트
 
@@ -259,11 +479,21 @@ $ fastkit startdemo [OPTIONS]
 | 템플릿 | 설명 | 기능 |
 |----------|-------------|----------|
 | `fastapi-default` | 간단한 FastAPI 프로젝트 | 기본 CRUD, Mock 데이터 |
-| `fastapi-async-crud` | 비동기 item 관리 API | Async/await, 성능 |
+| `fastapi-domain-starter` | 도메인 지향 스타터 | 업무 개념별 폴더 분리, `/health` |
+| `fastapi-auth-jwt` | JWT 인증 | 액세스/리프레시 회전, argon2id, 역할·스코프, Alembic |
+| `fastapi-sqlmodel` | 비동기 SQLModel 영속성 | SQLModel + 비동기 SQLAlchemy, Alembic, 제네릭 CRUD, 페이지네이션 |
+| `fastapi-llm-agent` | 스트리밍 Claude 에이전트 | SSE 스트리밍, 도구 호출 루프, 대화 기록 |
 | `fastapi-custom-response` | 맞춤형 응답 시스템 | 맞춤형 응답, 페이지네이션 |
-| `fastapi-dockerized` | Docker 기반 FastAPI API | Docker, 프로덕션 준비 |
 | `fastapi-psql-orm` | PostgreSQL용 FastAPI API | PostgreSQL, SQLAlchemy, Alembic |
+| `fastapi-mcp` | Model Context Protocol 서버 | MCP 통합 |
+| `fastapi-single-module` | 단일 파일 실습용 | 모듈 하나, 패키지 경계 없음 |
 | `fastapi-empty` | 최소 구성 FastAPI 프로젝트 | 최소 설정만 포함 |
+| `fastapi-async-crud` | *(deprecated)* 비동기 item 관리 API | `fastapi-sqlmodel` 로 대체 |
+| `fastapi-dockerized` | *(deprecated)* Docker 기반 FastAPI API | Docker 구성은 이제 모든 최신 템플릿에 포함 |
+
+deprecated 템플릿도 여전히 동작하는 프로젝트를 만들어 냅니다. 다만 새로
+시작하는 프로젝트에는 더 이상 권장하지 않습니다.
+[어떤 스타터를 고를까?](choosing-a-starter.md) 를 참고하세요.
 
 #### 예시
 
@@ -331,8 +561,13 @@ INFO:     Uvicorn running on http://127.0.0.1:8000
 #### 요구 사항
 
 - FastAPI 프로젝트 디렉터리 안에서 실행해야 합니다
-- 프로젝트에 FastAPI 앱이 있는 `src/main.py` 가 있어야 합니다
+- 프로젝트가 FastAPI 앱을 제공해야 합니다 — 기록된
+  `[tool.fastapi-fastkit].app_module` 이 있으면 그 값을 쓰고, 없으면 트리를
+  훑어 `main.py` 를 찾습니다
 - 가상 환경이 활성화되어 있어야 합니다
+
+기록된 진입점도 없고 스캔으로도 찾지 못하면 `runserver` 는 `main.py` 를 찾을
+수 없다고 알리고 멈춥니다.
 
 ### `list-templates`
 
@@ -372,6 +607,43 @@ $ fastkit list-templates
 
 </div>
 
+## 프로젝트 메타데이터 (`[tool.fastapi-fastkit]`)
+
+fastkit 이 만든 프로젝트는 자신이 어떻게 만들어졌는지를 스스로의
+`pyproject.toml` 에 기록합니다.
+
+```toml
+[tool.fastapi-fastkit]
+managed = true
+version = "1.4.0"
+template = "fastapi-domain-starter"
+preset = "domain-starter"
+package_manager = "uv"
+app_module = "src.app.main:app"
+features = ["database:PostgreSQL", "authentication:JWT"]
+```
+
+| 키 | 의미 |
+|---|---|
+| `managed` | 항상 `true`. fastkit 이 관리하는 프로젝트임을 표시 |
+| `version` | 프로젝트를 생성한 fastkit 버전 |
+| `template` | `startdemo` 템플릿, 또는 프리셋의 베이스 템플릿 |
+| `preset` | `init --interactive` 아키텍처 프리셋 (그 외에는 생략) |
+| `package_manager` | 환경을 구성할 때 사용한 패키지 매니저 |
+| `app_module` | uvicorn 진입점 (`module:attr`) |
+| `features` | 대화형 선택을 `"<범주>:<선택>"` 형태로 나열한 목록 |
+
+이 블록은 프로젝트 진입점에 대한 단일 진실 원천입니다. `fastkit runserver`
+는 디스크를 훑기 전에 여기서 `app_module` 을 읽고, `fastkit addroute` 는 이
+값으로 애플리케이션 위치를 찾으며, 생성된 Dockerfile 도 같은 값을 `CMD` 에
+씁니다.
+
+블록은 생성 과정의 가장 마지막에 기록됩니다. 패키지 매니저가 의존성을
+해결하면서 `pyproject.toml` 을 다시 쓰기 때문에, 그 뒤에 찍어야 하기
+때문입니다. 이후 다시 생성해도 블록은 새로 추가되지 않고 교체됩니다. 직접
+정리한 레이아웃을 fastkit 에 알려 주는 정식 방법은 `app_module` 값을 손으로
+고치는 것입니다.
+
 ## 환경 변수
 
 FastAPI-fastkit은 다음 환경 변수를 인식합니다:
@@ -381,6 +653,19 @@ FastAPI-fastkit은 다음 환경 변수를 인식합니다:
 | `FASTKIT_CONFIG_DIR` | 설정 디렉터리 | `~/.fastkit` |
 | `FASTKIT_TEMPLATES_DIR` | 커스텀 템플릿 디렉터리 | 내장 템플릿 |
 | `FASTKIT_LOG_LEVEL` | 로깅 레벨 | `INFO` |
+| `FASTKIT_SUBPROCESS_TIMEOUT` | 패키지 매니저 서브프로세스 타임아웃을 초 단위로 일괄 지정 | 작업별 (30 / 120 / 900) |
+
+패키지 매니저 호출은 각각 시간 제한을 두고 실행되므로, 멈춰 버린 자식
+프로세스가 CLI 를 영원히 붙잡는 일은 없습니다. 설치 가능 여부 확인 30초,
+가상환경 생성 120초, 의존성 설치 900초입니다.
+`FASTKIT_SUBPROCESS_TIMEOUT` 은 이 셋을 하나의 값으로 덮어씁니다. 느린
+네트워크에서 늘리거나 CI 에서 빨리 실패시키고 싶을 때 쓰면 됩니다. 양의
+정수가 아닌 값은 무시합니다.
+
+```console
+$ export FASTKIT_SUBPROCESS_TIMEOUT=1800
+$ fastkit startdemo fastapi-sqlmodel
+```
 
 ### 예시
 

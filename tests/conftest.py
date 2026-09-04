@@ -4,7 +4,6 @@
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
 import os
-import shutil
 from io import StringIO
 from typing import Generator
 
@@ -15,18 +14,16 @@ from fastapi_fastkit.core.settings import FastkitConfig
 
 
 @pytest.fixture(autouse=True, scope="session")
-def temp_dir() -> Generator[str, None, None]:
+def temp_dir(tmp_path_factory: pytest.TempPathFactory) -> Generator[str, None, None]:
     """
-    Fixture that creates a temporary directory for test cases and yields its path.
-    After tests are done, the directory is removed.
+    Fixture that yields a session-scoped temporary workspace path.
+
+    ``tmp_path_factory`` is used instead of a fixed ``tests/temp_test_workspace``
+    directory so parallel/concurrent test runs never share (or delete) each
+    other's workspace, and so pytest — not a ``shutil.rmtree`` in teardown —
+    owns the cleanup of the last few runs' artifacts.
     """
-    current_workspace = os.path.dirname(
-        os.path.abspath(__file__)
-    )  # use test/ directory as workspace
-    temp_dir = os.path.join(current_workspace, "temp_test_workspace")
-    os.makedirs(temp_dir, exist_ok=True)
-    yield temp_dir
-    shutil.rmtree(temp_dir)
+    yield str(tmp_path_factory.mktemp("fastkit_workspace"))
 
 
 @pytest.fixture(autouse=True, scope="session")

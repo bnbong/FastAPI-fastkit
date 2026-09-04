@@ -1,0 +1,158 @@
+# --------------------------------------------------------------------------
+# pytest fixtures for <project_name>.
+#
+# The Anthropic client is replaced by a scripted fake that mimics the parts
+# of the streaming API the agent uses (``messages.stream`` as an async
+# context manager exposing ``text_stream`` and ``get_final_message``). Every
+# test therefore runs offline and needs no API key.
+# --------------------------------------------------------------------------
+import json
+from collections.abc import AsyncGenerator, AsyncIterator
+from typing import Any
+
+import pytest
+import pytest_asyncio
+from anthropic.types import Message, TextBlock, ToolUseBlock, Usage
+from httpx import ASGITransport, AsyncClient
+from src.app.api.deps import get_agent, get_store
+from src.app.llm.agent import ChatAgent
+from src.app.main import app
+from src.app.memory.in_memory import InMemoryConversationStore
+
+
+def text_turn(text: str, *, output_tokens: int = 7) -> tuple[list[str], Message]:
+    """A scripted turn where Claude just answers."""
+    chunks = [text[i : i + 4] for i in range(0, len(text), 4)] or [""]
+    message = Message(
+        id="msg_text",
+        content=[TextBlock(type="text", text=text)],
+        model="claude-sonnet-5",
+        role="assistant",
+        stop_reason="end_turn",
+        type="message",
+        usage=Usage(input_tokens=11, output_tokens=output_tokens),
+    )
+    return chunks, message
+
+
+def tool_turn(
+    tool_name: str, tool_input: dict[str, Any], *, tool_use_id: str = "toolu_1"
+) -> tuple[list[str], Message]:
+    """A scripted turn where Claude asks for a tool."""
+    message = Message(
+        id="msg_tool",
+        content=[
+            ToolUseBlock(
+                type="tool_use", id=tool_use_id, name=tool_name, input=tool_input
+            )
+        ],
+        model="claude-sonnet-5",
+        role="assistant",
+        stop_reason="tool_use",
+        type="message",
+        usage=Usage(input_tokens=13, output_tokens=5),
+    )
+    return [], message
+
+
+class _TextStream:
+    def __init__(self, chunks: list[str]) -> None:
+        self._chunks = chunks
+
+    def __aiter__(self) -> AsyncIterator[str]:
+        async def gen() -> AsyncIterator[str]:
+            for chunk in self._chunks:
+                yield chunk
+
+        return gen()
+
+
+class _StreamContext:
+    def __init__(self, chunks: list[str], final: Message) -> None:
+        self.text_stream = _TextStream(chunks)
+        self._final = final
+
+    async def get_final_message(self) -> Message:
+        return self._final
+
+
+class _StreamManager:
+    def __init__(self, chunks: list[str], final: Message) -> None:
+        self._context = _StreamContext(chunks, final)
+
+    async def __aenter__(self) -> _StreamContext:
+        return self._context
+
+    async def __aexit__(self, *exc_info: object) -> bool:
+        return False
+
+
+class _FakeMessages:
+    def __init__(self, owner: "FakeAnthropic") -> None:
+        self._owner = owner
+
+    def stream(self, **kwargs: Any) -> _StreamManager:
+        self._owner.calls.append(kwargs)
+        if self._owner.error is not None:
+            raise self._owner.error
+        if not self._owner.turns:
+            raise AssertionError("the fake client ran out of scripted turns")
+        chunks, final = self._owner.turns.pop(0)
+        return _StreamManager(chunks, final)
+
+
+class FakeAnthropic:
+    """Stands in for ``AsyncAnthropic``, replaying scripted turns in order."""
+
+    def __init__(
+        self,
+        turns: list[tuple[list[str], Message]] | None = None,
+        *,
+        error: Exception | None = None,
+    ) -> None:
+        self.turns = list(turns or [])
+        self.error = error
+        self.calls: list[dict[str, Any]] = []
+        self.messages = _FakeMessages(self)
+
+
+@pytest.fixture
+def store() -> InMemoryConversationStore:
+    return InMemoryConversationStore()
+
+
+@pytest.fixture
+def make_client(store: InMemoryConversationStore):  # type: ignore[no-untyped-def]
+    """Return a factory that wires a scripted fake into the running app."""
+
+    def _factory(fake: FakeAnthropic) -> AsyncClient:
+        agent = ChatAgent(fake, store)  # type: ignore[arg-type]
+        app.dependency_overrides[get_agent] = lambda: agent
+        app.dependency_overrides[get_store] = lambda: store
+        return AsyncClient(transport=ASGITransport(app=app), base_url="http://test")
+
+    yield _factory
+    app.dependency_overrides.clear()
+
+
+@pytest_asyncio.fixture
+async def client() -> AsyncGenerator[AsyncClient, None]:
+    """A plain client for endpoints that do not touch the LLM."""
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as c:
+        yield c
+    app.dependency_overrides.clear()
+
+
+def parse_sse(body: str) -> list[dict[str, Any]]:
+    """Turn a raw SSE body into the list of decoded event payloads."""
+    events: list[dict[str, Any]] = []
+    for block in body.split("\r\n\r\n" if "\r\n\r\n" in body else "\n\n"):
+        data_lines = [
+            line[len("data:") :].strip()
+            for line in block.splitlines()
+            if line.startswith("data:")
+        ]
+        if data_lines:
+            events.append(json.loads("".join(data_lines)))
+    return events

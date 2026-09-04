@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -e
+
+# Send one message to a running dev server and print the SSE stream.
+MESSAGE="${1:-What is 12 * 34?}"
+
+curl -N -X POST http://127.0.0.1:8000/api/v1/chat \
+  -H "Content-Type: application/json" \
+  -d "{\"message\": \"${MESSAGE}\"}"

@@ -16,6 +16,14 @@ from typing import Any, Dict, List, Optional, cast
 
 import click
 
+from fastapi_fastkit.backend.project_builder.config_generator import SQL_DATABASES
+from fastapi_fastkit.core.settings import (
+    NONE_CHOICE,
+    FeatureAxis,
+    LoggingChoice,
+    MigrationsChoice,
+    ToolingChoice,
+)
 from fastapi_fastkit.utils.main import console, print_error
 
 from .selectors import render_selection_table
@@ -112,7 +120,7 @@ def prompt_architecture_preset(settings: Any) -> str:
         default=default_idx,
     )
 
-    return cast(str, preset_ids[choice - 1])
+    return preset_ids[choice - 1]
 
 
 def prompt_template_selection(settings: Any) -> Optional[str]:
@@ -163,9 +171,7 @@ def prompt_template_selection(settings: Any) -> Optional[str]:
 
     selected_key = list(options.keys())[choice - 1]
 
-    return cast(
-        Optional[str], selected_key if selected_key != "Empty Project" else None
-    )
+    return selected_key if selected_key != "Empty Project" else None
 
 
 def prompt_database_selection(settings: Any) -> Dict[str, Any]:
@@ -436,6 +442,137 @@ def prompt_utilities_selection(settings: Any) -> List[str]:
         return []
 
 
+def prompt_logging_selection(settings: Any) -> str:
+    """
+    Prompt for the application logging format.
+
+    Args:
+        settings: FastkitConfig instance
+
+    Returns:
+        Logging style name
+    """
+    console.print("\n[bold cyan]🪵 Logging Format[/bold cyan]")
+    console.print("[dim]Choose how the application emits its logs[/dim]\n")
+
+    logging_catalog = settings.PACKAGE_CATALOG[FeatureAxis.LOGGING]
+    descriptions = {
+        LoggingChoice.STRUCTURED: (
+            "JSON logs + X-Request-ID correlation middleware (stdlib only)"
+        ),
+        LoggingChoice.NONE: "Uvicorn's default plain-text logging",
+    }
+    options = {
+        name: descriptions.get(name, f"Packages: {', '.join(pkgs) or 'None'}")
+        for name, pkgs in logging_catalog.items()
+    }
+
+    render_selection_table("Logging Options", options)
+
+    choice = click.prompt(
+        "\nSelect logging format",
+        type=click.IntRange(1, len(options)),
+        default=len(options),  # Default to "None"
+    )
+
+    return cast(str, list(options.keys())[choice - 1])
+
+
+def prompt_migrations_selection(settings: Any, database_type: str = "None") -> str:
+    """
+    Prompt for the schema migration tool.
+
+    Alembic only has something to migrate on a relational database, so it is
+    pre-selected as the default when the user picked one and the prompt
+    defaults to ``None`` otherwise.
+
+    Args:
+        settings: FastkitConfig instance
+        database_type: The database chosen earlier in the flow
+
+    Returns:
+        Migration tool name
+    """
+    console.print("\n[bold cyan]🧬 Database Migrations[/bold cyan]")
+    console.print("[dim]Version-control your database schema[/dim]\n")
+
+    migrations_catalog = settings.PACKAGE_CATALOG[FeatureAxis.MIGRATIONS]
+    is_sql = database_type in SQL_DATABASES
+
+    descriptions = {
+        MigrationsChoice.ALEMBIC: (
+            "alembic.ini + async alembic/env.py + scripts/migrate.sh"
+            + (
+                " [bold green](recommended for SQL databases)[/bold green]"
+                if is_sql
+                else " [yellow](needs a relational database)[/yellow]"
+            )
+        ),
+        MigrationsChoice.NONE: "No migration tooling",
+    }
+    options = {name: descriptions.get(name, "") for name in migrations_catalog}
+
+    render_selection_table("Migration Options", options)
+
+    option_names = list(options.keys())
+    default_idx = (
+        option_names.index(MigrationsChoice.ALEMBIC) + 1 if is_sql else len(options)
+    )
+
+    choice = click.prompt(
+        "\nSelect migration tool",
+        type=click.IntRange(1, len(options)),
+        default=default_idx,
+    )
+
+    return cast(str, option_names[choice - 1])
+
+
+def prompt_tooling_selection(settings: Any) -> List[str]:
+    """
+    Prompt for developer tooling (multi-select).
+
+    Args:
+        settings: FastkitConfig instance
+
+    Returns:
+        List of selected tooling names
+    """
+    console.print("\n[bold cyan]🧰 Developer Tooling[/bold cyan]")
+    console.print(
+        "[dim]Select tooling to generate (comma-separated numbers, e.g., 1,3)[/dim]\n"
+    )
+
+    tooling_catalog = settings.PACKAGE_CATALOG[FeatureAxis.TOOLING]
+    descriptions = {
+        ToolingChoice.RUFF: "ruff + ruff-format config in pyproject.toml (replaces black/isort)",
+        ToolingChoice.PRE_COMMIT: ".pre-commit-config.yaml",
+        ToolingChoice.GITHUB_ACTIONS: ".github/workflows/test.yml (Python 3.12)",
+        ToolingChoice.DEVCONTAINER: ".devcontainer/devcontainer.json",
+        ToolingChoice.MAKEFILE: "Makefile with install/test/lint/format/run",
+    }
+
+    options = [name for name in tooling_catalog if name != NONE_CHOICE]
+    for i, option in enumerate(options, 1):
+        console.print(
+            f"  [cyan]{i}[/cyan]. {option} [dim]{descriptions.get(option, '')}[/dim]"
+        )
+
+    selected_input = console.input(
+        "\n[cyan]Your choice (or press Enter to skip):[/cyan] "
+    ).strip()
+
+    if not selected_input:
+        return []
+
+    try:
+        indices = [int(x.strip()) for x in selected_input.split(",") if x.strip()]
+        return [options[idx - 1] for idx in indices if 1 <= idx <= len(options)]
+    except (ValueError, IndexError):
+        console.print("[yellow]Invalid selection. Skipping tooling.[/yellow]")
+        return []
+
+
 def prompt_deployment_options() -> List[str]:
     """
     Prompt for deployment configuration.
@@ -561,11 +698,21 @@ def prompt_additional_features(settings: Any) -> Dict[str, Any]:
     # Monitoring
     features["monitoring"] = prompt_monitoring_selection(settings)
 
+    # Logging format
+    features["logging"] = prompt_logging_selection(settings)
+
     # Testing
     features["testing"] = prompt_testing_selection(settings)
 
+    # Migrations — the database choice decides the recommended default.
+    database_type = features["database"].get("type", NONE_CHOICE)
+    features["migrations"] = prompt_migrations_selection(settings, database_type)
+
     # Utilities
     features["utilities"] = prompt_utilities_selection(settings)
+
+    # Developer tooling
+    features["tooling"] = prompt_tooling_selection(settings)
 
     # Deployment
     features["deployment"] = prompt_deployment_options()

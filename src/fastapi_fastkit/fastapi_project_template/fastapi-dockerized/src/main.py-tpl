@@ -1,13 +1,14 @@
 # --------------------------------------------------------------------------
 # Main server application module
 # --------------------------------------------------------------------------
-from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from src.api.api import api_router
 from src.core.config import settings
+
+# fastkit:imports
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -23,4 +24,11 @@ if settings.all_cors_origins:
     )
 
 
+# fastkit:routes
 app.include_router(api_router)
+
+
+@app.get("/health")
+async def health_check() -> dict[str, str]:
+    """Health check endpoint."""
+    return {"status": "healthy"}

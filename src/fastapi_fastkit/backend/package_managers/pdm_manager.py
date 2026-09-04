@@ -3,19 +3,14 @@
 #
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
-import os
 import subprocess
 import sys
 from typing import List
 
 from fastapi_fastkit.core.exceptions import BackendExceptions
+from fastapi_fastkit.core.settings import settings
 from fastapi_fastkit.utils.logging import debug_log, get_logger
-from fastapi_fastkit.utils.main import (
-    console,
-    handle_exception,
-    print_error,
-    print_success,
-)
+from fastapi_fastkit.utils.main import print_success
 
 from .base import BasePackageManager
 
@@ -27,16 +22,7 @@ class PdmManager(BasePackageManager):
 
     def is_available(self) -> bool:
         """Check if PDM is available on the system."""
-        try:
-            subprocess.run(
-                ["pdm", "--version"],
-                check=True,
-                capture_output=True,
-                text=True,
-            )
-            return True
-        except (subprocess.CalledProcessError, FileNotFoundError):
-            return False
+        return self._check_command_available(["pdm", "--version"])
 
     def get_dependency_file_name(self) -> str:
         """Get the dependency file name for PDM."""
@@ -51,29 +37,16 @@ class PdmManager(BasePackageManager):
         """
         venv_path = str(self.project_dir / ".venv")
 
-        try:
-            with console.status("[bold green]Creating virtual environment with PDM..."):
-                # PDM can create virtual environment in specific location
-                subprocess.run(
-                    ["pdm", "venv", "create", "--name", ".venv", sys.executable],
-                    cwd=str(self.project_dir),
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                )
+        self._run_checked(
+            ["pdm", "venv", "create", "--name", ".venv", sys.executable],
+            status_msg="Creating virtual environment with PDM...",
+            error_prefix="Failed to create venv with PDM",
+            timeout=settings.get_subprocess_timeout("venv"),
+        )
 
-            debug_log(f"Virtual environment created at {venv_path}", "info")
-            print_success("Virtual environment created successfully with PDM")
-            return venv_path
-
-        except subprocess.CalledProcessError as e:
-            debug_log(f"Error creating virtual environment: {e.stderr}", "error")
-            handle_exception(e, f"Error creating virtual environment: {str(e)}")
-            raise BackendExceptions("Failed to create venv with PDM")
-        except OSError as e:
-            debug_log(f"System error creating virtual environment: {e}", "error")
-            handle_exception(e, f"Error creating virtual environment: {str(e)}")
-            raise BackendExceptions(f"Failed to create venv with PDM: {str(e)}")
+        debug_log(f"Virtual environment created at {venv_path}", "info")
+        print_success("Virtual environment created successfully with PDM")
+        return venv_path
 
     def install_dependencies(self, venv_path: str) -> None:
         """
@@ -82,47 +55,19 @@ class PdmManager(BasePackageManager):
         :param venv_path: Path to the virtual environment
         :raises: BackendExceptions if dependency installation fails
         """
-        try:
-            if not os.path.exists(venv_path):
-                debug_log(
-                    "Virtual environment does not exist. Creating it first.", "warning"
-                )
-                print_error("Virtual environment does not exist. Creating it first.")
-                venv_path = self.create_virtual_environment()
-                if not venv_path:
-                    raise BackendExceptions("Failed to create venv")
+        venv_path = self._ensure_venv(venv_path)
+        self._require_dependency_file()
 
-            pyproject_path = self.get_dependency_file_path()
-            if not pyproject_path.exists():
-                debug_log(f"pyproject.toml file not found at {pyproject_path}", "error")
-                print_error(f"pyproject.toml file not found at {pyproject_path}")
-                raise BackendExceptions("pyproject.toml file not found")
+        self._run_checked(
+            ["pdm", "install"],
+            status_msg="Installing dependencies with PDM...",
+            error_prefix="Failed to install dependencies with PDM",
+            timeout=settings.get_subprocess_timeout("install"),
+            summarize_output=True,
+        )
 
-            # Install dependencies using PDM
-            with console.status("[bold green]Installing dependencies with PDM..."):
-                subprocess.run(
-                    ["pdm", "install"],
-                    cwd=str(self.project_dir),
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                )
-
-            debug_log("Dependencies installed successfully with PDM", "info")
-            print_success("Dependencies installed successfully with PDM")
-
-        except subprocess.CalledProcessError as e:
-            debug_log(f"Error during dependency installation: {e.stderr}", "error")
-            handle_exception(e, f"Error during dependency installation: {str(e)}")
-            if hasattr(e, "stderr"):
-                print_error(f"Error details: {e.stderr}")
-            raise BackendExceptions("Failed to install dependencies with PDM")
-        except OSError as e:
-            debug_log(f"System error during dependency installation: {e}", "error")
-            handle_exception(e, f"Error during dependency installation: {str(e)}")
-            raise BackendExceptions(
-                f"Failed to install dependencies with PDM: {str(e)}"
-            )
+        debug_log("Dependencies installed successfully with PDM", "info")
+        print_success("Dependencies installed successfully with PDM")
 
     def generate_dependency_file(
         self,
@@ -205,6 +150,7 @@ packages = ["src"]
                 check=True,
                 capture_output=True,
                 text=True,
+                timeout=settings.get_subprocess_timeout("install"),
             )
 
             debug_log(
@@ -212,7 +158,7 @@ packages = ["src"]
                 "info",
             )
 
-        except subprocess.CalledProcessError as e:
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
             debug_log(f"Error adding dependency with PDM: {e}", "error")
             raise BackendExceptions(f"Failed to add dependency with PDM: {str(e)}")
         except OSError as e:
@@ -238,6 +184,7 @@ packages = ["src"]
                 check=True,
                 capture_output=True,
                 text=True,
+                timeout=settings.get_subprocess_timeout(),
             )
 
             # Create or update pyproject.toml with provided metadata
@@ -271,7 +218,7 @@ packages = ["src"]
 
             debug_log(f"Initialized PDM project: {project_name}", "info")
 
-        except subprocess.CalledProcessError as e:
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
             debug_log(f"Error initializing PDM project: {e}", "error")
             raise BackendExceptions(f"Failed to initialize PDM project: {str(e)}")
         except (OSError, UnicodeEncodeError) as e:

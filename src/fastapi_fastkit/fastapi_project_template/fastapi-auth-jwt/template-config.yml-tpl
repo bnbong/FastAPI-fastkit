@@ -1,0 +1,16 @@
+name: "FastAPI JWT Authentication"
+description: "FastAPI application with JWT access/refresh authentication, SQLModel users, and Alembic migrations"
+category: "authentication"
+requires_docker: false
+
+# Testing configuration
+testing:
+  strategy: "sqlite"
+  database_url: "sqlite://"
+  test_command: "pytest tests/ -v"
+
+# Default values for testing
+test_env_defaults:
+  SECRET_KEY: "test-secret-key"
+  DATABASE_URL: "sqlite://"
+  ENVIRONMENT: "development"

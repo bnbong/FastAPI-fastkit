@@ -33,15 +33,20 @@ next section explains).
 
 | Locale | Status | Markdown pages | Notes |
 |---|---|---:|---|
-| 🇬🇧 English (`en`) | ✅ Source of truth | 26 / 26 | Authoritative. |
-| 🇰🇷 Korean (`ko`) | ✅ Complete | 26 / 26 | All locale pages are present. Phase 1: top-level + core user-guide; Phase 2: remaining user-guide + all tutorials; Phase 3: contributing + reference. `docs/ko/changelog.md` intentionally reuses the canonical English `CHANGELOG.md`. |
-| 🇯🇵 Japanese (`ja`) | ✅ Complete | 26 / 26 | All locale pages are present. Phase 1: top-level + core user-guide; Phase 2: remaining user-guide + all tutorials; Phase 3: contributing + reference. `docs/ja/changelog.md` intentionally reuses the canonical English `CHANGELOG.md`. |
-| 🇨🇳 Chinese (`zh`) | ✅ Complete | 26 / 26 | All locale pages are present. Phase 1: top-level + core user-guide; Phase 2: remaining user-guide + all tutorials; Phase 3: contributing + reference. `docs/zh/changelog.md` intentionally reuses the canonical English `CHANGELOG.md`. |
-| 🇪🇸 Spanish (`es`) | ✅ Complete | 26 / 26 | All locale pages are present. Phase 1: top-level + core user-guide; Phase 2: remaining user-guide + all tutorials; Phase 3: contributing + reference. `docs/es/changelog.md` intentionally reuses the canonical English `CHANGELOG.md`. |
-| 🇫🇷 French (`fr`) | ✅ Complete | 26 / 26 | All locale pages are present. Phase 1: top-level + core user-guide; Phase 2: remaining user-guide + all tutorials; Phase 3: contributing + reference. `docs/fr/changelog.md` intentionally reuses the canonical English `CHANGELOG.md`. |
-| 🇩🇪 German (`de`) | ✅ Complete | 26 / 26 | All locale pages are present. Phase 1: top-level + core user-guide; Phase 2: remaining user-guide + all tutorials; Phase 3: contributing + reference. `docs/de/changelog.md` intentionally reuses the canonical English `CHANGELOG.md`. |
+| 🇬🇧 English (`en`) | ✅ Source of truth | 29 / 29 | Authoritative. |
+| 🇰🇷 Korean (`ko`) | 🟡 Partial | 26 / 29 | Phases 1-3 complete. The three tutorials added in v1.4.0 (`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`) are not translated yet and fall back to English. `docs/ko/changelog.md` intentionally reuses the canonical English `CHANGELOG.md`. |
+| 🇯🇵 Japanese (`ja`) | 🟡 Partial | 26 / 29 | Phases 1-3 complete. The three tutorials added in v1.4.0 (`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`) are not translated yet and fall back to English. `docs/ja/changelog.md` intentionally reuses the canonical English `CHANGELOG.md`. |
+| 🇨🇳 Chinese (`zh`) | 🟡 Partial | 26 / 29 | Phases 1-3 complete. The three tutorials added in v1.4.0 (`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`) are not translated yet and fall back to English. `docs/zh/changelog.md` intentionally reuses the canonical English `CHANGELOG.md`. |
+| 🇪🇸 Spanish (`es`) | 🟡 Partial | 26 / 29 | Phases 1-3 complete. The three tutorials added in v1.4.0 (`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`) are not translated yet and fall back to English. `docs/es/changelog.md` intentionally reuses the canonical English `CHANGELOG.md`. |
+| 🇫🇷 French (`fr`) | 🟡 Partial | 26 / 29 | Phases 1-3 complete. The three tutorials added in v1.4.0 (`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`) are not translated yet and fall back to English. `docs/fr/changelog.md` intentionally reuses the canonical English `CHANGELOG.md`. |
+| 🇩🇪 German (`de`) | 🟡 Partial | 26 / 29 | Phases 1-3 complete. The three tutorials added in v1.4.0 (`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`) are not translated yet and fall back to English. `docs/de/changelog.md` intentionally reuses the canonical English `CHANGELOG.md`. |
 
-*Snapshot verified 2026-06-18; zh row recounted for the current branch after Phase 3 (contributing + reference) landed. Chinese now has all 26 locale pages present and is tracked at ✅ Complete.* These counts are maintained by hand;
+*Snapshot verified 2026-09-04, for the v1.4.0 release. English gained three
+tutorial pages (`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`,
+`tutorial/llm-agent.md`), so every other locale dropped from ✅ Complete to
+🟡 Partial at 26 / 29. The Korean landing page, CLI reference and starter
+guide were re-synced with their English sources in the same release; the
+remaining Korean pages are present but predate the v1.4.0 English updates.* These counts are maintained by hand;
 to recount the current state from the repo root, run:
 
 ```console

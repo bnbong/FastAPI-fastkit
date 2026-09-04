@@ -1,0 +1,69 @@
+# --------------------------------------------------------------------------
+# Items domain — HTTP transport.
+# --------------------------------------------------------------------------
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlmodel.ext.asyncio.session import AsyncSession
+
+from src.app.core.config import settings
+from src.app.crud.pagination import Page
+from src.app.db.session import get_session
+from src.app.domains.items.crud import item_crud
+from src.app.domains.items.models import Item, ItemCreate, ItemPublic, ItemUpdate
+
+router = APIRouter(prefix="/items", tags=["items"])
+
+
+async def _get_or_404(session: AsyncSession, item_id: int) -> Item:
+    item = await item_crud.get(session, item_id)
+    if item is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Item not found"
+        )
+    return item
+
+
+@router.get("", response_model=Page[ItemPublic])
+async def list_items(
+    session: AsyncSession = Depends(get_session),
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=settings.DEFAULT_PAGE_LIMIT, ge=1),
+) -> Page[ItemPublic]:
+    limit = min(limit, settings.MAX_PAGE_LIMIT)
+    items = await item_crud.list(session, offset=offset, limit=limit)
+    total = await item_crud.count(session)
+    return Page[ItemPublic](
+        items=[ItemPublic.model_validate(item, from_attributes=True) for item in items],
+        total=total,
+        offset=offset,
+        limit=limit,
+    )
+
+
+@router.get("/{item_id}", response_model=ItemPublic)
+async def read_item(item_id: int, session: AsyncSession = Depends(get_session)) -> Item:
+    return await _get_or_404(session, item_id)
+
+
+@router.post("", response_model=ItemPublic, status_code=status.HTTP_201_CREATED)
+async def create_item(
+    payload: ItemCreate, session: AsyncSession = Depends(get_session)
+) -> Item:
+    return await item_crud.create(session, payload)
+
+
+@router.patch("/{item_id}", response_model=ItemPublic)
+async def update_item(
+    item_id: int,
+    payload: ItemUpdate,
+    session: AsyncSession = Depends(get_session),
+) -> Item:
+    item = await _get_or_404(session, item_id)
+    return await item_crud.update(session, item, payload)
+
+
+@router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_item(
+    item_id: int, session: AsyncSession = Depends(get_session)
+) -> None:
+    item = await _get_or_404(session, item_id)
+    await item_crud.delete(session, item)

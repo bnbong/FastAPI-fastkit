@@ -34,6 +34,8 @@
 - **🔍 자동화된 템플릿 품질 보증**: 주간 자동 테스트로 모든 템플릿이 정상 동작하고 최신 상태를 유지하도록 보장
 - **🚀 다양한 프로젝트 템플릿**: async CRUD, Docker, PostgreSQL 등 다양한 사용 사례에 맞춘 사전 구성 템플릿 제공
 - **📦 다중 패키지 매니저 지원**: 선호하는 Python 패키지 매니저(pip, uv, pdm, poetry)를 선택 가능
+- **🧾 재현 가능한 프로젝트 설정**: 대화형 세션의 선택을 `--save-config` 로 저장해 두었다가 `fastkit init --config` 로 프롬프트 없이 그대로 다시 생성
+- **🏷️ 스스로를 설명하는 프로젝트**: 생성된 프로젝트마다 템플릿, 프리셋, 패키지 매니저, 진입점, 선택한 기능을 `[tool.fastapi-fastkit]` 블록에 기록하며 `runserver` 와 `addroute` 가 이를 다시 읽어 사용
 
 ## 설치
 
@@ -350,6 +352,26 @@ Installing dependencies...
 - 자동 pip 호환성을 갖춘 **스마트 의존성 관리**  
 - 프리셋이 자동 연결할 수 없는 선택에 대해 수동 연결 안내를 출력하는 **기능 검증**  
 - 생성된 `pyproject.toml` 에 **식별 마커** 주입 (description 마커 + `[tool.fastapi-fastkit]` 테이블) — 이후 `is_fastkit_project()` 가 생성된 프로젝트를 식별 가능  
+- **프로젝트 메타데이터** 를 `[tool.fastapi-fastkit]` 에 기록 — 템플릿, 프리셋, 패키지 매니저, `app_module`, 선택한 `features` 가 담기며 `fastkit runserver` 와 `fastkit addroute` 가 이 값을 읽어 동작  
+- **재현 가능한 실행**: `--save-config <경로>` 로 답변을 저장하고, `--config <경로>` 로 프롬프트 없이 그대로 재생성하며, `--dry-run` 으로 아무것도 쓰지 않고 결과만 미리 확인  
+
+이제 카탈로그의 모든 선택지가 패키지 설치에 그치지 않고 실제로 동작하는
+코드를 생성합니다 — 백그라운드 작업(Celery/Dramatiq), Redis 캐싱,
+WebSocket, Pagination, OpenTelemetry 트레이싱, OAuth2 / 세션 기반 인증
+모두 대응하는 모듈과 `main.py` 연결 코드를 함께 생성합니다. 신규 축 3개가
+추가되었습니다.
+
+- **로깅(logging)**: `structured` 선택 시 별도 의존성 없이 표준 라이브러리 `logging` + `json` 기반 구조화 로깅과 request-id 미들웨어를 생성  
+- **마이그레이션(migrations)**: `Alembic` 선택 시 SQL 데이터베이스를 고른 경우 비동기 마이그레이션 환경 전체(`alembic.ini`, `alembic/env.py`, 베이스라인 리비전, `scripts/migrate.sh`)를 생성  
+- **툴링(tooling, 다중 선택)**: `ruff`, `pre-commit`, `github-actions`, `devcontainer`, `makefile` — 각각 해당 설정 파일을 생성하며 `ruff` 는 `pyproject.toml` 에 `[tool.ruff]` 블록도 함께 병합  
+
+모든 생성 프로젝트에는 `/health`, `/ready` 엔드포인트가 기본으로
+포함되며, `--dry-run` 은 이 신규 산출물을 포함해 실제 실행과 동일한 파일
+목록을 미리 보여줍니다. `classic-layered` / `domain-starter` 는 템플릿이
+제공하는 `main.py` 를 그대로 보존하므로, 위 축을 포함한 일부 선택은 수동
+연결이 필요하다는 경고가 기능 검증 단계에서 출력됩니다 — 자세한 내용은
+[프리셋 / 기능 매트릭스](reference/preset-feature-matrix.md) 문서를
+참고하세요.
 
 ### FastAPI 프로젝트에 새 라우트 추가
 
@@ -474,6 +496,7 @@ $ fastkit list-templates
 
 - 📚 **[사용자 가이드](user-guide/quick-start.md)** - 자세한 설치 및 사용 가이드
 - 🎯 **[튜토리얼](tutorial/getting-started.md)** - 초보자를 위한 단계별 튜토리얼
+- 🧭 **[어떤 스타터를 고를까?](user-guide/choosing-a-starter.md)** - 템플릿과 대화형 프리셋 선택을 돕는 가이드
 - 📖 **[CLI 레퍼런스](user-guide/cli-reference.md)** - 전체 명령어 레퍼런스
 - 🔍 **[템플릿 품질 보증](reference/template-quality-assurance.md)** - 자동화된 테스트 및 품질 기준
 
@@ -486,16 +509,19 @@ $ fastkit list-templates
 - **[기본 API 서버 만들기](tutorial/basic-api-server.md)** - `fastapi-default` 템플릿으로 첫 FastAPI 서버 만들기
 - **[비동기 CRUD API 만들기](tutorial/async-crud-api.md)** - `fastapi-async-crud` 템플릿으로 고성능 비동기 API 개발
 - **[도메인 지향 프로젝트](tutorial/domain-starter.md)** - 현재 권장 기본값인 `fastapi-domain-starter` 템플릿으로 중간 규모 API 구축
+- **[JWT 인증](https://bnbong.github.io/FastAPI-fastkit/tutorial/auth-jwt/)** - `fastapi-auth-jwt` 템플릿으로 실제 계정 도입: 회전하는 리프레시 토큰, argon2id 해싱, 역할·스코프 가드 (영문 페이지)
 
 ### 🗄️ 데이터베이스 및 인프라
 
 - **[데이터베이스 통합](tutorial/database-integration.md)** - `fastapi-psql-orm` 템플릿으로 PostgreSQL + SQLAlchemy 활용
-- **[Docker 기반 배포](tutorial/docker-deployment.md)** - `fastapi-dockerized` 템플릿으로 프로덕션 배포 환경 구성
+- **[SQLModel 비동기 영속성](https://bnbong.github.io/FastAPI-fastkit/tutorial/sqlmodel/)** - `fastapi-sqlmodel` 템플릿으로 비동기 SQLModel, Alembic 마이그레이션, 제네릭 CRUD, 페이지네이션 구성 (영문 페이지)
+- **[Docker 기반 배포](tutorial/docker-deployment.md)** - `fastapi-dockerized` 템플릿으로 프로덕션 배포 환경 구성 *(해당 템플릿은 deprecated — 기존 사용자를 위해 유지)*
 
 ### ⚡ 고급 기능
 
 - **[커스텀 응답 처리 및 고급 API 설계](tutorial/custom-response-handling.md)** - `fastapi-custom-response` 템플릿으로 엔터프라이즈급 API 구축
 - **[MCP 통합](tutorial/mcp-integration.md)** - `fastapi-mcp` 템플릿으로 AI 모델과 통합된 API 서버 만들기
+- **[스트리밍 LLM 에이전트](https://bnbong.github.io/FastAPI-fastkit/tutorial/llm-agent/)** - `fastapi-llm-agent` 템플릿으로 도구 호출 루프를 갖춘 스트리밍 Claude 챗 백엔드 구축 (영문 페이지)
 
 각 튜토리얼은 다음을 제공합니다:
 

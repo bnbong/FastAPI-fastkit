@@ -3,18 +3,13 @@
 #
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
-import os
 import subprocess
 from typing import List
 
 from fastapi_fastkit.core.exceptions import BackendExceptions
+from fastapi_fastkit.core.settings import settings
 from fastapi_fastkit.utils.logging import debug_log, get_logger
-from fastapi_fastkit.utils.main import (
-    console,
-    handle_exception,
-    print_error,
-    print_success,
-)
+from fastapi_fastkit.utils.main import print_success
 
 from .base import BasePackageManager
 
@@ -26,16 +21,7 @@ class UvManager(BasePackageManager):
 
     def is_available(self) -> bool:
         """Check if UV is available on the system."""
-        try:
-            subprocess.run(
-                ["uv", "--version"],
-                check=True,
-                capture_output=True,
-                text=True,
-            )
-            return True
-        except (subprocess.CalledProcessError, FileNotFoundError):
-            return False
+        return self._check_command_available(["uv", "--version"])
 
     def get_dependency_file_name(self) -> str:
         """Get the dependency file name for UV."""
@@ -50,29 +36,16 @@ class UvManager(BasePackageManager):
         """
         venv_path = str(self.project_dir / ".venv")
 
-        try:
-            with console.status("[bold green]Creating virtual environment with UV..."):
-                # UV can create virtual environment with specific Python version
-                subprocess.run(
-                    ["uv", "venv", venv_path],
-                    cwd=str(self.project_dir),
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                )
+        self._run_checked(
+            ["uv", "venv", venv_path],
+            status_msg="Creating virtual environment with UV...",
+            error_prefix="Failed to create venv with UV",
+            timeout=settings.get_subprocess_timeout("venv"),
+        )
 
-            debug_log(f"Virtual environment created at {venv_path}", "info")
-            print_success("Virtual environment created successfully with UV")
-            return venv_path
-
-        except subprocess.CalledProcessError as e:
-            debug_log(f"Error creating virtual environment: {e.stderr}", "error")
-            handle_exception(e, f"Error creating virtual environment: {str(e)}")
-            raise BackendExceptions("Failed to create venv with UV")
-        except OSError as e:
-            debug_log(f"System error creating virtual environment: {e}", "error")
-            handle_exception(e, f"Error creating virtual environment: {str(e)}")
-            raise BackendExceptions(f"Failed to create venv with UV: {str(e)}")
+        debug_log(f"Virtual environment created at {venv_path}", "info")
+        print_success("Virtual environment created successfully with UV")
+        return venv_path
 
     def install_dependencies(self, venv_path: str) -> None:
         """
@@ -81,56 +54,23 @@ class UvManager(BasePackageManager):
         :param venv_path: Path to the virtual environment
         :raises: BackendExceptions if dependency installation fails
         """
-        try:
-            if not os.path.exists(venv_path):
-                debug_log(
-                    "Virtual environment does not exist. Creating it first.", "warning"
-                )
-                print_error("Virtual environment does not exist. Creating it first.")
-                venv_path = self.create_virtual_environment()
-                if not venv_path:
-                    raise BackendExceptions("Failed to create venv")
+        venv_path = self._ensure_venv(venv_path)
+        self._require_dependency_file()
 
-            pyproject_path = self.get_dependency_file_path()
-            if not pyproject_path.exists():
-                debug_log(f"pyproject.toml file not found at {pyproject_path}", "error")
-                print_error(f"pyproject.toml file not found at {pyproject_path}")
-                raise BackendExceptions("pyproject.toml file not found")
+        # Install dependencies using UV sync (including dev dependencies)
+        cmd = ["uv", "sync", "--group", "dev"]
+        debug_log(f"Running UV command: {' '.join(cmd)} in {self.project_dir}", "info")
 
-            # Install dependencies using UV sync (including dev dependencies)
-            cmd = ["uv", "sync", "--group", "dev"]
-            debug_log(
-                f"Running UV command: {' '.join(cmd)} in {self.project_dir}", "info"
-            )
+        self._run_checked(
+            cmd,
+            status_msg="Installing dependencies with UV...",
+            error_prefix="Failed to install dependencies with UV",
+            timeout=settings.get_subprocess_timeout("install"),
+            summarize_output=True,
+        )
 
-            with console.status("[bold green]Installing dependencies with UV..."):
-                result = subprocess.run(
-                    cmd,
-                    cwd=str(self.project_dir),
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                )
-
-                # Log UV output for debugging
-                if result.stdout:
-                    debug_log(f"UV stdout: {result.stdout}", "debug")
-                if result.stderr:
-                    debug_log(f"UV stderr: {result.stderr}", "debug")
-
-            debug_log("Dependencies installed successfully with UV", "info")
-            print_success("Dependencies installed successfully with UV")
-
-        except subprocess.CalledProcessError as e:
-            debug_log(f"Error during dependency installation: {e.stderr}", "error")
-            handle_exception(e, f"Error during dependency installation: {str(e)}")
-            if hasattr(e, "stderr"):
-                print_error(f"Error details: {e.stderr}")
-            raise BackendExceptions("Failed to install dependencies with UV")
-        except OSError as e:
-            debug_log(f"System error during dependency installation: {e}", "error")
-            handle_exception(e, f"Error during dependency installation: {str(e)}")
-            raise BackendExceptions(f"Failed to install dependencies with UV: {str(e)}")
+        debug_log("Dependencies installed successfully with UV", "info")
+        print_success("Dependencies installed successfully with UV")
 
     def generate_dependency_file(
         self,
@@ -214,6 +154,7 @@ dev-dependencies = []
                 check=True,
                 capture_output=True,
                 text=True,
+                timeout=settings.get_subprocess_timeout("install"),
             )
 
             debug_log(
@@ -221,7 +162,7 @@ dev-dependencies = []
                 "info",
             )
 
-        except subprocess.CalledProcessError as e:
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
             debug_log(f"Error adding dependency with UV: {e}", "error")
             raise BackendExceptions(f"Failed to add dependency with UV: {str(e)}")
         except OSError as e:
@@ -247,6 +188,7 @@ dev-dependencies = []
                 check=True,
                 capture_output=True,
                 text=True,
+                timeout=settings.get_subprocess_timeout(),
             )
 
             # Create custom pyproject.toml with provided metadata
@@ -281,7 +223,7 @@ dev-dependencies = []
 
             debug_log(f"Initialized UV project: {project_name}", "info")
 
-        except subprocess.CalledProcessError as e:
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
             debug_log(f"Error initializing UV project: {e}", "error")
             raise BackendExceptions(f"Failed to initialize UV project: {str(e)}")
         except (OSError, UnicodeEncodeError) as e:
@@ -294,27 +236,15 @@ dev-dependencies = []
 
         :raises: BackendExceptions if lock generation fails
         """
-        try:
-            with console.status("[bold green]Generating UV lock file..."):
-                subprocess.run(
-                    ["uv", "lock"],
-                    cwd=str(self.project_dir),
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                )
+        self._run_checked(
+            ["uv", "lock"],
+            status_msg="Generating UV lock file...",
+            error_prefix="Failed to generate UV lock file",
+            timeout=settings.get_subprocess_timeout("install"),
+        )
 
-            debug_log("UV lock file generated successfully", "info")
-            print_success("UV lock file generated successfully")
-
-        except subprocess.CalledProcessError as e:
-            debug_log(f"Error generating UV lock file: {e.stderr}", "error")
-            handle_exception(e, f"Error generating UV lock file: {str(e)}")
-            raise BackendExceptions("Failed to generate UV lock file")
-        except OSError as e:
-            debug_log(f"System error generating UV lock file: {e}", "error")
-            handle_exception(e, f"Error generating UV lock file: {str(e)}")
-            raise BackendExceptions(f"Failed to generate UV lock file: {str(e)}")
+        debug_log("UV lock file generated successfully", "info")
+        print_success("UV lock file generated successfully")
 
     def run_script(self, script_command: str) -> None:
         """
@@ -330,12 +260,13 @@ dev-dependencies = []
                 check=True,
                 capture_output=True,
                 text=True,
+                timeout=settings.get_subprocess_timeout(),
             )
 
             debug_log(f"UV script executed successfully: {script_command}", "info")
 
-        except subprocess.CalledProcessError as e:
-            debug_log(f"Error running UV script: {e.stderr}", "error")
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
+            debug_log(f"Error running UV script: {e.stderr!r}", "error")
             raise BackendExceptions(f"Failed to run UV script: {str(e)}")
         except OSError as e:
             debug_log(f"System error running UV script: {e}", "error")

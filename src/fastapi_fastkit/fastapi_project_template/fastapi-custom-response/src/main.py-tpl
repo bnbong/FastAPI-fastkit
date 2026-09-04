@@ -10,6 +10,8 @@ from src.core.config import settings
 from src.helper.exceptions import InternalException
 from src.utils.documents import add_description_at_api_tags
 
+# fastkit:imports
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
 )
@@ -33,7 +35,14 @@ async def internal_exception_handler(request: Request, exc: InternalException):
     )
 
 
+# fastkit:routes
 app.include_router(api_router)
 
 # Apply Custom OpenAPI Tags description
 add_description_at_api_tags(app)
+
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint."""
+    return {"status": "healthy"}

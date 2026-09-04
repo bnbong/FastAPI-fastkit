@@ -1,0 +1,30 @@
+# --------------------------------------------------------------------------
+# Anthropic client construction.
+#
+# Kept in its own module so the agent depends on a factory rather than on a
+# module-level singleton — that is what makes the client replaceable in
+# tests without patching imports.
+# --------------------------------------------------------------------------
+from anthropic import AsyncAnthropic
+
+from src.app.core.config import settings
+
+
+def build_client() -> AsyncAnthropic:
+    """Create the async Anthropic client from application settings.
+
+    Setting ``LLM_BASE_URL`` points the same client at an Anthropic-compatible
+    gateway (LiteLLM, an internal proxy, a local server); ``LLM_AUTH_TOKEN``
+    supplies a bearer token for gateways that authenticate that way instead of
+    with an Anthropic API key.
+    """
+    kwargs: dict[str, object] = {}
+
+    if settings.LLM_BASE_URL:
+        kwargs["base_url"] = settings.LLM_BASE_URL
+    if settings.LLM_AUTH_TOKEN:
+        kwargs["auth_token"] = settings.LLM_AUTH_TOKEN
+    else:
+        kwargs["api_key"] = settings.ANTHROPIC_API_KEY or None
+
+    return AsyncAnthropic(**kwargs)  # type: ignore[arg-type]

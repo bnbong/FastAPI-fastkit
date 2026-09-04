@@ -1,0 +1,3 @@
+# Authlib stores the OAuth state in the session cookie.
+app.add_middleware(SessionMiddleware, secret_key=SESSION_SECRET_KEY)
+app.include_router(auth_router)

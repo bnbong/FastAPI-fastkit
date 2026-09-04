@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -e
+set -x
+
+# Apply every pending Alembic migration to the database in DATABASE_URL.
+alembic upgrade head

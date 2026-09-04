@@ -1,0 +1,36 @@
+# --------------------------------------------------------------------------
+# Engine / session factory.
+#
+# SQLite needs ``check_same_thread=False`` because FastAPI runs sync
+# dependencies in a threadpool; PostgreSQL takes no extra arguments.
+# --------------------------------------------------------------------------
+from collections.abc import Generator
+from typing import Any, Dict
+
+from sqlmodel import Session, SQLModel, create_engine
+
+from src.app.core.config import settings
+
+_connect_args: Dict[str, Any] = {}
+if settings.DATABASE_URL.startswith("sqlite"):
+    _connect_args = {"check_same_thread": False}
+
+engine = create_engine(settings.DATABASE_URL, connect_args=_connect_args)
+
+
+def create_db_and_tables() -> None:
+    """Create every table declared by the imported SQLModel models.
+
+    Convenient for SQLite and tests. For PostgreSQL, run the Alembic
+    migrations (``alembic upgrade head``) instead.
+    """
+    # Imported for their side effect: registering models on SQLModel.metadata.
+    from src.app.domains.auth import models as auth_models  # noqa: F401
+    from src.app.domains.users import models as user_models  # noqa: F401
+
+    SQLModel.metadata.create_all(engine)
+
+
+def get_session() -> Generator[Session, None, None]:
+    with Session(engine) as session:
+        yield session

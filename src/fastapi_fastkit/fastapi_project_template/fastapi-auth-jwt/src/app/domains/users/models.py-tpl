@@ -1,0 +1,35 @@
+# --------------------------------------------------------------------------
+# User entity.
+# --------------------------------------------------------------------------
+from datetime import datetime, timezone
+from typing import List, Optional
+
+from sqlmodel import Field, SQLModel
+
+
+def _utcnow() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+class User(SQLModel, table=True):
+    """A registered account.
+
+    ``scopes`` is a comma-separated string rather than a relation to keep the
+    example single-table; swap it for a proper roles table when the
+    permission model grows.
+    """
+
+    __tablename__ = "users"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    email: str = Field(index=True, unique=True, max_length=320)
+    full_name: Optional[str] = Field(default=None, max_length=255)
+    hashed_password: str = Field(max_length=255)
+    is_active: bool = Field(default=True)
+    is_superuser: bool = Field(default=False)
+    scopes: str = Field(default="me")
+    created_at: datetime = Field(default_factory=_utcnow)
+
+    @property
+    def scope_list(self) -> List[str]:
+        return [scope for scope in self.scopes.split(",") if scope]

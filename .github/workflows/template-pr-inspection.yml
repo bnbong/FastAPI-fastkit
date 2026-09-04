@@ -23,7 +23,7 @@ jobs:
           fetch-depth: 0  # Fetch all history for git diff
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
@@ -42,7 +42,9 @@ jobs:
           docker compose version
 
       - name: Inspect changed templates
-        run: pdm run python scripts/inspect-changed-templates.py
+        # --offline keeps PR runs deterministic: dependency freshness is
+        # advisory and belongs to the weekly scheduled inspection.
+        run: pdm run python scripts/inspect-changed-templates.py --offline
 
       - name: Create or Update PR Comment
         if: always()

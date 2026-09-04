@@ -1,14 +1,18 @@
 # --------------------------------------------------------------------------
 # The Module defines main and core CLI operations for FastAPI-fastkit.
 #
+# Commands here handle argument parsing, prompting and reporting only. The
+# generation pipeline itself lives in ``backend.scaffolder``.
+#
 # @author bnbong bbbong9@gmail.com
 # --------------------------------------------------------------------------
 import atexit
+import keyword
 import os
 import shutil
 import subprocess
 import sys
-from typing import Union, cast
+from typing import Any, Dict, List, Optional, Union, cast
 
 import click
 from click import Command, Context
@@ -17,20 +21,35 @@ from rich.panel import Panel
 
 from fastapi_fastkit.backend.interactive import InteractiveConfigBuilder
 from fastapi_fastkit.backend.interactive.selectors import display_feature_catalog
+from fastapi_fastkit.backend.interactive.validators import validate_project_name
 from fastapi_fastkit.backend.main import (
     add_new_route,
     ask_create_project_folder,
-    create_venv_with_manager,
-    deploy_template_with_folder_option,
     find_template_core_modules,
-    generate_dependency_file_with_manager,
     get_deployment_success_message,
-    inject_project_metadata,
-    install_dependencies_with_manager,
     read_template_stack,
+)
+from fastapi_fastkit.backend.project_builder import (
+    PresetLayoutStrategist,
+    app_module_from_main_path,
+)
+from fastapi_fastkit.backend.project_builder.config_schema import (
+    ConfigSchemaError,
+    normalize_project_config,
+)
+from fastapi_fastkit.backend.scaffolder import (
+    ProjectScaffolder,
+    ScaffoldOptions,
+    cleanup_failed_project,
 )
 from fastapi_fastkit.core.exceptions import CLIExceptions
 from fastapi_fastkit.core.settings import FastkitConfig
+from fastapi_fastkit.utils.config_file import (
+    ConfigFileError,
+    load_project_config,
+    save_project_config,
+    validate_project_config,
+)
 from fastapi_fastkit.utils.logging import get_logger, setup_logging
 from fastapi_fastkit.utils.main import console as utils_console
 from fastapi_fastkit.utils.main import (
@@ -40,6 +59,7 @@ from fastapi_fastkit.utils.main import (
     print_info,
     print_success,
     print_warning,
+    read_fastkit_metadata,
     validate_email,
 )
 
@@ -47,24 +67,10 @@ from . import __version__
 
 console = utils_console
 
-
-def _cleanup_failed_project(
-    project_dir: str, user_workspace: str, create_project_folder: bool
-) -> None:
-    """
-    Clean up a partially created project after an error.
-
-    Only deletes a freshly created project folder. When the project was deployed
-    in-place (create_project_folder=False), project_dir equals the user's workspace,
-    and removing it would destroy unrelated files, so no cleanup is performed.
-    """
-    if not create_project_folder:
-        return
-    if not project_dir or not os.path.exists(project_dir):
-        return
-    if os.path.abspath(project_dir) == os.path.abspath(user_workspace):
-        return
-    shutil.rmtree(project_dir, ignore_errors=True)
+# Kept as a module-level alias: the rollback helper moved to the scaffolder
+# alongside the pipeline it protects, but callers (and tests) still reach for
+# it here.
+_cleanup_failed_project = cleanup_failed_project
 
 
 @click.group()
@@ -191,6 +197,69 @@ def list_features(ctx: Context) -> None:
     display_feature_catalog(settings.PACKAGE_CATALOG, settings.FEATURE_DESCRIPTIONS)
 
 
+def _select_package_manager(settings: Any) -> str:
+    """Prompt for a package manager, showing the catalog first."""
+    console.print("\n[bold]Available Package Managers:[/bold]")
+    package_manager_table = create_info_table(
+        "Package Managers",
+        {
+            f"{manager.upper()}": config["description"]
+            for manager, config in settings.PACKAGE_MANAGER_CONFIG.items()
+        },
+    )
+    console.print(package_manager_table)
+    console.print("\n")
+
+    return cast(
+        str,
+        click.prompt(
+            "Select package manager",
+            type=click.Choice(settings.SUPPORTED_PACKAGE_MANAGERS),
+            default=settings.DEFAULT_PACKAGE_MANAGER,
+            show_choices=True,
+            show_default=True,
+        ),
+    )
+
+
+def _scaffold(
+    ctx: Context, options: ScaffoldOptions, error_context: str
+) -> Optional[str]:
+    """
+    Run the scaffolder and report the outcome.
+
+    :param ctx: Click context (for settings / debug mode)
+    :param options: Scaffold options to execute
+    :param error_context: Command name used in the debug log message
+    :return: The generated project directory, or None when generation failed
+        or was only previewed.
+    """
+    settings = ctx.obj["settings"]
+    scaffolder = ProjectScaffolder(settings, options)
+
+    try:
+        result = scaffolder.run()
+    except Exception as e:
+        if settings.DEBUG_MODE:
+            logger = get_logger()
+            logger.exception(f"Error during project creation in {error_context}: {e}")
+        print_error(f"Error during project creation: {str(e)}")
+        return None
+
+    if result.dry_run:
+        return None
+
+    print_success(
+        get_deployment_success_message(
+            options.template,
+            options.project_name,
+            settings.USER_WORKSPACE,
+            options.create_project_folder,
+        )
+    )
+    return result.project_dir
+
+
 @fastkit_cli.command(context_settings={"ignore_unknown_options": True})
 @click.argument("template", default="fastapi-default")
 @click.option(
@@ -219,6 +288,35 @@ def list_features(ctx: Context) -> None:
     type=click.Choice(["pip", "uv", "pdm", "poetry"]),
     default=None,
 )
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    default=False,
+    help="Show the files and packages that would be created, without writing anything.",
+)
+@click.option(
+    "--no-venv",
+    is_flag=True,
+    default=False,
+    help="Skip virtual environment creation (implies no dependency installation).",
+)
+@click.option(
+    "--no-install",
+    is_flag=True,
+    default=False,
+    help="Skip dependency installation.",
+)
+@click.option(
+    "--yes",
+    "-y",
+    "assume_yes",
+    is_flag=True,
+    default=False,
+    help=(
+        "Do not ask for confirmation before overwriting existing files when "
+        "deploying the project in place."
+    ),
+)
 @click.pass_context
 def startdemo(
     ctx: Context,
@@ -228,6 +326,10 @@ def startdemo(
     author_email: str,
     description: str,
     package_manager: str,
+    dry_run: bool,
+    no_venv: bool,
+    no_install: bool,
+    assume_yes: bool,
 ) -> None:
     """
     Create a new FastAPI project from templates and inject metadata.
@@ -250,6 +352,24 @@ def startdemo(
         raise CLIExceptions(
             f"Template '{template}' does not exist in '{template_dir}'."
         )
+
+    # The name ends up inside pyproject.toml and Python source, and it names
+    # the directory the project is written to, so reject anything unusable
+    # before a single file is created.
+    name_valid, name_error = validate_project_name(project_name)
+    if not name_valid:
+        print_error(f"Invalid project name: {name_error}")
+        return
+
+    # ``init`` refuses to overwrite an existing project; ``startdemo`` must do
+    # the same, otherwise a failure mid-generation would roll back a directory
+    # that was never ours to delete. ``--dry-run`` writes nothing, so it is
+    # still allowed to preview against an existing directory.
+    project_dir = os.path.join(settings.USER_WORKSPACE, project_name)
+    if not dry_run and os.path.exists(project_dir):
+        print_error(f"Error: Project '{project_name}' already exists.")
+        return
+
     table = create_info_table(
         "Project Information",
         {
@@ -274,24 +394,7 @@ def startdemo(
 
     # Package manager selection
     if not package_manager:
-        console.print("\n[bold]Available Package Managers:[/bold]")
-        package_manager_table = create_info_table(
-            "Package Managers",
-            {
-                f"{manager.upper()}": config["description"]
-                for manager, config in settings.PACKAGE_MANAGER_CONFIG.items()
-            },
-        )
-        console.print(package_manager_table)
-        console.print("\n")
-
-        package_manager = click.prompt(
-            "Select package manager",
-            type=click.Choice(settings.SUPPORTED_PACKAGE_MANAGERS),
-            default=settings.DEFAULT_PACKAGE_MANAGER,
-            show_choices=True,
-            show_default=True,
-        )
+        package_manager = _select_package_manager(settings)
 
     confirm = click.confirm(
         "\nDo you want to proceed with project creation?", default=False
@@ -301,32 +404,85 @@ def startdemo(
         return
 
     # Ask user whether to create a new project folder
-    create_project_folder = ask_create_project_folder(project_name)
+    create_project_folder = True if dry_run else ask_create_project_folder(project_name)
+
+    _scaffold(
+        ctx,
+        ScaffoldOptions(
+            project_name=project_name,
+            author=author,
+            author_email=author_email,
+            description=description,
+            package_manager=package_manager,
+            template=template,
+            create_project_folder=create_project_folder,
+            dry_run=dry_run,
+            with_venv=not no_venv,
+            with_install=not (no_install or no_venv),
+            assume_yes=assume_yes,
+        ),
+        error_context="startdemo",
+    )
+
+
+def _load_config_file(path: str) -> Optional[Dict[str, Any]]:
+    """
+    Load and validate a project config file for non-interactive ``init``.
+
+    :param path: Path to the config file
+    :return: The configuration, or None when it could not be used (the reason
+        is printed for the user).
+    """
+    try:
+        config = load_project_config(path)
+    except ConfigFileError as e:
+        print_error(str(e))
+        return None
+
+    errors = validate_project_config(config)
+    if errors:
+        for error in errors:
+            print_error(error)
+        return None
+
+    # Normalise once, here: every downstream consumer (dependency collector,
+    # dynamic config generator, scaffolder metadata) must read the same
+    # canonical selections, or they disagree about what the project contains.
+    try:
+        config = normalize_project_config(config)
+    except ConfigSchemaError as e:
+        print_error(f"Invalid project config '{path}': {e}")
+        return None
+
+    print_info(f"Loaded project configuration from '{path}'")
+    return config
+
+
+def _offer_config_save(config: Dict[str, Any], save_config: Optional[str]) -> None:
+    """Persist an interactive session's answers when the user wants them kept."""
+    path = save_config
+    if not path:
+        # Only ask when there is a human at the other end: scripted runs
+        # (CI, piped input) opt in with --save-config instead.
+        if not sys.stdin.isatty():
+            return
+        if not click.confirm(
+            "\nSave these selections to a config file for later reuse?", default=False
+        ):
+            return
+        path = click.prompt(
+            "Config file path (.json / .toml / .yaml)",
+            type=str,
+            default="fastkit.config.json",
+        )
 
     try:
-        user_local = settings.USER_WORKSPACE
+        save_project_config(config, path)
+    except ConfigFileError as e:
+        print_warning(f"Could not save config file: {e}")
+        return
 
-        project_dir, _ = deploy_template_with_folder_option(
-            target_template, user_local, project_name, create_project_folder
-        )
-
-        inject_project_metadata(
-            project_dir, project_name, author, author_email, description
-        )
-
-        venv_path = create_venv_with_manager(project_dir, package_manager)
-        install_dependencies_with_manager(project_dir, venv_path, package_manager)
-
-        success_message = get_deployment_success_message(
-            template, project_name, user_local, create_project_folder
-        )
-        print_success(success_message)
-
-    except Exception as e:
-        if settings.DEBUG_MODE:
-            logger = get_logger()
-            logger.exception(f"Error during project creation in startdemo: {str(e)}")
-        print_error(f"Error during project creation: {str(e)}")
+    print_success(f"Saved project configuration to '{path}'")
 
 
 @fastkit_cli.command(context_settings={"ignore_unknown_options": True})
@@ -339,6 +495,22 @@ def startdemo(
         "architecture preset (minimal / single-module / classic-layered / "
         "domain-starter, default: domain-starter), then feature selection."
     ),
+)
+@click.option(
+    "--config",
+    "config_path",
+    default=None,
+    type=click.Path(),
+    help=(
+        "Create the project non-interactively from a saved configuration file "
+        "(.json / .toml, and .yaml when PyYAML is installed)."
+    ),
+)
+@click.option(
+    "--save-config",
+    default=None,
+    type=click.Path(),
+    help="With --interactive, write the answered configuration to this path.",
 )
 @click.option(
     "--project-name",
@@ -363,15 +535,50 @@ def startdemo(
     type=click.Choice(["pip", "uv", "pdm", "poetry"]),
     default=None,
 )
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    default=False,
+    help="Show the files and packages that would be created, without writing anything.",
+)
+@click.option(
+    "--no-venv",
+    is_flag=True,
+    default=False,
+    help="Skip virtual environment creation (implies no dependency installation).",
+)
+@click.option(
+    "--no-install",
+    is_flag=True,
+    default=False,
+    help="Skip dependency installation.",
+)
+@click.option(
+    "--yes",
+    "-y",
+    "assume_yes",
+    is_flag=True,
+    default=False,
+    help=(
+        "Do not ask for confirmation before overwriting existing files when "
+        "deploying the project in place."
+    ),
+)
 @click.pass_context
 def init(
     ctx: Context,
     interactive: bool,
+    config_path: Optional[str],
+    save_config: Optional[str],
     project_name: str,
     author: str,
     author_email: str,
     description: str,
     package_manager: str,
+    dry_run: bool,
+    no_venv: bool,
+    no_install: bool,
+    assume_yes: bool,
 ) -> None:
     """
     Start a FastAPI project setup.
@@ -381,7 +588,10 @@ def init(
     / ``domain-starter`` — default: ``domain-starter``) and then walks
     through feature selection (database, auth, testing, deployment, ...).
 
-    Without --interactive, creates an empty project with predefined stacks.
+    Use --config <path> to replay a saved configuration without any prompts,
+    and --save-config <path> to record an interactive session as one.
+
+    Without either, creates an empty project with predefined stacks.
 
     This command will automatically create a new FastAPI project directory
     and a python virtual environment. Dependencies will be automatically
@@ -389,187 +599,35 @@ def init(
     """
     settings = ctx.obj["settings"]
 
-    # Interactive mode - use InteractiveConfigBuilder
-    if interactive:
+    config: Optional[Dict[str, Any]] = None
+
+    if config_path:
+        config = _load_config_file(config_path)
+        if config is None:
+            return
+    elif interactive:
         print_info("Starting interactive project setup...")
 
         builder = InteractiveConfigBuilder(settings)
-        config = builder.run_interactive_flow()
+        interactive_config = builder.run_interactive_flow()
 
         # User cancelled
-        if not config:
+        if not interactive_config:
             return
 
-        # Extract configuration
-        project_name = cast(str, config.get("project_name", ""))
-        author = cast(str, config.get("author", ""))
-        author_email = cast(str, config.get("author_email", ""))
-        description = cast(str, config.get("description", ""))
-        package_manager = config.get(
-            "package_manager", settings.DEFAULT_PACKAGE_MANAGER
+        config = interactive_config
+        _offer_config_save(config, save_config)
+
+    if config is not None:
+        _init_from_config(
+            ctx,
+            config,
+            package_manager=package_manager,
+            dry_run=dry_run,
+            no_venv=no_venv,
+            no_install=no_install,
+            assume_yes=assume_yes,
         )
-        all_dependencies = config.get("all_dependencies", [])
-
-        # Check if project already exists
-        project_dir = os.path.join(settings.USER_WORKSPACE, project_name)
-        if os.path.exists(project_dir):
-            print_error(f"Error: Project '{project_name}' already exists.")
-            return
-
-        # Ask user whether to create a new project folder
-        create_project_folder = ask_create_project_folder(project_name)
-
-        try:
-            user_local = settings.USER_WORKSPACE
-
-            # Pick the base template from the architecture preset chosen
-            # earlier in the interactive flow. Older callers without a
-            # preset fall back to ``minimal`` (= fastapi-empty), preserving
-            # pre-#45 behaviour.
-            from fastapi_fastkit.backend.project_builder import (
-                PresetLayoutStrategist,
-            )
-
-            preset_id = config.get("architecture_preset")
-            strategist = PresetLayoutStrategist(preset_id)
-            template = strategist.base_template
-            template_dir = settings.FASTKIT_TEMPLATE_ROOT
-            target_template = os.path.join(template_dir, template)
-
-            if not os.path.exists(target_template):
-                print_error(
-                    f"Template '{template}' does not exist in '{template_dir}'."
-                )
-                raise CLIExceptions(
-                    f"Template '{template}' does not exist in '{template_dir}'."
-                )
-
-            # Deploy template
-            project_dir, _ = deploy_template_with_folder_option(
-                target_template, user_local, project_name, create_project_folder
-            )
-
-            # Inject project metadata
-            inject_project_metadata(
-                project_dir, project_name, author, author_email, description
-            )
-
-            # Generate dependency file with collected dependencies
-            generate_dependency_file_with_manager(
-                project_dir,
-                all_dependencies,
-                package_manager,
-                project_name,
-                author,
-                author_email,
-                description,
-            )
-
-            # Update setup.py install_requires with selected dependencies
-            from fastapi_fastkit.backend.main import update_setup_py_dependencies
-
-            update_setup_py_dependencies(project_dir, all_dependencies)
-
-            print_success(
-                f"Generated dependency file with {len(all_dependencies)} packages"
-            )
-
-            # Generate stack-specific code and configurations
-            from fastapi_fastkit.backend.project_builder.config_generator import (
-                DynamicConfigGenerator,
-            )
-
-            generator = DynamicConfigGenerator(config, project_dir)
-
-            # main.py overlay — only regenerated for presets that ship a
-            # placeholder app (minimal, single-module). For richer presets
-            # (classic-layered, domain-starter) we keep the template's
-            # router-aware main.py intact.
-            #
-            # The strategist's ``main_py_target`` is always ``src/main.py``
-            # for both regenerate-main presets, and both fastapi-empty and
-            # fastapi-single-module ship that file, so we can write
-            # straight to the strategist's path without a flat-``main.py``
-            # fallback branch.
-            if strategist.should_regenerate_main:
-                main_py_path = strategist.main_py_target(project_dir)
-                main_py_path.parent.mkdir(parents=True, exist_ok=True)
-                main_py_path.write_text(generator.generate_main_py())
-            else:
-                print_info(
-                    f"Preserving template-shipped main.py for preset "
-                    f"'{strategist.preset_id}'."
-                )
-
-            # Generate database configuration if selected — preset chooses
-            # where the file lives so it sits next to the existing structure.
-            db_info = config.get("database", {})
-            if isinstance(db_info, dict) and db_info.get("type") != "None":
-                db_config_content = generator.generate_database_config()
-                if db_config_content:
-                    db_config_path = strategist.db_config_target(project_dir)
-                    db_config_path.parent.mkdir(parents=True, exist_ok=True)
-                    db_config_path.write_text(db_config_content)
-
-            # Generate auth configuration if selected
-            auth_type = config.get("authentication", "None")
-            if auth_type != "None":
-                auth_config_content = generator.generate_auth_config()
-                if auth_config_content:
-                    auth_config_path = strategist.auth_config_target(project_dir)
-                    auth_config_path.parent.mkdir(parents=True, exist_ok=True)
-                    auth_config_path.write_text(auth_config_content)
-
-            # Generate test configuration if testing selected
-            testing_type = config.get("testing", "None")
-            if testing_type != "None":
-                test_config_content = generator.generate_test_config()
-                if test_config_content:
-                    test_config_path = os.path.join(project_dir, "pytest.ini")
-                    with open(test_config_path, "w") as f:
-                        f.write(test_config_content)
-
-            # Generate Docker files if deployment selected
-            deployment = config.get("deployment", [])
-            if deployment and deployment != ["None"]:
-                # Thread the preset-aware app module so the generated
-                # Dockerfile's ``CMD ["uvicorn", "<module>:app", ...]``
-                # matches the layout the user actually generated. Default
-                # ``src.main:app`` only works for minimal / single-module /
-                # classic-layered; domain-starter needs ``src.app.main:app``.
-                generator.generate_docker_files(app_module=strategist.app_module)
-                print_success("Generated Docker deployment files")
-
-            # Surface preset-specific warnings (e.g. "you picked a preset
-            # whose shipped main.py we kept; CORS/Prometheus must be wired
-            # manually").
-            for warning in strategist.compatibility_warnings(config):
-                print_warning(warning, title="Preset compatibility")
-
-            print_success("Generated configuration files for selected stack")
-
-            # Create virtual environment and install dependencies
-            venv_path = create_venv_with_manager(project_dir, package_manager)
-            install_dependencies_with_manager(project_dir, venv_path, package_manager)
-
-            success_message = get_deployment_success_message(
-                template, project_name, user_local, create_project_folder
-            )
-            print_success(success_message)
-
-            print_info(
-                "To start your project, run 'fastkit runserver' at newly created FastAPI project directory"
-            )
-
-        except Exception as e:
-            if settings.DEBUG_MODE:
-                logger = get_logger()
-                logger.exception(f"Error during project creation in init: {str(e)}")
-            print_error(f"Error during project creation: {str(e)}")
-            _cleanup_failed_project(
-                project_dir, settings.USER_WORKSPACE, create_project_folder
-            )
-
         return
 
     # Non-interactive mode (original behavior)
@@ -587,6 +645,11 @@ def init(
             print_error("Invalid email format. Please try again.")
     if not description:
         description = click.prompt("Enter the project description", type=str)
+
+    name_valid, name_error = validate_project_name(project_name)
+    if not name_valid:
+        print_error(f"Invalid project name: {name_error}")
+        return
 
     project_dir = os.path.join(settings.USER_WORKSPACE, project_name)
 
@@ -626,24 +689,7 @@ def init(
 
     # Package manager selection
     if not package_manager:
-        console.print("\n[bold]Available Package Managers:[/bold]")
-        package_manager_table = create_info_table(
-            "Package Managers",
-            {
-                f"{manager.upper()}": config["description"]
-                for manager, config in settings.PACKAGE_MANAGER_CONFIG.items()
-            },
-        )
-        console.print(package_manager_table)
-        console.print("\n")
-
-        package_manager = click.prompt(
-            "Select package manager",
-            type=click.Choice(settings.SUPPORTED_PACKAGE_MANAGERS),
-            default=settings.DEFAULT_PACKAGE_MANAGER,
-            show_choices=True,
-            show_default=True,
-        )
+        package_manager = _select_package_manager(settings)
 
     template = "fastapi-empty"
     template_dir = settings.FASTKIT_TEMPLATE_ROOT
@@ -663,60 +709,120 @@ def init(
         return
 
     # Ask user whether to create a new project folder
-    create_project_folder = ask_create_project_folder(project_name)
+    create_project_folder = True if dry_run else ask_create_project_folder(project_name)
 
-    try:
-        user_local = settings.USER_WORKSPACE
+    dependencies = list(settings.PROJECT_STACKS[stack])
+    deps_table = create_info_table(
+        f"Creating Project: {project_name}", {"Component": "Collected"}
+    )
+    for dep in dependencies:
+        deps_table.add_row(dep, "✓")
+    console.print(deps_table)
 
-        project_dir, _ = deploy_template_with_folder_option(
-            target_template, user_local, project_name, create_project_folder
-        )
+    created_dir = _scaffold(
+        ctx,
+        ScaffoldOptions(
+            project_name=project_name,
+            author=author,
+            author_email=author_email,
+            description=description,
+            package_manager=package_manager,
+            template=template,
+            dependencies=dependencies,
+            create_project_folder=create_project_folder,
+            dry_run=dry_run,
+            with_venv=not no_venv,
+            with_install=not (no_install or no_venv),
+            assume_yes=assume_yes,
+        ),
+        error_context="init",
+    )
 
-        inject_project_metadata(
-            project_dir, project_name, author, author_email, description
-        )
-
-        deps_table = create_info_table(
-            f"Creating Project: {project_name}", {"Component": "Collected"}
-        )
-
-        # Generate dependency file using selected package manager
-        dependencies = settings.PROJECT_STACKS[stack]
-        generate_dependency_file_with_manager(
-            project_dir,
-            dependencies,
-            package_manager,
-            project_name,
-            author,
-            author_email,
-            description,
-        )
-
-        for dep in dependencies:
-            deps_table.add_row(dep, "✓")
-
-        console.print(deps_table)
-
-        # Create virtual environment and install dependencies with selected package manager
-        venv_path = create_venv_with_manager(project_dir, package_manager)
-        install_dependencies_with_manager(project_dir, venv_path, package_manager)
-
-        success_message = get_deployment_success_message(
-            template, project_name, user_local, create_project_folder
-        )
-        print_success(success_message)
-
+    if created_dir:
         print_info(
             "To start your project, run 'fastkit runserver' at newly created FastAPI project directory"
         )
 
-    except Exception as e:
-        if settings.DEBUG_MODE:
-            logger = get_logger()
-            logger.exception(f"Error during project creation in init: {str(e)}")
-        print_error(f"Error during project creation: {str(e)}")
-        _cleanup_failed_project(
-            project_dir, settings.USER_WORKSPACE, create_project_folder
+
+def _init_from_config(
+    ctx: Context,
+    config: Dict[str, Any],
+    package_manager: Optional[str],
+    dry_run: bool,
+    no_venv: bool,
+    no_install: bool,
+    assume_yes: bool = False,
+) -> None:
+    """
+    Create a project from an interactive / file-provided configuration.
+
+    :param ctx: Click context
+    :param config: Configuration dict (interactive builder shape)
+    :param package_manager: CLI override for the config's package manager
+    :param dry_run: Preview only
+    :param no_venv: Skip virtualenv creation
+    :param no_install: Skip dependency installation
+    :param assume_yes: Skip the in-place overwrite confirmation
+    """
+    settings = ctx.obj["settings"]
+
+    project_name = cast(str, config.get("project_name", ""))
+    author = cast(str, config.get("author", ""))
+    author_email = cast(str, config.get("author_email", ""))
+    description = cast(str, config.get("description", ""))
+    resolved_manager = cast(
+        str,
+        package_manager
+        or config.get("package_manager", settings.DEFAULT_PACKAGE_MANAGER),
+    )
+
+    dependencies = config.get("all_dependencies")
+    if not dependencies:
+        # A hand-written config file may only list the feature selections;
+        # let the interactive builder derive the package set from them so
+        # both entry points resolve dependencies identically.
+        builder = InteractiveConfigBuilder(settings)
+        config = builder.build_config_from_mapping(config)
+        dependencies = config.get("all_dependencies", [])
+
+    project_dir = os.path.join(settings.USER_WORKSPACE, project_name)
+    if not dry_run and os.path.exists(project_dir):
+        print_error(f"Error: Project '{project_name}' already exists.")
+        return
+
+    # Pick the base template from the architecture preset. Configs without a
+    # preset fall back to ``minimal`` (= fastapi-empty), preserving pre-#45
+    # behaviour.
+    preset_id = config.get("architecture_preset")
+    strategist = PresetLayoutStrategist(preset_id)
+    template = strategist.base_template
+
+    create_project_folder = True if dry_run else ask_create_project_folder(project_name)
+
+    created_dir = _scaffold(
+        ctx,
+        ScaffoldOptions(
+            project_name=project_name,
+            author=author,
+            author_email=author_email,
+            description=description,
+            package_manager=resolved_manager,
+            template=template,
+            preset_id=strategist.preset_id,
+            dependencies=cast(List[str], dependencies),
+            config=config,
+            create_project_folder=create_project_folder,
+            dry_run=dry_run,
+            with_venv=not no_venv,
+            with_install=not (no_install or no_venv),
+            assume_yes=assume_yes,
+        ),
+        error_context="init",
+    )
+
+    if created_dir:
+        print_info(
+            "To start your project, run 'fastkit runserver' at newly created FastAPI project directory"
         )
 
 
@@ -766,8 +872,6 @@ def addroute(ctx: Context, route_name: str, project_dir: str) -> None:
         return
 
     # Route name shouldn't match reserved keywords
-    import keyword
-
     if keyword.iskeyword(route_name):
         print_error(
             f"Route name '{route_name}' is a Python keyword and cannot be used."
@@ -856,15 +960,37 @@ def deleteproject(ctx: Context, project_name: str) -> None:
 def _derive_app_module(project_dir: str, main_path: str) -> str:
     """Convert a discovered ``main.py`` path into a uvicorn ``module:attr``.
 
-    Templates can place ``main.py`` anywhere under the project (``main.py``,
-    ``src/main.py``, ``src/app/main.py``, ...). The previous ``"src/"`` /
-    ``""`` heuristic mis-mapped the domain-starter layout (``src/app/main.py``
-    → wrongly produced ``src.main:app``); deriving the dotted path from the
-    actual relative location avoids that drift for any future layout too.
+    Thin wrapper over the shared
+    :func:`~fastapi_fastkit.backend.project_builder.app_module_from_main_path`
+    so runserver, the preset profiles and Docker generation all derive the
+    entrypoint the same way.
     """
-    rel_path = os.path.relpath(main_path, project_dir)
-    module_part = os.path.splitext(rel_path)[0].replace(os.sep, ".")
-    return f"{module_part}:app"
+    return app_module_from_main_path(project_dir, main_path)
+
+
+def _resolve_runserver_app_module(project_dir: str) -> str:
+    """
+    Determine which ``module:attr`` uvicorn should serve.
+
+    The project's recorded ``[tool.fastapi-fastkit].app_module`` wins: it is
+    written at generation time and stays correct even for layouts the
+    on-disk scan cannot rank. Discovery is the fallback for projects created
+    before the metadata contract existed.
+
+    :param project_dir: Path to the project directory
+    :return: ``module:attr`` string, or an empty string when no entrypoint exists
+    """
+    recorded = read_fastkit_metadata(project_dir).get("app_module")
+    if isinstance(recorded, str) and recorded:
+        module_path = recorded.split(":")[0].replace(".", os.sep)
+        if os.path.exists(os.path.join(project_dir, f"{module_path}.py")):
+            return recorded
+
+    main_path = find_template_core_modules(project_dir).get("main", "")
+    if not main_path:
+        return ""
+
+    return _derive_app_module(project_dir, main_path)
 
 
 @fastkit_cli.command()
@@ -935,13 +1061,10 @@ def runserver(
                 return
             venv_python = None
 
-    core_modules = find_template_core_modules(project_dir)
-    if not core_modules["main"]:
+    app_module = _resolve_runserver_app_module(project_dir)
+    if not app_module:
         print_error(f"Could not find 'main.py' in '{project_dir}'.")
         return
-
-    main_path = core_modules["main"]
-    app_module = _derive_app_module(project_dir, main_path)
 
     if venv_python:
         print_info(f"Using Python from virtual environment: {venv_python}")
