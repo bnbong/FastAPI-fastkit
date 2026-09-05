@@ -116,12 +116,6 @@ fastkit startdemo [TEMPLATE] [OPTIONS]
   - Refuses to run if the target project directory already exists (`--dry-run` excepted)
 - Tip: List available templates with `fastkit list-templates`
 
-New in v1.4.0: `fastapi-auth-jwt` (JWT auth with refresh rotation),
-`fastapi-sqlmodel` (async SQLModel + Alembic + generic CRUD), and
-`fastapi-llm-agent` (streaming Claude agent with a tool loop).
-`fastapi-dockerized` and `fastapi-async-crud` are deprecated — they still
-work, but are no longer recommended starting points.
-
 ### Add a new route
 ```console
 fastkit addroute <project_name> <route_name>

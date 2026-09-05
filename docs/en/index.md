@@ -20,7 +20,7 @@
 
 This project was created to speed up the configuration of the development environment needed to develop Python-based web apps for new users of Python and [FastAPI](https://github.com/fastapi/fastapi).
 
-This project was inspired by the `SpringBoot initializer` & Python Django's `django-admin` cli operation.
+This project was inspired by the `SpringBoot initializer` & Python Django's `django-admin` CLI operation.
 
 !!! info "Translation status"
     English is the source of truth for these docs. Other languages in
@@ -128,7 +128,7 @@ Do you want to proceed with project creation? [y/N]: y
 FastAPI project will deploy at '~your-project-path~'
 
 ╭──────────────────────── Info ────────────────────────╮
-│ ℹ Injected metadata into setup.py                    │
+│ ℹ Injected metadata into pyproject.toml              │
 ╰──────────────────────────────────────────────────────╯
 ╭──────────────────────── Info ────────────────────────╮
 │ ℹ Injected metadata into config file                 │
@@ -178,6 +178,16 @@ Installing dependencies...
 </div>
 
 This command will create a new FastAPI project workspace environment with Python virtual environment.
+
+- Key options:
+  - `--project-name`, `--author`, `--author-email`, `--description`
+  - `--package-manager` [pip|uv|pdm|poetry]
+  - `--config <path>`: create the project from a saved config file (`.json` / `.toml`, and `.yaml` when PyYAML is installed) with no prompts
+  - `--save-config <path>`: with `--interactive`, record the answers for later reuse
+  - `--dry-run`: print the files and packages that would be created, write nothing
+  - `--no-venv`: skip virtual environment creation (implies `--no-install`)
+  - `--no-install`: skip dependency installation
+  - `--yes` / `-y`: skip the "Overwrite these files?" confirmation when deploying in place
 
 ### Create a project with interactive mode ✨ NEW!
 
@@ -269,6 +279,30 @@ Select utilities (comma-separated numbers, e.g., 1,3,4):
 
 Select utilities: 1
 
+🪵 Logging Format
+Select logging format:
+  1. structured - JSON logs + X-Request-ID correlation middleware (stdlib only)
+  2. None - Uvicorn's default plain-text logging
+
+Select logging format [2]: 1
+
+🧬 Database Migrations
+Select migration tool:
+  1. Alembic - alembic.ini + async alembic/env.py + scripts/migrate.sh (recommended for SQL databases)
+  2. None - No migration tooling
+
+Select migration tool [1]: 1
+
+🧰 Developer Tooling
+Select tooling to generate (comma-separated numbers, e.g., 1,3)
+  1. ruff ruff + ruff-format config in pyproject.toml (replaces black/isort)
+  2. pre-commit .pre-commit-config.yaml
+  3. github-actions .github/workflows/test.yml (Python 3.12)
+  4. devcontainer .devcontainer/devcontainer.json
+  5. makefile Makefile with install/test/lint/format/run
+
+Your choice (or press Enter to skip): 1,2
+
 🚀 Deployment Configuration
 Select deployment option:
   1. Docker - Generate Dockerfile
@@ -299,6 +333,9 @@ Enter custom package names (comma-separated, press Enter to skip):
 │ Monitoring          │ Prometheus                                                                │
 │ Testing             │ Coverage                                                                  │
 │ Utilities           │ CORS                                                                      │
+│ Logging             │ structured                                                                │
+│ Migrations          │ Alembic                                                                   │
+│ Tooling             │ ruff, pre-commit                                                          │
 │ Package Manager     │ uv                                                                        │
 └─────────────────────┴───────────────────────────────────────────────────────────────────────────┘
 
@@ -469,6 +506,12 @@ FastAPI template project will deploy at '~your-project-path~'
 
 </div>
 
+- Key options:
+  - `--project-name`, `--author`, `--author-email`, `--description`
+  - `--package-manager` [pip|uv|pdm|poetry]
+  - `--dry-run`, `--no-venv`, `--no-install`, `--yes`/`-y` — same meaning as on `init`
+  - Refuses to run if the target project directory already exists (`--dry-run` excepted)
+
 To view the list of available FastAPI demos, check with:
 
 <div class="termy">
@@ -487,19 +530,42 @@ $ fastkit list-templates
 │                        │ PostgreSQL                                            │
 │ fastapi-default        │ Simple FastAPI Project                                │
 │ fastapi-single-module  │ FastAPI Single Module Template                        │
+│ fastapi-auth-jwt       │ FastAPI JWT Authentication                            │
+│ fastapi-sqlmodel       │ FastAPI SQLModel                                      │
+│ fastapi-llm-agent      │ FastAPI LLM Agent                                     │
 └────────────────────────┴───────────────────────────────────────────────────────┘
 ```
 
 </div>
 
+Available templates:
+
+| Template | Description | Notes |
+|---|---|---|
+| [`fastapi-default`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-default/README.md-tpl) | Simple FastAPI project with a classic layered layout | Good first choice |
+| [`fastapi-empty`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-empty/README.md-tpl) | Minimal FastAPI template | Base for `minimal` preset |
+| [`fastapi-single-module`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-single-module/README.md-tpl) | Single-file FastAPI app | Base for `single-module` preset |
+| [`fastapi-domain-starter`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-domain-starter/README.md-tpl) | Domain-oriented, pyproject-first starter for medium-sized APIs | Base for `domain-starter` preset |
+| [`fastapi-auth-jwt`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-auth-jwt/README.md-tpl) | JWT authentication with refresh-token rotation, argon2 hashing and scopes | New in v1.4.0 |
+| [`fastapi-sqlmodel`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-sqlmodel/README.md-tpl) | Async SQLModel + Alembic migrations + generic CRUD with pagination | New in v1.4.0 |
+| [`fastapi-llm-agent`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-llm-agent/README.md-tpl) | Streaming Claude chat agent (SSE) with a tool-call loop | New in v1.4.0 |
+| [`fastapi-mcp`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-mcp/README.md-tpl) | FastAPI app exposed as an MCP server | |
+| [`fastapi-psql-orm`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-psql-orm/README.md-tpl) | Item management API with PostgreSQL, SQLModel, Alembic and docker-compose | Requires Docker |
+| [`fastapi-custom-response`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-custom-response/README.md-tpl) | Item management API with a custom response envelope, error handling and pagination | |
+| [`fastapi-async-crud`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-async-crud/README.md-tpl) | Async item management API | **Deprecated** — use `fastapi-sqlmodel` |
+| [`fastapi-dockerized`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-dockerized/README.md-tpl) | Dockerized item management API | **Deprecated** — use `fastapi-default` with the Docker option in `init --interactive` |
+
+Deprecated templates still work but are no longer recommended starting points. See [Which starter should I choose?](user-guide/choosing-a-starter.md) for a decision guide.
+
 ## Documentation
 
 For comprehensive guides and detailed usage instructions, explore our documentation:
 
+- 🧭 **[Which starter should I choose?](user-guide/choosing-a-starter.md)** - Beginner decision guide for `startdemo` templates and interactive presets
 - 📚 **[User Guide](user-guide/quick-start.md)** - Detailed installation and usage guides
 - 🎯 **[Tutorial](tutorial/getting-started.md)** - Step-by-step tutorials for beginners
-- 🧭 **[Which starter should I choose?](user-guide/choosing-a-starter.md)** - Decision guide for templates and interactive presets
 - 📖 **[CLI Reference](user-guide/cli-reference.md)** - Complete command reference
+- 🧱 **[Architecture Preset Matrix](reference/preset-feature-matrix.md)** - Per-preset / per-feature contract for interactive generation
 - 🔍 **[Template Quality Assurance](reference/template-quality-assurance.md)** - Automated testing and quality standards
 
 ## 🚀 Template-based Tutorials
