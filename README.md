@@ -57,7 +57,9 @@ $ pip install FastAPI-fastkit
 ```console
 fastkit init [OPTIONS]
 ```
-- What it does: Scaffolds an empty FastAPI project, creates a virtual environment, installs dependencies
+> [!TIP]
+> Scaffolds an empty FastAPI project, creates a virtual environment, installs dependencies
+
 - Key options:
   - `--project-name`, `--author`, `--author-email`, `--description`
   - `--package-manager` [pip|uv|pdm|poetry]
@@ -73,7 +75,9 @@ fastkit init [OPTIONS]
 ```console
 fastkit init --interactive
 ```
-- What it does: Guided step-by-step project setup with intelligent feature selection
+> [!TIP]
+> Guided step-by-step project setup with intelligent feature selection
+
 - Features:
   - **Architecture preset**: `minimal` | `single-module` | `classic-layered` | `domain-starter` (default)
   - **Database selection**: PostgreSQL, MySQL, MongoDB, Redis, SQLite
@@ -89,7 +93,7 @@ fastkit init --interactive
   - **Deployment**: Docker, docker-compose with auto-generated configs
   - **Package manager**: pip, uv, pdm, poetry
   - **Custom packages**: Add your own dependencies
-- Auto-generates (varies by preset — see [the matrix](https://bnbong.github.io/FastAPI-fastkit/reference/preset-feature-matrix/) for details):
+- Auto-generates (varies by preset - see [the matrix](https://bnbong.github.io/FastAPI-fastkit/reference/preset-feature-matrix/) for details):
   - `main.py` regenerated from selected features for `minimal` / `single-module`; preserved as-shipped for `classic-layered` / `domain-starter`
   - Database and authentication configuration files at preset-specific paths
   - Docker deployment files (`Dockerfile`, `docker-compose.yml`) with the preset's correct uvicorn entrypoint
@@ -102,7 +106,9 @@ fastkit init --interactive
 ```console
 fastkit startdemo [TEMPLATE] [OPTIONS]
 ```
-- What it does: Creates a project from a template (e.g., `fastapi-default`) and installs dependencies
+> [!TIP]
+> Creates a project from a template (e.g., `fastapi-default`) and installs dependencies
+
 - Key options:
   - `--project-name`, `--author`, `--author-email`, `--description`
   - `--package-manager` [pip|uv|pdm|poetry]
@@ -134,6 +140,25 @@ fastkit runserver [OPTIONS]
 ```console
 fastkit list-templates
 ```
+
+Available templates:
+
+| Template | Description | Notes |
+|---|---|---|
+| [`fastapi-default`](src/fastapi_fastkit/fastapi_project_template/fastapi-default/README.md-tpl) | Simple FastAPI project with a classic layered layout | Good first choice |
+| [`fastapi-empty`](src/fastapi_fastkit/fastapi_project_template/fastapi-empty/README.md-tpl) | Minimal FastAPI template | Base for `minimal` preset |
+| [`fastapi-single-module`](src/fastapi_fastkit/fastapi_project_template/fastapi-single-module/README.md-tpl) | Single-file FastAPI app | Base for `single-module` preset |
+| [`fastapi-domain-starter`](src/fastapi_fastkit/fastapi_project_template/fastapi-domain-starter/README.md-tpl) | Domain-oriented, pyproject-first starter for medium-sized APIs | Base for `domain-starter` preset |
+| [`fastapi-auth-jwt`](src/fastapi_fastkit/fastapi_project_template/fastapi-auth-jwt/README.md-tpl) | JWT authentication with refresh-token rotation, argon2 hashing and scopes | New in v1.4.0 |
+| [`fastapi-sqlmodel`](src/fastapi_fastkit/fastapi_project_template/fastapi-sqlmodel/README.md-tpl) | Async SQLModel + Alembic migrations + generic CRUD with pagination | New in v1.4.0 |
+| [`fastapi-llm-agent`](src/fastapi_fastkit/fastapi_project_template/fastapi-llm-agent/README.md-tpl) | Streaming Claude chat agent (SSE) with a tool-call loop | New in v1.4.0 |
+| [`fastapi-mcp`](src/fastapi_fastkit/fastapi_project_template/fastapi-mcp/README.md-tpl) | FastAPI app exposed as an MCP server | |
+| [`fastapi-psql-orm`](src/fastapi_fastkit/fastapi_project_template/fastapi-psql-orm/README.md-tpl) | Item management API with PostgreSQL, SQLModel, Alembic and docker-compose | Requires Docker |
+| [`fastapi-custom-response`](src/fastapi_fastkit/fastapi_project_template/fastapi-custom-response/README.md-tpl) | Item management API with a custom response envelope, error handling and pagination | |
+| [`fastapi-async-crud`](src/fastapi_fastkit/fastapi_project_template/fastapi-async-crud/README.md-tpl) | Async item management API | **Deprecated** — use `fastapi-sqlmodel` |
+| [`fastapi-dockerized`](src/fastapi_fastkit/fastapi_project_template/fastapi-dockerized/README.md-tpl) | Dockerized item management API | **Deprecated** — use `fastapi-default` with the Docker option in `init --interactive` |
+
+Deprecated templates still work but are no longer recommended starting points. See [Which starter should I choose?](https://bnbong.github.io/FastAPI-fastkit/user-guide/choosing-a-starter/) for a decision guide.
 
 ### Delete a project
 ```console
