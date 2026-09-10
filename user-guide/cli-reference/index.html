@@ -1,0 +1,5067 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Fast, easy-to-use starter kit for new users of Python and FastAPI">
+      
+      
+      
+        <link rel="canonical" href="https://bnbong.github.io/FastAPI-fastkit/user-guide/cli-reference/">
+      
+      
+        <link rel="prev" href="../using-templates/">
+      
+      
+        <link rel="next" href="../../tutorial/getting-started/">
+      
+      
+        
+          <link rel="alternate" href="./" hreflang="en">
+        
+          <link rel="alternate" href="../../ko/user-guide/cli-reference/" hreflang="ko">
+        
+          <link rel="alternate" href="../../ja/user-guide/cli-reference/" hreflang="ja">
+        
+          <link rel="alternate" href="../../zh/user-guide/cli-reference/" hreflang="zh">
+        
+          <link rel="alternate" href="../../es/user-guide/cli-reference/" hreflang="es">
+        
+          <link rel="alternate" href="../../fr/user-guide/cli-reference/" hreflang="fr">
+        
+          <link rel="alternate" href="../../de/user-guide/cli-reference/" hreflang="de">
+        
+      
+      
+      <link rel="icon" href="../../img/FastAPI-fastkit_logo.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>CLI Reference - FastAPI-fastkit</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=JetBrains+Mono:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"JetBrains Mono";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../css/termynal.css">
+    
+      <link rel="stylesheet" href="../../css/custom.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="brown">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#cli-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="FastAPI-fastkit" class="md-header__button md-logo" aria-label="FastAPI-fastkit" data-md-component="logo">
+      
+  <img src="../../img/FastAPI-fastkit_logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            FastAPI-fastkit
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              CLI Reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="brown"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="brown"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../ko/user-guide/cli-reference/" hreflang="ko" class="md-select__link">
+              한국어
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../ja/user-guide/cli-reference/" hreflang="ja" class="md-select__link">
+              日本語
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../zh/user-guide/cli-reference/" hreflang="zh" class="md-select__link">
+              中文
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../es/user-guide/cli-reference/" hreflang="es" class="md-select__link">
+              Español
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../fr/user-guide/cli-reference/" hreflang="fr" class="md-select__link">
+              Français
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../de/user-guide/cli-reference/" hreflang="de" class="md-select__link">
+              Deutsch
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/bnbong/FastAPI-fastkit" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    bnbong/FastAPI-fastkit
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../installation/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  User Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../tutorial/getting-started/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Tutorial
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../contributing/development-setup/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Contributing
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/faq/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../changelog/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Changelog
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="FastAPI-fastkit" class="md-nav__button md-logo" aria-label="FastAPI-fastkit" data-md-component="logo">
+      
+  <img src="../../img/FastAPI-fastkit_logo.png" alt="logo">
+
+    </a>
+    FastAPI-fastkit
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/bnbong/FastAPI-fastkit" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    bnbong/FastAPI-fastkit
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../choosing-a-starter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Choosing a Starter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../creating-projects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Creating Projects
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adding-routes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Routes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../using-templates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Using Templates
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#global-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Global Options
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Global Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#global-options_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Global Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Commands
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Commands">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#init" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        init
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="init">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Syntax
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-files-config-save-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration files (--config / --save-config)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-file-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration file schema
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#previewing-and-skipping-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Previewing and skipping steps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#in-place-deployment-and-overwrite-confirmation-yes-y" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        In-place deployment and overwrite confirmation (--yes / -y)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interactive-prompts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interactive Prompts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stack-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stack Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interactive-builder-feature-catalog-interactive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interactive builder feature catalog (--interactive)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#examples_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generated-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Generated Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#addroute" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        addroute
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="addroute">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#syntax_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Syntax
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Arguments
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#examples_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generated-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Generated Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generated-endpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Generated Endpoints
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#where-the-code-is-inserted" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where the code is inserted
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#startdemo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        startdemo
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="startdemo">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#syntax_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Syntax
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interactive-prompts_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interactive Prompts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#available-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Available Templates
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#examples_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#runserver" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        runserver
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="runserver">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#syntax_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Syntax
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#examples_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#list-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        list-templates
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="list-templates">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#syntax_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Syntax
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#examples_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#project-metadata-toolfastapi-fastkit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Project metadata ([tool.fastapi-fastkit])
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Variables
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Environment Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#examples_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Files
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration-file-location" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration File Location
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Format
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Workflows
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Workflows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-create-new-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Create New Project
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-add-features-to-existing-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Add Features to Existing Project
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-use-templates-for-complex-projects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Use Templates for Complex Projects
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#command-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Command Not Found
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#virtual-environment-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Virtual Environment Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#server-wont-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Server Won't Start
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#port-already-in-use" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Port Already in Use
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Advanced Usage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#custom-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Templates
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scripting-with-fastapi-fastkit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scripting with FastAPI-fastkit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integration-with-cicd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integration with CI/CD
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#package-manager-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Package Manager Support
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Package Manager Support">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#supported-package-managers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Supported Package Managers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specifying-package-manager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Specifying Package Manager
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Specifying Package Manager">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#global-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Global Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#project-specific-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Project-specific Selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#package-manager-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Package Manager Features
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Package Manager Features">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#uv-default" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        UV (Default)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pdm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PDM
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#poetry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Poetry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pip" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PIP
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#working-with-projects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Working with Projects
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Working with Projects">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#uv-projects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        UV Projects
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pdm-projects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PDM Projects
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#poetry-projects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Poetry Projects
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pip-projects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PIP Projects
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorial
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorial
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/first-project/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Your First Project
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/basic-api-server/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implementing Basic API Server
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/async-crud-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implementing Asynchronous CRUD API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/domain-starter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Domain-oriented Project (Domain Starter)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/auth-jwt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JWT Authentication
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/sqlmodel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Async Persistence with SQLModel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/llm-agent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Streaming LLM Agent
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/database-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Database Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/docker-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/custom-response-handling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implementing Custom Response Handling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/mcp-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implementing MCP Server
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Contributing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/development-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/code-guidelines/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Code Guidelines
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/template-creation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Template Creation Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/translation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Translation Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/preset-feature-matrix/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Preset Matrix
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/template-quality-assurance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Template Quality Assurance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/translation-status/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Translation Status
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#global-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Global Options
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Global Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#global-options_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Global Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Commands
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Commands">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#init" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        init
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="init">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Syntax
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-files-config-save-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration files (--config / --save-config)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-file-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration file schema
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#previewing-and-skipping-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Previewing and skipping steps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#in-place-deployment-and-overwrite-confirmation-yes-y" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        In-place deployment and overwrite confirmation (--yes / -y)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interactive-prompts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interactive Prompts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stack-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stack Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interactive-builder-feature-catalog-interactive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interactive builder feature catalog (--interactive)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#examples_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generated-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Generated Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#addroute" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        addroute
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="addroute">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#syntax_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Syntax
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Arguments
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#examples_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generated-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Generated Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generated-endpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Generated Endpoints
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#where-the-code-is-inserted" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where the code is inserted
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#startdemo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        startdemo
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="startdemo">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#syntax_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Syntax
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interactive-prompts_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interactive Prompts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#available-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Available Templates
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#examples_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#runserver" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        runserver
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="runserver">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#syntax_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Syntax
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#examples_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#list-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        list-templates
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="list-templates">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#syntax_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Syntax
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#examples_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#project-metadata-toolfastapi-fastkit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Project metadata ([tool.fastapi-fastkit])
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Variables
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Environment Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#examples_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Files
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration-file-location" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration File Location
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Format
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Workflows
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Workflows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-create-new-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Create New Project
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-add-features-to-existing-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Add Features to Existing Project
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-use-templates-for-complex-projects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Use Templates for Complex Projects
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#command-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Command Not Found
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#virtual-environment-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Virtual Environment Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#server-wont-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Server Won't Start
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#port-already-in-use" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Port Already in Use
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Advanced Usage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#custom-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Templates
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scripting-with-fastapi-fastkit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scripting with FastAPI-fastkit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integration-with-cicd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integration with CI/CD
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#package-manager-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Package Manager Support
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Package Manager Support">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#supported-package-managers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Supported Package Managers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specifying-package-manager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Specifying Package Manager
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Specifying Package Manager">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#global-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Global Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#project-specific-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Project-specific Selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#package-manager-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Package Manager Features
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Package Manager Features">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#uv-default" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        UV (Default)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pdm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PDM
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#poetry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Poetry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pip" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PIP
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#working-with-projects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Working with Projects
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Working with Projects">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#uv-projects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        UV Projects
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pdm-projects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PDM Projects
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#poetry-projects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Poetry Projects
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pip-projects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PIP Projects
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="cli-reference">CLI Reference</h1>
+<p>Complete reference for all FastAPI-fastkit command-line interface commands.</p>
+<h2 id="global-options">Global Options</h2>
+<p>All commands support these global options:</p>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">$ </span>fastkit<span class="w"> </span><span class="o">[</span>GLOBAL_OPTIONS<span class="o">]</span><span class="w"> </span>COMMAND<span class="w"> </span><span class="o">[</span>COMMAND_OPTIONS<span class="o">]</span>
+</span></code></pre></div>
+<h3 id="global-options_1">Global Options</h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--version</code></td>
+<td>Show FastAPI-fastkit version</td>
+</tr>
+<tr>
+<td><code>--help</code></td>
+<td>Show help message</td>
+</tr>
+</tbody>
+</table>
+<h3 id="examples">Examples</h3>
+<div class="termy">
+
+<div class="language-console highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="gp">$ </span>fastkit<span class="w"> </span>--version
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="go">FastAPI-fastkit version 1.0.0</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="gp">$ </span>fastkit<span class="w"> </span>--help
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="go">Usage: fastkit [OPTIONS] COMMAND [ARGS]...</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="go">  FastAPI-fastkit CLI</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="go">Options:</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="go">  --version  Show the version and exit.</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="go">  --help     Show this message and exit.</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="go">Commands:</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="go">  addroute       Add a new route to FastAPI project</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="go">  init           Create a new FastAPI project</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="go">  list-templates List available FastAPI templates</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="go">  runserver      Start FastAPI development server</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="go">  startdemo      Create FastAPI project from template</span>
+</span></code></pre></div>
+
+</div>
+
+<h2 id="commands">Commands</h2>
+<h3 id="init"><code>init</code></h3>
+<p>Create a new FastAPI project with interactive setup.</p>
+<h4 id="syntax">Syntax</h4>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="gp">$ </span>fastkit<span class="w"> </span>init<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</span></code></pre></div>
+<h4 id="options">Options</h4>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--interactive</code></td>
+<td>Guided setup: architecture preset, then feature selection</td>
+<td>off</td>
+</tr>
+<tr>
+<td><code>--config &lt;path&gt;</code></td>
+<td>Create the project from a saved configuration file, with no prompts</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--save-config &lt;path&gt;</code></td>
+<td>With <code>--interactive</code>, write the answered configuration to this path</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--project-name</code></td>
+<td>Project name (prompted when omitted)</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--author</code></td>
+<td>Author name (prompted when omitted)</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--author-email</code></td>
+<td>Author email (prompted when omitted)</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--description</code></td>
+<td>Project description (prompted when omitted)</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--package-manager</code></td>
+<td>Package manager to use (pip, uv, pdm, poetry)</td>
+<td>uv</td>
+</tr>
+<tr>
+<td><code>--dry-run</code></td>
+<td>Show the files and packages that would be created, without writing anything</td>
+<td>off</td>
+</tr>
+<tr>
+<td><code>--no-venv</code></td>
+<td>Skip virtual environment creation (implies <code>--no-install</code>)</td>
+<td>off</td>
+</tr>
+<tr>
+<td><code>--no-install</code></td>
+<td>Skip dependency installation</td>
+<td>off</td>
+</tr>
+<tr>
+<td><code>--yes</code> / <code>-y</code></td>
+<td>Do not ask for confirmation before overwriting existing files when deploying the project in place</td>
+<td>off</td>
+</tr>
+<tr>
+<td><code>--help</code></td>
+<td>Show command help</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<h4 id="configuration-files-config-save-config">Configuration files (<code>--config</code> / <code>--save-config</code>)</h4>
+<p>An interactive session's answers are a plain mapping, and that mapping can
+travel through a file. This turns project creation into something you can
+commit, review and replay.</p>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="gp"># </span>record<span class="w"> </span>an<span class="w"> </span>interactive<span class="w"> </span>session
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="gp">$ </span>fastkit<span class="w"> </span>init<span class="w"> </span>--interactive<span class="w"> </span>--save-config<span class="w"> </span>fastkit.config.json
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="gp"># </span>replay<span class="w"> </span>it<span class="w"> </span>later,<span class="w"> </span>with<span class="w"> </span>no<span class="w"> </span>prompts<span class="w"> </span>at<span class="w"> </span>all
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="gp">$ </span>fastkit<span class="w"> </span>init<span class="w"> </span>--config<span class="w"> </span>fastkit.config.json
+</span></code></pre></div>
+<p>If you don't pass <code>--save-config</code>, an interactive run that reaches the end
+asks whether to save the selections and where to put them. That prompt only
+appears when a human is at the terminal — piped or CI runs stay silent and
+opt in with the flag instead.</p>
+<p><strong>Supported formats</strong> are chosen from the file extension:</p>
+<table>
+<thead>
+<tr>
+<th>Extension</th>
+<th>Availability</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.json</code></td>
+<td>Always (standard library)</td>
+</tr>
+<tr>
+<td><code>.toml</code></td>
+<td>Always (standard library)</td>
+</tr>
+<tr>
+<td><code>.yaml</code> / <code>.yml</code></td>
+<td>Only when PyYAML is installed — fastkit does not add it as a runtime dependency</td>
+</tr>
+</tbody>
+</table>
+<p>A loaded file must contain a mapping at its top level with at least
+<code>project_name</code>, <code>author</code> and <code>author_email</code>. It is then validated with the
+same rules the interactive prompts use (project name shape, email format,
+<code>all_dependencies</code> must be a list), and every problem is reported before
+anything is written. A file that lists only feature selections — no
+<code>all_dependencies</code> — is expanded through the interactive builder, so a
+hand-written config and a wizard session resolve the same package set.</p>
+<p>A minimal example:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">&quot;project_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;orders-api&quot;</span><span class="p">,</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">&quot;author&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Developer Kim&quot;</span><span class="p">,</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="nt">&quot;author_email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;developer@example.com&quot;</span><span class="p">,</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Domain-oriented orders service&quot;</span><span class="p">,</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">  </span><span class="nt">&quot;architecture_preset&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;domain-starter&quot;</span><span class="p">,</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">  </span><span class="nt">&quot;package_manager&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uv&quot;</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="p">}</span>
+</span></code></pre></div>
+<h4 id="configuration-file-schema">Configuration file schema</h4>
+<p>Every config file — hand-written or produced by <code>--save-config</code> — is passed
+through the same normalizer before it reaches the generator
+(<code>normalize_project_config</code> in
+<code>backend/project_builder/config_schema.py</code>). An unknown key, an unknown
+choice for a known axis, or a value of the wrong type is rejected with the
+offending name and the list of values that are actually allowed, instead of
+being silently ignored.</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Shape</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>project_name</code>, <code>author</code>, <code>author_email</code></td>
+<td>string</td>
+<td>Required</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>string</td>
+<td>Required</td>
+</tr>
+<tr>
+<td><code>architecture_preset</code> (alias <code>preset</code>)</td>
+<td><code>"minimal"</code> | <code>"single-module"</code> | <code>"classic-layered"</code> | <code>"domain-starter"</code></td>
+<td>The two spellings must agree if both are present</td>
+</tr>
+<tr>
+<td><code>package_manager</code></td>
+<td><code>"pip"</code> | <code>"uv"</code> | <code>"pdm"</code> | <code>"poetry"</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>database</code></td>
+<td>string, or <code>{"type": &lt;choice&gt;}</code></td>
+<td><code>PostgreSQL</code>, <code>MySQL</code>, <code>MongoDB</code>, <code>Redis</code>, <code>SQLite</code>, <code>None</code></td>
+</tr>
+<tr>
+<td><code>authentication</code>, <code>async_tasks</code>, <code>testing</code>, <code>caching</code>, <code>monitoring</code>, <code>migrations</code>, <code>logging</code></td>
+<td>string, or <code>{"type": &lt;choice&gt;}</code></td>
+<td>Single-select axes — see the <a href="#interactive-builder-feature-catalog-interactive">feature catalog</a> above for each axis's choices</td>
+</tr>
+<tr>
+<td><code>utilities</code>, <code>tooling</code></td>
+<td>list of strings</td>
+<td>Multi-select axes — same catalog for choices</td>
+</tr>
+<tr>
+<td><code>deployment</code></td>
+<td>list of strings</td>
+<td>Subset of <code>Docker</code>, <code>docker-compose</code>; picking <code>docker-compose</code> pulls in <code>Docker</code> automatically</td>
+</tr>
+<tr>
+<td><code>custom_packages</code></td>
+<td>list of strings</td>
+<td>Extra packages to install verbatim</td>
+</tr>
+</tbody>
+</table>
+<p>Every axis accepts either its bare choice (<code>"authentication": "JWT"</code>) or the
+<code>{"type": ...}</code> mapping shape that <code>database</code> and a project's own
+<code>[tool.fastapi-fastkit]</code> metadata use (<code>"authentication": {"type": "JWT"}</code>) —
+both normalize to the same canonical form, and <code>--save-config</code> always writes
+the canonical, bare-string form back out.</p>
+<p>A config exercising most of the axes:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">{</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="nt">&quot;project_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;orders-api&quot;</span><span class="p">,</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="nt">&quot;author&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Developer Kim&quot;</span><span class="p">,</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span><span class="nt">&quot;author_email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;developer@example.com&quot;</span><span class="p">,</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Domain-oriented orders service&quot;</span><span class="p">,</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">  </span><span class="nt">&quot;architecture_preset&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;domain-starter&quot;</span><span class="p">,</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">  </span><span class="nt">&quot;package_manager&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uv&quot;</span><span class="p">,</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">  </span><span class="nt">&quot;database&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PostgreSQL&quot;</span><span class="p">,</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">  </span><span class="nt">&quot;authentication&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;JWT&quot;</span><span class="p">,</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">  </span><span class="nt">&quot;async_tasks&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Celery&quot;</span><span class="p">,</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">  </span><span class="nt">&quot;caching&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Redis&quot;</span><span class="p">,</span>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">  </span><span class="nt">&quot;migrations&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Alembic&quot;</span><span class="p">,</span>
+</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="w">  </span><span class="nt">&quot;tooling&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;ruff&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;makefile&quot;</span><span class="p">],</span>
+</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="w">  </span><span class="nt">&quot;deployment&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Docker&quot;</span><span class="p">]</span>
+</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>The same configuration as TOML:</p>
+<div class="language-toml highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">project_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;orders-api&quot;</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="n">author</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Developer Kim&quot;</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">author_email</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;developer@example.com&quot;</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="n">description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Domain-oriented orders service&quot;</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="n">architecture_preset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;domain-starter&quot;</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="n">package_manager</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;uv&quot;</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="n">database</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;PostgreSQL&quot;</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="n">authentication</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;JWT&quot;</span>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="n">async_tasks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Celery&quot;</span>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="n">caching</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Redis&quot;</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="n">migrations</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Alembic&quot;</span>
+</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="n">tooling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;ruff&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;makefile&quot;</span><span class="p">]</span>
+</span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="n">deployment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Docker&quot;</span><span class="p">]</span>
+</span></code></pre></div>
+<h4 id="previewing-and-skipping-steps">Previewing and skipping steps</h4>
+<p><code>--dry-run</code> prints the tree that would be created and the packages that
+would be installed — with the package manager that would install them —
+and then exits without touching the disk:</p>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="gp">$ </span>fastkit<span class="w"> </span>init<span class="w"> </span>--config<span class="w"> </span>fastkit.config.json<span class="w"> </span>--dry-run
+</span></code></pre></div>
+<p><code>--no-install</code> stops after the virtual environment is created;
+<code>--no-venv</code> skips the environment as well (and therefore the install).
+Both are useful in containers, in CI, and anywhere the environment is
+managed outside fastkit.</p>
+<h4 id="in-place-deployment-and-overwrite-confirmation-yes-y">In-place deployment and overwrite confirmation (<code>--yes</code> / <code>-y</code>)</h4>
+<p>When a project is deployed in place — into the current workspace rather
+than a new project folder — fastkit asks "Overwrite these files?" before
+replacing any file that already exists. <code>--yes</code> (or its short form <code>-y</code>)
+skips that confirmation and proceeds with the overwrite. It does not affect
+the separate "Do you want to proceed with project creation?" prompt, which
+is still shown. In a non-interactive environment (stdin is not a TTY, as in
+CI or a piped run), the overwrite confirmation is skipped automatically
+even without <code>--yes</code>.</p>
+<h4 id="interactive-prompts">Interactive Prompts</h4>
+<p>The <code>init</code> command will prompt you for:</p>
+<ol>
+<li><strong>Project name</strong>: Directory name and package name</li>
+<li><strong>Author name</strong>: Package author information</li>
+<li><strong>Author email</strong>: Contact email for package</li>
+<li><strong>Project description</strong>: Brief description of the project</li>
+<li><strong>Stack selection</strong>: Choose from minimal, standard, or full</li>
+<li><strong>Package manager selection</strong>: Choose from pip, uv, pdm, or poetry (unless specified with <code>--package-manager</code>)</li>
+</ol>
+<h4 id="stack-options">Stack Options</h4>
+<p><strong>MINIMAL Stack:</strong></p>
+<ul>
+<li><code>fastapi</code> - FastAPI framework</li>
+<li><code>uvicorn</code> - ASGI server</li>
+<li><code>pydantic</code> - Data validation</li>
+<li><code>pydantic-settings</code> - Configuration management</li>
+</ul>
+<p><strong>STANDARD Stack:</strong></p>
+<ul>
+<li>All MINIMAL stack packages</li>
+<li><code>sqlalchemy</code> - SQL toolkit and ORM</li>
+<li><code>alembic</code> - Database migration tool</li>
+<li><code>pytest</code> - Testing framework</li>
+</ul>
+<p><strong>FULL Stack:</strong></p>
+<ul>
+<li>All STANDARD stack packages</li>
+<li><code>redis</code> - In-memory data store</li>
+<li><code>celery</code> - Distributed task queue</li>
+</ul>
+<h4 id="interactive-builder-feature-catalog-interactive">Interactive builder feature catalog (<code>--interactive</code>)</h4>
+<p><code>fastkit init --interactive</code> walks a different, axis-based catalog instead
+of the minimal/standard/full stack above (source of truth:
+<code>FastkitConfig.PACKAGE_CATALOG</code> in <code>core/settings.py</code>, and
+<code>DynamicConfigGenerator.build_artifacts()</code> for what each choice generates).
+Every axis defaults to <code>None</code> (skip); <code>utilities</code> and <code>tooling</code> are
+multi-select.</p>
+<p>Every selection now generates real code, not just installed packages — see
+the <a href="../../reference/preset-feature-matrix/">architecture preset / feature matrix</a>
+for how <code>minimal</code> / <code>single-module</code> (regenerated <code>main.py</code>) and
+<code>classic-layered</code> / <code>domain-starter</code> (preserved <code>main.py</code>, manual-wiring
+warnings) differ.</p>
+<table>
+<thead>
+<tr>
+<th>Axis</th>
+<th>Choices</th>
+<th>Installed packages</th>
+<th>Generated files</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>database</code></td>
+<td>PostgreSQL, MySQL, MongoDB, Redis, SQLite, None</td>
+<td>PostgreSQL: <code>asyncpg</code>, <code>sqlalchemy</code> · MySQL: <code>aiomysql</code>, <code>sqlalchemy</code> · MongoDB: <code>motor</code> · Redis: <code>redis[hiredis]</code> · SQLite: <code>sqlalchemy</code>, <code>aiosqlite</code></td>
+<td>A database config module at the preset's path (e.g. <code>src/config/database.py</code>)</td>
+</tr>
+<tr>
+<td><code>authentication</code></td>
+<td>JWT, OAuth2, FastAPI-Users, Session-based, None</td>
+<td>JWT: <code>pyjwt[crypto]</code>, <code>pwdlib[argon2]</code> · OAuth2: <code>authlib</code>, <code>itsdangerous</code>, <code>httpx</code> · FastAPI-Users: <code>fastapi-users[sqlalchemy]</code>, <code>pyjwt[crypto]</code>, <code>pwdlib[argon2]</code> · Session-based: <code>itsdangerous</code></td>
+<td>An auth config module at the preset's path; OAuth2 and Session-based also add <code>main.py</code> middleware setup</td>
+</tr>
+<tr>
+<td><code>async_tasks</code></td>
+<td>Celery, Dramatiq, None</td>
+<td>Celery: <code>celery[redis]</code>, <code>redis[hiredis]</code> · Dramatiq: <code>dramatiq[redis]</code>, <code>redis[hiredis]</code></td>
+<td><code>&lt;pkg&gt;/worker.py</code> (background worker) + <code>&lt;pkg&gt;/features/tasks.py</code> (task routes)</td>
+</tr>
+<tr>
+<td><code>testing</code></td>
+<td>Basic, Coverage, Advanced, None</td>
+<td>Basic: <code>pytest</code>, <code>pytest-asyncio</code>, <code>httpx</code> · Coverage: + <code>pytest-cov</code> · Advanced: + <code>faker</code>, <code>factory-boy</code></td>
+<td><code>pytest.ini</code>; Advanced also adds <code>tests/factories.py</code> and <code>tests/test_factories.py</code></td>
+</tr>
+<tr>
+<td><code>caching</code></td>
+<td>Redis, None</td>
+<td>Redis: <code>redis[hiredis]</code>, <code>fastapi-cache2</code>, <code>jinja2</code></td>
+<td><code>&lt;pkg&gt;/features/cache.py</code> (cached endpoints)</td>
+</tr>
+<tr>
+<td><code>monitoring</code></td>
+<td>Loguru, OpenTelemetry, Prometheus, None</td>
+<td>Loguru: <code>loguru</code> · OpenTelemetry: <code>opentelemetry-api</code>, <code>opentelemetry-sdk</code>, <code>opentelemetry-instrumentation-fastapi</code>, <code>opentelemetry-exporter-otlp-proto-http</code> · Prometheus: <code>prometheus-client</code>, <code>prometheus-fastapi-instrumentator</code></td>
+<td>No standalone file — wired directly into <code>main.py</code> (import / lifespan / setup)</td>
+</tr>
+<tr>
+<td><code>utilities</code> (multi-select)</td>
+<td>CORS, Rate-Limiting, Pagination, WebSocket, None</td>
+<td>CORS: none (built into FastAPI) · Rate-Limiting: <code>slowapi</code> · Pagination: <code>fastapi-pagination</code> · WebSocket: <code>websockets</code></td>
+<td>CORS and Rate-Limiting wire into <code>main.py</code> directly; Pagination adds <code>&lt;pkg&gt;/features/pagination.py</code>, WebSocket adds <code>&lt;pkg&gt;/features/websocket.py</code></td>
+</tr>
+<tr>
+<td><code>migrations</code></td>
+<td>Alembic, None</td>
+<td>Alembic: <code>alembic</code></td>
+<td><code>alembic.ini</code>, <code>alembic/env.py</code>, <code>alembic/script.py.mako</code>, a baseline <code>alembic/versions/&lt;id&gt;_initial.py</code>, <code>scripts/migrate.sh</code> — only when the database axis is a SQL database</td>
+</tr>
+<tr>
+<td><code>tooling</code> (multi-select)</td>
+<td>ruff, pre-commit, github-actions, devcontainer, makefile, None</td>
+<td>ruff: <code>ruff</code> · pre-commit: <code>pre-commit</code> · github-actions / devcontainer / makefile: none</td>
+<td>ruff merges a <code>[tool.ruff]</code> block into <code>pyproject.toml</code> (or writes <code>ruff.toml</code> for <code>pip</code> projects); pre-commit writes <code>.pre-commit-config.yaml</code>; github-actions writes <code>.github/workflows/test.yml</code>; devcontainer writes <code>.devcontainer/devcontainer.json</code>; makefile writes <code>Makefile</code></td>
+</tr>
+<tr>
+<td><code>logging</code></td>
+<td>structured, None</td>
+<td>None (stdlib <code>logging</code> + <code>json</code> only)</td>
+<td><code>&lt;pkg&gt;/logging_config.py</code> (structured JSON logging + request-id middleware), wired into <code>main.py</code></td>
+</tr>
+</tbody>
+</table>
+<p>Regardless of selection, every generated project gets <code>/health</code> and
+<code>/ready</code> endpoints in <code>main.py</code>, and <code>--dry-run</code> prints this exact file set
+before anything is written.</p>
+<h4 id="examples_1">Examples</h4>
+<div class="termy">
+
+<div class="language-console highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="gp">$ </span>fastkit<span class="w"> </span>init
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="go">Enter the project name: my-api</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="go">Enter the author name: John Doe</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="go">Enter the author email: john@example.com</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="go">Enter the project description: My awesome API</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="go">Select stack (minimal, standard, full): standard</span>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="go">Select package manager (pip, uv, pdm, poetry) [uv]: uv</span>
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="go">Do you want to proceed with project creation? [y/N]: y</span>
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="go">✨ FastAPI project &#39;my-api&#39; has been created successfully!</span>
+</span></code></pre></div>
+
+</div>
+
+<h4 id="generated-structure">Generated Structure</h4>
+<p>Creates a project with this structure:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>my-api/
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>├── .venv/                    # Virtual environment
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>├── src/
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>│   ├── __init__.py
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>│   ├── main.py              # FastAPI application
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>│   ├── core/
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>│   │   ├── __init__.py
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>│   │   └── config.py        # Configuration
+</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>│   ├── api/
+</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>│   │   ├── __init__.py
+</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>│   │   ├── api.py          # API router collection
+</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>│   │   └── routes/
+</span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>│   │       ├── __init__.py
+</span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>│   │       └── items.py     # Example route
+</span><span id="__span-9-15"><a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>│   ├── crud/
+</span><span id="__span-9-16"><a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a>│   │   ├── __init__.py
+</span><span id="__span-9-17"><a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a>│   │   └── items.py         # CRUD operations
+</span><span id="__span-9-18"><a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a>│   ├── schemas/
+</span><span id="__span-9-19"><a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a>│   │   ├── __init__.py
+</span><span id="__span-9-20"><a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a>│   │   └── items.py         # Pydantic schemas
+</span><span id="__span-9-21"><a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a>│   └── mocks/
+</span><span id="__span-9-22"><a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a>│       ├── __init__.py
+</span><span id="__span-9-23"><a id="__codelineno-9-23" name="__codelineno-9-23" href="#__codelineno-9-23"></a>│       └── mock_items.json  # Test data
+</span><span id="__span-9-24"><a id="__codelineno-9-24" name="__codelineno-9-24" href="#__codelineno-9-24"></a>├── tests/
+</span><span id="__span-9-25"><a id="__codelineno-9-25" name="__codelineno-9-25" href="#__codelineno-9-25"></a>├── scripts/
+</span><span id="__span-9-26"><a id="__codelineno-9-26" name="__codelineno-9-26" href="#__codelineno-9-26"></a>├── requirements.txt
+</span><span id="__span-9-27"><a id="__codelineno-9-27" name="__codelineno-9-27" href="#__codelineno-9-27"></a>├── setup.py
+</span><span id="__span-9-28"><a id="__codelineno-9-28" name="__codelineno-9-28" href="#__codelineno-9-28"></a>└── README.md
+</span></code></pre></div>
+<h3 id="addroute"><code>addroute</code></h3>
+<p>Add a new API route to an existing FastAPI project.</p>
+<h4 id="syntax_1">Syntax</h4>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="gp">$ </span>fastkit<span class="w"> </span>addroute<span class="w"> </span>ROUTE_NAME<span class="w"> </span><span class="o">[</span>PROJECT_DIR<span class="o">]</span><span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</span></code></pre></div>
+<h4 id="arguments">Arguments</h4>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ROUTE_NAME</code></td>
+<td>Name of the new route (plural recommended)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>PROJECT_DIR</code></td>
+<td>Project directory under your workspace (defaults to <code>.</code>, the current directory)</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<h4 id="options_1">Options</h4>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code></td>
+<td>Show command help</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<h4 id="examples_2">Examples</h4>
+<div class="termy">
+
+<div class="language-console highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>my-api
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="gp">$ </span>fastkit<span class="w"> </span>addroute<span class="w"> </span>users
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="go">                       Adding New Route</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="go">┌──────────────────┬──────────────────────────────────────────┐</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="go">│ Project          │ my-api                                   │</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="go">│ Route Name       │ users                                    │</span>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="go">│ Target Directory │ ~/my-api                                 │</span>
+</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="go">└──────────────────┴──────────────────────────────────────────┘</span>
+</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>
+</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="go">Do you want to add route &#39;users&#39; to project &#39;my-api&#39;? [Y/n]: y</span>
+</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>
+</span><span id="__span-11-12"><a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a><span class="go">✨ Successfully added new route &#39;users&#39; to project &#39;my-api&#39;</span>
+</span></code></pre></div>
+
+</div>
+
+<p>You can also target a project under your workspace by name without <code>cd</code>-ing into it:</p>
+<div class="termy">
+
+<div class="language-console highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="gp">$ </span>fastkit<span class="w"> </span>addroute<span class="w"> </span>users<span class="w"> </span>my-api
+</span></code></pre></div>
+
+</div>
+
+<h4 id="generated-files">Generated Files</h4>
+<p>Creates these files in the project:</p>
+<ul>
+<li><code>src/api/routes/users.py</code> - Route handlers</li>
+<li><code>src/crud/users.py</code> - CRUD operations</li>
+<li><code>src/schemas/users.py</code> - Pydantic schemas</li>
+</ul>
+<p>Also updates <code>src/api/api.py</code> to include the new router.</p>
+<h4 id="generated-endpoints">Generated Endpoints</h4>
+<p>Creates full CRUD endpoints:</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/users/</code></td>
+<td>Get all users</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/users/</code></td>
+<td>Create new user</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/users/{user_id}</code></td>
+<td>Get specific user</td>
+</tr>
+<tr>
+<td><code>PUT</code></td>
+<td><code>/api/v1/users/{user_id}</code></td>
+<td>Update user</td>
+</tr>
+<tr>
+<td><code>DELETE</code></td>
+<td><code>/api/v1/users/{user_id}</code></td>
+<td>Delete user</td>
+</tr>
+</tbody>
+</table>
+<h4 id="where-the-code-is-inserted">Where the code is inserted</h4>
+<p><code>addroute</code> needs two things from the project: where to put the new imports,
+and where to register the router. Templates and generated entrypoints mark
+both with anchor comments:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1"># src/app/api/router.py</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">src.app.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">health</span>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="c1"># fastkit:imports</span>
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>
+</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="n">api_router</span> <span class="o">=</span> <span class="n">APIRouter</span><span class="p">()</span>
+</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="n">api_router</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">health</span><span class="o">.</span><span class="n">router</span><span class="p">)</span>
+</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>
+</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="c1"># fastkit:routes</span>
+</span></code></pre></div>
+<p>Keep those comments in place when you edit the file — <code>addroute</code> inserts
+directly above <code># fastkit:imports</code> and <code># fastkit:routes</code>. A project that
+lost them (or was generated before the anchors existed) still works: fastkit
+falls back to an AST-based insertion that finds the import block and the
+router registrations itself. The anchors simply make the result predictable.</p>
+<p><code>addroute</code> also reads the project's <code>[tool.fastapi-fastkit]</code> block to locate
+the entrypoint, so it works on layouts the on-disk scan alone would rank
+wrongly.</p>
+<h3 id="startdemo"><code>startdemo</code></h3>
+<p>Create a FastAPI project from a pre-built template.</p>
+<h4 id="syntax_2">Syntax</h4>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="gp">$ </span>fastkit<span class="w"> </span>startdemo<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</span></code></pre></div>
+<h4 id="options_2">Options</h4>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--project-name</code></td>
+<td>Project name (prompted when omitted)</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--author</code></td>
+<td>Author name (prompted when omitted)</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--author-email</code></td>
+<td>Author email (prompted when omitted)</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--description</code></td>
+<td>Project description (prompted when omitted)</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--package-manager</code></td>
+<td>Package manager to use (pip, uv, pdm, poetry)</td>
+<td>uv</td>
+</tr>
+<tr>
+<td><code>--dry-run</code></td>
+<td>Show the files and packages that would be created, without writing anything</td>
+<td>off</td>
+</tr>
+<tr>
+<td><code>--no-venv</code></td>
+<td>Skip virtual environment creation (implies <code>--no-install</code>)</td>
+<td>off</td>
+</tr>
+<tr>
+<td><code>--no-install</code></td>
+<td>Skip dependency installation</td>
+<td>off</td>
+</tr>
+<tr>
+<td><code>--yes</code> / <code>-y</code></td>
+<td>Do not ask for confirmation before overwriting existing files when deploying the project in place</td>
+<td>off</td>
+</tr>
+<tr>
+<td><code>--help</code></td>
+<td>Show command help</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<p>Like <code>init</code>, <code>startdemo</code> refuses to run when the target project directory
+already exists (<code>Error: Project '{name}' already exists.</code>). <code>--dry-run</code> is
+the exception: since it never writes to disk, it is still allowed to target
+a name that already has a directory. See
+<a href="#in-place-deployment-and-overwrite-confirmation-yes-y">In-place deployment and overwrite confirmation</a>
+above for what <code>--yes</code> does when deploying into the current workspace.</p>
+<h4 id="interactive-prompts_1">Interactive Prompts</h4>
+<p>The <code>startdemo</code> command will prompt you for:</p>
+<ol>
+<li><strong>Project name</strong>: Directory name for the new project</li>
+<li><strong>Author name</strong>: Package author information</li>
+<li><strong>Author email</strong>: Contact email</li>
+<li><strong>Project description</strong>: Brief description</li>
+<li><strong>Package manager selection</strong>: Choose from pip, uv, pdm, or poetry (unless specified with <code>--package-manager</code>)</li>
+</ol>
+<h4 id="available-templates">Available Templates</h4>
+<table>
+<thead>
+<tr>
+<th>Template</th>
+<th>Description</th>
+<th>Features</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fastapi-default</code></td>
+<td>Simple FastAPI Project</td>
+<td>Basic CRUD, Mock data</td>
+</tr>
+<tr>
+<td><code>fastapi-domain-starter</code></td>
+<td>Domain-oriented starter</td>
+<td>One folder per business concept, <code>/health</code></td>
+</tr>
+<tr>
+<td><code>fastapi-auth-jwt</code></td>
+<td>JWT authentication</td>
+<td>Access/refresh rotation, argon2id, roles and scopes, Alembic</td>
+</tr>
+<tr>
+<td><code>fastapi-sqlmodel</code></td>
+<td>Async SQLModel persistence</td>
+<td>SQLModel + async SQLAlchemy, Alembic, generic CRUD, pagination</td>
+</tr>
+<tr>
+<td><code>fastapi-llm-agent</code></td>
+<td>Streaming Claude agent</td>
+<td>SSE streaming, tool-call loop, conversation memory</td>
+</tr>
+<tr>
+<td><code>fastapi-custom-response</code></td>
+<td>Custom Response System</td>
+<td>Custom responses, Pagination</td>
+</tr>
+<tr>
+<td><code>fastapi-psql-orm</code></td>
+<td>PostgreSQL FastAPI API</td>
+<td>PostgreSQL, SQLAlchemy, Alembic</td>
+</tr>
+<tr>
+<td><code>fastapi-mcp</code></td>
+<td>Model Context Protocol server</td>
+<td>MCP integration</td>
+</tr>
+<tr>
+<td><code>fastapi-single-module</code></td>
+<td>Single-file sandbox</td>
+<td>One module, no package boundaries</td>
+</tr>
+<tr>
+<td><code>fastapi-empty</code></td>
+<td>Minimal FastAPI Project</td>
+<td>Bare minimum setup</td>
+</tr>
+<tr>
+<td><code>fastapi-async-crud</code></td>
+<td><em>(deprecated)</em> Async Item Management API</td>
+<td>Superseded by <code>fastapi-sqlmodel</code></td>
+</tr>
+<tr>
+<td><code>fastapi-dockerized</code></td>
+<td><em>(deprecated)</em> Dockerized FastAPI API</td>
+<td>Docker tooling now ships with the newer templates</td>
+</tr>
+</tbody>
+</table>
+<p>The deprecated templates still generate working projects; they are simply no
+longer recommended starting points. See
+<a href="../choosing-a-starter/">Which starter should I choose?</a>.</p>
+<h4 id="examples_3">Examples</h4>
+<div class="termy">
+
+<div class="language-console highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="gp">$ </span>fastkit<span class="w"> </span>startdemo<span class="w"> </span>fastapi-psql-orm
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="go">Enter the project name: my-blog</span>
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="go">Enter the author name: Jane Smith</span>
+</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="go">Enter the author email: jane@example.com</span>
+</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="go">Enter the project description: Blog API with PostgreSQL</span>
+</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>
+</span><span id="__span-15-7"><a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="go">Select package manager (pip, uv, pdm, poetry) [uv]: poetry</span>
+</span><span id="__span-15-8"><a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="go">Do you want to proceed with project creation? [y/N]: y</span>
+</span><span id="__span-15-9"><a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a>
+</span><span id="__span-15-10"><a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="go">✨ FastAPI project &#39;my-blog&#39; from &#39;fastapi-psql-orm&#39; has been created!</span>
+</span></code></pre></div>
+
+</div>
+
+<h3 id="runserver"><code>runserver</code></h3>
+<p>Start the FastAPI development server.</p>
+<h4 id="syntax_3">Syntax</h4>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="gp">$ </span>fastkit<span class="w"> </span>runserver<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</span></code></pre></div>
+<h4 id="options_3">Options</h4>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Short</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--host</code></td>
+<td><code>-h</code></td>
+<td>Host to bind to</td>
+<td><code>127.0.0.1</code></td>
+</tr>
+<tr>
+<td><code>--port</code></td>
+<td><code>-p</code></td>
+<td>Port to bind to</td>
+<td><code>8000</code></td>
+</tr>
+<tr>
+<td><code>--reload</code></td>
+<td><code>-r</code></td>
+<td>Enable auto-reload</td>
+<td><code>True</code></td>
+</tr>
+<tr>
+<td><code>--workers</code></td>
+<td><code>-w</code></td>
+<td>Number of workers</td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>--help</code></td>
+<td></td>
+<td>Show command help</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<h4 id="examples_4">Examples</h4>
+<div class="termy">
+
+<div class="language-console highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="gp"># </span>Basic<span class="w"> </span>usage<span class="w"> </span><span class="o">(</span>default<span class="w"> </span>settings<span class="o">)</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="gp">$ </span>fastkit<span class="w"> </span>runserver
+</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="go">INFO:     Uvicorn running on http://127.0.0.1:8000</span>
+</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>
+</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="gp"># </span>Custom<span class="w"> </span>host<span class="w"> </span>and<span class="w"> </span>port
+</span><span id="__span-17-6"><a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="gp">$ </span>fastkit<span class="w"> </span>runserver<span class="w"> </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0<span class="w"> </span>--port<span class="w"> </span><span class="m">8080</span>
+</span><span id="__span-17-7"><a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a><span class="go">INFO:     Uvicorn running on http://0.0.0.0:8080</span>
+</span><span id="__span-17-8"><a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>
+</span><span id="__span-17-9"><a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a><span class="gp"># </span>Disable<span class="w"> </span>auto-reload
+</span><span id="__span-17-10"><a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a><span class="gp">$ </span>fastkit<span class="w"> </span>runserver<span class="w"> </span>--no-reload
+</span><span id="__span-17-11"><a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a><span class="go">INFO:     Uvicorn running on http://127.0.0.1:8000</span>
+</span><span id="__span-17-12"><a id="__codelineno-17-12" name="__codelineno-17-12" href="#__codelineno-17-12"></a>
+</span><span id="__span-17-13"><a id="__codelineno-17-13" name="__codelineno-17-13" href="#__codelineno-17-13"></a><span class="gp"># </span>Multiple<span class="w"> </span>workers<span class="w"> </span><span class="o">(</span>production<span class="o">)</span>
+</span><span id="__span-17-14"><a id="__codelineno-17-14" name="__codelineno-17-14" href="#__codelineno-17-14"></a><span class="gp">$ </span>fastkit<span class="w"> </span>runserver<span class="w"> </span>--workers<span class="w"> </span><span class="m">4</span>
+</span><span id="__span-17-15"><a id="__codelineno-17-15" name="__codelineno-17-15" href="#__codelineno-17-15"></a><span class="go">INFO:     Uvicorn running on http://127.0.0.1:8000</span>
+</span></code></pre></div>
+
+</div>
+
+<h4 id="requirements">Requirements</h4>
+<ul>
+<li>Must be run from a FastAPI project directory</li>
+<li>The project must expose a FastAPI app — resolved from
+  <code>[tool.fastapi-fastkit].app_module</code> when present, otherwise discovered by
+  scanning for <code>main.py</code></li>
+<li>Virtual environment should be activated</li>
+</ul>
+<p>If neither the recorded entrypoint nor the scan finds a module, <code>runserver</code>
+reports that it could not find <code>main.py</code> and stops.</p>
+<h3 id="list-templates"><code>list-templates</code></h3>
+<p>List all available FastAPI project templates.</p>
+<h4 id="syntax_4">Syntax</h4>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="gp">$ </span>fastkit<span class="w"> </span>list-templates<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</span></code></pre></div>
+<h4 id="options_4">Options</h4>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code></td>
+<td>Show command help</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<h4 id="examples_5">Examples</h4>
+<div class="termy">
+
+<div class="language-console highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="gp">$ </span>fastkit<span class="w"> </span>list-templates
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="go">                      Available Templates</span>
+</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="go">┌─────────────────────────┬───────────────────────────────────┐</span>
+</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="go">│ fastapi-custom-response │ Async Item Management API with    │</span>
+</span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="go">│                         │ Custom Response System            │</span>
+</span><span id="__span-19-6"><a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="go">│ fastapi-dockerized      │ Dockerized FastAPI Item           │</span>
+</span><span id="__span-19-7"><a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="go">│                         │ Management API                    │</span>
+</span><span id="__span-19-8"><a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a><span class="go">│ fastapi-empty           │ No description                    │</span>
+</span><span id="__span-19-9"><a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="go">│ fastapi-async-crud      │ Async Item Management API Server  │</span>
+</span><span id="__span-19-10"><a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a><span class="go">│ fastapi-psql-orm        │ Dockerized FastAPI Item           │</span>
+</span><span id="__span-19-11"><a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a><span class="go">│                         │ Management API with PostgreSQL    │</span>
+</span><span id="__span-19-12"><a id="__codelineno-19-12" name="__codelineno-19-12" href="#__codelineno-19-12"></a><span class="go">│ fastapi-default         │ Simple FastAPI Project            │</span>
+</span><span id="__span-19-13"><a id="__codelineno-19-13" name="__codelineno-19-13" href="#__codelineno-19-13"></a><span class="go">└─────────────────────────┴───────────────────────────────────┘</span>
+</span></code></pre></div>
+
+</div>
+
+<h2 id="project-metadata-toolfastapi-fastkit">Project metadata (<code>[tool.fastapi-fastkit]</code>)</h2>
+<p>Every project fastkit generates records how it was produced, in its own
+<code>pyproject.toml</code>:</p>
+<div class="language-toml highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="k">[tool.fastapi-fastkit]</span>
+</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="n">managed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="n">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;1.4.0&quot;</span>
+</span><span id="__span-20-4"><a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="n">template</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;fastapi-domain-starter&quot;</span>
+</span><span id="__span-20-5"><a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a><span class="n">preset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;domain-starter&quot;</span>
+</span><span id="__span-20-6"><a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a><span class="n">package_manager</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;uv&quot;</span>
+</span><span id="__span-20-7"><a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a><span class="n">app_module</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;src.app.main:app&quot;</span>
+</span><span id="__span-20-8"><a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a><span class="n">features</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;database:PostgreSQL&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;authentication:JWT&quot;</span><span class="p">]</span>
+</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>managed</code></td>
+<td>Always <code>true</code>; marks the project as fastkit-managed</td>
+</tr>
+<tr>
+<td><code>version</code></td>
+<td>The fastkit version that generated the project</td>
+</tr>
+<tr>
+<td><code>template</code></td>
+<td>The <code>startdemo</code> template, or the preset's base template</td>
+</tr>
+<tr>
+<td><code>preset</code></td>
+<td>The <code>init --interactive</code> architecture preset (omitted otherwise)</td>
+</tr>
+<tr>
+<td><code>package_manager</code></td>
+<td>The manager used to build the environment</td>
+</tr>
+<tr>
+<td><code>app_module</code></td>
+<td>The uvicorn <code>module:attr</code> entrypoint</td>
+</tr>
+<tr>
+<td><code>features</code></td>
+<td>Flat <code>"&lt;category&gt;:&lt;choice&gt;"</code> list of interactive selections</td>
+</tr>
+</tbody>
+</table>
+<p>This block is the single source of truth for the project's entrypoint:
+<code>fastkit runserver</code> reads <code>app_module</code> from it before falling back to
+scanning the tree, <code>fastkit addroute</code> uses it to locate the application, and
+generated Dockerfiles use the same value in their <code>CMD</code>.</p>
+<p>The block is written at the very end of generation — package managers rewrite
+<code>pyproject.toml</code> while resolving dependencies, so it has to be stamped after
+that — and a later regeneration replaces it rather than appending a second
+copy. Editing <code>app_module</code> by hand is the supported way to tell fastkit about
+a layout you reorganized yourself.</p>
+<h2 id="environment-variables">Environment Variables</h2>
+<p>FastAPI-fastkit respects these environment variables:</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>FASTKIT_CONFIG_DIR</code></td>
+<td>Configuration directory</td>
+<td><code>~/.fastkit</code></td>
+</tr>
+<tr>
+<td><code>FASTKIT_TEMPLATES_DIR</code></td>
+<td>Custom templates directory</td>
+<td>Built-in templates</td>
+</tr>
+<tr>
+<td><code>FASTKIT_LOG_LEVEL</code></td>
+<td>Logging level</td>
+<td><code>INFO</code></td>
+</tr>
+<tr>
+<td><code>FASTKIT_SUBPROCESS_TIMEOUT</code></td>
+<td>Overrides every package-manager subprocess timeout, in seconds</td>
+<td>per-operation (30 / 120 / 900)</td>
+</tr>
+</tbody>
+</table>
+<p>Package manager calls are individually bounded so a hung child process can
+never block the CLI: 30 seconds for an availability check, 120 for creating
+a virtual environment, 900 for installing dependencies.
+<code>FASTKIT_SUBPROCESS_TIMEOUT</code> replaces all three with one value — useful on a
+slow network, or to fail fast in CI. A value that isn't a positive integer is
+ignored.</p>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="gp">$ </span><span class="nb">export</span><span class="w"> </span><span class="nv">FASTKIT_SUBPROCESS_TIMEOUT</span><span class="o">=</span><span class="m">1800</span>
+</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="gp">$ </span>fastkit<span class="w"> </span>startdemo<span class="w"> </span>fastapi-sqlmodel
+</span></code></pre></div>
+<h3 id="examples_6">Examples</h3>
+<div class="termy">
+
+<div class="language-console highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="gp"># </span>Custom<span class="w"> </span>configuration<span class="w"> </span>directory
+</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="gp">$ </span><span class="nb">export</span><span class="w"> </span><span class="nv">FASTKIT_CONFIG_DIR</span><span class="o">=</span>~/my-fastkit-config
+</span><span id="__span-22-3"><a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="gp">$ </span>fastkit<span class="w"> </span>init
+</span><span id="__span-22-4"><a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a>
+</span><span id="__span-22-5"><a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a><span class="gp"># </span>Custom<span class="w"> </span>templates<span class="w"> </span>directory
+</span><span id="__span-22-6"><a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a><span class="gp">$ </span><span class="nb">export</span><span class="w"> </span><span class="nv">FASTKIT_TEMPLATES_DIR</span><span class="o">=</span>~/my-templates
+</span><span id="__span-22-7"><a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a><span class="gp">$ </span>fastkit<span class="w"> </span>list-templates
+</span><span id="__span-22-8"><a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a>
+</span><span id="__span-22-9"><a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a><span class="gp"># </span>Debug<span class="w"> </span>logging
+</span><span id="__span-22-10"><a id="__codelineno-22-10" name="__codelineno-22-10" href="#__codelineno-22-10"></a><span class="gp">$ </span><span class="nb">export</span><span class="w"> </span><span class="nv">FASTKIT_LOG_LEVEL</span><span class="o">=</span>DEBUG
+</span><span id="__span-22-11"><a id="__codelineno-22-11" name="__codelineno-22-11" href="#__codelineno-22-11"></a><span class="gp">$ </span>fastkit<span class="w"> </span>init
+</span></code></pre></div>
+
+</div>
+
+<h2 id="configuration-files">Configuration Files</h2>
+<p>FastAPI-fastkit can use configuration files for default settings.</p>
+<h3 id="configuration-file-location">Configuration File Location</h3>
+<ol>
+<li><code>$FASTKIT_CONFIG_DIR/config.yaml</code> (if <code>FASTKIT_CONFIG_DIR</code> is set)</li>
+<li><code>~/.fastkit/config.yaml</code> (default)</li>
+<li><code>./fastkit.yaml</code> (project-specific)</li>
+</ol>
+<h3 id="configuration-format">Configuration Format</h3>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="c1"># ~/.fastkit/config.yaml</span>
+</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="nt">default</span><span class="p">:</span>
+</span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="w">  </span><span class="nt">author</span><span class="p">:</span>
+</span><span id="__span-23-4"><a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Your</span><span class="nv"> </span><span class="s">Name&quot;</span>
+</span><span id="__span-23-5"><a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="w">    </span><span class="nt">email</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;your.email@example.com&quot;</span>
+</span><span id="__span-23-6"><a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a>
+</span><span id="__span-23-7"><a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a><span class="w">  </span><span class="nt">project</span><span class="p">:</span>
+</span><span id="__span-23-8"><a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a><span class="w">    </span><span class="nt">stack</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;standard&quot;</span>
+</span><span id="__span-23-9"><a id="__codelineno-23-9" name="__codelineno-23-9" href="#__codelineno-23-9"></a><span class="w">    </span><span class="nt">create_venv</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id="__span-23-10"><a id="__codelineno-23-10" name="__codelineno-23-10" href="#__codelineno-23-10"></a><span class="w">    </span><span class="nt">install_deps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id="__span-23-11"><a id="__codelineno-23-11" name="__codelineno-23-11" href="#__codelineno-23-11"></a>
+</span><span id="__span-23-12"><a id="__codelineno-23-12" name="__codelineno-23-12" href="#__codelineno-23-12"></a><span class="w">  </span><span class="nt">server</span><span class="p">:</span>
+</span><span id="__span-23-13"><a id="__codelineno-23-13" name="__codelineno-23-13" href="#__codelineno-23-13"></a><span class="w">    </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.1&quot;</span>
+</span><span id="__span-23-14"><a id="__codelineno-23-14" name="__codelineno-23-14" href="#__codelineno-23-14"></a><span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8000</span>
+</span><span id="__span-23-15"><a id="__codelineno-23-15" name="__codelineno-23-15" href="#__codelineno-23-15"></a><span class="w">    </span><span class="nt">reload</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id="__span-23-16"><a id="__codelineno-23-16" name="__codelineno-23-16" href="#__codelineno-23-16"></a>
+</span><span id="__span-23-17"><a id="__codelineno-23-17" name="__codelineno-23-17" href="#__codelineno-23-17"></a><span class="nt">templates</span><span class="p">:</span>
+</span><span id="__span-23-18"><a id="__codelineno-23-18" name="__codelineno-23-18" href="#__codelineno-23-18"></a><span class="w">  </span><span class="nt">custom_dir</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;~/my-templates&quot;</span>
+</span><span id="__span-23-19"><a id="__codelineno-23-19" name="__codelineno-23-19" href="#__codelineno-23-19"></a>
+</span><span id="__span-23-20"><a id="__codelineno-23-20" name="__codelineno-23-20" href="#__codelineno-23-20"></a><span class="nt">logging</span><span class="p">:</span>
+</span><span id="__span-23-21"><a id="__codelineno-23-21" name="__codelineno-23-21" href="#__codelineno-23-21"></a><span class="w">  </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;INFO&quot;</span>
+</span><span id="__span-23-22"><a id="__codelineno-23-22" name="__codelineno-23-22" href="#__codelineno-23-22"></a><span class="w">  </span><span class="nt">file</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;~/.fastkit/logs/fastkit.log&quot;</span>
+</span></code></pre></div>
+<h2 id="common-workflows">Common Workflows</h2>
+<h3 id="1-create-new-project">1. Create New Project</h3>
+<div class="termy">
+
+<div class="language-console highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="gp"># </span>Create<span class="w"> </span>a<span class="w"> </span>new<span class="w"> </span>project
+</span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="gp">$ </span>fastkit<span class="w"> </span>init
+</span><span id="__span-24-3"><a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="gp"># </span>Follow<span class="w"> </span>prompts...
+</span><span id="__span-24-4"><a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>
+</span><span id="__span-24-5"><a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a><span class="gp"># </span>Navigate<span class="w"> </span>to<span class="w"> </span>project
+</span><span id="__span-24-6"><a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a><span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>my-awesome-api
+</span><span id="__span-24-7"><a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a>
+</span><span id="__span-24-8"><a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a><span class="gp"># </span>Activate<span class="w"> </span>virtual<span class="w"> </span>environment
+</span><span id="__span-24-9"><a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a><span class="gp">$ </span><span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+</span><span id="__span-24-10"><a id="__codelineno-24-10" name="__codelineno-24-10" href="#__codelineno-24-10"></a>
+</span><span id="__span-24-11"><a id="__codelineno-24-11" name="__codelineno-24-11" href="#__codelineno-24-11"></a><span class="gp"># </span>Start<span class="w"> </span>development<span class="w"> </span>server
+</span><span id="__span-24-12"><a id="__codelineno-24-12" name="__codelineno-24-12" href="#__codelineno-24-12"></a><span class="gp">$ </span>fastkit<span class="w"> </span>runserver
+</span></code></pre></div>
+
+</div>
+
+<h3 id="2-add-features-to-existing-project">2. Add Features to Existing Project</h3>
+<div class="termy">
+
+<div class="language-console highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="gp"># </span>Add<span class="w"> </span>multiple<span class="w"> </span>routes<span class="w"> </span><span class="o">(</span>project<span class="w"> </span>name<span class="w"> </span>as<span class="w"> </span>second<span class="w"> </span>positional<span class="w"> </span><span class="nv">arg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>workspace<span class="w"> </span>project<span class="o">)</span>
+</span><span id="__span-25-2"><a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="gp">$ </span>fastkit<span class="w"> </span>addroute<span class="w"> </span>users<span class="w"> </span>my-api
+</span><span id="__span-25-3"><a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="gp">$ </span>fastkit<span class="w"> </span>addroute<span class="w"> </span>products<span class="w"> </span>my-api
+</span><span id="__span-25-4"><a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a><span class="gp">$ </span>fastkit<span class="w"> </span>addroute<span class="w"> </span>orders<span class="w"> </span>my-api
+</span><span id="__span-25-5"><a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a>
+</span><span id="__span-25-6"><a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a><span class="gp"># </span>Test<span class="w"> </span>the<span class="w"> </span>API
+</span><span id="__span-25-7"><a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a><span class="gp">$ </span>fastkit<span class="w"> </span>runserver
+</span><span id="__span-25-8"><a id="__codelineno-25-8" name="__codelineno-25-8" href="#__codelineno-25-8"></a><span class="gp"># </span>Visit<span class="w"> </span>http://127.0.0.1:8000/docs
+</span></code></pre></div>
+
+</div>
+
+<h3 id="3-use-templates-for-complex-projects">3. Use Templates for Complex Projects</h3>
+<div class="termy">
+
+<div class="language-console highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="gp"># </span>List<span class="w"> </span>available<span class="w"> </span>templates
+</span><span id="__span-26-2"><a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="gp">$ </span>fastkit<span class="w"> </span>list-templates
+</span><span id="__span-26-3"><a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>
+</span><span id="__span-26-4"><a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a><span class="gp"># </span>Create<span class="w"> </span>from<span class="w"> </span>template
+</span><span id="__span-26-5"><a id="__codelineno-26-5" name="__codelineno-26-5" href="#__codelineno-26-5"></a><span class="gp">$ </span>fastkit<span class="w"> </span>startdemo
+</span><span id="__span-26-6"><a id="__codelineno-26-6" name="__codelineno-26-6" href="#__codelineno-26-6"></a><span class="gp"># </span>Select<span class="w"> </span>fastapi-psql-orm<span class="w"> </span><span class="k">for</span><span class="w"> </span>database<span class="w"> </span>project
+</span><span id="__span-26-7"><a id="__codelineno-26-7" name="__codelineno-26-7" href="#__codelineno-26-7"></a>
+</span><span id="__span-26-8"><a id="__codelineno-26-8" name="__codelineno-26-8" href="#__codelineno-26-8"></a><span class="gp"># </span>Setup<span class="w"> </span>database<span class="w"> </span><span class="o">(</span><span class="k">for</span><span class="w"> </span>PostgreSQL<span class="w"> </span>template<span class="o">)</span>
+</span><span id="__span-26-9"><a id="__codelineno-26-9" name="__codelineno-26-9" href="#__codelineno-26-9"></a><span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>my-project
+</span><span id="__span-26-10"><a id="__codelineno-26-10" name="__codelineno-26-10" href="#__codelineno-26-10"></a><span class="gp">$ </span>docker-compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>postgres
+</span><span id="__span-26-11"><a id="__codelineno-26-11" name="__codelineno-26-11" href="#__codelineno-26-11"></a><span class="gp">$ </span><span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+</span><span id="__span-26-12"><a id="__codelineno-26-12" name="__codelineno-26-12" href="#__codelineno-26-12"></a><span class="gp">$ </span>alembic<span class="w"> </span>upgrade<span class="w"> </span>head
+</span><span id="__span-26-13"><a id="__codelineno-26-13" name="__codelineno-26-13" href="#__codelineno-26-13"></a><span class="gp">$ </span>fastkit<span class="w"> </span>runserver
+</span></code></pre></div>
+
+</div>
+
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="command-not-found">Command Not Found</h3>
+<p>If <code>fastkit</code> command is not found:</p>
+<ol>
+<li>
+<p><strong>Check installation:</strong>
+ <br />
+<div class="termy">
+   <div class="language-console highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="gp">$ </span>pip<span class="w"> </span>show<span class="w"> </span>fastapi-fastkit
+</span></code></pre></div>
+   </div>
+</p>
+</li>
+<li>
+<p><strong>Reinstall if needed:</strong>
+ <br />
+<div class="termy">
+   <div class="language-console highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="gp">$ </span>pip<span class="w"> </span>uninstall<span class="w"> </span>fastapi-fastkit
+</span><span id="__span-28-2"><a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>fastapi-fastkit
+</span></code></pre></div>
+   </div>
+</p>
+</li>
+<li>
+<p><strong>Check PATH:</strong>
+ <br />
+<div class="termy">
+   <div class="language-console highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="gp">$ </span>which<span class="w"> </span>fastkit
+</span></code></pre></div>
+   </div>
+</p>
+</li>
+</ol>
+<h3 id="virtual-environment-issues">Virtual Environment Issues</h3>
+<p>If virtual environment creation fails:</p>
+<ol>
+<li>
+<p><strong>Check Python version:</strong>
+ <br />
+<div class="termy">
+   <div class="language-console highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="gp">$ </span>python<span class="w"> </span>--version<span class="w">  </span><span class="c1"># Should be 3.12+</span>
+</span></code></pre></div>
+   </div>
+</p>
+</li>
+<li>
+<p><strong>Check venv module:</strong>
+ <br />
+<div class="termy">
+   <div class="language-console highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="gp">$ </span>python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>--help
+</span></code></pre></div>
+   </div>
+</p>
+</li>
+<li>
+<p><strong>Manual virtual environment:</strong>
+ <br />
+<div class="termy">
+   <div class="language-console highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="gp">$ </span>python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+</span><span id="__span-32-2"><a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a><span class="gp">$ </span><span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+</span><span id="__span-32-3"><a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+</span></code></pre></div>
+   </div>
+</p>
+</li>
+</ol>
+<h3 id="server-wont-start">Server Won't Start</h3>
+<p>If <code>fastkit runserver</code> fails:</p>
+<ol>
+<li><strong>Check you're in project directory</strong></li>
+<li><strong>Verify <code>src/main.py</code> exists</strong></li>
+<li>
+<p><strong>Activate virtual environment:</strong>
+ <br />
+<div class="termy">
+   <div class="language-console highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a><span class="gp">$ </span><span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+</span></code></pre></div>
+   </div>
+</p>
+</li>
+<li>
+<p><strong>Check for syntax errors:</strong>
+ <br />
+<div class="termy">
+   <div class="language-console highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="gp">$ </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from src.main import app&quot;</span>
+</span></code></pre></div>
+   </div>
+</p>
+</li>
+</ol>
+<h3 id="port-already-in-use">Port Already in Use</h3>
+<p>If port 8000 is busy:</p>
+<div class="termy">
+
+<div class="language-console highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="gp"># </span>Use<span class="w"> </span>different<span class="w"> </span>port
+</span><span id="__span-35-2"><a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a><span class="gp">$ </span>fastkit<span class="w"> </span>runserver<span class="w"> </span>--port<span class="w"> </span><span class="m">8080</span>
+</span><span id="__span-35-3"><a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a>
+</span><span id="__span-35-4"><a id="__codelineno-35-4" name="__codelineno-35-4" href="#__codelineno-35-4"></a><span class="gp"># </span>Or<span class="w"> </span><span class="nb">kill</span><span class="w"> </span>existing<span class="w"> </span>process
+</span><span id="__span-35-5"><a id="__codelineno-35-5" name="__codelineno-35-5" href="#__codelineno-35-5"></a><span class="gp">$ </span>lsof<span class="w"> </span>-ti:8000<span class="w"> </span><span class="p">|</span><span class="w"> </span>xargs<span class="w"> </span><span class="nb">kill</span><span class="w"> </span>-9
+</span></code></pre></div>
+
+</div>
+
+<h2 id="advanced-usage">Advanced Usage</h2>
+<h3 id="custom-templates">Custom Templates</h3>
+<p>You can create custom templates by:</p>
+<ol>
+<li>
+<p><strong>Creating template directory:</strong>
+   <div class="language-text highlight"><pre><span></span><code><span id="__span-36-1"><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a>my-template/
+</span><span id="__span-36-2"><a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a>├── src/
+</span><span id="__span-36-3"><a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a>│   └── main.py-tpl
+</span><span id="__span-36-4"><a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a>├── requirements.txt-tpl
+</span><span id="__span-36-5"><a id="__codelineno-36-5" name="__codelineno-36-5" href="#__codelineno-36-5"></a>└── setup.py-tpl
+</span></code></pre></div></p>
+</li>
+<li>
+<p><strong>Setting environment variable:</strong>
+ <br />
+<div class="termy">
+   <div class="language-console highlight"><pre><span></span><code><span id="__span-37-1"><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a><span class="gp">$ </span><span class="nb">export</span><span class="w"> </span><span class="nv">FASTKIT_TEMPLATES_DIR</span><span class="o">=</span>~/my-templates
+</span></code></pre></div>
+   </div>
+</p>
+</li>
+<li>
+<p><strong>Using custom template:</strong>
+ <br />
+<div class="termy">
+   <div class="language-console highlight"><pre><span></span><code><span id="__span-38-1"><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a><span class="gp">$ </span>fastkit<span class="w"> </span>startdemo
+</span><span id="__span-38-2"><a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a><span class="gp"># </span>Your<span class="w"> </span>custom<span class="w"> </span>templates<span class="w"> </span>will<span class="w"> </span>appear<span class="w"> </span><span class="k">in</span><span class="w"> </span>the<span class="w"> </span>list
+</span></code></pre></div>
+   </div>
+</p>
+</li>
+</ol>
+<h3 id="scripting-with-fastapi-fastkit">Scripting with FastAPI-fastkit</h3>
+<p>You can use FastAPI-fastkit in scripts:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-39-1"><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a><span class="ch">#!/bin/bash</span>
+</span><span id="__span-39-2"><a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a><span class="c1"># create-microservices.sh</span>
+</span><span id="__span-39-3"><a id="__codelineno-39-3" name="__codelineno-39-3" href="#__codelineno-39-3"></a>
+</span><span id="__span-39-4"><a id="__codelineno-39-4" name="__codelineno-39-4" href="#__codelineno-39-4"></a><span class="k">for</span><span class="w"> </span>service<span class="w"> </span><span class="k">in</span><span class="w"> </span>users<span class="w"> </span>products<span class="w"> </span>orders<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+</span><span id="__span-39-5"><a id="__codelineno-39-5" name="__codelineno-39-5" href="#__codelineno-39-5"></a><span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Creating </span><span class="nv">$service</span><span class="s2"> service...&quot;</span>
+</span><span id="__span-39-6"><a id="__codelineno-39-6" name="__codelineno-39-6" href="#__codelineno-39-6"></a><span class="w">    </span>fastkit<span class="w"> </span>init<span class="w"> </span><span class="s">&lt;&lt;EOF</span>
+</span><span id="__span-39-7"><a id="__codelineno-39-7" name="__codelineno-39-7" href="#__codelineno-39-7"></a><span class="s">$service-service</span>
+</span><span id="__span-39-8"><a id="__codelineno-39-8" name="__codelineno-39-8" href="#__codelineno-39-8"></a><span class="s">Company Team</span>
+</span><span id="__span-39-9"><a id="__codelineno-39-9" name="__codelineno-39-9" href="#__codelineno-39-9"></a><span class="s">team@company.com</span>
+</span><span id="__span-39-10"><a id="__codelineno-39-10" name="__codelineno-39-10" href="#__codelineno-39-10"></a><span class="s">$service microservice</span>
+</span><span id="__span-39-11"><a id="__codelineno-39-11" name="__codelineno-39-11" href="#__codelineno-39-11"></a><span class="s">minimal</span>
+</span><span id="__span-39-12"><a id="__codelineno-39-12" name="__codelineno-39-12" href="#__codelineno-39-12"></a><span class="s">y</span>
+</span><span id="__span-39-13"><a id="__codelineno-39-13" name="__codelineno-39-13" href="#__codelineno-39-13"></a><span class="s">EOF</span>
+</span><span id="__span-39-14"><a id="__codelineno-39-14" name="__codelineno-39-14" href="#__codelineno-39-14"></a>
+</span><span id="__span-39-15"><a id="__codelineno-39-15" name="__codelineno-39-15" href="#__codelineno-39-15"></a><span class="w">    </span><span class="nb">cd</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$service</span><span class="s2">-service&quot;</span>
+</span><span id="__span-39-16"><a id="__codelineno-39-16" name="__codelineno-39-16" href="#__codelineno-39-16"></a><span class="w">    </span>fastkit<span class="w"> </span>addroute<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$service</span><span class="s2">&quot;</span>
+</span><span id="__span-39-17"><a id="__codelineno-39-17" name="__codelineno-39-17" href="#__codelineno-39-17"></a><span class="w">    </span><span class="nb">cd</span><span class="w"> </span>..
+</span><span id="__span-39-18"><a id="__codelineno-39-18" name="__codelineno-39-18" href="#__codelineno-39-18"></a><span class="k">done</span>
+</span></code></pre></div>
+<h3 id="integration-with-cicd">Integration with CI/CD</h3>
+<p>Example GitHub Actions workflow:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-40-1"><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Test FastAPI-fastkit Project</span>
+</span><span id="__span-40-2"><a id="__codelineno-40-2" name="__codelineno-40-2" href="#__codelineno-40-2"></a>
+</span><span id="__span-40-3"><a id="__codelineno-40-3" name="__codelineno-40-3" href="#__codelineno-40-3"></a><span class="nt">on</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">push</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">pull_request</span><span class="p p-Indicator">]</span>
+</span><span id="__span-40-4"><a id="__codelineno-40-4" name="__codelineno-40-4" href="#__codelineno-40-4"></a>
+</span><span id="__span-40-5"><a id="__codelineno-40-5" name="__codelineno-40-5" href="#__codelineno-40-5"></a><span class="nt">jobs</span><span class="p">:</span>
+</span><span id="__span-40-6"><a id="__codelineno-40-6" name="__codelineno-40-6" href="#__codelineno-40-6"></a><span class="w">  </span><span class="nt">test</span><span class="p">:</span>
+</span><span id="__span-40-7"><a id="__codelineno-40-7" name="__codelineno-40-7" href="#__codelineno-40-7"></a><span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+</span><span id="__span-40-8"><a id="__codelineno-40-8" name="__codelineno-40-8" href="#__codelineno-40-8"></a><span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+</span><span id="__span-40-9"><a id="__codelineno-40-9" name="__codelineno-40-9" href="#__codelineno-40-9"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v2</span>
+</span><span id="__span-40-10"><a id="__codelineno-40-10" name="__codelineno-40-10" href="#__codelineno-40-10"></a>
+</span><span id="__span-40-11"><a id="__codelineno-40-11" name="__codelineno-40-11" href="#__codelineno-40-11"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Set up Python</span>
+</span><span id="__span-40-12"><a id="__codelineno-40-12" name="__codelineno-40-12" href="#__codelineno-40-12"></a><span class="w">      </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/setup-python@v2</span>
+</span><span id="__span-40-13"><a id="__codelineno-40-13" name="__codelineno-40-13" href="#__codelineno-40-13"></a><span class="w">      </span><span class="nt">with</span><span class="p">:</span>
+</span><span id="__span-40-14"><a id="__codelineno-40-14" name="__codelineno-40-14" href="#__codelineno-40-14"></a><span class="w">        </span><span class="nt">python-version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3.12&#39;</span>
+</span><span id="__span-40-15"><a id="__codelineno-40-15" name="__codelineno-40-15" href="#__codelineno-40-15"></a>
+</span><span id="__span-40-16"><a id="__codelineno-40-16" name="__codelineno-40-16" href="#__codelineno-40-16"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Install FastAPI-fastkit</span>
+</span><span id="__span-40-17"><a id="__codelineno-40-17" name="__codelineno-40-17" href="#__codelineno-40-17"></a><span class="w">      </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pip install fastapi-fastkit</span>
+</span><span id="__span-40-18"><a id="__codelineno-40-18" name="__codelineno-40-18" href="#__codelineno-40-18"></a>
+</span><span id="__span-40-19"><a id="__codelineno-40-19" name="__codelineno-40-19" href="#__codelineno-40-19"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Create test project</span>
+</span><span id="__span-40-20"><a id="__codelineno-40-20" name="__codelineno-40-20" href="#__codelineno-40-20"></a><span class="w">      </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+</span><span id="__span-40-21"><a id="__codelineno-40-21" name="__codelineno-40-21" href="#__codelineno-40-21"></a><span class="w">        </span><span class="no">fastkit init &lt;&lt;EOF</span>
+</span><span id="__span-40-22"><a id="__codelineno-40-22" name="__codelineno-40-22" href="#__codelineno-40-22"></a><span class="w">        </span><span class="no">test-project</span>
+</span><span id="__span-40-23"><a id="__codelineno-40-23" name="__codelineno-40-23" href="#__codelineno-40-23"></a><span class="w">        </span><span class="no">CI</span>
+</span><span id="__span-40-24"><a id="__codelineno-40-24" name="__codelineno-40-24" href="#__codelineno-40-24"></a><span class="w">        </span><span class="no">ci@example.com</span>
+</span><span id="__span-40-25"><a id="__codelineno-40-25" name="__codelineno-40-25" href="#__codelineno-40-25"></a><span class="w">        </span><span class="no">Test project</span>
+</span><span id="__span-40-26"><a id="__codelineno-40-26" name="__codelineno-40-26" href="#__codelineno-40-26"></a><span class="w">        </span><span class="no">standard</span>
+</span><span id="__span-40-27"><a id="__codelineno-40-27" name="__codelineno-40-27" href="#__codelineno-40-27"></a><span class="w">        </span><span class="no">y</span>
+</span><span id="__span-40-28"><a id="__codelineno-40-28" name="__codelineno-40-28" href="#__codelineno-40-28"></a><span class="w">        </span><span class="no">EOF</span>
+</span><span id="__span-40-29"><a id="__codelineno-40-29" name="__codelineno-40-29" href="#__codelineno-40-29"></a>
+</span><span id="__span-40-30"><a id="__codelineno-40-30" name="__codelineno-40-30" href="#__codelineno-40-30"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Test project</span>
+</span><span id="__span-40-31"><a id="__codelineno-40-31" name="__codelineno-40-31" href="#__codelineno-40-31"></a><span class="w">      </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+</span><span id="__span-40-32"><a id="__codelineno-40-32" name="__codelineno-40-32" href="#__codelineno-40-32"></a><span class="w">        </span><span class="no">cd test-project</span>
+</span><span id="__span-40-33"><a id="__codelineno-40-33" name="__codelineno-40-33" href="#__codelineno-40-33"></a><span class="w">        </span><span class="no">source .venv/bin/activate</span>
+</span><span id="__span-40-34"><a id="__codelineno-40-34" name="__codelineno-40-34" href="#__codelineno-40-34"></a><span class="w">        </span><span class="no">python -m pytest</span>
+</span></code></pre></div>
+<h2 id="package-manager-support">Package Manager Support</h2>
+<p>FastAPI-fastkit supports multiple Python package managers, allowing you to choose the one that best fits your workflow.</p>
+<h3 id="supported-package-managers">Supported Package Managers</h3>
+<table>
+<thead>
+<tr>
+<th>Manager</th>
+<th>Description</th>
+<th>Dependency File</th>
+<th>Best For</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>UV</strong> (default)</td>
+<td>Fast Python package manager</td>
+<td><code>pyproject.toml</code></td>
+<td>Speed and performance</td>
+</tr>
+<tr>
+<td><strong>PDM</strong></td>
+<td>Modern Python dependency management</td>
+<td><code>pyproject.toml</code></td>
+<td>Advanced dependency resolution</td>
+</tr>
+<tr>
+<td><strong>Poetry</strong></td>
+<td>Python dependency management and packaging</td>
+<td><code>pyproject.toml</code></td>
+<td>Poetry-based workflows</td>
+</tr>
+<tr>
+<td><strong>PIP</strong></td>
+<td>Standard Python package manager</td>
+<td><code>requirements.txt</code></td>
+<td>Traditional Python development</td>
+</tr>
+</tbody>
+</table>
+<h3 id="specifying-package-manager">Specifying Package Manager</h3>
+<h4 id="global-configuration">Global Configuration</h4>
+<p>You can set your preferred package manager for all projects:</p>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-41-1"><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a><span class="gp"># </span>Using<span class="w"> </span><span class="nb">command</span><span class="w"> </span>line<span class="w"> </span>options
+</span><span id="__span-41-2"><a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a><span class="gp">$ </span>fastkit<span class="w"> </span>init<span class="w"> </span>--package-manager<span class="w"> </span>poetry
+</span><span id="__span-41-3"><a id="__codelineno-41-3" name="__codelineno-41-3" href="#__codelineno-41-3"></a><span class="gp">$ </span>fastkit<span class="w"> </span>startdemo<span class="w"> </span>--package-manager<span class="w"> </span>pdm
+</span></code></pre></div>
+<h4 id="project-specific-selection">Project-specific Selection</h4>
+<p>Each project can use a different package manager. The choice is made during project creation and affects:</p>
+<ul>
+<li><strong>Dependency file format</strong>: Each manager creates its appropriate files</li>
+<li><strong>Virtual environment management</strong>: Different activation methods</li>
+<li><strong>Dependency installation</strong>: Manager-specific commands</li>
+</ul>
+<h3 id="package-manager-features">Package Manager Features</h3>
+<h4 id="uv-default">UV (Default)</h4>
+<ul>
+<li><strong>Fast</strong>: Rust-based, extremely fast dependency resolution</li>
+<li><strong>Compatible</strong>: Drop-in replacement for pip and pip-tools</li>
+<li><strong>Modern</strong>: Support for PEP 621 project metadata</li>
+</ul>
+<div class="termy">
+
+<div class="language-console highlight"><pre><span></span><code><span id="__span-42-1"><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a><span class="gp">$ </span>fastkit<span class="w"> </span>init<span class="w"> </span>--package-manager<span class="w"> </span>uv
+</span><span id="__span-42-2"><a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a><span class="gp"># </span>Creates<span class="w"> </span>pyproject.toml<span class="w"> </span>with<span class="w"> </span>UV<span class="w"> </span>configuration
+</span></code></pre></div>
+
+</div>
+
+<h4 id="pdm">PDM</h4>
+<ul>
+<li><strong>Modern</strong>: PEP 582 and PEP 621 support</li>
+<li><strong>Advanced</strong>: Sophisticated dependency resolution</li>
+<li><strong>Flexible</strong>: Multiple project layouts</li>
+</ul>
+<div class="termy">
+
+<div class="language-console highlight"><pre><span></span><code><span id="__span-43-1"><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a><span class="gp">$ </span>fastkit<span class="w"> </span>init<span class="w"> </span>--package-manager<span class="w"> </span>pdm
+</span><span id="__span-43-2"><a id="__codelineno-43-2" name="__codelineno-43-2" href="#__codelineno-43-2"></a><span class="gp"># </span>Creates<span class="w"> </span>pyproject.toml<span class="w"> </span>with<span class="w"> </span>PDM<span class="w"> </span>configuration
+</span></code></pre></div>
+
+</div>
+
+<h4 id="poetry">Poetry</h4>
+<ul>
+<li><strong>Established</strong>: Mature and widely adopted</li>
+<li><strong>Integrated</strong>: Build and publish support</li>
+<li><strong>Lockfile</strong>: poetry.lock for reproducible builds</li>
+</ul>
+<div class="termy">
+
+<div class="language-console highlight"><pre><span></span><code><span id="__span-44-1"><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a><span class="gp">$ </span>fastkit<span class="w"> </span>init<span class="w"> </span>--package-manager<span class="w"> </span>poetry
+</span><span id="__span-44-2"><a id="__codelineno-44-2" name="__codelineno-44-2" href="#__codelineno-44-2"></a><span class="gp"># </span>Creates<span class="w"> </span>pyproject.toml<span class="w"> </span>with<span class="w"> </span>Poetry<span class="w"> </span>configuration
+</span></code></pre></div>
+
+</div>
+
+<h4 id="pip">PIP</h4>
+<ul>
+<li><strong>Standard</strong>: Built into Python</li>
+<li><strong>Compatible</strong>: Works everywhere</li>
+<li><strong>Simple</strong>: Straightforward dependency management</li>
+</ul>
+<div class="termy">
+
+<div class="language-console highlight"><pre><span></span><code><span id="__span-45-1"><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a><span class="gp">$ </span>fastkit<span class="w"> </span>init<span class="w"> </span>--package-manager<span class="w"> </span>pip
+</span><span id="__span-45-2"><a id="__codelineno-45-2" name="__codelineno-45-2" href="#__codelineno-45-2"></a><span class="gp"># </span>Creates<span class="w"> </span>requirements.txt
+</span></code></pre></div>
+
+</div>
+
+<h3 id="working-with-projects">Working with Projects</h3>
+<p>After creating a project with a specific package manager:</p>
+<h4 id="uv-projects">UV Projects</h4>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-46-1"><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a><span class="go">cd my-project</span>
+</span><span id="__span-46-2"><a id="__codelineno-46-2" name="__codelineno-46-2" href="#__codelineno-46-2"></a><span class="go">uv sync          # Install dependencies</span>
+</span><span id="__span-46-3"><a id="__codelineno-46-3" name="__codelineno-46-3" href="#__codelineno-46-3"></a><span class="go">uv add requests  # Add new dependency</span>
+</span><span id="__span-46-4"><a id="__codelineno-46-4" name="__codelineno-46-4" href="#__codelineno-46-4"></a><span class="go">uv run pytest   # Run commands in environment</span>
+</span></code></pre></div>
+<h4 id="pdm-projects">PDM Projects</h4>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-47-1"><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a><span class="go">cd my-project</span>
+</span><span id="__span-47-2"><a id="__codelineno-47-2" name="__codelineno-47-2" href="#__codelineno-47-2"></a><span class="go">pdm install      # Install dependencies</span>
+</span><span id="__span-47-3"><a id="__codelineno-47-3" name="__codelineno-47-3" href="#__codelineno-47-3"></a><span class="go">pdm add requests # Add new dependency</span>
+</span><span id="__span-47-4"><a id="__codelineno-47-4" name="__codelineno-47-4" href="#__codelineno-47-4"></a><span class="go">pdm run pytest  # Run commands in environment</span>
+</span></code></pre></div>
+<h4 id="poetry-projects">Poetry Projects</h4>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-48-1"><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a><span class="go">cd my-project</span>
+</span><span id="__span-48-2"><a id="__codelineno-48-2" name="__codelineno-48-2" href="#__codelineno-48-2"></a><span class="go">poetry install      # Install dependencies</span>
+</span><span id="__span-48-3"><a id="__codelineno-48-3" name="__codelineno-48-3" href="#__codelineno-48-3"></a><span class="go">poetry add requests # Add new dependency</span>
+</span><span id="__span-48-4"><a id="__codelineno-48-4" name="__codelineno-48-4" href="#__codelineno-48-4"></a><span class="go">poetry run pytest  # Run commands in environment</span>
+</span></code></pre></div>
+<h4 id="pip-projects">PIP Projects</h4>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-49-1"><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a><span class="go">cd my-project</span>
+</span><span id="__span-49-2"><a id="__codelineno-49-2" name="__codelineno-49-2" href="#__codelineno-49-2"></a><span class="go">source .venv/bin/activate  # Linux/macOS</span>
+</span><span id="__span-49-3"><a id="__codelineno-49-3" name="__codelineno-49-3" href="#__codelineno-49-3"></a><span class="go">.venv\Scripts\activate     # Windows</span>
+</span><span id="__span-49-4"><a id="__codelineno-49-4" name="__codelineno-49-4" href="#__codelineno-49-4"></a><span class="go">pip install -r requirements.txt</span>
+</span><span id="__span-49-5"><a id="__codelineno-49-5" name="__codelineno-49-5" href="#__codelineno-49-5"></a><span class="go">pip install requests</span>
+</span><span id="__span-49-6"><a id="__codelineno-49-6" name="__codelineno-49-6" href="#__codelineno-49-6"></a><span class="go">pytest</span>
+</span></code></pre></div>
+<h2 id="next-steps">Next Steps</h2>
+<p>Now that you understand the CLI:</p>
+<ol>
+<li><strong><a href="../quick-start/">Quick Start</a></strong>: Try the commands hands-on</li>
+<li><strong><a href="../../tutorial/first-project/">Your First Project</a></strong>: Build a complete application</li>
+<li><strong><a href="../../contributing/development-setup/">Contributing</a></strong>: Contribute to FastAPI-fastkit</li>
+</ol>
+<div class="admonition tip">
+<p class="admonition-title">CLI Tips</p>
+<ul>
+<li>Use <code>--help</code> with any command for detailed help</li>
+<li>Configure default settings to speed up project creation</li>
+<li>Use templates for complex project setups</li>
+<li>Combine commands to create powerful workflows</li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../using-templates/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Using Templates">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Using Templates
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../../tutorial/getting-started/" class="md-footer__link md-footer__link--next" aria-label="Next: Getting Started">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Getting Started
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.indexes", "navigation.footer", "navigation.top", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.expand", "search.highlight", "search.share", "search.suggest", "announce.dismiss", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="../../js/termynal.js"></script>
+      
+        <script src="../../js/custom.js"></script>
+      
+    
+  </body>
+</html>
