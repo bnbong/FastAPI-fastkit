@@ -464,7 +464,7 @@ class TestConfigSchemaNormalization:
         dependencies = config["all_dependencies"]
         for package in (
             "asyncpg",
-            "python-jose[cryptography]",
+            "pyjwt[crypto]",
             "celery[redis]",
             "fastapi-cache2",
             "alembic",

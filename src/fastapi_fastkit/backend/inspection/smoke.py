@@ -115,12 +115,17 @@ def _probe(url: str, timeout: int = 5) -> Optional[int]:
 
 
 def _wait_for_server(
-    process: "subprocess.Popen[bytes]", base_url: str, timeout: int
+    process: Optional["subprocess.Popen[bytes]"], base_url: str, timeout: int
 ) -> Tuple[bool, str]:
-    """Poll ``/docs`` until the server answers, the process dies or time runs out."""
+    """Poll ``/docs`` until the server answers, the process dies or time runs out.
+
+    ``process`` is ``None`` when the server is not ours to watch - a container
+    started by the Docker strategy, for one - in which case only the timeout
+    bounds the wait.
+    """
     deadline = time.time() + timeout
     while time.time() < deadline:
-        if process.poll() is not None:
+        if process is not None and process.poll() is not None:
             return False, "server process exited before becoming reachable"
         status = _probe(f"{base_url}/docs")
         if status is not None:
@@ -228,14 +233,70 @@ def _read_log_tail(log_file: IO[bytes]) -> str:
         return ""
 
 
+def _check_health_endpoint(ctx: InspectionContext, base_url: str) -> Optional[str]:
+    """Probe ``/health``; return a failure message, or ``None`` when acceptable.
+
+    A template without a ``/health`` route answers 404, which is fine; an
+    unreachable endpoint is only worth a warning, but a route that exists and
+    answers with anything other than 200 is a real failure.
+    """
+    health_status = _probe(f"{base_url}/health")
+    if health_status is None:
+        ctx.add_warning("Smoke test: /health did not respond")
+    elif health_status == 404:
+        debug_log("Template exposes no /health endpoint, skipping", "info")
+    elif health_status != 200:
+        return (
+            f"Smoke test failed: /health returned HTTP {health_status} (expected 200)"
+        )
+    return None
+
+
+def run_http_smoke(ctx: InspectionContext, base_url: str) -> bool:
+    """Verify the HTTP surface of a server someone else already started.
+
+    Used by the Docker strategy, which has the real application running in a
+    container: probing its published port is more honest than booting a second
+    copy on the host, and templates that require Docker never get a host venv
+    to boot one with in the first place.
+    """
+    debug_log(f"Running smoke test against {base_url}", "info")
+    reachable, reason = _wait_for_server(None, base_url, ctx.options.smoke_timeout)
+    if not reachable:
+        ctx.add_error(f"Smoke test failed: {reason}")
+        return False
+
+    failure = _check_health_endpoint(ctx, base_url)
+    if failure:
+        ctx.add_error(failure)
+        return False
+
+    debug_log("Smoke test passed", "info")
+    return True
+
+
+def _requires_docker(ctx: InspectionContext) -> bool:
+    """Whether the template declares that it can only run under Docker."""
+    return bool((ctx.template_config or {}).get("requires_docker", False))
+
+
 def check_smoke_test(ctx: InspectionContext) -> bool:
     """Boot the generated project and verify its HTTP surface."""
     if not ctx.options.run_smoke_test:
         debug_log("Smoke test disabled", "info")
         return True
 
+    if ctx.smoke_result is not None:
+        debug_log("Reusing the smoke test result recorded while testing", "info")
+        return ctx.smoke_result
+
     python_executable = ctx.python_executable()
     if not python_executable or not os.path.exists(python_executable):
+        if _requires_docker(ctx):
+            ctx.add_warning(
+                "smoke test skipped: Docker template without published port"
+            )
+            return True
         ctx.add_error(
             "Smoke test requires an installed environment, but no virtual "
             "environment was prepared for the generated project"
@@ -306,16 +367,9 @@ def check_smoke_test(ctx: InspectionContext) -> bool:
                     ctx.add_error(last_failure)
                     return False
 
-                health_status = _probe(f"{base_url}/health")
-                if health_status is None:
-                    ctx.add_warning("Smoke test: /health did not respond")
-                elif health_status == 404:
-                    debug_log("Template exposes no /health endpoint, skipping", "info")
-                elif health_status != 200:
-                    ctx.add_error(
-                        f"Smoke test failed: /health returned HTTP {health_status} "
-                        "(expected 200)\n" + _read_log_tail(log_file)
-                    )
+                failure = _check_health_endpoint(ctx, base_url)
+                if failure:
+                    ctx.add_error(f"{failure}\n{_read_log_tail(log_file)}".rstrip())
                     return False
             finally:
                 _terminate(process)

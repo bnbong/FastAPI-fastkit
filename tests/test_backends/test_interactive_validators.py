@@ -74,7 +74,7 @@ class TestValidatePackageName:
     def test_valid_package_name_with_version_and_extras(self) -> None:
         """Test validation of package name with both version and extras."""
         # given
-        package_name = "python-jose[cryptography]>=3.0.0"
+        package_name = "pyjwt[crypto]>=2.10.0"
 
         # when
         result = validate_package_name(package_name)

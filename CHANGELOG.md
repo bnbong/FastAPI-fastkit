@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.4.1 (2026-09-10)
+
+### Security
+
+- `python-jose` → `PyJWT[crypto]` in the JWT / FastAPI-Users catalog entries and the `fastapi-mcp` template (drops the unpatched `ecdsa` CVE-2024-23342); docs dependency floors raised for Dependabot advisories (mkdocs-material ≥ 9.7.7, pymdown-extensions ≥ 11.0.1, idna ≥ 3.15; urllib3 / virtualenv / filelock refreshed in lock files).
+- `passlib[bcrypt]` → `pwdlib[argon2]` in the JWT / FastAPI-Users catalog entries and the `fastapi-mcp` template (passlib is unmaintained and pinned bcrypt to 4.0.1; generated projects now hash with argon2id like `fastapi-auth-jwt`).
+
+### Fixes
+
+- Template inspector's compile check no longer writes bytecode and runs before the Docker test step (fixes the weekly `fastapi-psql-orm` PermissionError); Docker strategy reclaims bind-mount ownership after container runs; CI pins PDM's interpreter to 3.12; security-scan workflow now builds a valid JSON report and counts vulnerabilities correctly.
+- Template inspector parses every `docker-compose ps --format json` shape (single JSON array on Compose < 2.21, NDJSON on newer releases) and falls back to the `docker compose` plugin when the standalone binary is missing.
+- Docker-backed templates are smoke-tested against the container's published port instead of requiring a host virtualenv (the weekly `fastapi-psql-orm` run now reaches and passes the smoke step).
+- `startdemo` / `init` normalize copied text files to LF and keep executable bits, and a new `.gitattributes` pins template line endings, so shell scripts generated on Windows or with `core.autocrlf=true` no longer fail with `bash\r: No such file or directory`. `fastapi-psql-orm` `.env` now sets `ENVIRONMENT=development`.
+
 ## v1.4.0 (2026-09-04)
 
 ### Features

@@ -134,8 +134,8 @@ class TestCollectFromConfig:
         dependencies = collector.collect_from_config(config)
 
         # then
-        assert "python-jose[cryptography]" in dependencies
-        assert "passlib[bcrypt]" in dependencies
+        assert "pyjwt[crypto]" in dependencies
+        assert "pwdlib[argon2]" in dependencies
 
     def test_collect_with_celery(self) -> None:
         """Test dependency collection with Celery."""
@@ -280,7 +280,7 @@ class TestCollectFromConfig:
         assert "sqlalchemy" in dependencies
         assert "asyncpg" in dependencies
         # Authentication
-        assert "python-jose[cryptography]" in dependencies
+        assert "pyjwt[crypto]" in dependencies
         # Tasks
         assert any("celery" in dep for dep in dependencies)
         assert any("redis" in dep for dep in dependencies)
@@ -586,7 +586,7 @@ class TestNewFeatureAxes:
         # then — one representative package per axis that ships any
         for expected in (
             "asyncpg",
-            "python-jose[cryptography]",
+            "pyjwt[crypto]",
             "celery[redis]",
             "fastapi-cache2",
             "loguru",

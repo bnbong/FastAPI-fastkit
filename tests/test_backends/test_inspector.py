@@ -11,7 +11,7 @@ import os
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -679,16 +679,22 @@ class TestDockerStrategy:
         compose.exec_tests.return_value = subprocess.CompletedProcess(
             ["pytest"], 0, "", ""
         )
+        compose.published_port.return_value = 32768
 
         # when
         with (
             patch.object(DockerCompose, "is_available", return_value=True),
             patch.object(strategies_module, "DockerCompose", return_value=compose),
+            patch.object(
+                strategies_module.smoke, "run_http_smoke", return_value=True
+            ) as mock_smoke,
         ):
             result = strategies_module.DockerStrategy(ctx).run()
 
         # then
         assert result is True
+        assert ctx.smoke_result is True
+        mock_smoke.assert_called_once_with(ctx, "http://127.0.0.1:32768")
         compose.cleanup.assert_called_once()
         # test_env_defaults are materialised into a .env file
         assert "POSTGRES_USER=test_user" in (tmp_path / ".env").read_text()
@@ -807,6 +813,118 @@ class TestStrategyErrorPaths:
         assert result is False
 
 
+class TestDockerStrategySmokeTest:
+    """The Docker strategy probes the container before tearing it down."""
+
+    def _context(self, tmp_path: Path, **option_kwargs: Any) -> Any:
+        return InspectionContext(
+            template_path=tmp_path,
+            temp_dir=str(tmp_path),
+            options=InspectionOptions(**option_kwargs),
+            template_config={"requires_docker": True},
+        )
+
+    def _compose(self, port: Optional[int]) -> MagicMock:
+        compose = MagicMock()
+        compose.containers_running.return_value = True
+        compose.verify_services_running.return_value = None
+        compose.exec_tests.return_value = subprocess.CompletedProcess(
+            ["pytest"], 0, "", ""
+        )
+        compose.published_port.return_value = port
+        return compose
+
+    def _run(self, ctx: Any, compose: MagicMock) -> bool:
+        with (
+            patch.object(DockerCompose, "is_available", return_value=True),
+            patch.object(strategies_module, "DockerCompose", return_value=compose),
+        ):
+            result: bool = strategies_module.DockerStrategy(ctx).run()
+        return result
+
+    def test_failed_probe_is_recorded_but_tests_still_pass(
+        self, tmp_path: Path
+    ) -> None:
+        # given: the container answers nothing on its published port
+        ctx = self._context(tmp_path, smoke_timeout=0)
+        compose = self._compose(32768)
+
+        # when
+        with patch.object(strategies_module.smoke, "_probe", return_value=None):
+            result = self._run(ctx, compose)
+
+        # then: the strategy itself succeeded, the smoke step will fail
+        assert result is True
+        assert ctx.smoke_result is False
+        assert any("Smoke test failed" in e for e in ctx.errors)
+
+    def test_probe_runs_before_the_stack_is_torn_down(self, tmp_path: Path) -> None:
+        # given
+        ctx = self._context(tmp_path)
+        compose = self._compose(32768)
+        order: List[str] = []
+        compose.cleanup.side_effect = lambda: order.append("cleanup")
+
+        # when
+        with patch.object(
+            strategies_module.smoke,
+            "run_http_smoke",
+            side_effect=lambda *_: order.append("smoke") or True,
+        ):
+            result = self._run(ctx, compose)
+
+        # then
+        assert result is True
+        assert order == ["smoke", "cleanup"]
+
+    def test_missing_published_port_is_a_warning(self, tmp_path: Path) -> None:
+        # given
+        ctx = self._context(tmp_path)
+        compose = self._compose(None)
+
+        # when
+        with patch.object(strategies_module.smoke, "run_http_smoke") as mock_smoke:
+            result = self._run(ctx, compose)
+
+        # then
+        assert result is True
+        assert ctx.smoke_result is True
+        assert ctx.errors == []
+        assert any("smoke test skipped" in w for w in ctx.warnings)
+        mock_smoke.assert_not_called()
+
+    def test_disabled_smoke_test_is_not_probed(self, tmp_path: Path) -> None:
+        # given
+        ctx = self._context(tmp_path, run_smoke_test=False)
+        compose = self._compose(32768)
+
+        # when
+        with patch.object(strategies_module.smoke, "run_http_smoke") as mock_smoke:
+            result = self._run(ctx, compose)
+
+        # then
+        assert result is True
+        assert ctx.smoke_result is None
+        mock_smoke.assert_not_called()
+
+    def test_failed_tests_skip_the_probe(self, tmp_path: Path) -> None:
+        # given
+        ctx = self._context(tmp_path)
+        compose = self._compose(32768)
+        compose.exec_tests.return_value = subprocess.CompletedProcess(
+            ["pytest"], 1, "out", "err"
+        )
+
+        # when
+        with patch.object(strategies_module.smoke, "run_http_smoke") as mock_smoke:
+            result = self._run(ctx, compose)
+
+        # then
+        assert result is False
+        assert ctx.smoke_result is None
+        mock_smoke.assert_not_called()
+
+
 class TestDockerStrategyEnvFileAndTimeout:
     """The .env materialisation and the outer timeout/OSError handling."""
 
@@ -834,6 +952,7 @@ class TestDockerStrategyEnvFileAndTimeout:
         compose.exec_tests.return_value = subprocess.CompletedProcess(
             ["pytest"], 0, "", ""
         )
+        compose.published_port.return_value = None
 
         # when
         with (
@@ -1026,6 +1145,35 @@ class TestReportAndFacade(InspectorTestBase):
         # then
         assert result is False
         mock_tests.assert_not_called()
+
+    def test_compile_check_runs_before_template_tests(self, temp_dir: str) -> None:
+        # given: the compile check is static, so it must gate the expensive
+        # (and, for docker templates, root-owned) test run
+        self.create_valid_template_structure()
+        options = InspectionOptions(
+            offline=True, run_smoke_test=False, run_template_tests=False
+        )
+        calls: List[str] = []
+
+        # when
+        with self.make_inspector(temp_dir, options) as inspector:
+            with (
+                patch.object(
+                    TemplateInspector,
+                    "_check_compileall",
+                    side_effect=lambda: (calls.append("compile"), True)[1],
+                ),
+                patch.object(
+                    TemplateInspector,
+                    "_test_template",
+                    side_effect=lambda: (calls.append("tests"), True)[1],
+                ),
+            ):
+                result = inspector.inspect_template()
+
+        # then
+        assert result is True, inspector.errors
+        assert calls == ["compile", "tests"]
 
     def test_inspect_template_runs_every_check(self, temp_dir: str) -> None:
         # given: all expensive steps stubbed out

@@ -29,9 +29,16 @@ jobs:
 
       - name: Setup PDM
         uses: pdm-project/setup-pdm@v4
+        with:
+          # Pin the interpreter: without this PDM may resolve a newer runtime
+          # than the one actions/setup-python provisioned.
+          python-version: "3.12"
 
       - name: Install dependencies
         run: pdm install -G dev
+
+      - name: Verify Python version
+        run: pdm run python --version
 
       - name: Install UV package manager
         run: |

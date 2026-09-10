@@ -22,6 +22,104 @@ logger = get_logger(__name__)
 #: here are the *converted* names (the ``-tpl`` marker already stripped).
 TEMPLATE_ONLY_FILES = frozenset({"template-config.yml"})
 
+#: Extensions of files that are known to be text and therefore safe to rewrite
+#: with Unix line endings. Anything outside this list is copied byte for byte,
+#: so an image or an archive shipped inside a template survives untouched.
+TEXT_FILE_EXTENSIONS = frozenset(
+    {
+        ".bash",
+        ".cfg",
+        ".css",
+        ".env",
+        ".html",
+        ".ini",
+        ".js",
+        ".json",
+        ".mako",
+        ".md",
+        ".py",
+        ".rst",
+        ".sh",
+        ".sql",
+        ".toml",
+        ".ts",
+        ".txt",
+        ".yaml",
+        ".yml",
+    }
+)
+
+#: Extension-less file names that are text as well.
+TEXT_FILE_NAMES = frozenset(
+    {
+        ".dockerignore",
+        ".env",
+        ".gitignore",
+        "CHANGELOG",
+        "Dockerfile",
+        "LICENSE",
+        "Makefile",
+        "Procfile",
+        "README",
+    }
+)
+
+#: How much of a file is sampled when looking for a NUL byte. A NUL in the
+#: first chunk is the same heuristic Git uses to call a blob binary.
+BINARY_SNIFF_BYTES = 8192
+
+
+def _looks_like_text_file(file_path: str, file_name: str) -> bool:
+    """
+    Decide whether a copied file may have its line endings normalised.
+
+    The check is deliberately conservative: the name has to be on the text
+    whitelist *and* the content must carry no NUL byte, so a mislabelled
+    binary is left alone rather than corrupted.
+
+    :param file_path: Path of the file to inspect
+    :param file_name: File name used for the extension/name whitelist
+    :return: True when the file is safe to rewrite as text
+    """
+    _, extension = os.path.splitext(file_name)
+    if (
+        extension.lower() not in TEXT_FILE_EXTENSIONS
+        and file_name not in TEXT_FILE_NAMES
+    ):
+        return False
+
+    try:
+        with open(file_path, "rb") as f:
+            return b"\x00" not in f.read(BINARY_SNIFF_BYTES)
+    except OSError as e:
+        debug_log(f"Could not sniff {file_path} for binary content: {e}", "warning")
+        return False
+
+
+def _normalize_line_endings(file_path: str, file_name: str) -> None:
+    """
+    Rewrite a copied text file with Unix line endings.
+
+    Templates checked out on Windows (or with ``core.autocrlf=true``) carry
+    CRLF, which makes a generated project's shell scripts unusable inside a
+    Linux container: ``env: 'bash\r': No such file or directory``. The rewrite
+    happens in place through :func:`fix_script_line_endings`, which truncates
+    rather than recreates the file and therefore keeps the executable bit
+    ``shutil.copy2`` just carried over.
+
+    :param file_path: Path of the copied file
+    :param file_name: File name used for the text/binary decision
+    """
+    if not _looks_like_text_file(file_path, file_name):
+        return
+
+    # Imported lazily: ``fastapi_fastkit.backend.inspection`` pulls in the
+    # scaffolder, which imports this module, so a top-level import would be
+    # circular.
+    from fastapi_fastkit.backend.inspection.fsutils import fix_script_line_endings
+
+    fix_script_line_endings(file_path)
+
 
 def copy_and_convert_template(
     template_dir: str, target_dir: str, project_name: str = ""
@@ -130,6 +228,7 @@ def _copy_template_file(
 
     try:
         shutil.copy2(src_file, dst_file)
+        _normalize_line_endings(dst_file, dst_file_name)
         debug_log(f"Copied {src_file} to {dst_file}", "debug")
         return dst_file
 
@@ -223,8 +322,8 @@ def _write_target_file(target_file: str, content: str, source_file: str) -> bool
         target_dir = os.path.dirname(target_file)
         os.makedirs(target_dir, exist_ok=True)
 
-        with open(target_file, "w", encoding="utf-8") as f:
-            f.write(content)
+        with open(target_file, "w", encoding="utf-8", newline="\n") as f:
+            f.write(content.replace("\r\n", "\n").replace("\r", "\n"))
 
         debug_log(
             f"Successfully copied template file from {source_file} to {target_file}",

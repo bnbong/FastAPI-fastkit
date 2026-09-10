@@ -16,6 +16,7 @@ from typing import Any, Dict, List
 from fastapi_fastkit.backend.main import create_venv, install_dependencies_with_manager
 from fastapi_fastkit.utils.logging import debug_log
 
+from . import smoke
 from .context import InspectionContext
 from .docker import DockerCompose
 from .fsutils import fix_all_script_line_endings, fix_script_line_endings
@@ -278,7 +279,15 @@ class DockerStrategy(TestStrategy):
                 self.ctx.add_error(verification_error)
                 return False
 
-            return self._run_tests(compose)
+            if not self._run_tests(compose):
+                return False
+
+            # The application is running right here, in a container with a
+            # published port: probing that is the only way a Docker-only
+            # template gets a smoke test, since no host venv is ever built for
+            # it. Done before the ``finally`` below tears the stack down.
+            self._run_smoke_test(compose)
+            return True
         except subprocess.TimeoutExpired:
             self.ctx.add_error("Docker Compose setup timed out")
             return False
@@ -306,6 +315,28 @@ class DockerStrategy(TestStrategy):
 
         debug_log("Docker tests passed successfully", "info")
         return True
+
+    def _run_smoke_test(self, compose: DockerCompose) -> None:
+        """Probe the running container's HTTP surface and record the verdict.
+
+        The result lands on the context so the pipeline's Smoke Test step
+        reuses it instead of trying (and failing) to boot the project from a
+        virtual environment that a Docker run never creates.
+        """
+        if not self.ctx.options.run_smoke_test:
+            return
+
+        port = compose.published_port()
+        if port is None:
+            self.ctx.add_warning(
+                "smoke test skipped: Docker template without published port"
+            )
+            self.ctx.smoke_result = True
+            return
+
+        self.ctx.smoke_result = smoke.run_http_smoke(
+            self.ctx, f"http://127.0.0.1:{port}"
+        )
 
 
 def select_fallback_strategy(ctx: InspectionContext) -> TestStrategy:

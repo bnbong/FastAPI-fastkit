@@ -257,13 +257,13 @@ class FastkitConfig:
             DatabaseChoice.NONE: [],
         },
         FeatureAxis.AUTHENTICATION: {
-            AuthChoice.JWT: ["python-jose[cryptography]", "passlib[bcrypt]"],
+            AuthChoice.JWT: ["pyjwt[crypto]", "pwdlib[argon2]"],
             # SessionMiddleware (used by the OAuth2 login flow) needs itsdangerous.
             AuthChoice.OAUTH2: ["authlib", "itsdangerous", "httpx"],
             AuthChoice.FASTAPI_USERS: [
                 "fastapi-users[sqlalchemy]",
-                "python-jose[cryptography]",
-                "passlib[bcrypt]",
+                "pyjwt[crypto]",
+                "pwdlib[argon2]",
             ],
             AuthChoice.SESSION: ["itsdangerous"],
             AuthChoice.NONE: [],

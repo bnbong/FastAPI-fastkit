@@ -286,8 +286,8 @@ class TestGenerateAuthConfig:
         # then
         assert content is not None
         assert "JWT Authentication Configuration" in content
-        assert "jose" in content.lower()
-        assert "passlib" in content or "password" in content.lower()
+        assert "import jwt" in content
+        assert "pwdlib" in content or "password" in content.lower()
         assert "SECRET_KEY" in content
 
     def test_generate_auth_config_fastapi_users(self) -> None:

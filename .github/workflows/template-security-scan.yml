@@ -32,20 +32,15 @@ jobs:
 
       - name: Run security scan on templates
         id: scan
+        env:
+          TEMPLATES_INPUT: ${{ github.event.inputs.templates }}
         run: |
           TEMPLATE_DIR="src/fastapi_fastkit/fastapi_project_template"
           RESULTS_FILE="security_scan_results.json"
           SCAN_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-
-          # Initialize results
-          echo '{' > $RESULTS_FILE
-          echo '  "scan_date": "'$SCAN_DATE'",' >> $RESULTS_FILE
-          echo '  "templates": [' >> $RESULTS_FILE
-
-          TEMPLATES_INPUT="${{ github.event.inputs.templates }}"
-          FIRST_TEMPLATE=true
-          TOTAL_VULNERABILITIES=0
-          AFFECTED_TEMPLATES=""
+          TEMP_DIR=$(mktemp -d)
+          MANIFEST="$TEMP_DIR/manifest.txt"
+          : > "$MANIFEST"
 
           for template_dir in $TEMPLATE_DIR/fastapi-*/; do
             template_name=$(basename "$template_dir")
@@ -65,44 +60,83 @@ jobs:
               temp_req=$(mktemp)
               cp "$req_file" "$temp_req"
 
-              # Run pip-audit and capture output
-              audit_output=$(pip-audit -r "$temp_req" --format json 2>/dev/null || echo '[]')
-              rm "$temp_req"
+              audit_file="$TEMP_DIR/${template_name}.json"
+              err_file="$TEMP_DIR/${template_name}.err"
 
-              # Count vulnerabilities
-              vuln_count=$(echo "$audit_output" | python3 -c "import sys, json; data = json.load(sys.stdin); print(len(data))" 2>/dev/null || echo "0")
-
-              if [ "$vuln_count" -gt 0 ]; then
-                TOTAL_VULNERABILITIES=$((TOTAL_VULNERABILITIES + vuln_count))
-                AFFECTED_TEMPLATES="$AFFECTED_TEMPLATES $template_name"
-                echo "⚠️ Found $vuln_count vulnerabilities in $template_name"
-              else
-                echo "✅ No vulnerabilities in $template_name"
+              if ! pip-audit -r "$temp_req" --format json > "$audit_file" 2>"$err_file"; then
+                echo "⚠️ pip-audit failed for $template_name (recorded in results)"
               fi
+              rm -f "$temp_req"
 
-              # Add to JSON
-              if [ "$FIRST_TEMPLATE" = true ]; then
-                FIRST_TEMPLATE=false
-              else
-                echo '    ,' >> $RESULTS_FILE
-              fi
-
-              echo '    {' >> $RESULTS_FILE
-              echo '      "name": "'$template_name'",' >> $RESULTS_FILE
-              echo '      "vulnerability_count": '$vuln_count',' >> $RESULTS_FILE
-              echo '      "vulnerabilities": '$audit_output >> $RESULTS_FILE
-              echo '    }' >> $RESULTS_FILE
+              echo "$template_name" >> "$MANIFEST"
             fi
           done
 
-          echo '  ],' >> $RESULTS_FILE
-          echo '  "total_vulnerabilities": '$TOTAL_VULNERABILITIES',' >> $RESULTS_FILE
-          echo '  "affected_templates": "'$(echo $AFFECTED_TEMPLATES | xargs)'"' >> $RESULTS_FILE
-          echo '}' >> $RESULTS_FILE
+          # Assemble valid JSON results (and never do it via shell string concatenation)
+          TEMP_DIR="$TEMP_DIR" RESULTS_FILE="$RESULTS_FILE" SCAN_DATE="$SCAN_DATE" python3 - <<'PYEOF'
+          import json
+          import os
 
-          # Set outputs for later steps
-          echo "total_vulnerabilities=$TOTAL_VULNERABILITIES" >> $GITHUB_OUTPUT
-          echo "affected_templates=$AFFECTED_TEMPLATES" >> $GITHUB_OUTPUT
+          temp_dir = os.environ["TEMP_DIR"]
+          results_file = os.environ["RESULTS_FILE"]
+          scan_date = os.environ["SCAN_DATE"]
+
+          manifest_path = os.path.join(temp_dir, "manifest.txt")
+          with open(manifest_path) as f:
+              template_names = [line.strip() for line in f if line.strip()]
+
+          templates = []
+          total_vulnerabilities = 0
+          affected_templates = []
+
+          for name in template_names:
+              audit_file = os.path.join(temp_dir, f"{name}.json")
+              err_file = os.path.join(temp_dir, f"{name}.err")
+
+              entry = {"template": name, "vulnerability_count": 0, "vulnerabilities": []}
+
+              try:
+                  with open(audit_file) as af:
+                      data = json.load(af)
+                  dependencies = data.get("dependencies", [])
+                  vulnerable_deps = [dep for dep in dependencies if dep.get("vulns")]
+                  vuln_count = sum(len(dep.get("vulns", [])) for dep in dependencies)
+                  entry["vulnerability_count"] = vuln_count
+                  entry["vulnerabilities"] = vulnerable_deps
+              except Exception as exc:
+                  error_msg = ""
+                  if os.path.exists(err_file):
+                      with open(err_file) as ef:
+                          error_msg = ef.read().strip()
+                  entry["error"] = error_msg or str(exc)
+
+              if entry["vulnerability_count"] > 0:
+                  total_vulnerabilities += entry["vulnerability_count"]
+                  affected_templates.append(name)
+                  print(f"⚠️ Found {entry['vulnerability_count']} vulnerabilities in {name}")
+              elif "error" not in entry:
+                  print(f"✅ No vulnerabilities in {name}")
+              else:
+                  print(f"❌ pip-audit failed for {name}: {entry['error']}")
+
+              templates.append(entry)
+
+          results = {
+              "scan_date": scan_date,
+              "templates": templates,
+              "total_vulnerabilities": total_vulnerabilities,
+              "affected_templates": " ".join(affected_templates),
+          }
+
+          with open(results_file, "w") as rf:
+              json.dump(results, rf, indent=2)
+
+          github_output = os.environ.get("GITHUB_OUTPUT")
+          if github_output:
+              with open(github_output, "a") as gh:
+                  gh.write(f"total_vulnerabilities={total_vulnerabilities}\n")
+                  gh.write(f"affected_templates={' '.join(affected_templates)}\n")
+          PYEOF
 
       - name: Upload scan results
         uses: actions/upload-artifact@v4
@@ -127,15 +161,27 @@ jobs:
               const results = JSON.parse(fs.readFileSync('security_scan_results.json', 'utf8'));
 
               results.templates.forEach(template => {
-                if (template.vulnerability_count > 0) {
-                  issueBody += `### ⚠️ ${template.name}\n\n`;
-                  issueBody += `Found **${template.vulnerability_count}** vulnerabilities:\n\n`;
-                  issueBody += `| Package | Installed | Fix Versions | Vulnerability ID |\n`;
-                  issueBody += `|---------|-----------|--------------|------------------|\n`;
+                if (template.error) {
+                  issueBody += `### ❌ ${template.template}\n\n`;
+                  issueBody += `pip-audit failed to scan this template:\n\n`;
+                  issueBody += "```\n" + template.error + "\n```\n\n";
+                  return;
+                }
 
-                  template.vulnerabilities.forEach(vuln => {
-                    const fixVersions = vuln.fix_versions ? vuln.fix_versions.join(', ') : 'N/A';
-                    issueBody += `| ${vuln.name} | ${vuln.version} | ${fixVersions} | ${vuln.id} |\n`;
+                if (template.vulnerability_count > 0) {
+                  issueBody += `### ⚠️ ${template.template}\n\n`;
+                  issueBody += `Found **${template.vulnerability_count}** vulnerabilities:\n\n`;
+                  issueBody += `| Package | Installed | Fix Versions | Vulnerability ID / Aliases |\n`;
+                  issueBody += `|---------|-----------|--------------|------------------------------|\n`;
+
+                  template.vulnerabilities.forEach(dep => {
+                    (dep.vulns || []).forEach(vuln => {
+                      const fixVersions = (vuln.fix_versions && vuln.fix_versions.length)
+                        ? vuln.fix_versions.join(', ')
+                        : 'no fix available';
+                      const idAliases = [vuln.id, ...(vuln.aliases || [])].filter(Boolean).join(', ');
+                      issueBody += `| ${dep.name} | ${dep.version} | ${fixVersions} | ${idAliases} |\n`;
+                    });
                   });
 
                   issueBody += `\n`;
