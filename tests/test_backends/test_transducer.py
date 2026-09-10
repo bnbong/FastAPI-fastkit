@@ -15,6 +15,7 @@ from fastapi_fastkit.backend.transducer import (
     _apply_replacements,
     _copy_template_file,
     _ensure_directory_exists,
+    _looks_like_text_file,
     _process_directory_tree,
     _read_template_content,
     _write_target_file,
@@ -192,6 +193,45 @@ class TestTransducer:
         # then
         assert result is False
         assert not target_file.exists()
+
+    def test_copy_and_convert_template_file_returns_false_when_content_is_none(
+        self,
+    ) -> None:
+        """Test copy_and_convert_template_file returns False when content read fails."""
+        # given
+        source_file = self.source_path / "test.py-tpl"
+        target_file = self.dest_path / "test.py"
+        source_file.write_text("# Test content")
+
+        # when
+        with patch(
+            "fastapi_fastkit.backend.transducer._read_template_content",
+            return_value=None,
+        ):
+            result = copy_and_convert_template_file(str(source_file), str(target_file))
+
+        # then
+        assert result is False
+        assert not target_file.exists()
+
+    def test_copy_and_convert_template_file_returns_false_on_unexpected_error(
+        self,
+    ) -> None:
+        """Test copy_and_convert_template_file catches unexpected exceptions."""
+        # given
+        source_file = self.source_path / "test.py-tpl"
+        target_file = self.dest_path / "test.py"
+        source_file.write_text("# Test content")
+
+        # when
+        with patch(
+            "fastapi_fastkit.backend.transducer._write_target_file",
+            side_effect=RuntimeError("boom"),
+        ):
+            result = copy_and_convert_template_file(str(source_file), str(target_file))
+
+        # then
+        assert result is False
 
     def test_copy_and_convert_template_file_target_dir_creation(self) -> None:
         """Test copy_and_convert_template_file creates target directory."""
@@ -513,6 +553,35 @@ class TestTransducer:
                 copy_and_convert_template(
                     str(self.source_path), "/invalid/path", "project"
                 )
+
+
+class TestLooksLikeTextFile:
+    """``_looks_like_text_file`` sniffs whitelisted files for binary content."""
+
+    def setup_method(self) -> None:
+        """Setup method for each test."""
+        self.temp_dir = tempfile.mkdtemp()
+
+    def teardown_method(self) -> None:
+        """Cleanup method for each test."""
+        import shutil
+
+        if os.path.exists(self.temp_dir):
+            shutil.rmtree(self.temp_dir)
+
+    def test_returns_false_when_open_raises_os_error(self) -> None:
+        """An OSError while sniffing the file is treated as non-text."""
+        # given
+        file_path = os.path.join(self.temp_dir, "main.py")
+        with open(file_path, "w") as f:
+            f.write("print('hi')")
+
+        # when
+        with patch("builtins.open", side_effect=OSError("boom")):
+            result = _looks_like_text_file(file_path, "main.py")
+
+        # then
+        assert result is False
 
 
 class TestLineEndingNormalization:

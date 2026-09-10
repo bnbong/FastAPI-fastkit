@@ -240,6 +240,37 @@ class TestServices:
             {"Name": "db", "State": "exited"},
         ]
 
+    def test_returns_empty_list_when_document_is_neither_dict_nor_list(self) -> None:
+        # given - a payload that parses successfully but into a scalar value
+        compose = DockerCompose("/tmp/project")
+        stdout = '{"ignored": true}'
+
+        # when
+        with patch.object(compose, "_compose", return_value=completed(stdout=stdout)):
+            with patch.object(docker_module.json, "loads", return_value=42):
+                services = compose._services(timeout=5)
+
+        # then
+        assert services == []
+
+    def test_parse_json_lines_skips_blank_and_malformed_lines(self) -> None:
+        # given - blank lines and syntactically invalid JSON lines mixed in
+        payload = (
+            '{"Name": "app", "State": "running"}\n'
+            "\n"
+            "{not valid json}\n"
+            '{"Name": "db", "State": "exited"}'
+        )
+
+        # when
+        services = DockerCompose._parse_json_lines(payload)
+
+        # then
+        assert services == [
+            {"Name": "app", "State": "running"},
+            {"Name": "db", "State": "exited"},
+        ]
+
 
 class TestContainersRunning:
     """Every container in the project must report ``true`` for Running."""
@@ -313,6 +344,22 @@ class TestWaitUntilHealthy:
             with patch("time.sleep"):
                 with patch("time.time", side_effect=lambda: next(times, 100)):
                     compose.wait_until_healthy(timeout=1)
+
+    def test_logs_and_sleeps_while_waiting_for_services_to_become_ready(self) -> None:
+        # given - the deadline check passes once before finally timing out
+        compose = DockerCompose("/tmp/project")
+        times = iter([0, 0, 100])
+        with patch.object(compose, "_services", return_value=[]):
+            with patch("time.sleep") as mock_sleep:
+                with patch(
+                    "fastapi_fastkit.backend.inspection.docker.debug_log"
+                ) as mock_debug_log:
+                    with patch("time.time", side_effect=lambda: next(times, 100)):
+                        compose.wait_until_healthy(timeout=10)
+
+        # then
+        mock_sleep.assert_any_call(5)
+        mock_debug_log.assert_any_call("Services not ready yet, waiting...", "info")
 
 
 class TestVerifyServicesRunning:
