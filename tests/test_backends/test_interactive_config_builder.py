@@ -108,8 +108,8 @@ class TestCollectAllDependencies:
         dependencies = builder._collect_all_dependencies()
 
         # then
-        assert "python-jose[cryptography]" in dependencies
-        assert "passlib[bcrypt]" in dependencies
+        assert "pyjwt[crypto]" in dependencies
+        assert "pwdlib[argon2]" in dependencies
 
     def test_collect_dependencies_deduplication(self) -> None:
         """Test that dependencies are deduplicated."""

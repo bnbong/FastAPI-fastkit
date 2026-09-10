@@ -3,10 +3,10 @@ Authentication-related API endpoints.
 """
 from datetime import datetime, timedelta, timezone
 
+import jwt
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jose import jwt
-from passlib.context import CryptContext
+from pwdlib import PasswordHash
 
 from src.auth.dependencies import get_current_active_user
 from src.core.config import settings
@@ -14,8 +14,8 @@ from src.schemas.items import AuthToken, UserInfo, UserLogin
 
 router = APIRouter()
 
-# Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Password hashing — argon2id, the recommended default for new applications.
+password_hash = PasswordHash.recommended()
 
 # OAuth2 scheme
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -25,19 +25,19 @@ mock_users = {
     "user1": {
         "user_id": "user1",
         "username": "user1",
-        "hashed_password": pwd_context.hash("password123"),
+        "hashed_password": password_hash.hash("password123"),
         "active": True,
     },
     "user2": {
         "user_id": "user2",
         "username": "user2",
-        "hashed_password": pwd_context.hash("password456"),
+        "hashed_password": password_hash.hash("password456"),
         "active": True,
     },
     "admin": {
         "user_id": "admin",
         "username": "admin",
-        "hashed_password": pwd_context.hash("admin123"),
+        "hashed_password": password_hash.hash("admin123"),
         "active": True,
     },
 }
@@ -45,12 +45,12 @@ mock_users = {
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against its hash."""
-    return pwd_context.verify(plain_password, hashed_password)
+    return password_hash.verify(plain_password, hashed_password)
 
 
 def get_password_hash(password: str) -> str:
     """Generate password hash."""
-    return pwd_context.hash(password)
+    return password_hash.hash(password)
 
 
 def authenticate_user(username: str, password: str) -> dict | None:

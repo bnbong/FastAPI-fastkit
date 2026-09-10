@@ -513,3 +513,103 @@ class TestTransducer:
                 copy_and_convert_template(
                     str(self.source_path), "/invalid/path", "project"
                 )
+
+
+class TestLineEndingNormalization:
+    """Copying a template must never carry CRLF into a generated project."""
+
+    def setup_method(self) -> None:
+        """Setup method for each test."""
+        self.temp_source_dir = tempfile.mkdtemp()
+        self.temp_dest_dir = tempfile.mkdtemp()
+        self.source_path = Path(self.temp_source_dir)
+        self.dest_path = Path(self.temp_dest_dir)
+
+    def teardown_method(self) -> None:
+        """Cleanup method for each test."""
+        import shutil
+
+        if os.path.exists(self.temp_source_dir):
+            shutil.rmtree(self.temp_source_dir)
+        if os.path.exists(self.temp_dest_dir):
+            shutil.rmtree(self.temp_dest_dir)
+
+    def test_crlf_text_templates_are_converted_to_lf(self) -> None:
+        """Every whitelisted text file loses its CRLF during the copy."""
+        # given
+        crlf_files = {
+            "pre-start.sh-tpl": b"#!/usr/bin/env bash\r\nset -e\r\n",
+            "main.py-tpl": b"import os\r\nprint(os)\r\n",
+            "docker-compose.yml-tpl": b"services:\r\n  app: {}\r\n",
+            "pyproject.toml-tpl": b'[project]\r\nname = "x"\r\n',
+            "setup.cfg-tpl": b"[flake8]\r\nmax-line-length = 88\r\n",
+            "alembic.ini-tpl": b"[alembic]\r\nscript_location = m\r\n",
+            ".env-tpl": b"ENVIRONMENT=development\r\nSECRET_KEY=changethis\r\n",
+            "Dockerfile-tpl": b"FROM python:3.12\r\nWORKDIR /app\r\n",
+            "Makefile-tpl": b"all:\r\n\techo hi\r\n",
+            "script.py.mako-tpl": b"# ${message}\r\n",
+            "README.md-tpl": b"# Title\r\n\r\nBody\r\n",
+            "requirements.txt-tpl": b"fastapi\r\nuvicorn\r\n",
+            # Extension-less text files (alembic ships a bare ``README``).
+            "README-tpl": b"Generic single-database configuration.\r\n",
+        }
+        for name, payload in crlf_files.items():
+            (self.source_path / name).write_bytes(payload)
+
+        # when
+        copy_and_convert_template(str(self.source_path), str(self.dest_path))
+
+        # then
+        for name, payload in crlf_files.items():
+            converted = self.dest_path / name.removesuffix("-tpl")
+            content = converted.read_bytes()
+            assert b"\r" not in content, f"{converted} still contains CR"
+            assert content == payload.replace(b"\r\n", b"\n")
+
+    def test_executable_bit_survives_normalization(self) -> None:
+        """A CRLF shell script stays executable after being rewritten."""
+        # given
+        script = self.source_path / "pre-start.sh-tpl"
+        script.write_bytes(b"#!/usr/bin/env bash\r\nexit 0\r\n")
+        script.chmod(0o755)
+
+        # when
+        copy_and_convert_template(str(self.source_path), str(self.dest_path))
+
+        # then
+        converted = self.dest_path / "pre-start.sh"
+        assert converted.read_bytes() == b"#!/usr/bin/env bash\nexit 0\n"
+        assert os.access(str(converted), os.X_OK)
+        assert converted.stat().st_mode & 0o111 == 0o111
+
+    def test_binary_files_are_copied_untouched(self) -> None:
+        """A PNG carrying a CRLF byte pair is copied byte for byte."""
+        # given
+        png_bytes = b"\x89PNG\r\n\x1a\n" + b"\x00\x01\r\n\x02" * 8
+        (self.source_path / "logo.png-tpl").write_bytes(png_bytes)
+        # A NUL byte inside a whitelisted extension must also be left alone.
+        mislabelled = b"header\x00\r\npayload\r\n"
+        (self.source_path / "data.json-tpl").write_bytes(mislabelled)
+
+        # when
+        copy_and_convert_template(str(self.source_path), str(self.dest_path))
+
+        # then
+        assert (self.dest_path / "logo.png").read_bytes() == png_bytes
+        assert (self.dest_path / "data.json").read_bytes() == mislabelled
+
+    def test_single_file_copy_normalizes_line_endings(self) -> None:
+        """``copy_and_convert_template_file`` writes LF regardless of input."""
+        # given
+        source = self.source_path / "config.py-tpl"
+        source.write_bytes(b"NAME = '{{project_name}}'\r\nDEBUG = True\r\n")
+        target = self.dest_path / "config.py"
+
+        # when
+        result = copy_and_convert_template_file(
+            str(source), str(target), {"{{project_name}}": "demo"}
+        )
+
+        # then
+        assert result is True
+        assert target.read_bytes() == b"NAME = 'demo'\nDEBUG = True\n"

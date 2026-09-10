@@ -1,0 +1,33 @@
+# Normalise line endings so template files are never checked out with CRLF.
+#
+# A generated project's shell scripts run inside Linux containers; a CRLF
+# `scripts/pre-start.sh` makes the app container die with
+# `env: 'bash\r': No such file or directory`. Contributors on Windows (or with
+# `core.autocrlf=true`) would otherwise ship CRLF into the templates.
+
+# Let Git decide for anything it detects as text, but never rewrite to CRLF.
+* text=auto eol=lf
+
+# Template payload files (the `-tpl` marker is stripped at generation time).
+*-tpl text eol=lf
+*.sh-tpl text eol=lf
+Dockerfile-tpl text eol=lf
+Makefile-tpl text eol=lf
+
+# Scripts and container files in this repository itself.
+*.sh text eol=lf
+*.bash text eol=lf
+Dockerfile text eol=lf
+Makefile text eol=lf
+
+# Binary assets must never be touched.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.woff binary
+*.woff2 binary

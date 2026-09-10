@@ -252,8 +252,12 @@ class TemplateInspector:
             ("Configuration Consistency", self._check_configuration_consistency),
             ("FastAPI Implementation", self._check_fastapi_implementation),
             ("Placeholder Substitution", self._check_no_placeholder_residue),
-            ("Template Tests", self._test_template),
+            # Compile Check is a pure static check: it runs before the (much
+            # heavier) Template Tests so a syntax error is reported without
+            # waiting for an environment, and so it never observes files a
+            # containerised test run left behind.
             ("Compile Check", self._check_compileall),
+            ("Template Tests", self._test_template),
             ("Type Check", self._check_mypy),
             ("Smoke Test", self._check_smoke_test),
             ("Dependency Freshness", self._check_dependency_freshness),

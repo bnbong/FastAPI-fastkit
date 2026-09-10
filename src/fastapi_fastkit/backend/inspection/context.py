@@ -43,6 +43,10 @@ class InspectionContext:
     warnings: List[str] = field(default_factory=list)
     #: Populated by a test strategy so later checks can reuse the environment.
     venv_path: Optional[str] = None
+    #: Populated when a test strategy already exercised the app's HTTP surface
+    #: (the Docker strategy probes the running container), so the Smoke Test
+    #: step reuses that verdict instead of booting a second server.
+    smoke_result: Optional[bool] = None
 
     def add_error(self, message: str) -> None:
         """Record a fatal finding."""

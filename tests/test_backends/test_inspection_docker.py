@@ -11,7 +11,21 @@ from unittest.mock import patch
 
 import pytest
 
-from fastapi_fastkit.backend.inspection.docker import COMPOSE_COMMAND, DockerCompose
+from fastapi_fastkit.backend.inspection import docker as docker_module
+from fastapi_fastkit.backend.inspection.docker import (
+    COMPOSE_COMMAND,
+    COMPOSE_PLUGIN_COMMAND,
+    RECLAIM_IMAGE,
+    DockerCompose,
+)
+
+
+@pytest.fixture(autouse=True)
+def reset_compose_prefix() -> Any:
+    """Keep the module-level compose prefix from leaking between testcases."""
+    original = docker_module._compose_prefix
+    yield
+    docker_module._compose_prefix = original
 
 
 def completed(
@@ -85,6 +99,53 @@ class TestIsAvailable:
         ):
             assert DockerCompose.is_available() is False
 
+    def test_keeps_docker_compose_command_by_default(self) -> None:
+        with patch("subprocess.run", return_value=completed(returncode=0)):
+            assert DockerCompose.is_available() is True
+        assert DockerCompose.compose_command() == [COMPOSE_COMMAND]
+
+    def test_falls_back_to_compose_plugin(self) -> None:
+        # given - only ``docker --version`` and ``docker compose version`` work
+        def fake_run(
+            command: List[str], **kwargs: Any
+        ) -> subprocess.CompletedProcess[str]:
+            if command[0] == COMPOSE_COMMAND:
+                raise OSError("not found")
+            return completed(returncode=0)
+
+        # when
+        with patch("subprocess.run", side_effect=fake_run):
+            available = DockerCompose.is_available()
+
+        # then
+        assert available is True
+        assert DockerCompose.compose_command() == list(COMPOSE_PLUGIN_COMMAND)
+
+    def test_false_when_no_compose_implementation(self) -> None:
+        # given
+        def fake_run(
+            command: List[str], **kwargs: Any
+        ) -> subprocess.CompletedProcess[str]:
+            if command[:1] == ["docker"] and command[1:] == ["--version"]:
+                return completed(returncode=0)
+            return completed(returncode=1)
+
+        # when / then
+        with patch("subprocess.run", side_effect=fake_run):
+            assert DockerCompose.is_available() is False
+
+    def test_plugin_fallback_is_used_by_compose_invocations(self) -> None:
+        # given
+        compose = DockerCompose("/tmp/project")
+        docker_module._compose_prefix = list(COMPOSE_PLUGIN_COMMAND)
+
+        # when
+        with patch.object(compose, "_run", return_value=completed()) as mock_run:
+            compose._compose(["ps"], timeout=5)
+
+        # then
+        assert mock_run.call_args.args[0][:2] == ["docker", "compose"]
+
 
 class TestServices:
     """``_services`` parses docker-compose ps --format json output."""
@@ -98,6 +159,69 @@ class TestServices:
         compose = DockerCompose("/tmp/project")
         with patch.object(compose, "_compose", return_value=completed(returncode=1)):
             assert compose._services(timeout=5) == []
+
+    def test_returns_empty_list_on_empty_output(self) -> None:
+        compose = DockerCompose("/tmp/project")
+        with patch.object(compose, "_compose", return_value=completed(stdout="  \n")):
+            assert compose._services(timeout=5) == []
+
+    def test_parses_single_json_array(self) -> None:
+        # given - compose v2.18 and older print one JSON array
+        compose = DockerCompose("/tmp/project")
+        stdout = (
+            '[{"Name": "app", "State": "running"}, '
+            '{"Name": "db", "State": "running"}]'
+        )
+
+        # when
+        with patch.object(compose, "_compose", return_value=completed(stdout=stdout)):
+            services = compose._services(timeout=5)
+
+        # then
+        assert services == [
+            {"Name": "app", "State": "running"},
+            {"Name": "db", "State": "running"},
+        ]
+
+    def test_parses_single_json_object(self) -> None:
+        compose = DockerCompose("/tmp/project")
+        stdout = '{"Name": "app", "State": "running"}'
+        with patch.object(compose, "_compose", return_value=completed(stdout=stdout)):
+            assert compose._services(timeout=5) == [{"Name": "app", "State": "running"}]
+
+    def test_skips_non_dict_entries_of_a_json_array(self) -> None:
+        compose = DockerCompose("/tmp/project")
+        stdout = '["not-a-dict", {"Name": "db", "State": "running"}]'
+        with patch.object(compose, "_compose", return_value=completed(stdout=stdout)):
+            assert compose._services(timeout=5) == [{"Name": "db", "State": "running"}]
+
+    def test_ignores_interleaved_warning_lines(self) -> None:
+        # given - compose may mix its own logs into stdout
+        compose = DockerCompose("/tmp/project")
+        stdout = (
+            'time="2024-01-01T00:00:00Z" level=warning msg="deprecated"\n'
+            '{"Name": "app", "State": "running"}\n'
+            '{"Name": "db", "State": "running"}\n'
+        )
+
+        # when
+        with patch.object(compose, "_compose", return_value=completed(stdout=stdout)):
+            services = compose._services(timeout=5)
+
+        # then
+        assert services == [
+            {"Name": "app", "State": "running"},
+            {"Name": "db", "State": "running"},
+        ]
+
+    def test_ignores_warning_lines_around_a_json_array(self) -> None:
+        compose = DockerCompose("/tmp/project")
+        stdout = (
+            'time="2024-01-01T00:00:00Z" level=warning msg="deprecated"\n'
+            '[{"Name": "app", "State": "running"}]\n'
+        )
+        with patch.object(compose, "_compose", return_value=completed(stdout=stdout)):
+            assert compose._services(timeout=5) == [{"Name": "app", "State": "running"}]
 
     def test_parses_json_lines_and_skips_malformed(self) -> None:
         compose = DockerCompose("/tmp/project")
@@ -260,9 +384,149 @@ class TestCleanup:
     def test_runs_down_and_prune(self) -> None:
         compose = DockerCompose("/tmp/project")
         with patch.object(compose, "_run", return_value=completed()) as mock_run:
-            compose.cleanup()
-        assert mock_run.call_count == 2
-        first_args = mock_run.call_args_list[0].args[0]
-        assert first_args[0] == COMPOSE_COMMAND
+            with (
+                patch("os.getuid", return_value=1000, create=True),
+                patch("os.getgid", return_value=1000, create=True),
+            ):
+                compose.cleanup()
+        assert mock_run.call_count == 3
+        reclaim_args = mock_run.call_args_list[0].args[0]
+        assert reclaim_args[:3] == ["docker", "run", "--rm"]
+        assert RECLAIM_IMAGE in reclaim_args
+        assert reclaim_args[-4:] == ["chown", "-R", "1000:1000", "/mnt"]
         second_args = mock_run.call_args_list[1].args[0]
-        assert second_args == ["docker", "system", "prune", "-f"]
+        assert second_args[0] == COMPOSE_COMMAND
+        third_args = mock_run.call_args_list[2].args[0]
+        assert third_args == ["docker", "system", "prune", "-f"]
+
+    def test_ownership_reclaim_is_skipped_for_root(self) -> None:
+        compose = DockerCompose("/tmp/project")
+        with patch.object(compose, "_run", return_value=completed()) as mock_run:
+            with patch("os.getuid", return_value=0, create=True):
+                compose.reclaim_bind_mount_ownership()
+        mock_run.assert_not_called()
+
+    def test_ownership_reclaim_mounts_the_project_directory(self) -> None:
+        compose = DockerCompose("/tmp/project")
+        with patch.object(compose, "_run", return_value=completed()) as mock_run:
+            with (
+                patch("os.getuid", return_value=501, create=True),
+                patch("os.getgid", return_value=20, create=True),
+            ):
+                compose.reclaim_bind_mount_ownership()
+        args = mock_run.call_args.args[0]
+        assert "/tmp/project:/mnt" in args
+        assert "501:20" in args
+
+
+class TestPublishedPort:
+    """``published_port`` reads host-bound ports out of ``ps --format json``."""
+
+    def _services(self, entries: List[Any]) -> Any:
+        return patch.object(DockerCompose, "_services", return_value=entries)
+
+    def test_prefers_the_app_service(self) -> None:
+        # given
+        compose = DockerCompose("/tmp/project")
+        entries = [
+            {
+                "Service": "db",
+                "Name": "proj-db-1",
+                "Publishers": [{"PublishedPort": 5432, "TargetPort": 5432}],
+            },
+            {
+                "Service": "app",
+                "Name": "proj-app-1",
+                "Publishers": [{"PublishedPort": 8000, "TargetPort": 8000}],
+            },
+        ]
+
+        # when
+        with self._services(entries):
+            port = compose.published_port()
+
+        # then
+        assert port == 8000
+
+    def test_ignores_unpublished_entries(self) -> None:
+        # given
+        compose = DockerCompose("/tmp/project")
+        entries = [
+            {
+                "Service": "app",
+                "Name": "proj-app-1",
+                "Publishers": [
+                    {"PublishedPort": 0, "TargetPort": 8000},
+                    {"PublishedPort": "32770", "TargetPort": 8000},
+                ],
+            }
+        ]
+
+        # when
+        with self._services(entries):
+            port = compose.published_port()
+
+        # then
+        assert port == 32770
+
+    def test_falls_back_to_any_service_with_a_published_port(self) -> None:
+        # given: no service name matches the hint
+        compose = DockerCompose("/tmp/project")
+        entries = [
+            {
+                "Service": "web",
+                "Name": "proj-web-1",
+                "Publishers": [{"PublishedPort": 9000}],
+            }
+        ]
+
+        # when
+        with self._services(entries):
+            port = compose.published_port()
+
+        # then
+        assert port == 9000
+
+    def test_returns_none_without_publishers(self) -> None:
+        # given
+        compose = DockerCompose("/tmp/project")
+        entries = [
+            {"Service": "app", "Name": "proj-app-1", "Publishers": []},
+            {"Service": "db", "Name": "proj-db-1"},
+        ]
+
+        # when
+        with self._services(entries):
+            port = compose.published_port()
+
+        # then
+        assert port is None
+
+    def test_returns_none_when_ps_reports_nothing(self) -> None:
+        # given
+        compose = DockerCompose("/tmp/project")
+
+        # when
+        with self._services([]):
+            port = compose.published_port()
+
+        # then
+        assert port is None
+
+    def test_malformed_publisher_entries_are_skipped(self) -> None:
+        # given
+        compose = DockerCompose("/tmp/project")
+        entries = [
+            {
+                "Service": "app",
+                "Name": "proj-app-1",
+                "Publishers": ["nonsense", {"PublishedPort": "not-a-number"}],
+            }
+        ]
+
+        # when
+        with self._services(entries):
+            port = compose.published_port()
+
+        # then
+        assert port is None

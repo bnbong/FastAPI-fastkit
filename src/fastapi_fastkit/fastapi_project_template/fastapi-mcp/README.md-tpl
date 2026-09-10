@@ -75,7 +75,7 @@ MCP_TITLE=FastAPI MCP Server
 MCP_DESCRIPTION=FastAPI endpoints exposed as MCP tools
 
 # Authentication Settings
-SECRET_KEY=changethis
+SECRET_KEY=changethis-please-use-openssl-rand-hex-32
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 

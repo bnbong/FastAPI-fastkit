@@ -86,7 +86,8 @@ distribution = true
 [dependency-groups]
 docs = [
     "mkdocs>=1.6.1",
-    "mkdocs-material>=9.6.15",
+    # mkdocs-material < 9.7.7 — DOM XSS in the client-side search integration.
+    "mkdocs-material>=9.7.7",
     "mdx-include>=1.4.2",
     "mkdocs-static-i18n>=1.3.0",
     "pyyaml>=6.0.3",
@@ -94,11 +95,14 @@ docs = [
     # Security floors for transitive deps surfaced by Dependabot:
     #   pygments < 2.20.0 — ReDoS in GUID regex
     #   requests < 2.33.0 — insecure temp file reuse in extract_zipped_paths
+    #   idna     < 3.15   — quadratic complexity in IDNA decoding (transitive via requests)
     "pygments>=2.20.0",
     "requests>=2.33.0",
-    # pymdown-extensions < 10.17.2 crashes on pygments 2.20+ (NoneType filename
-    # passed to html.escape); see pymdown-extensions#2580.
-    "pymdown-extensions>=10.17.2",
+    "idna>=3.15",
+    # pymdown-extensions <= 11.0.0 — ReDoS plus two path-traversal advisories;
+    # 10.17.2+ was already required because earlier releases crash on pygments
+    # 2.20+ (NoneType filename passed to html.escape), see pymdown-extensions#2580.
+    "pymdown-extensions>=11.0.1",
 ]
 translation = [
     "openai>=2.8.1",

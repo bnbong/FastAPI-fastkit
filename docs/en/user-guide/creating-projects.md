@@ -462,7 +462,7 @@ After project creation, you can add more dependencies:
 <div class="termy">
 
 ```console
-$ pip install requests httpx python-jose
+$ pip install requests httpx pyjwt
 $ pip freeze > requirements.txt
 ```
 

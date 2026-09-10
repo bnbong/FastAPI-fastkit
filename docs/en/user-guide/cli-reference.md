@@ -265,7 +265,7 @@ warnings) differ.
 | Axis | Choices | Installed packages | Generated files |
 |---|---|---|---|
 | `database` | PostgreSQL, MySQL, MongoDB, Redis, SQLite, None | PostgreSQL: `asyncpg`, `sqlalchemy` · MySQL: `aiomysql`, `sqlalchemy` · MongoDB: `motor` · Redis: `redis[hiredis]` · SQLite: `sqlalchemy`, `aiosqlite` | A database config module at the preset's path (e.g. `src/config/database.py`) |
-| `authentication` | JWT, OAuth2, FastAPI-Users, Session-based, None | JWT: `python-jose[cryptography]`, `passlib[bcrypt]` · OAuth2: `authlib`, `itsdangerous`, `httpx` · FastAPI-Users: `fastapi-users[sqlalchemy]`, `python-jose[cryptography]`, `passlib[bcrypt]` · Session-based: `itsdangerous` | An auth config module at the preset's path; OAuth2 and Session-based also add `main.py` middleware setup |
+| `authentication` | JWT, OAuth2, FastAPI-Users, Session-based, None | JWT: `pyjwt[crypto]`, `pwdlib[argon2]` · OAuth2: `authlib`, `itsdangerous`, `httpx` · FastAPI-Users: `fastapi-users[sqlalchemy]`, `pyjwt[crypto]`, `pwdlib[argon2]` · Session-based: `itsdangerous` | An auth config module at the preset's path; OAuth2 and Session-based also add `main.py` middleware setup |
 | `async_tasks` | Celery, Dramatiq, None | Celery: `celery[redis]`, `redis[hiredis]` · Dramatiq: `dramatiq[redis]`, `redis[hiredis]` | `<pkg>/worker.py` (background worker) + `<pkg>/features/tasks.py` (task routes) |
 | `testing` | Basic, Coverage, Advanced, None | Basic: `pytest`, `pytest-asyncio`, `httpx` · Coverage: + `pytest-cov` · Advanced: + `faker`, `factory-boy` | `pytest.ini`; Advanced also adds `tests/factories.py` and `tests/test_factories.py` |
 | `caching` | Redis, None | Redis: `redis[hiredis]`, `fastapi-cache2`, `jinja2` | `<pkg>/features/cache.py` (cached endpoints) |

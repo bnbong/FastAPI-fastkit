@@ -291,32 +291,65 @@ class TestLintChecks:
         assert result is True
         assert any("Could not run mypy" in warning for warning in ctx.warnings)
 
-    def test_compileall_timeout_is_reported_as_error(self, tmp_path: Path) -> None:
+    def test_compileall_writes_no_bytecode(self, tmp_path: Path) -> None:
         # given
         ctx = make_context(tmp_path)
+        Path(ctx.temp_path("main.py")).write_text("value = 1\n")
 
         # when
-        with patch(
-            "subprocess.run",
-            side_effect=subprocess.TimeoutExpired(cmd="compileall", timeout=1),
-        ):
+        result = lint.check_compileall(ctx)
+
+        # then
+        assert result is True
+        assert not list(Path(ctx.temp_dir).rglob("__pycache__"))
+        assert not list(Path(ctx.temp_dir).rglob("*.pyc"))
+
+    def test_compileall_runs_no_subprocess(self, tmp_path: Path) -> None:
+        # given
+        ctx = make_context(tmp_path)
+        Path(ctx.temp_path("main.py")).write_text("value = 1\n")
+
+        # when
+        with patch("subprocess.run") as mock_run:
+            result = lint.check_compileall(ctx)
+
+        # then
+        assert result is True
+        mock_run.assert_not_called()
+
+    def test_compileall_skips_excluded_directories(self, tmp_path: Path) -> None:
+        # given
+        ctx = make_context(tmp_path)
+        vendored = Path(ctx.temp_path(".venv", "lib"))
+        vendored.mkdir(parents=True)
+        (vendored / "broken.py").write_text("def broken(:\n")
+
+        # when / then
+        assert lint.check_compileall(ctx) is True
+
+    def test_compileall_reports_the_offending_file(self, tmp_path: Path) -> None:
+        # given
+        ctx = make_context(tmp_path)
+        Path(ctx.temp_path("broken.py")).write_text("def broken(:\n")
+
+        # when / then
+        assert lint.check_compileall(ctx) is False
+        assert any("broken.py" in error for error in ctx.errors)
+
+    def test_compileall_unreadable_file_is_reported_as_error(
+        self, tmp_path: Path
+    ) -> None:
+        # given
+        ctx = make_context(tmp_path)
+        Path(ctx.temp_path("main.py")).write_text("value = 1\n")
+
+        # when
+        with patch("builtins.open", side_effect=OSError("permission denied")):
             result = lint.check_compileall(ctx)
 
         # then
         assert result is False
-        assert any("compileall timed out" in error for error in ctx.errors)
-
-    def test_compileall_oserror_is_reported_as_error(self, tmp_path: Path) -> None:
-        # given
-        ctx = make_context(tmp_path)
-
-        # when
-        with patch("subprocess.run", side_effect=OSError("no interpreter")):
-            result = lint.check_compileall(ctx)
-
-        # then
-        assert result is False
-        assert any("Failed to run compileall" in error for error in ctx.errors)
+        assert any("could not be read" in error for error in ctx.errors)
 
 
 class TestDependencyFreshnessCheck:
@@ -1101,3 +1134,128 @@ class TestContextHelpers:
         assert options["offline"] is False
         assert options["run_smoke_test"] is True
         assert options["run_mypy"] is False
+
+
+class TestSmokeTestReuseAndDockerTemplates:
+    """A Docker run probes the container, so the smoke step reuses its verdict."""
+
+    def test_recorded_result_is_reused_without_booting_a_server(
+        self, tmp_path: Path
+    ) -> None:
+        # given: a strategy already probed the running container
+        ctx = make_context(tmp_path)
+        ctx.smoke_result = True
+
+        # when
+        with patch.object(smoke_module.subprocess, "Popen") as popen:
+            result = smoke_module.check_smoke_test(ctx)
+
+        # then
+        assert result is True
+        popen.assert_not_called()
+
+    def test_recorded_failure_is_reused(self, tmp_path: Path) -> None:
+        # given
+        ctx = make_context(tmp_path)
+        ctx.smoke_result = False
+
+        # when
+        with patch.object(smoke_module.subprocess, "Popen") as popen:
+            result = smoke_module.check_smoke_test(ctx)
+
+        # then
+        assert result is False
+        popen.assert_not_called()
+
+    def test_docker_template_without_venv_is_skipped(self, tmp_path: Path) -> None:
+        # given: requires_docker templates never get a host virtual environment
+        ctx = make_context(tmp_path)
+        ctx.template_config = {"requires_docker": True}
+
+        # when
+        result = smoke_module.check_smoke_test(ctx)
+
+        # then
+        assert result is True
+        assert ctx.errors == []
+        assert any("smoke test skipped" in w for w in ctx.warnings)
+
+
+class TestRunHttpSmoke:
+    """Probing an already-running server (a container's published port)."""
+
+    def test_passes_when_docs_and_health_answer(self, tmp_path: Path) -> None:
+        # given
+        ctx = make_context(tmp_path)
+        statuses = {"docs": 200, "health": 200}
+
+        # when
+        with patch.object(
+            smoke_module,
+            "_probe",
+            side_effect=lambda url, timeout=5: statuses[url.rsplit("/", 1)[-1]],
+        ):
+            result = smoke_module.run_http_smoke(ctx, "http://127.0.0.1:8000")
+
+        # then
+        assert result is True
+        assert ctx.errors == []
+
+    def test_missing_health_endpoint_is_not_an_error(self, tmp_path: Path) -> None:
+        # given
+        ctx = make_context(tmp_path)
+        statuses = {"docs": 200, "health": 404}
+
+        # when
+        with patch.object(
+            smoke_module,
+            "_probe",
+            side_effect=lambda url, timeout=5: statuses[url.rsplit("/", 1)[-1]],
+        ):
+            result = smoke_module.run_http_smoke(ctx, "http://127.0.0.1:8000")
+
+        # then
+        assert result is True
+        assert ctx.errors == []
+
+    def test_broken_health_endpoint_fails(self, tmp_path: Path) -> None:
+        # given
+        ctx = make_context(tmp_path)
+        statuses = {"docs": 200, "health": 503}
+
+        # when
+        with patch.object(
+            smoke_module,
+            "_probe",
+            side_effect=lambda url, timeout=5: statuses[url.rsplit("/", 1)[-1]],
+        ):
+            result = smoke_module.run_http_smoke(ctx, "http://127.0.0.1:8000")
+
+        # then
+        assert result is False
+        assert any("/health returned HTTP 503" in e for e in ctx.errors)
+
+    def test_unreachable_container_fails(self, tmp_path: Path) -> None:
+        # given
+        ctx = make_context(tmp_path)
+        ctx.options.smoke_timeout = 0
+
+        # when
+        with patch.object(smoke_module, "_probe", return_value=None):
+            result = smoke_module.run_http_smoke(ctx, "http://127.0.0.1:8000")
+
+        # then
+        assert result is False
+        assert any("did not become reachable" in e for e in ctx.errors)
+
+    def test_bad_docs_status_fails(self, tmp_path: Path) -> None:
+        # given
+        ctx = make_context(tmp_path)
+
+        # when
+        with patch.object(smoke_module, "_probe", return_value=500):
+            result = smoke_module.run_http_smoke(ctx, "http://127.0.0.1:8000")
+
+        # then
+        assert result is False
+        assert any("/docs returned HTTP 500" in e for e in ctx.errors)

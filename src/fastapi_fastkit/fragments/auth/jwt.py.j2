@@ -1,8 +1,8 @@
 {% include "header.j2" %}
 from datetime import UTC, datetime, timedelta
 
-from jose import jwt
-from passlib.context import CryptContext
+import jwt
+from pwdlib import PasswordHash
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -18,18 +18,18 @@ class AuthSettings(BaseSettings):
 
 settings = AuthSettings()
 
-# Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Password hashing — argon2id, the recommended default for new applications.
+password_hash = PasswordHash.recommended()
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against a hash."""
-    return pwd_context.verify(plain_password, hashed_password)
+    return password_hash.verify(plain_password, hashed_password)
 
 
 def get_password_hash(password: str) -> str:
     """Hash a password."""
-    return pwd_context.hash(password)
+    return password_hash.hash(password)
 
 
 def create_access_token(
