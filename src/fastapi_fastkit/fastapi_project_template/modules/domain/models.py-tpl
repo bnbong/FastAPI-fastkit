@@ -1,0 +1,11 @@
+# --------------------------------------------------------------------------
+# <new_route> domain models.
+# --------------------------------------------------------------------------
+
+from dataclasses import dataclass
+
+
+@dataclass
+class <entity_class>:
+    id: int
+    name: str

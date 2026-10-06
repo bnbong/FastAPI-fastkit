@@ -1,0 +1,66 @@
+# --------------------------------------------------------------------------
+# <new_route> API routes.
+# --------------------------------------------------------------------------
+
+from fastapi import APIRouter, Depends, HTTPException, Response, status
+from <domain_module>.schemas import <entity_class>Create, <entity_class>Read
+from <domain_module>.service import <entity_class>NotFoundError, <entity_class>Service
+
+router = APIRouter()
+
+
+def get_<new_route>_service() -> <entity_class>Service:
+    return <entity_class>Service()
+
+
+@router.get("", response_model=list[<entity_class>Read])
+def list_<new_route>(
+    service: <entity_class>Service = Depends(get_<new_route>_service),
+) -> list[<entity_class>Read]:
+    return [<entity_class>Read.model_validate(entity) for entity in service.list_<new_route>()]
+
+
+@router.get("/{entity_id}", response_model=<entity_class>Read)
+def get_<new_route>(
+    entity_id: int, service: <entity_class>Service = Depends(get_<new_route>_service)
+) -> <entity_class>Read:
+    try:
+        return <entity_class>Read.model_validate(service.get_<new_route>(entity_id))
+    except <entity_class>NotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+        ) from exc
+
+
+@router.post("", response_model=<entity_class>Read, status_code=status.HTTP_201_CREATED)
+def create_<new_route>(
+    payload: <entity_class>Create, service: <entity_class>Service = Depends(get_<new_route>_service)
+) -> <entity_class>Read:
+    return <entity_class>Read.model_validate(service.create_<new_route>(payload))
+
+
+@router.put("/{entity_id}", response_model=<entity_class>Read)
+def replace_<new_route>(
+    entity_id: int,
+    payload: <entity_class>Create,
+    service: <entity_class>Service = Depends(get_<new_route>_service),
+) -> <entity_class>Read:
+    try:
+        return <entity_class>Read.model_validate(service.replace_<new_route>(entity_id, payload))
+    except <entity_class>NotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+        ) from exc
+
+
+@router.delete("/{entity_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_<new_route>(
+    entity_id: int, service: <entity_class>Service = Depends(get_<new_route>_service)
+) -> Response:
+    try:
+        service.delete_<new_route>(entity_id)
+    except <entity_class>NotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+        ) from exc
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

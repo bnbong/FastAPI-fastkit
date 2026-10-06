@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 from src.app.domains.items.schemas import ItemCreate, ItemRead
 from src.app.domains.items.service import ItemNotFoundError, ItemService
 
-router = APIRouter(prefix="/items", tags=["items"])
+router = APIRouter()
 
 
 def get_item_service() -> ItemService:

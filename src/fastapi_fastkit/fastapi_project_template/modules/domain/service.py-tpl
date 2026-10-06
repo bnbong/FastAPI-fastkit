@@ -1,0 +1,43 @@
+# --------------------------------------------------------------------------
+# <new_route> service.
+# --------------------------------------------------------------------------
+
+from <domain_module>.models import <entity_class>
+from <domain_module>.repository import <entity_class>Repository
+from <domain_module>.schemas import <entity_class>Create
+
+# Share the default repository between requests.
+_default_repository = <entity_class>Repository()
+
+
+class <entity_class>NotFoundError(Exception):
+    """Raised when <entity_class> is not found."""
+
+
+class <entity_class>Service:
+    """Business logic for <entity_class>."""
+
+    def __init__(self, repository: <entity_class>Repository | None = None) -> None:
+        self._repository = repository if repository is not None else _default_repository
+
+    def list_<new_route>(self) -> list[<entity_class>]:
+        return self._repository.list_all()
+
+    def get_<new_route>(self, entity_id: int) -> <entity_class>:
+        entity = self._repository.get(entity_id)
+        if entity is None:
+            raise <entity_class>NotFoundError(f"<entity_class> {entity_id} does not exist")
+        return entity
+
+    def create_<new_route>(self, payload: <entity_class>Create) -> <entity_class>:
+        return self._repository.add(name=payload.name)
+
+    def replace_<new_route>(self, entity_id: int, payload: <entity_class>Create) -> <entity_class>:
+        entity = self._repository.replace(entity_id=entity_id, name=payload.name)
+        if entity is None:
+            raise <entity_class>NotFoundError(f"<entity_class> {entity_id} does not exist")
+        return entity
+
+    def delete_<new_route>(self, entity_id: int) -> None:
+        if not self._repository.delete(entity_id=entity_id):
+            raise <entity_class>NotFoundError(f"<entity_class> {entity_id} does not exist")

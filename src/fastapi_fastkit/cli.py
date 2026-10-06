@@ -37,6 +37,7 @@ from fastapi_fastkit.backend.project_builder.config_schema import (
     ConfigSchemaError,
     normalize_project_config,
 )
+from fastapi_fastkit.backend.route_generators import resolve_route_layout
 from fastapi_fastkit.backend.scaffolder import (
     ProjectScaffolder,
     ScaffoldOptions,
@@ -829,8 +830,16 @@ def _init_from_config(
 @fastkit_cli.command()
 @click.argument("route_name")
 @click.argument("project_dir", default=".")
+@click.option(
+    "--layout",
+    type=click.Choice(["classic-layer", "domain"]),
+    default=None,
+    help="Route layout. Defaults to domain for domain-starter, otherwise classic-layer.",
+)
 @click.pass_context
-def addroute(ctx: Context, route_name: str, project_dir: str) -> None:
+def addroute(
+    ctx: Context, route_name: str, project_dir: str, layout: Optional[str]
+) -> None:
     """
     Add a new route to the FastAPI project.
 
@@ -879,12 +888,14 @@ def addroute(ctx: Context, route_name: str, project_dir: str) -> None:
         return
 
     try:
+        route_layout = resolve_route_layout(actual_project_dir, layout)
         # Show information about the operation
         table = create_info_table(
             "Adding New Route",
             {
                 "Project": project_name,
                 "Route Name": route_name,
+                "Layout": route_layout,
                 "Target Directory": actual_project_dir,
             },
         )
@@ -903,7 +914,7 @@ def addroute(ctx: Context, route_name: str, project_dir: str) -> None:
             return
 
         # Add the new route
-        add_new_route(actual_project_dir, route_name)
+        add_new_route(actual_project_dir, route_name, layout=route_layout)
 
         if project_dir == ".":
             print_success(

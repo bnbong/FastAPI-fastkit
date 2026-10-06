@@ -1,0 +1,45 @@
+# --------------------------------------------------------------------------
+# <new_route> repository.
+#
+# Data is stored in memory, lost on restart, and not shared between workers.
+# --------------------------------------------------------------------------
+
+from threading import Lock
+
+from <domain_module>.models import <entity_class>
+
+
+class <entity_class>Repository:
+    """In-memory storage for <entity_class>."""
+
+    def __init__(self) -> None:
+        self._data: dict[int, <entity_class>] = {}
+        self._next_id = 1
+        self._lock = Lock()
+
+    def list_all(self) -> list[<entity_class>]:
+        with self._lock:
+            return list(self._data.values())
+
+    def get(self, entity_id: int) -> <entity_class> | None:
+        with self._lock:
+            return self._data.get(entity_id)
+
+    def add(self, name: str) -> <entity_class>:
+        with self._lock:
+            entity = <entity_class>(id=self._next_id, name=name)
+            self._data[entity.id] = entity
+            self._next_id += 1
+            return entity
+
+    def replace(self, entity_id: int, name: str) -> <entity_class> | None:
+        with self._lock:
+            if entity_id not in self._data:
+                return None
+            entity = <entity_class>(id=entity_id, name=name)
+            self._data[entity_id] = entity
+            return entity
+
+    def delete(self, entity_id: int) -> bool:
+        with self._lock:
+            return self._data.pop(entity_id, None) is not None
