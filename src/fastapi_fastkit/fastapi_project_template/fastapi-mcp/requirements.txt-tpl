@@ -40,7 +40,7 @@ pydantic==2.13.5
 pydantic-core==2.46.5
 pydantic-settings==2.15.0
 pygments==2.21.0
-PyJWT==2.13.0
+PyJWT==2.15.1
 pytest==9.1.1
 pytest-cov==7.1.0
 python-dotenv==1.2.3
@@ -59,7 +59,7 @@ tomli==2.4.1
 typer==0.27.2
 typing-extensions==4.16.0
 typing-inspection==0.4.4
-urllib3==2.7.0
+urllib3==2.8.0
 uvicorn==0.52.4
 uvloop==0.22.1
 watchfiles==1.2.0
