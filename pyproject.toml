@@ -96,9 +96,11 @@ docs = [
     #   pygments < 2.20.0 — ReDoS in GUID regex
     #   requests < 2.33.0 — insecure temp file reuse in extract_zipped_paths
     #   idna     < 3.15   — quadratic complexity in IDNA decoding (transitive via requests)
+    #   urllib3  < 2.8.0  — chunked Deflate streaming infinite loop (GHSA-gh4c-6fx4-qh6g), transitive via requests
     "pygments>=2.20.0",
     "requests>=2.33.0",
     "idna>=3.15",
+    "urllib3>=2.8.0",
     # pymdown-extensions <= 11.0.0 — ReDoS plus two path-traversal advisories;
     # 10.17.2+ was already required because earlier releases crash on pygments
     # 2.20+ (NoneType filename passed to html.escape), see pymdown-extensions#2580.
@@ -107,6 +109,8 @@ docs = [
 translation = [
     "openai>=2.8.1",
     "anthropic>=0.74.0",
+    # anyio < 4.14.2 — TLSStream IDNA host-name encoding allows certificate spoofing (GHSA-82r6-8w77-94w6); transitive via httpx
+    "anyio>=4.14.2",
 ]
 
 [tool.coverage.run]

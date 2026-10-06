@@ -337,9 +337,11 @@ docs = [
     { name = "pyyaml" },
     { name = "requests" },
     { name = "types-pyyaml" },
+    { name = "urllib3" },
 ]
 translation = [
     { name = "anthropic" },
+    { name = "anyio" },
     { name = "openai" },
 ]
 
@@ -371,9 +373,11 @@ docs = [
     { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "requests", specifier = ">=2.33.0" },
     { name = "types-pyyaml", specifier = ">=6.0.12.20250915" },
+    { name = "urllib3", specifier = ">=2.8.0" },
 ]
 translation = [
     { name = "anthropic", specifier = ">=0.74.0" },
+    { name = "anyio", specifier = ">=4.14.2" },
     { name = "openai", specifier = ">=2.8.1" },
 ]
 
