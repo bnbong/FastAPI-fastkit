@@ -19,7 +19,7 @@ dependencies = [
     "sqlmodel>=0.0.42",
     "SQLAlchemy>=2.0.52",
     "alembic>=1.19.1",
-    "PyJWT>=2.13.0",
+    "PyJWT>=2.15.1",
     "pwdlib[argon2]>=0.3.1",
     "psycopg[binary]>=3.3.5",
 ]
