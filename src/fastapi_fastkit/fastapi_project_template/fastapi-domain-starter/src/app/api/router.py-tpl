@@ -11,5 +11,5 @@ from src.app.domains.items import router as items_router
 
 api_router = APIRouter()
 api_router.include_router(health.router)
-api_router.include_router(items_router.router)
+api_router.include_router(items_router.router, prefix="/items", tags=["items"])
 # fastkit:routes

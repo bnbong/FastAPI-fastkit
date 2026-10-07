@@ -305,17 +305,29 @@ class TestLayoutAwareCommands:
 
         # then
         assert "Successfully added new route" in result.output, result.output
-        assert (project_path / "src" / "app" / "api" / "routes" / "user.py").exists()
-        # the classic layout must not be created alongside it
+        assert (
+            project_path / "src" / "app" / "domains" / "user" / "router.py"
+        ).exists()
+        assert not (project_path / "src" / "app" / "api" / "routes").exists()
+        assert not (project_path / "src" / "app" / "crud").exists()
+        assert not (project_path / "src" / "app" / "schemas").exists()
+        # the old package root must not be created alongside it
         assert not (project_path / "src" / "api").exists()
 
         router_content = (
             project_path / "src" / "app" / "api" / "router.py"
         ).read_text()
-        assert "from .routes import user" in router_content
+        assert (
+            "from src.app.domains.user import router as user_router" in router_content
+        )
+        assert (
+            'api_router.include_router(user_router.router, prefix="/user", tags=["user"])'
+            in router_content
+        )
 
+    @pytest.mark.parametrize("route_layout", ["domain", "classic-layer"])
     def test_addroute_imports_resolve_for_the_domain_starter_layout(
-        self, tmp_path: Path
+        self, tmp_path: Path, route_layout: str
     ) -> None:
         # given
         project_path = self._generate(
@@ -324,16 +336,31 @@ class TestLayoutAwareCommands:
         os.chdir(project_path)
 
         # when
-        result = self.runner.invoke(fastkit_cli, ["addroute", "user", "."], input="Y\n")
+        result = self.runner.invoke(
+            fastkit_cli,
+            ["addroute", "user", ".", "--layout", route_layout],
+            input="Y\n",
+        )
 
         # then
         assert "Successfully added new route" in result.output, result.output
-        route_content = (
-            project_path / "src" / "app" / "api" / "routes" / "user.py"
-        ).read_text()
-        assert "from src.app.crud.user import *" in route_content
-        assert "from src.app.schemas.user import *" in route_content
+        package = project_path / "src" / "app"
+        if route_layout == "domain":
+            route_content = (package / "domains" / "user" / "router.py").read_text()
+            assert (
+                "from src.app.domains.user.schemas import UserCreate, UserRead"
+                in route_content
+            )
+            assert (
+                "from src.app.domains.user.service import UserNotFoundError, UserService"
+                in route_content
+            )
+        else:
+            route_content = (package / "api" / "routes" / "user.py").read_text()
+            assert "from src.app.crud.user import *" in route_content
+            assert "from src.app.schemas.user import *" in route_content
         assert "<package_root>" not in route_content
+        assert "<domain_module>" not in route_content
         assert _unresolved_project_imports(project_path) == []
 
     def test_addroute_imports_resolve_for_the_classic_layout(

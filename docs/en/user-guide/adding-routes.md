@@ -2,7 +2,90 @@
 
 Learn how to add new API routes to your existing FastAPI project.
 
+## Choose the route layout
+
+`addroute` accepts `--layout=classic-layer` or `--layout=domain`. When omitted,
+it reads `[tool.fastapi-fastkit].preset`: `domain-starter` selects `domain`;
+`classic-layered`, `minimal`, and `single-module` select `classic-layer`.
+If `preset` is missing, it infers the preset from `template`, so projects created
+with `startdemo` or interactive `init` also select `domain` for
+`fastapi-domain-starter`. Without either value, it selects `classic-layer`. An unknown preset falls back to `classic-layer` with
+a warning. An explicit option overrides this selection without changing the
+project's metadata.
+
+```console
+$ cd my-api
+$ fastkit addroute users . --layout=domain
+$ fastkit addroute products . --layout=classic-layer
+```
+
+The selected layout is displayed before confirmation. Files are placed under
+the application's actual package (`src/` or `src/app/`), using its recorded
+entrypoint when available.
+
+## Generate a domain CRUD
+
+For a `domain-starter` project, simply run:
+
+```console
+$ fastkit addroute users
+```
+
+This creates the following files and registers the domain router automatically:
+
+```text
+src/app/domains/users/
+├── __init__.py
+├── models.py       # Users(id: int, name: str)
+├── schemas.py      # UsersCreate for POST/PUT, UsersRead for responses
+├── repository.py   # typed CRUD operations and in-memory storage
+├── service.py      # business logic and UsersNotFoundError
+└── router.py       # HTTP endpoints and overridable service dependency
+```
+
+The classes are named `Users`, `UsersCreate`, `UsersRead`, `UsersRepository`,
+and `UsersService` within each domain; class names use PascalCase (`health_checks` becomes `HealthChecks`), without singularization.
+The repository assigns IDs starting at 1. POST and PUT require a `name` between
+1 and 120 characters; PUT preserves the existing ID.
+
+| Method | Domain path | Result |
+|--------|-------------|--------|
+| GET | `/users` | List entities, 200 |
+| GET | `/users/{entity_id}` | Read entity, 200 or 404 |
+| POST | `/users` | Create entity, 201 |
+| PUT | `/users/{entity_id}` | Replace entity, 200 or 404 |
+| DELETE | `/users/{entity_id}` | Delete entity, empty 204 or 404 |
+
+The domain prefix and tags are set in the shared API router when it calls
+`include_router`, as in the classic layout.
+
+The application's existing API prefix remains in effect (for example,
+`/api/v1/users`). Domain routes do not include PATCH.
+
+The generated repository is self-contained and locks its CRUD operations. Its
+default instance is shared between requests **within this domain and process**.
+Data is lost on restart and is not shared between worker processes. Adapt the
+repository for durable persistence; it has no dependency on the starter's
+`db.memory`, ORM, or database configuration.
+
+For isolated tests, inject a fresh `UsersRepository` into `UsersService`,
+then override the router's `get_users_service` FastAPI dependency.
+`UsersRepository.reset()` clears that repository and restarts IDs at 1.
+`service.reset_store()` resets the default repository shared between requests.
+Explicitly created repository instances have independent storage.
+
+## Re-running the command
+
+Existing module files are preserved; missing files are created. Imports and
+router registrations are not duplicated. Same-named modules in different layouts
+can coexist; import aliases avoid Python name collisions. HTTP method/path
+conflicts are not checked by the generator. `--layout` does not migrate existing
+modules.
+
 ## Basic Route Addition
+
+The following examples describe the `classic-layer` layout. Pass
+`--layout=classic-layer` explicitly when using a domain-starter project.
 
 ### Using the `addroute` Command
 

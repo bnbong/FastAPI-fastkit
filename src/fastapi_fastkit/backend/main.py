@@ -18,6 +18,7 @@ from fastapi_fastkit.backend.package_managers import PackageManagerFactory
 from fastapi_fastkit.backend.project_builder.preset_layout import (
     app_module_from_main_path,
 )
+from fastapi_fastkit.backend.route_wiring import register_router, router_alias
 from fastapi_fastkit.backend.transducer import (
     copy_and_convert_template,
     copy_and_convert_template_file,
@@ -1464,6 +1465,16 @@ def _handle_api_router_file(
         if os.path.exists(api_source):
             copy_and_convert_template_file(api_source, api_router_file)
 
+        # The __init__ template may be empty; initialize the API router.
+        if os.path.exists(api_router_file):
+            with open(api_router_file, "r", encoding="utf-8") as f:
+                content = f.read()
+            if not content.strip():
+                with open(api_router_file, "w", encoding="utf-8") as f:
+                    f.write(
+                        "from fastapi import APIRouter\n\napi_router = APIRouter()\n"
+                    )
+
     # Update API router to include new route
     if os.path.exists(api_router_file):
         _update_api_router(api_router_file, route_name)
@@ -1484,23 +1495,22 @@ def _update_api_router(api_router_file: str, route_name: str) -> None:
         with open(api_router_file, "r", encoding="utf-8") as f:
             content = f.read()
 
-        route_import = f"from .routes import {route_name}"
+        alias = router_alias(api_router_file, "routes", route_name, route_name)
+        suffix = f" as {alias}" if alias != route_name else ""
+        route_import = f"from .routes import {route_name}{suffix}"
         route_include = (
-            f"api_router.include_router({route_name}.router, "
+            f"api_router.include_router({alias}.router, "
             f'prefix="/{route_name}", tags=["{route_name}"])'
         )
 
-        if (
-            route_import in content
-            and f"api_router.include_router({route_name}.router" in content
-        ):
-            return  # Already included
-
-        content = insert_import_line(content, route_import)
-        content = insert_statement_line(content, route_include)
-
-        with open(api_router_file, "w", encoding="utf-8") as f:
-            f.write(content)
+        register_router(
+            {
+                "api_dir": os.path.dirname(api_router_file),
+                "api_router_file": api_router_file,
+            },
+            route_import,
+            route_include,
+        )
 
         debug_log(f"Updated API router to include {route_name}", "info")
 
@@ -1594,7 +1604,9 @@ def _update_main_app(
         print_warning(f"Failed to update main.py: {e}")
 
 
-def add_new_route(project_dir: str, route_name: str) -> None:
+def add_new_route(
+    project_dir: str, route_name: str, layout: Optional[str] = None
+) -> None:
     """
     Add a new API route to an existing FastAPI project.
 
@@ -1604,37 +1616,20 @@ def add_new_route(project_dir: str, route_name: str) -> None:
 
     :param project_dir: Path to the project directory
     :param route_name: Name of the new route to add
+    :param layout: Explicit route layout, or None to select from preset metadata
     :raises BackendExceptions: If route addition fails
     """
     try:
-        # Setup paths
-        modules_dir = os.path.join(settings.FASTKIT_TEMPLATE_ROOT, "modules")
-        layout = resolve_project_layout(project_dir)
-        src_dir = layout["package_dir"]
-
-        # Ensure project structure exists
-        target_dirs = _ensure_project_structure(src_dir)
-
-        # Create route files
-        _create_route_files(
-            modules_dir, target_dirs, route_name, layout["package_module"]
+        # Import here to avoid a circular import with route_generators.
+        from fastapi_fastkit.backend.route_generators import (
+            get_route_generator,
+            resolve_route_layout,
         )
 
-        # Handle API router file
-        _handle_api_router_file(
-            target_dirs, modules_dir, route_name, layout["api_router_file"]
-        )
-
-        # Process init files
-        module_types = ["api/routes", "crud", "schemas"]
-        _process_init_files(modules_dir, target_dirs, module_types)
-
-        # Update main application
-        _update_main_app(
-            src_dir,
-            route_name,
-            router_module=layout["api_router_module"],
-            main_py_path=layout["main"],
+        route_layout = resolve_route_layout(project_dir, layout)
+        project_layout = resolve_project_layout(project_dir)
+        get_route_generator(route_layout).add_new_route(
+            project_dir, route_name, project_layout
         )
 
         debug_log(f"Successfully added new route: {route_name}", "info")
