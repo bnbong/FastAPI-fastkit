@@ -6,8 +6,10 @@ Learn how to add new API routes to your existing FastAPI project.
 
 `addroute` accepts `--layout=classic-layer` or `--layout=domain`. When omitted,
 it reads `[tool.fastapi-fastkit].preset`: `domain-starter` selects `domain`;
-`classic-layered`, `minimal`, `single-module`, and projects without a preset
-select `classic-layer`. An unknown preset falls back to `classic-layer` with
+`classic-layered`, `minimal`, and `single-module` select `classic-layer`.
+If `preset` is missing, it infers the preset from `template`, so projects created
+with `startdemo` or interactive `init` also select `domain` for
+`fastapi-domain-starter`. Without either value, it selects `classic-layer`. An unknown preset falls back to `classic-layer` with
 a warning. An explicit option overrides this selection without changing the
 project's metadata.
 
@@ -67,8 +69,10 @@ repository for durable persistence; it has no dependency on the starter's
 `db.memory`, ORM, or database configuration.
 
 For isolated tests, inject a fresh `UsersRepository` into `UsersService`,
-then override the router's `get_users_service` FastAPI dependency. Explicitly
-created repository instances have independent storage.
+then override the router's `get_users_service` FastAPI dependency.
+`UsersRepository.reset()` clears that repository and restarts IDs at 1.
+`service.reset_store()` resets the default repository shared between requests.
+Explicitly created repository instances have independent storage.
 
 ## Re-running the command
 

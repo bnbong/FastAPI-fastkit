@@ -197,8 +197,9 @@ service.
 Mirrors the runtime layout — one test module per surface that has
 behavior worth pinning. The starter ships:
 
-- `conftest.py` — autouse fixture that resets the items store between
-  tests, plus a `client` fixture wrapping `TestClient(app)`.
+- `conftest.py` — autouse fixture that resets the items store and calls
+  `service.reset_store()` for generated domains between tests, plus a `client`
+  fixture wrapping `TestClient(app)`.
 - `test_health.py` — verifies `GET /api/v1/health` returns 200 +
   `{"status": "ok"}`.
 - `test_items.py` — full CRUD coverage of the items endpoints,
@@ -338,8 +339,10 @@ From the generated project's root, add a `users` domain:
 $ fastkit addroute users
 ```
 
-The command reads `[tool.fastapi-fastkit].preset`. For `domain-starter` it
-automatically chooses the domain layout, which is displayed before confirmation.
+The command reads `[tool.fastapi-fastkit].preset`, or infers it from `template`
+when `preset` is absent. Projects created with `startdemo`, interactive `init`,
+or `init --config` therefore choose the domain layout for domain-starter.
+The selected layout is displayed before confirmation.
 You can also select it explicitly:
 
 ```console
@@ -348,8 +351,8 @@ $ fastkit addroute users . --layout=domain
 
 `--layout=classic-layer` generates the traditional `api/routes`, `crud`, and
 `schemas` structure. That is also the default for `classic-layered`, `minimal`,
-`single-module`, and projects without a preset. An unknown preset falls back to
-`classic-layer` with a warning. The option does not change the project's preset.
+`single-module`, and projects without preset or template metadata. An unknown
+preset falls back to `classic-layer` with a warning. The option does not change the project's preset.
 
 ### Generated domain
 
@@ -416,7 +419,11 @@ def test_create_user(client):
 
 Re-running `addroute` preserves existing domain files, creates missing files,
 and avoids duplicate imports and registrations. Same-named classic modules
-can coexist through import aliases. Check HTTP paths and methods yourself when
+can coexist through import aliases. Generated packages re-export their modules,
+and repositories expose `reset()` to clear data and restart IDs. The starter's
+autouse fixture calls `service.reset_store()` for generated domains. In older
+projects, add this call to the existing reset fixture or use isolated repositories
+through dependency overrides. Check HTTP paths and methods yourself when
 combining routers; the generator does not detect overlapping endpoints.
 
 ## Step 6: Where to go next

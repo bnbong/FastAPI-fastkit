@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Dict, Optional, Union
 
 from fastapi_fastkit.backend import main as backend
+from fastapi_fastkit.backend.project_builder.preset_layout import PresetLayoutStrategist
 from fastapi_fastkit.backend.route_wiring import register_router, router_alias
 from fastapi_fastkit.backend.transducer import copy_and_convert_template_file
 from fastapi_fastkit.core.exceptions import BackendExceptions
@@ -17,13 +18,19 @@ ROUTE_LAYOUTS = ("classic-layer", "domain")
 
 
 def resolve_route_layout(project_dir: str, layout: Optional[str] = None) -> str:
-    """Resolve the route layout from the option or project preset."""
+    """Resolve the route layout from the option or project metadata."""
     if layout is not None:
         if layout not in ROUTE_LAYOUTS:
             raise BackendExceptions(f"Unknown route layout: {layout!r}")
         return layout
 
-    preset = read_fastkit_metadata(project_dir).get("preset")
+    metadata = read_fastkit_metadata(project_dir)
+    preset = metadata.get("preset")
+    if not preset:
+        template = metadata.get("template")
+        domain_template = PresetLayoutStrategist("domain-starter").base_template
+        if template == domain_template:
+            return "domain"
     if preset == "domain-starter":
         return "domain"
     if preset and preset not in ("classic-layered", "minimal", "single-module"):

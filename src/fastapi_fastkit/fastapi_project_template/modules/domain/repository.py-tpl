@@ -43,3 +43,8 @@ class <entity_class>Repository:
     def delete(self, entity_id: int) -> bool:
         with self._lock:
             return self._data.pop(entity_id, None) is not None
+
+    def reset(self) -> None:
+        with self._lock:
+            self._data.clear()
+            self._next_id = 1

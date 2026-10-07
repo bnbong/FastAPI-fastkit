@@ -1503,12 +1503,6 @@ def _update_api_router(api_router_file: str, route_name: str) -> None:
             f'prefix="/{route_name}", tags=["{route_name}"])'
         )
 
-        if (
-            route_import in content
-            and f"api_router.include_router({alias}.router" in content
-        ):
-            return  # Already included
-
         register_router(
             {
                 "api_dir": os.path.dirname(api_router_file),

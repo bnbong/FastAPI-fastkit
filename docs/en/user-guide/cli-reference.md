@@ -405,8 +405,9 @@ Both layouts update the existing API router and connect it to the application
 if necessary. Paths follow the actual app package, including `src/app/`.
 
 Without the option, `[tool.fastapi-fastkit].preset = "domain-starter"` selects
-`domain`. `classic-layered`, `minimal`, `single-module`, and an absent preset
-select `classic-layer`. An unknown preset falls back to `classic-layer` with a
+`domain`. When `preset` is missing, the preset is inferred from `template`;
+`fastapi-domain-starter` also selects `domain`. Other presets and projects without
+either metadata value select `classic-layer`. An unknown preset falls back to `classic-layer` with a
 warning. Explicit selection does not change the project's preset.
 
 ```console

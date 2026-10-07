@@ -12,11 +12,16 @@ import pytest
 from click.testing import CliRunner
 
 from fastapi_fastkit.backend.main import add_new_route, write_fastkit_metadata
-from fastapi_fastkit.backend.route_generators import resolve_route_layout
+from fastapi_fastkit.backend.route_generators import (
+    DomainRouteGenerator,
+    get_route_generator,
+    resolve_route_layout,
+)
+from fastapi_fastkit.backend.scaffolder import ProjectScaffolder, ScaffoldOptions
 from fastapi_fastkit.backend.transducer import copy_and_convert_template
 from fastapi_fastkit.cli import fastkit_cli
 from fastapi_fastkit.core.exceptions import BackendExceptions
-from fastapi_fastkit.core.settings import settings
+from fastapi_fastkit.core.settings import FastkitConfig, settings
 
 
 def make_project(
@@ -471,3 +476,158 @@ def test_existing_domain_registration_is_preserved(
     before = snapshot(tmp_path)
     add_new_route(str(tmp_path), "users")
     assert snapshot(tmp_path) == before
+
+
+@pytest.mark.parametrize(
+    "template, expected",
+    [
+        ("fastapi-domain-starter", "domain"),
+        ("fastapi-default", "classic-layer"),
+        ("fastapi-empty", "classic-layer"),
+        ("fastapi-single-module", "classic-layer"),
+        ("unknown", "classic-layer"),
+    ],
+)
+def test_layout_from_template(tmp_path: Path, template: str, expected: str) -> None:
+    make_project(tmp_path, preset=None)
+    metadata = tmp_path / "pyproject.toml"
+    metadata.write_text(metadata.read_text() + f'template = "{template}"\n')
+    assert resolve_route_layout(str(tmp_path)) == expected
+
+
+@pytest.mark.parametrize("preset", ["minimal", "domain-starter", "unknown"])
+def test_preset_takes_priority_over_template(tmp_path: Path, preset: str) -> None:
+    make_project(tmp_path, preset=preset)
+    metadata = tmp_path / "pyproject.toml"
+    metadata.write_text(metadata.read_text() + 'template = "fastapi-domain-starter"\n')
+    assert resolve_route_layout(str(tmp_path)) == (
+        "domain" if preset == "domain-starter" else "classic-layer"
+    )
+    assert resolve_route_layout(str(tmp_path), "classic-layer") == "classic-layer"
+
+
+def scaffold_starter(root: Path) -> Path:
+    config = FastkitConfig()
+    config.USER_WORKSPACE = str(root)
+    options = ScaffoldOptions(
+        project_name="starter",
+        author="Test",
+        author_email="test@example.com",
+        description="Test",
+        package_manager="pip",
+        template="fastapi-domain-starter",
+        with_venv=False,
+        with_install=False,
+        assume_yes=True,
+    )
+    result = ProjectScaffolder(config, options).run()
+    assert "preset" not in result.metadata
+    return Path(result.project_dir)
+
+
+def test_scaffold_without_preset_generates_domain(tmp_path: Path) -> None:
+    project = scaffold_starter(tmp_path)
+    assert resolve_route_layout(str(project)) == "domain"
+    add_new_route(str(project), "users")
+    assert (project / "src/app/domains/users/router.py").exists()
+    assert not (project / "src/app/api/routes").exists()
+
+
+def test_generated_domains_reset_between_tests(tmp_path: Path) -> None:
+    if any(
+        importlib.util.find_spec(name) is None
+        for name in ("fastapi", "httpx", "pydantic_settings")
+    ):
+        pytest.skip("Starter runtime dependencies are required")
+    project = scaffold_starter(tmp_path)
+    add_new_route(str(project), "users")
+    test_file = project / "tests/test_generated_users.py"
+    test_file.write_text(
+        """
+from src.app.domains.users import models, repository, router, schemas, service
+
+def test_first(client):
+    assert client.get('/api/v1/users').json() == []
+    assert client.post('/api/v1/users', json={'name': 'first'}).json()['id'] == 1
+    isolated = repository.UsersRepository()
+    isolated.add(name='isolated')
+    isolated.reset()
+    assert isolated.list_all() == []
+    assert isolated.add(name='fresh').id == 1
+    assert len(client.get('/api/v1/users').json()) == 1
+
+def test_second(client):
+    assert client.get('/api/v1/users').json() == []
+    assert client.post('/api/v1/users', json={'name': 'second'}).json()['id'] == 1
+""",
+        encoding="utf-8",
+    )
+    result = subprocess.run(
+        [sys.executable, "-m", "pytest", "tests", "-q", "--override-ini", "addopts="],
+        cwd=project,
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+@pytest.mark.parametrize("layout", ["classic-layer", "domain"])
+def test_empty_aggregator(tmp_path: Path, layout: str) -> None:
+    package = make_project(tmp_path, nested=False)
+    aggregator = package / "api/api.py"
+    aggregator.write_text("", encoding="utf-8")
+    add_new_route(str(tmp_path), "users", layout=layout)
+    source = aggregator.read_text()
+    assert "api_router = APIRouter()" in source
+    assert source.count("include_router") == 1
+
+
+@pytest.mark.parametrize("name", ["bad-name", "class"])
+def test_invalid_route_name_preserves_project(tmp_path: Path, name: str) -> None:
+    make_project(tmp_path)
+    before = snapshot(tmp_path)
+    with pytest.raises(BackendExceptions, match="Python identifier"):
+        add_new_route(str(tmp_path), name)
+    assert snapshot(tmp_path) == before
+
+
+def test_missing_source_directory(tmp_path: Path) -> None:
+    with pytest.raises(BackendExceptions, match="Source directory not found"):
+        DomainRouteGenerator().add_new_route(
+            str(tmp_path), "users", {"package_dir": str(tmp_path / "absent")}
+        )
+
+
+def test_missing_domain_templates(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    make_project(tmp_path)
+    before = snapshot(tmp_path)
+    monkeypatch.setattr(settings, "FASTKIT_TEMPLATE_ROOT", str(tmp_path / "absent"))
+    with pytest.raises(BackendExceptions, match="Missing domain template"):
+        add_new_route(str(tmp_path), "users")
+    assert snapshot(tmp_path) == before
+
+
+def test_domain_template_copy_failure(tmp_path: Path) -> None:
+    make_project(tmp_path)
+    with patch(
+        "fastapi_fastkit.backend.route_generators.copy_and_convert_template_file",
+        return_value=False,
+    ):
+        with pytest.raises(BackendExceptions, match="Failed to create domain file"):
+            add_new_route(str(tmp_path), "users")
+
+
+@pytest.mark.parametrize("name", ["_", "none"])
+def test_unusual_domain_names_compile(tmp_path: Path, name: str) -> None:
+    package = make_project(tmp_path)
+    add_new_route(str(tmp_path), name)
+    for file in (package / "domains" / name).glob("*.py"):
+        compile(file.read_text(), str(file), "exec")
+
+
+def test_invalid_generator_layout() -> None:
+    with pytest.raises(BackendExceptions, match="Unknown route layout"):
+        get_route_generator("invalid")
