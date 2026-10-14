@@ -21,6 +21,38 @@ FastAPI-fastkit 同时使用**两套互补的质量保障系统**:
 - ✅ **依赖检查** —— 确认 FastAPI 及必要依赖被正确声明
 - ✅ **FastAPI 实现** —— 确认模板包含合规的 FastAPI 应用初始化
 - ✅ **测试执行** —— 运行模板的测试以确认功能正常
+- ✅ **冒烟测试** —— 用 uvicorn 启动生成的项目,并探测其 HTTP 接口
+- ✅ **配置一致性** —— Python 版本固定、依赖漂移、自我依赖
+- ✅ **占位符残留** —— 项目生成后不残留任何 `<placeholder>`
+- ✅ **依赖新鲜度** —— 对落后于 PyPI 最新发布版本的固定版本发出警告
+
+## 各项检查的作用
+
+检查会从模板生成一个**真实的项目** —— 复制、转换 `-tpl`、注入元数据 —— 然后针对这个生成的项目而不是模板源码运行每一项检查。只读取模板的检查无法发现生成过程中未能替换的占位符。
+
+### 冒烟测试
+
+生成的项目会在一个空闲端口上用 uvicorn 启动,检查器会持续轮询,直到服务器响应或超时。服务器启动后,会请求 `/docs` 与 `/health` 并检查其状态码。随后终止服务器进程,如果它没有停止,则升级为 `SIGKILL`。
+
+uvicorn 的目标按以下顺序解析:生成的 `pyproject.toml` 中的 `[tool.fastapi-fastkit].app_module`,然后是模板 `template-config.yml` 中的 `app_module`,最后是约定俗成的 `main.py` 位置。这与 `fastkit runserver` 使用的契约相同,因此冒烟测试能够启动的模板,其生成的项目也能够运行。
+
+这项检查能发现静态分析发现不了的问题:只在运行时才解析的 import、会抛出异常的 `lifespan`、没有默认值的配置字段。
+
+### 配置一致性
+
+会针对模板的 `pyproject.toml-tpl` 验证三件事:
+
+- **Python 版本固定保持一致并以 3.12 为目标** —— `requires-python`、black 的 `target-version` 与 mypy 的 `python_version`。一个声明 `>=3.12` 却按 `py311` 格式化的模板,就是一个迟早会坑到贡献者的 bug。
+- **没有依赖漂移** —— `requirements.txt-tpl` 与 `[project].dependencies` 中声明的包不得相互冲突。模板为了兼容各种包管理器会同时附带这两个文件,而两份列表如果没有检查,总会逐渐偏离。
+- **没有自我依赖** —— 生成的项目不得将 `FastAPI-fastkit` 声明为运行时依赖。该 CLI 是开发工具;把它打包进每个生成的应用,会把整个 fastkit 依赖树带入无关的项目。
+
+### 占位符残留
+
+每个 `<project_name>`、`<description>` 及同类占位符都必须在生成过程中被替换。生成的项目中仍然存在任何 `<placeholder>` 都会被视为错误 —— 这意味着元数据注入不知道那个文件,用户会原样收到它。
+
+### 依赖新鲜度
+
+固定的版本会与 PyPI 上的最新发布版本进行比较,并以警告而非错误的形式报告 —— 一个落后一个小版本的模板只是一条信息,而不是一次失败。这是唯一一项会访问网络的检查,`--offline` 会跳过它。
 
 ## 自动化模板测试系统
 
@@ -140,6 +172,30 @@ $ python scripts/inspect-templates.py --verbose
 $ python scripts/inspect-templates.py --output my_results.json
 ```
 
+#### 检查选项
+
+| 选项 | 作用 | 适用场景 |
+|---|---|---|
+| `--offline` | 跳过所有网络查询(依赖新鲜度报告) | 没有网络,或者想要快速、封闭的运行 |
+| `--no-smoke` | 跳过用 uvicorn 启动生成的项目 | 只在迭代结构;冒烟测试是最慢的步骤 |
+| `--mypy` | 用 mypy 对生成的项目进行类型检查 | 提交模板之前 —— 由于速度较慢,需要显式开启 |
+| `--templates` | 要检查的模板列表,以逗号分隔 | 只处理一个模板时 |
+| `--verbose` | 详细输出 | 调试失败时 |
+| `--output` | JSON 结果文件的路径 | 需要并排保留多次运行结果时 |
+
+针对单个模板的快速本地循环:
+
+```console
+$ python scripts/inspect-templates.py \
+    --templates fastapi-sqlmodel --offline --no-smoke --verbose
+```
+
+……以及提交 PR 之前的完整检查:
+
+```console
+$ python scripts/inspect-templates.py --templates fastapi-sqlmodel --mypy
+```
+
 ### 使用 Makefile 命令
 
 ```console
@@ -192,10 +248,11 @@ $ make inspect-template TEMPLATES="fastapi-default,fastapi-async-crud"
 - 必须包含一个带 Python 源文件的 `src/` 目录
 - Python 文件必须使用 `.py-tpl` 扩展名
 - 必须包含 `tests/` 目录与 `README.md-tpl` 文件
-- 必须至少包含**一份**元数据文件:
-    - `pyproject.toml-tpl`(推荐,PEP 621),或
-    - `setup.py-tpl`(遗留,仍可接受)
-- 当 `pyproject.toml-tpl` 已声明 `[project].dependencies` 时,`requirements.txt-tpl` 为可选
+- 必须包含 `pyproject.toml-tpl`(PEP 621)。内置模板以 pyproject 为先,不再附带 `setup.py-tpl`;检查仍然接受该文件,以便第三方模板继续可用,但新模板不得添加它。
+- 当 `pyproject.toml-tpl` 已声明 `[project].dependencies` 时,`requirements.txt-tpl` 为可选 —— 但如果两者同时存在,它们必须保持一致(参见*配置一致性*)
+- 必须统一以 Python 3.12 为目标:`requires-python = ">=3.12"`、black 的 `target-version = ["py312"]`、mypy 的 `python_version = "3.12"`,以及任何 Docker 基础镜像都使用 `python:3.12-slim`
+- 不得将 `FastAPI-fastkit` 声明为运行时依赖
+- 生成后不得留下任何未替换的 `<placeholder>`
 
 ### FastAPI 要求
 - 必须包含 FastAPI 应用初始化

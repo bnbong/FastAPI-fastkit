@@ -29,12 +29,18 @@
 | 기능 | `minimal` / `single-module` | `classic-layered` / `domain-starter` |
 |---|---|---|
 | **데이터베이스** (PostgreSQL, MySQL, SQLite, MongoDB) | 설정 모듈을 생성하고, 추가로 다시 생성된 `main.py`에 `await init_db()` 호출용 스텁을 넣어 줍니다. | 설정 모듈을 프리셋에 맞는 경로에 생성합니다. 템플릿이 제공하는 `main.py`는 **그대로 유지**되므로, `get_db()`를 라우터에 직접 연결해야 합니다. |
-| **인증** (JWT, FastAPI-Users, OAuth2, Session-based) | 인증 설정 모듈을 생성합니다. JWT의 경우 다시 생성된 `main.py`에 `HTTPBearer` import까지 추가합니다. | 인증 설정 모듈을 프리셋에 맞는 경로에 생성합니다. `main.py`에는 import가 추가되지 않으므로 의존성을 직접 연결해야 합니다. |
-| **백그라운드 작업** (Celery, Dramatiq) | 패키지가 설치됩니다. 현재 main.py 오버레이는 없습니다. | 동일. |
-| **캐싱** (Redis) | 패키지가 설치됩니다. 현재 main.py 오버레이는 없습니다. | 동일. |
+| **인증** (JWT, FastAPI-Users, OAuth2, Session-based) | 인증 설정 모듈을 생성합니다. JWT는 `HTTPBearer`를 import하고, OAuth2와 Session-based는 `main.py` 미들웨어 설정도 추가합니다. | 인증 설정 모듈을 프리셋에 맞는 경로에 생성합니다. `main.py`에는 import가 추가되지 않으므로 의존성을 직접 연결해야 합니다. |
+| **백그라운드 작업** (Celery, Dramatiq) | `worker.py`와 `features/tasks.py`를 생성하고, 다시 생성된 `main.py`에 작업 라우터를 마운트합니다. | `worker.py`와 `features/tasks.py`를 생성하지만, 템플릿이 제공하는 `main.py`는 **그대로 유지**됩니다. 라우터는 직접 마운트해야 합니다. |
+| **캐싱** (Redis) | `features/cache.py`를 생성하고, 다시 생성된 `main.py`에서 이를 마운트하고 초기화합니다. | `features/cache.py`를 생성합니다. 마운트는 직접 해야 합니다. |
+| **유틸리티: Pagination / WebSocket** | `features/pagination.py` / `features/websocket.py`를 생성하고, 다시 생성된 `main.py`에 라우터를 마운트합니다. | 같은 모듈을 생성합니다. 마운트는 직접 해야 합니다. |
+| **모니터링: OpenTelemetry** | 별도 파일은 없습니다. 트레이싱 설정이 다시 생성된 `main.py`에 직접 추가됩니다. | 별도 파일은 없습니다. 템플릿이 제공하는 `main.py`가 유지되므로 트레이싱이 **연결되지 않습니다**. 설정을 직접 추가해야 합니다. |
+| **마이그레이션** (Alembic) | SQL 데이터베이스를 선택하면 `main.py` 오버레이와 관계없이 `alembic.ini`, `alembic/env.py`, 기준(baseline) 리비전, `scripts/migrate.sh`를 생성합니다. | 동일. Alembic 파일 생성은 `main.py`가 유지되는지 여부와 관계가 없습니다. |
+| **도구** (ruff, pre-commit, github-actions, devcontainer, makefile) | `main.py` 오버레이와 관계없이 해당하는 설정 파일을 생성합니다. | 동일. |
+| **로깅** (structured) | `logging_config.py`를 생성하고, 다시 생성된 `main.py`에 request-id 미들웨어를 연결합니다. | `logging_config.py`를 생성합니다. 템플릿이 제공하는 `main.py`가 유지되므로 미들웨어는 직접 연결해야 합니다. |
 | **CORS** (유틸리티) | 다시 생성된 `main.py`에 `allow_origins=['*']` 형태로 `CORSMiddleware`가 추가됩니다. | 템플릿이 제공하는 `main.py`에 **이미 연결**돼 있습니다 (`settings.all_cors_origins` 조건부). `.env`의 `BACKEND_CORS_ORIGINS` 값만 채우면 활성화되므로 코드를 수정할 필요가 없습니다. |
-| **테스트** (Basic / Coverage / Advanced) | 프로젝트 루트에 `pytest.ini` 가 생성됩니다. | 동일. |
+| **테스트** (Basic / Coverage / Advanced) | 프로젝트 루트에 `pytest.ini` 가 생성됩니다. Advanced는 `tests/factories.py`와 `tests/test_factories.py`도 추가합니다. | 동일. |
 | **배포** (Docker, docker-compose) | 프로젝트 루트에 `Dockerfile` 또는 `docker-compose.yml` 이 작성됩니다. | 동일. |
+| **`/health` / `/ready`** | 다시 생성된 `main.py`에 항상 포함됩니다. | 그대로 유지되는, 템플릿이 제공하는 `main.py`에 이미 포함돼 있습니다. |
 
 ## "프리셋 호환성" 경고가 표시되는 시점
 
@@ -44,10 +50,15 @@
 |---|---|
 | `CORS` (유틸리티) | ❌ — 템플릿이 제공하는 `main.py`에 이미 연결돼 있습니다. `.env`에 `BACKEND_CORS_ORIGINS`만 채우면 됩니다. |
 | `Rate-Limiting` (유틸리티) | ✅ — `slowapi` 리미터 설정이 추가되지 않음 |
-| `Prometheus` (모니터링) | ✅ — `Instrumentator().instrument(app)` 호출이 추가되지 않음 |
+| `Pagination` / `WebSocket` (유틸리티) | ✅ — 생성된 라우터(`features/pagination.py` / `features/websocket.py`)가 마운트되지 않음 |
+| `Celery` / `Dramatiq` (async_tasks) | ✅ — 생성된 `worker.py` / `features/tasks.py` 라우터가 마운트되지 않음 |
+| `Redis` (캐싱) | ✅ — 생성된 `features/cache.py`가 마운트되거나 초기화되지 않음 |
+| `Prometheus` / `OpenTelemetry` (모니터링) | ✅ — 계측 설정이 `main.py`에 추가되지 않음 |
+| `structured` (로깅) | ✅ — `logging_config.py`는 생성되지만, request-id 미들웨어가 `main.py`에 추가되지 않음 |
+| `Alembic` (마이그레이션), `tooling` 선택 | ❌ — 이 파일들은 프리셋과 관계없이 생성되고 바로 사용할 수 있으며, `main.py`에 의존하지 않음 |
 | 모든 데이터베이스 / 인증 선택 | ⚠️ — 설정 파일은 생성되지만, 라우터에 `Depends()` 로 연결하는 작업은 직접 해야 함 |
 
-`minimal` 과 `single-module` 프리셋에서는 동적 `main.py` 오버레이가 CORS, 레이트 제한, Prometheus 계측을 자동으로 처리하므로 경고가 발생하지 않습니다.
+`minimal` 과 `single-module` 프리셋에서는 동적 `main.py` 오버레이가 위의 모든 항목을 자동으로 처리하므로 경고가 발생하지 않습니다.
 
 ## 지원되지 않는 조합 (안전 우선)
 

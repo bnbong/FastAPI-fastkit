@@ -258,7 +258,7 @@ to proceed with project creation?" 확인 프롬프트에는 영향을 주지 �
 | 축 | 선택지 | 설치되는 패키지 | 생성되는 파일 |
 |---|---|---|---|
 | `database` | PostgreSQL, MySQL, MongoDB, Redis, SQLite, None | PostgreSQL: `asyncpg`, `sqlalchemy` · MySQL: `aiomysql`, `sqlalchemy` · MongoDB: `motor` · Redis: `redis[hiredis]` · SQLite: `sqlalchemy`, `aiosqlite` | 프리셋 경로에 데이터베이스 설정 모듈 (예: `src/config/database.py`) |
-| `authentication` | JWT, OAuth2, FastAPI-Users, Session-based, None | JWT: `python-jose[cryptography]`, `passlib[bcrypt]` · OAuth2: `authlib`, `itsdangerous`, `httpx` · FastAPI-Users: `fastapi-users[sqlalchemy]`, `python-jose[cryptography]`, `passlib[bcrypt]` · Session-based: `itsdangerous` | 프리셋 경로에 인증 설정 모듈 생성; OAuth2 · Session-based 는 `main.py` 미들웨어 설정도 추가 |
+| `authentication` | JWT, OAuth2, FastAPI-Users, Session-based, None | JWT: `pyjwt[crypto]`, `pwdlib[argon2]` · OAuth2: `authlib`, `itsdangerous`, `httpx` · FastAPI-Users: `fastapi-users[sqlalchemy]`, `pyjwt[crypto]`, `pwdlib[argon2]` · Session-based: `itsdangerous` | 프리셋 경로에 인증 설정 모듈 생성; OAuth2 · Session-based 는 `main.py` 미들웨어 설정도 추가 |
 | `async_tasks` | Celery, Dramatiq, None | Celery: `celery[redis]`, `redis[hiredis]` · Dramatiq: `dramatiq[redis]`, `redis[hiredis]` | `<pkg>/worker.py`(백그라운드 워커) + `<pkg>/features/tasks.py`(작업 라우트) |
 | `testing` | Basic, Coverage, Advanced, None | Basic: `pytest`, `pytest-asyncio`, `httpx` · Coverage: + `pytest-cov` · Advanced: + `faker`, `factory-boy` | `pytest.ini`; Advanced 는 `tests/factories.py`, `tests/test_factories.py` 도 추가 |
 | `caching` | Redis, None | Redis: `redis[hiredis]`, `fastapi-cache2`, `jinja2` | `<pkg>/features/cache.py`(캐시된 엔드포인트) |

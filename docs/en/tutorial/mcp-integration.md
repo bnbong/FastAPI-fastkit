@@ -452,6 +452,7 @@ user_db = UserDatabase()
 from typing import Optional, List
 from fastapi import Depends, HTTPException, status, Security
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials, APIKeyHeader
+import jwt
 from src.auth.jwt_handler import decode_token, token_manager
 from src.auth.models import User, UserInDB, Permission, user_db
 

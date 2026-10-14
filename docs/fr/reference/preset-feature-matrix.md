@@ -29,12 +29,18 @@ Ces fonctionnalités sont prises en charge dans **tous** les préréglages — l
 | Fonctionnalité | `minimal` / `single-module` | `classic-layered` / `domain-starter` |
 |---|---|---|
 | **Base de données** (PostgreSQL, MySQL, SQLite, MongoDB) | Génère le module de configuration **et** insère des appels `await init_db()` dans le `main.py` régénéré. | Génère le module de configuration au chemin du préréglage. Le `main.py` livré est **préservé**, câblez donc manuellement `get_db()` dans les routeurs. |
-| **Authentification** (JWT, FastAPI-Users, OAuth2, basée sur session) | Génère le module de configuration d'authentification. JWT importe aussi `HTTPBearer` dans le `main.py` régénéré. | Génère le module de configuration d'authentification au chemin du préréglage. Aucun import n'est ajouté à `main.py` — câblez les dépendances manuellement. |
-| **Tâches en arrière-plan** (Celery, Dramatiq) | Paquets installés ; aucune superposition de main.py aujourd'hui. | Idem. |
-| **Mise en cache** (Redis) | Paquets installés ; aucune superposition de main.py aujourd'hui. | Idem. |
+| **Authentification** (JWT, FastAPI-Users, OAuth2, basée sur session) | Génère le module de configuration d'authentification ; JWT importe `HTTPBearer`, et OAuth2 ainsi que l'authentification basée sur session ajoutent aussi leur configuration de middleware dans `main.py`. | Génère le module de configuration d'authentification au chemin du préréglage. Aucun import n'est ajouté à `main.py` — câblez les dépendances manuellement. |
+| **Tâches en arrière-plan** (Celery, Dramatiq) | Génère `worker.py` et `features/tasks.py`, et monte le routeur de tâches dans le `main.py` régénéré. | Génère `worker.py` et `features/tasks.py`, mais le `main.py` livré est **préservé** — montez le routeur manuellement. |
+| **Mise en cache** (Redis) | Génère `features/cache.py` et le monte / l'initialise dans le `main.py` régénéré. | Génère `features/cache.py` ; montez-le manuellement. |
+| **Utilitaires : Pagination / WebSocket** | Génère `features/pagination.py` / `features/websocket.py` et monte le routeur dans le `main.py` régénéré. | Génère le même module ; montez-le manuellement. |
+| **Supervision : OpenTelemetry** | Aucun fichier autonome — la configuration du traçage est ajoutée directement au `main.py` régénéré. | Aucun fichier autonome. Le `main.py` livré est préservé, le traçage n'est donc **pas câblé** — ajoutez la configuration manuellement. |
+| **Migrations** (Alembic) | Génère `alembic.ini`, `alembic/env.py`, une révision de référence et `scripts/migrate.sh` pour toute sélection de base de données SQL — indépendamment de la superposition de `main.py`. | Idem — la génération Alembic ne dépend pas de la préservation de `main.py`. |
+| **Outillage** (ruff, pre-commit, github-actions, devcontainer, makefile) | Génère le ou les fichiers de configuration correspondants, indépendamment de la superposition de `main.py`. | Idem. |
+| **Journalisation** (structured) | Génère `logging_config.py` et câble le middleware d'identifiant de requête dans le `main.py` régénéré. | Génère `logging_config.py` ; le `main.py` livré est préservé, câblez donc le middleware manuellement. |
 | **CORS** (utilitaire) | `CORSMiddleware` est ajouté au `main.py` régénéré avec `allow_origins=['*']`. | **Déjà câblé** dans le `main.py` livré (conditionné par `settings.all_cors_origins`). Activez-le en définissant `BACKEND_CORS_ORIGINS` dans `.env` — aucune modification de code nécessaire. |
-| **Tests** (Basic / Coverage / Advanced) | `pytest.ini` est généré à la racine du projet. | Idem. |
+| **Tests** (Basic / Coverage / Advanced) | `pytest.ini` est généré à la racine du projet ; Advanced ajoute aussi `tests/factories.py` et `tests/test_factories.py`. | Idem. |
 | **Déploiement** (Docker, docker-compose) | `Dockerfile` et/ou `docker-compose.yml` écrits à la racine du projet. | Idem. |
+| **`/health` / `/ready`** | Toujours présents dans le `main.py` régénéré. | Déjà présents dans le `main.py` préservé, livré par le modèle. |
 
 ## Quand un avertissement « Préréglage compatibilité » apparaît
 
@@ -44,10 +50,15 @@ Pour les préréglages qui **préservent le `main.py` livré** (`classic-layered
 |---|---|
 | `CORS` (utilitaire) | ❌ — déjà câblé dans le `main.py` livré. Renseignez simplement `BACKEND_CORS_ORIGINS` dans `.env`. |
 | `Rate-Limiting` (utilitaire) | ✅ — la configuration du limiteur `slowapi` n'est pas ajoutée |
-| `Prometheus` (supervision) | ✅ — `Instrumentator().instrument(app)` n'est pas appelé |
+| `Pagination` / `WebSocket` (utilitaire) | ✅ — le routeur généré (`features/pagination.py` / `features/websocket.py`) n'est pas monté |
+| `Celery` / `Dramatiq` (async_tasks) | ✅ — le routeur généré `worker.py` / `features/tasks.py` n'est pas monté |
+| `Redis` (mise en cache) | ✅ — le `features/cache.py` généré n'est ni monté ni initialisé |
+| `Prometheus` / `OpenTelemetry` (supervision) | ✅ — la configuration de l'instrumentation n'est pas ajoutée à `main.py` |
+| `structured` (journalisation) | ✅ — `logging_config.py` est généré, mais le middleware d'identifiant de requête n'est pas ajouté à `main.py` |
+| `Alembic` (migrations), sélections d'outillage | ❌ — ces fichiers sont générés et utilisables quel que soit le préréglage ; rien ne dépend de `main.py` |
 | Toute sélection base de données / authentification | ⚠️ — les fichiers de configuration sont générés, mais vous devez les passer en `Depends()` dans vos routeurs |
 
-Pour les préréglages `minimal` et `single-module`, la superposition dynamique de `main.py` gère automatiquement CORS, la limitation de débit et l'instrumentation Prometheus ; aucun avertissement n'est émis.
+Pour les préréglages `minimal` et `single-module`, la superposition dynamique de `main.py` gère automatiquement chacun des axes ci-dessus ; aucun avertissement n'est émis.
 
 ## Combinaisons non prises en charge (rester prudent)
 

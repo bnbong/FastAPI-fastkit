@@ -212,6 +212,27 @@ Das Projekt-Makefile bietet praktische Befehle für gängige Entwicklungsaufgabe
 | `make inspect-templates-verbose` | Mit ausführlicher Ausgabe inspizieren |
 | `make inspect-template` | Eine oder mehrere Vorlagen inspizieren (Parameter TEMPLATES) |
 
+Das zugrunde liegende Skript kennt drei Flags, die beim Iterieren nützlich sind: `--offline` (überspringt die PyPI-Aktualitätsabfragen), `--no-smoke` (überspringt das Starten des generierten Projekts mit uvicorn — der langsamste Schritt) und `--mypy` (Typprüfung des generierten Projekts; optional, weil sie langsam ist). Was jede Prüfung genau tut, beschreibt [Qualitätssicherung der Vorlagen](../reference/template-quality-assurance.md).
+
+```console
+$ python scripts/inspect-templates.py --templates fastapi-sqlmodel --offline --no-smoke
+```
+
+### Generierter Code liegt in Jinja2-Fragmenten
+
+Alles, was `fastkit init --interactive` in ein Projekt schreibt — `main.py`, Datenbank- und Auth-Module, Docker-Dateien, die pytest-Konfiguration — wird aus Vorlagen unter `src/fastapi_fastkit/fragments/` gerendert und nicht in Python aus Strings zusammengesetzt. `main.py.j2` codiert keine Funktion fest: Es iteriert über die Listen `import_fragments`, `lifespan_fragments` und `setup_fragments`, die `DynamicConfigGenerator` liefert, und bindet jedes Fragment ein, sodass sich Funktionen frei kombinieren lassen.
+
+Eine Funktion hinzuzufügen, sieht ungefähr so aus:
+
+1. Legen Sie die Bausteine in `main/imports/`, `main/lifespan/` und/oder `main/setup/` ab (Lifespan-Fragmente sind um vier Leerzeichen eingerückt, die anderen beiden nicht).
+2. Registrieren Sie sie in `DynamicConfigGenerator._main_fragments()`, abgesichert durch die passende Konfigurationsabfrage.
+3. Für ein eigenständiges Modul fügen Sie `<area>/<feature>.py.j2` hinzu und rendern es mit `self._render(...)`.
+4. Erweitern Sie die Kombinationsmatrix in `tests/test_backends/test_project_builder_config_generator.py` — sie prüft, dass sich jede gerenderte Python-Datei mit `ast.parse` parsen lässt.
+
+Zwei Einschränkungen, über die man leicht stolpert: Jedes Fragment muss mit einem abschließenden Zeilenumbruch enden (die Umgebung wird mit `keep_trailing_newline=True` erstellt), und `main.py.j2` muss seine Anker `# fastkit:imports` / `# fastkit:routes` behalten — `fastkit addroute` fügt an ihnen ein.
+
+Das maßgebliche Vorgehen ist direkt neben den Fragmenten dokumentiert, in [`src/fastapi_fastkit/fragments/README.md`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fragments/README.md).
+
 ### Dokumentations-Befehle
 
 | Befehl | Beschreibung |
@@ -353,13 +374,16 @@ FastAPI-fastkit/
 - **`src/fastapi_fastkit/`** — Hauptquellcode des Pakets
     - **`cli.py`** — Haupteinstiegspunkt des CLI
     - **`backend/`** — zentrale Backend-Logik
-        - **`inspector.py`** — Vorlagen-Inspektor
+        - **`inspection/`** — Pipeline zur Vorlagen-Inspektion (context, checks, consistency, freshness, smoke, lint, report)
+        - **`inspector.py`** — Fassade über `inspection/`, beibehalten für den historischen Importpfad
         - **`interactive/`** — Komponenten des interaktiven Modus (Prompts, Selectors, Validators)
         - **`package_managers/`** — Implementierungen der Paketmanager (pip, uv, pdm, poetry)
-        - **`project_builder/`** — Hilfsfunktionen zum Projektbau
+        - **`project_builder/`** — Hilfsfunktionen zum Projektbau, einschließlich des fragmentbasierten Konfigurationsgenerators
+        - **`scaffolder.py`** — die Generierungspipeline, die `init` und `startdemo` gemeinsam nutzen
         - **`transducer.py`** — Vorlagen-Transducer
     - **`core/`** — zentrale Konfiguration und Exceptions
-    - **`fastapi_project_template/`** — Projektvorlagen (fastapi-default, fastapi-async-crud usw.)
+    - **`fragments/`** — Jinja2-Fragmente, die in generierte Projekte gerendert werden (siehe oben)
+    - **`fastapi_project_template/`** — Projektvorlagen (fastapi-default, fastapi-domain-starter usw.)
     - **`utils/`** — gemeinsame Hilfsfunktionen
 - **`tests/`** — Test-Suite
     - **`test_backends/`** — Backend-spezifische Tests

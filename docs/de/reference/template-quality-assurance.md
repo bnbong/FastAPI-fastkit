@@ -21,6 +21,38 @@ Jeden Mittwoch um Mitternacht (UTC) inspiziert unser GitHub-Actions-Workflow aut
 - ✅ **Abhängigkeitsprüfung** — bestätigt, dass FastAPI und benötigte Abhängigkeiten ordnungsgemäß deklariert sind
 - ✅ **FastAPI-Implementierung** — prüft, dass Vorlagen eine korrekte FastAPI-App-Initialisierung enthalten
 - ✅ **Testausführung** — führt die Tests der Vorlage aus, um die Funktionsfähigkeit zu bestätigen
+- ✅ **Smoke-Test** — startet das generierte Projekt mit uvicorn und prüft seine HTTP-Oberfläche
+- ✅ **Konsistenz der Konfiguration** — Festlegung der Python-Version, Abhängigkeitsabweichungen, Selbstabhängigkeit
+- ✅ **Platzhalter-Rückstände** — kein `<placeholder>` übersteht die Projektgenerierung
+- ✅ **Aktualität der Abhängigkeiten** — warnt vor festgelegten Versionen, die hinter ihrem neuesten PyPI-Release zurückliegen
+
+## Was jede Prüfung tut
+
+Die Inspektion generiert aus der Vorlage ein **echtes Projekt** — Kopieren, `-tpl`-Konvertierung, Einfügen der Metadaten — und führt dann jede Prüfung gegen dieses generierte Projekt aus, nicht gegen den Quellcode der Vorlage. Eine Prüfung, die nur die Vorlage liest, kann keinen Platzhalter erkennen, den die Generierung nicht ersetzt hat.
+
+### Smoke-Test
+
+Das generierte Projekt wird mit uvicorn auf einem freien Port gestartet, und der Inspektor fragt so lange ab, bis der Server antwortet oder das Timeout abläuft. Sobald er läuft, werden `/docs` und `/health` angefragt und ihre Statuscodes geprüft. Anschließend wird der Serverprozess beendet, notfalls mit `SIGKILL`, wenn er nicht stoppt.
+
+Das uvicorn-Ziel wird in dieser Reihenfolge ermittelt: `[tool.fastapi-fastkit].app_module` in der generierten `pyproject.toml`, dann `app_module` in der `template-config.yml` der Vorlage, dann die üblichen `main.py`-Speicherorte. Das ist derselbe Vertrag, den `fastkit runserver` verwendet: Eine Vorlage, deren Smoke-Test startet, ist eine Vorlage, deren generiertes Projekt läuft.
+
+Diese Prüfung findet, was statische Analyse nicht finden kann: einen Import, der sich erst zur Laufzeit auflöst, einen `lifespan`, der eine Ausnahme auslöst, ein Konfigurationsfeld ohne Standardwert.
+
+### Konsistenz der Konfiguration
+
+Drei Dinge werden gegen die `pyproject.toml-tpl` der Vorlage geprüft:
+
+- **Die Festlegungen der Python-Version stimmen überein und zielen auf 3.12** — `requires-python`, `target-version` von black und `python_version` von mypy. Eine Vorlage, die als `py311` formatiert, aber `>=3.12` deklariert, ist ein Fehler, der nur darauf wartet, einen Mitwirkenden zu treffen.
+- **Keine Abhängigkeitsabweichung** — die in `requirements.txt-tpl` und in `[project].dependencies` deklarierten Pakete dürfen sich nicht widersprechen. Vorlagen liefern beide Dateien aus Gründen der Paketmanager-Kompatibilität mit, und zwei Listen laufen immer auseinander, solange nichts sie prüft.
+- **Keine Selbstabhängigkeit** — ein generiertes Projekt darf `FastAPI-fastkit` nicht als Laufzeitabhängigkeit deklarieren. Das CLI ist ein Entwicklungswerkzeug; es in jede generierte App mitzuliefern, zieht den gesamten Abhängigkeitsbaum von fastkit in fremde Projekte.
+
+### Platzhalter-Rückstände
+
+Jedes `<project_name>`, `<description>` und Verwandte müssen während der Generierung ersetzt werden. Jeder `<placeholder>`, der im generierten Projekt noch vorhanden ist, ist ein Fehler — er bedeutet, dass das Einfügen der Metadaten diese Datei nicht kennt und der Nutzer sie unverändert erhalten würde.
+
+### Aktualität der Abhängigkeiten
+
+Festgelegte Versionen werden mit dem neuesten Release auf PyPI verglichen und als Warnungen gemeldet, nie als Fehler — eine Vorlage, die eine Minor-Version zurückliegt, ist eine Information, kein Fehlschlag. Dies ist die einzige Prüfung, die auf das Netzwerk zugreift, und `--offline` überspringt sie.
 
 ## Automatisiertes Vorlagen-Testsystem
 
@@ -140,6 +172,30 @@ $ python scripts/inspect-templates.py --verbose
 $ python scripts/inspect-templates.py --output my_results.json
 ```
 
+#### Inspektions-Flags
+
+| Flag | Wirkung | Verwenden Sie es, wenn |
+|---|---|---|
+| `--offline` | Überspringt jede Netzwerkabfrage (Bericht zur Aktualität der Abhängigkeiten) | kein Netzwerk verfügbar ist oder Sie einen schnellen, abgeschotteten Lauf möchten |
+| `--no-smoke` | Überspringt das Starten des generierten Projekts mit uvicorn | Sie nur an der Struktur iterieren; der Smoke-Test ist der langsamste Schritt |
+| `--mypy` | Führt eine Typprüfung des generierten Projekts mit mypy durch | Sie eine Vorlage einreichen — optional, weil es langsam ist |
+| `--templates` | Kommagetrennte Liste der zu inspizierenden Vorlagen | Sie an einer einzelnen Vorlage arbeiten |
+| `--verbose` | Ausführliche Ausgabe | Sie einen Fehlschlag debuggen |
+| `--output` | Pfad für die JSON-Ergebnisdatei | Sie mehrere Läufe nebeneinander aufbewahren möchten |
+
+Eine schnelle lokale Schleife für eine einzelne Vorlage:
+
+```console
+$ python scripts/inspect-templates.py \
+    --templates fastapi-sqlmodel --offline --no-smoke --verbose
+```
+
+…und die vollständige Prüfung vor dem Öffnen einer PR:
+
+```console
+$ python scripts/inspect-templates.py --templates fastapi-sqlmodel --mypy
+```
+
 ### Makefile-Befehle verwenden
 
 ```console
@@ -192,10 +248,11 @@ Damit eine Vorlage die Inspektion besteht, muss sie diese Anforderungen erfülle
 - Muss ein `src/`-Verzeichnis mit Python-Quellcodedateien enthalten
 - Python-Dateien müssen die Endung `.py-tpl` verwenden
 - Muss ein `tests/`-Verzeichnis und eine `README.md-tpl`-Datei enthalten
-- Muss **mindestens eine** Metadaten-Datei enthalten:
-    - `pyproject.toml-tpl` (bevorzugt, PEP 621), oder
-    - `setup.py-tpl` (legacy, weiterhin akzeptiert)
-- `requirements.txt-tpl` ist optional, wenn `pyproject.toml-tpl` `[project].dependencies` deklariert
+- Muss `pyproject.toml-tpl` (PEP 621) enthalten. Mitgelieferte Vorlagen sind pyproject-first und liefern keine `setup.py-tpl` mehr mit; die Inspektion akzeptiert sie weiterhin, damit Vorlagen von Drittanbietern funktionsfähig bleiben, aber neue Vorlagen dürfen keine hinzufügen.
+- `requirements.txt-tpl` ist optional, wenn `pyproject.toml-tpl` `[project].dependencies` deklariert — sind jedoch beide vorhanden, müssen sie übereinstimmen (siehe *Konsistenz der Konfiguration*)
+- Muss durchgängig auf Python 3.12 zielen: `requires-python = ">=3.12"`, black `target-version = ["py312"]`, mypy `python_version = "3.12"` und `python:3.12-slim` für jedes Docker-Basis-Image
+- Darf `FastAPI-fastkit` nicht als Laufzeitabhängigkeit deklarieren
+- Darf nach der Generierung keinen `<placeholder>` unersetzt lassen
 
 ### FastAPI-Anforderungen
 - Muss die FastAPI-App-Initialisierung enthalten

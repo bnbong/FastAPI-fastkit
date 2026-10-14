@@ -60,8 +60,126 @@ $ fastkit init [OPTIONS]
 
 | Option | Description | Défaut |
 |--------|-------------|---------|
+| `--interactive` | Configuration guidée : préréglage d'architecture, puis sélection des fonctionnalités | désactivé |
+| `--config <path>` | Créer le projet à partir d'un fichier de configuration enregistré, sans aucune question | - |
+| `--save-config <path>` | Avec `--interactive`, écrire la configuration répondue à ce chemin | - |
+| `--project-name` | Nom du projet (demandé s'il est omis) | - |
+| `--author` | Nom de l'auteur (demandé s'il est omis) | - |
+| `--author-email` | E-mail de l'auteur (demandé s'il est omis) | - |
+| `--description` | Description du projet (demandée si elle est omise) | - |
 | `--package-manager` | Gestionnaire de paquets à utiliser (pip, uv, pdm, poetry) | uv |
+| `--dry-run` | Afficher les fichiers et paquets qui seraient créés, sans rien écrire | désactivé |
+| `--no-venv` | Ignorer la création de l'environnement virtuel (implique `--no-install`) | désactivé |
+| `--no-install` | Ignorer l'installation des dépendances | désactivé |
+| `--yes` / `-y` | Ne pas demander de confirmation avant d'écraser des fichiers existants lors d'un déploiement du projet sur place | désactivé |
 | `--help` | Afficher l'aide de la commande | - |
+
+#### Fichiers de configuration (`--config` / `--save-config`)
+
+Les réponses d'une session interactive forment un simple mapping, et ce mapping peut transiter par un fichier. La création de projet devient ainsi quelque chose que vous pouvez committer, relire et rejouer.
+
+```console
+# enregistrer une session interactive
+$ fastkit init --interactive --save-config fastkit.config.json
+
+# la rejouer plus tard, sans aucune question
+$ fastkit init --config fastkit.config.json
+```
+
+Si vous ne passez pas `--save-config`, une exécution interactive menée à son terme demande s'il faut enregistrer les sélections et où les placer. Cette question n'apparaît que lorsqu'une personne est devant le terminal — les exécutions redirigées ou en CI restent silencieuses et s'y abonnent plutôt avec l'option.
+
+**Les formats pris en charge** sont choisis d'après l'extension du fichier :
+
+| Extension | Disponibilité |
+|---|---|
+| `.json` | Toujours (bibliothèque standard) |
+| `.toml` | Toujours (bibliothèque standard) |
+| `.yaml` / `.yml` | Uniquement lorsque PyYAML est installé — fastkit ne l'ajoute pas comme dépendance d'exécution |
+
+Un fichier chargé doit contenir un mapping au niveau supérieur avec au moins `project_name`, `author` et `author_email`. Il est ensuite validé avec les mêmes règles que celles des invites interactives (forme du nom de projet, format de l'e-mail, `all_dependencies` doit être une liste), et chaque problème est signalé avant que quoi que ce soit ne soit écrit. Un fichier qui ne liste que des sélections de fonctionnalités — sans `all_dependencies` — est développé par le constructeur interactif, si bien qu'une configuration écrite à la main et une session de l'assistant aboutissent au même ensemble de paquets.
+
+Un exemple minimal :
+
+```json
+{
+  "project_name": "orders-api",
+  "author": "Developer Kim",
+  "author_email": "developer@example.com",
+  "description": "Domain-oriented orders service",
+  "architecture_preset": "domain-starter",
+  "package_manager": "uv"
+}
+```
+
+#### Schéma du fichier de configuration
+
+Chaque fichier de configuration — écrit à la main ou produit par `--save-config` — passe par le même normaliseur avant d'atteindre le générateur (`normalize_project_config` dans `backend/project_builder/config_schema.py`). Une clé inconnue, un choix inconnu pour un axe connu ou une valeur du mauvais type est rejeté avec le nom fautif et la liste des valeurs réellement autorisées, au lieu d'être ignoré silencieusement.
+
+| Clé | Forme | Remarques |
+|---|---|---|
+| `project_name`, `author`, `author_email` | chaîne | Requis |
+| `description` | chaîne | Requis |
+| `architecture_preset` (alias `preset`) | `"minimal"` \| `"single-module"` \| `"classic-layered"` \| `"domain-starter"` | Les deux graphies doivent concorder si elles sont toutes deux présentes |
+| `package_manager` | `"pip"` \| `"uv"` \| `"pdm"` \| `"poetry"` | |
+| `database` | chaîne, ou `{"type": <choice>}` | `PostgreSQL`, `MySQL`, `MongoDB`, `Redis`, `SQLite`, `None` |
+| `authentication`, `async_tasks`, `testing`, `caching`, `monitoring`, `migrations`, `logging` | chaîne, ou `{"type": <choice>}` | Axes à sélection unique — consultez le [catalogue de fonctionnalités](#catalogue-de-fonctionnalites-du-constructeur-interactif-interactive) ci-dessus pour les choix de chaque axe |
+| `utilities`, `tooling` | liste de chaînes | Axes à sélection multiple — même catalogue pour les choix |
+| `deployment` | liste de chaînes | Sous-ensemble de `Docker`, `docker-compose` ; choisir `docker-compose` ajoute automatiquement `Docker` |
+| `custom_packages` | liste de chaînes | Paquets supplémentaires à installer tels quels |
+
+Chaque axe accepte soit son choix brut (`"authentication": "JWT"`), soit la forme de mapping `{"type": ...}` qu'utilisent `database` et les propres métadonnées `[tool.fastapi-fastkit]` d'un projet (`"authentication": {"type": "JWT"}`) — les deux se normalisent vers la même forme canonique, et `--save-config` réécrit toujours la forme canonique en chaîne brute.
+
+Une configuration qui exerce la plupart des axes :
+
+```json
+{
+  "project_name": "orders-api",
+  "author": "Developer Kim",
+  "author_email": "developer@example.com",
+  "description": "Domain-oriented orders service",
+  "architecture_preset": "domain-starter",
+  "package_manager": "uv",
+  "database": "PostgreSQL",
+  "authentication": "JWT",
+  "async_tasks": "Celery",
+  "caching": "Redis",
+  "migrations": "Alembic",
+  "tooling": ["ruff", "makefile"],
+  "deployment": ["Docker"]
+}
+```
+
+La même configuration en TOML :
+
+```toml
+project_name = "orders-api"
+author = "Developer Kim"
+author_email = "developer@example.com"
+description = "Domain-oriented orders service"
+architecture_preset = "domain-starter"
+package_manager = "uv"
+database = "PostgreSQL"
+authentication = "JWT"
+async_tasks = "Celery"
+caching = "Redis"
+migrations = "Alembic"
+tooling = ["ruff", "makefile"]
+deployment = ["Docker"]
+```
+
+#### Prévisualiser et ignorer des étapes
+
+`--dry-run` affiche l'arborescence qui serait créée et les paquets qui seraient installés — avec le gestionnaire de paquets qui les installerait — puis se termine sans toucher au disque :
+
+```console
+$ fastkit init --config fastkit.config.json --dry-run
+```
+
+`--no-install` s'arrête après la création de l'environnement virtuel ; `--no-venv` ignore également l'environnement (et donc l'installation). Les deux sont utiles dans les conteneurs, en CI et partout où l'environnement est géré en dehors de fastkit.
+
+#### Déploiement sur place et confirmation d'écrasement (`--yes` / `-y`)
+
+Lorsqu'un projet est déployé sur place — dans l'espace de travail courant plutôt que dans un nouveau dossier de projet — fastkit demande « Overwrite these files? » avant de remplacer tout fichier déjà existant. `--yes` (ou sa forme courte `-y`) ignore cette confirmation et procède à l'écrasement. Cela n'affecte pas la question distincte « Do you want to proceed with project creation? », qui reste affichée. Dans un environnement non interactif (stdin n'est pas un TTY, comme en CI ou lors d'une exécution redirigée), la confirmation d'écrasement est ignorée automatiquement, même sans `--yes`.
 
 #### Invites interactives
 
@@ -95,6 +213,27 @@ La commande `init` vous demandera :
 - Tous les paquets de la pile STANDARD
 - `redis` — stockage de données en mémoire
 - `celery` — file de tâches distribuée
+
+#### Catalogue de fonctionnalités du constructeur interactif (`--interactive`)
+
+`fastkit init --interactive` parcourt un catalogue différent, organisé par axes, au lieu des piles minimal/standard/full ci-dessus (source de vérité : `FastkitConfig.PACKAGE_CATALOG` dans `core/settings.py`, et `DynamicConfigGenerator.build_artifacts()` pour ce que génère chaque choix). Chaque axe vaut `None` (ignoré) par défaut ; `utilities` et `tooling` sont à sélection multiple.
+
+Chaque sélection génère désormais du code réel, et pas seulement des paquets installés — consultez la [matrice préréglages d'architecture / fonctionnalités](../reference/preset-feature-matrix.md) pour voir en quoi `minimal` / `single-module` (`main.py` régénéré) et `classic-layered` / `domain-starter` (`main.py` préservé, avertissements de câblage manuel) diffèrent.
+
+| Axe | Choix | Paquets installés | Fichiers générés |
+|---|---|---|---|
+| `database` | PostgreSQL, MySQL, MongoDB, Redis, SQLite, None | PostgreSQL : `asyncpg`, `sqlalchemy` · MySQL : `aiomysql`, `sqlalchemy` · MongoDB : `motor` · Redis : `redis[hiredis]` · SQLite : `sqlalchemy`, `aiosqlite` | Un module de configuration de base de données au chemin du préréglage (par ex. `src/config/database.py`) |
+| `authentication` | JWT, OAuth2, FastAPI-Users, Session-based, None | JWT : `pyjwt[crypto]`, `pwdlib[argon2]` · OAuth2 : `authlib`, `itsdangerous`, `httpx` · FastAPI-Users : `fastapi-users[sqlalchemy]`, `pyjwt[crypto]`, `pwdlib[argon2]` · Session-based : `itsdangerous` | Un module de configuration d'authentification au chemin du préréglage ; OAuth2 et Session-based ajoutent aussi une configuration de middleware dans `main.py` |
+| `async_tasks` | Celery, Dramatiq, None | Celery : `celery[redis]`, `redis[hiredis]` · Dramatiq : `dramatiq[redis]`, `redis[hiredis]` | `<pkg>/worker.py` (worker d'arrière-plan) + `<pkg>/features/tasks.py` (routes de tâches) |
+| `testing` | Basic, Coverage, Advanced, None | Basic : `pytest`, `pytest-asyncio`, `httpx` · Coverage : + `pytest-cov` · Advanced : + `faker`, `factory-boy` | `pytest.ini` ; Advanced ajoute aussi `tests/factories.py` et `tests/test_factories.py` |
+| `caching` | Redis, None | Redis : `redis[hiredis]`, `fastapi-cache2`, `jinja2` | `<pkg>/features/cache.py` (points d'extrémité mis en cache) |
+| `monitoring` | Loguru, OpenTelemetry, Prometheus, None | Loguru : `loguru` · OpenTelemetry : `opentelemetry-api`, `opentelemetry-sdk`, `opentelemetry-instrumentation-fastapi`, `opentelemetry-exporter-otlp-proto-http` · Prometheus : `prometheus-client`, `prometheus-fastapi-instrumentator` | Aucun fichier autonome — câblé directement dans `main.py` (import / lifespan / configuration) |
+| `utilities` (sélection multiple) | CORS, Rate-Limiting, Pagination, WebSocket, None | CORS : aucun (intégré à FastAPI) · Rate-Limiting : `slowapi` · Pagination : `fastapi-pagination` · WebSocket : `websockets` | CORS et Rate-Limiting sont câblés directement dans `main.py` ; Pagination ajoute `<pkg>/features/pagination.py`, WebSocket ajoute `<pkg>/features/websocket.py` |
+| `migrations` | Alembic, None | Alembic : `alembic` | `alembic.ini`, `alembic/env.py`, `alembic/script.py.mako`, une révision de référence `alembic/versions/<id>_initial.py`, `scripts/migrate.sh` — uniquement lorsque l'axe base de données est une base SQL |
+| `tooling` (sélection multiple) | ruff, pre-commit, github-actions, devcontainer, makefile, None | ruff : `ruff` · pre-commit : `pre-commit` · github-actions / devcontainer / makefile : aucun | ruff fusionne un bloc `[tool.ruff]` dans `pyproject.toml` (ou écrit `ruff.toml` pour les projets `pip`) ; pre-commit écrit `.pre-commit-config.yaml` ; github-actions écrit `.github/workflows/test.yml` ; devcontainer écrit `.devcontainer/devcontainer.json` ; makefile écrit `Makefile` |
+| `logging` | structured, None | Aucun (uniquement `logging` + `json` de la bibliothèque standard) | `<pkg>/logging_config.py` (journalisation JSON structurée + middleware d'identifiant de requête), câblé dans `main.py` |
+
+Quelle que soit la sélection, chaque projet généré reçoit les points d'extrémité `/health` et `/ready` dans `main.py`, et `--dry-run` affiche exactement cet ensemble de fichiers avant toute écriture.
 
 #### Exemples
 
@@ -227,6 +366,26 @@ Crée des points d'extrémité CRUD complets :
 | `PUT` | `/api/v1/users/{user_id}` | Mettre à jour un utilisateur |
 | `DELETE` | `/api/v1/users/{user_id}` | Supprimer un utilisateur |
 
+#### Où le code est inséré
+
+`addroute` a besoin de deux informations sur le projet : où placer les nouveaux imports et où enregistrer le routeur. Les modèles et les points d'entrée générés marquent ces deux emplacements par des commentaires d'ancrage :
+
+```python
+# src/app/api/router.py
+from src.app.api import health
+
+# fastkit:imports
+
+api_router = APIRouter()
+api_router.include_router(health.router)
+
+# fastkit:routes
+```
+
+Conservez ces commentaires lorsque vous modifiez le fichier — `addroute` insère directement au-dessus de `# fastkit:imports` et de `# fastkit:routes`. Un projet qui les a perdus (ou qui a été généré avant l'existence des ancres) fonctionne toujours : fastkit se rabat sur une insertion fondée sur l'AST qui repère elle-même le bloc d'imports et les enregistrements de routeurs. Les ancres rendent simplement le résultat prévisible.
+
+`addroute` lit aussi le bloc `[tool.fastapi-fastkit]` du projet pour localiser le point d'entrée : il fonctionne donc sur des dispositions que la seule analyse du disque classerait mal.
+
 ### `startdemo`
 
 Créer un projet FastAPI à partir d'un modèle prêt à l'emploi.
@@ -241,8 +400,18 @@ $ fastkit startdemo [OPTIONS]
 
 | Option | Description | Défaut |
 |--------|-------------|---------|
+| `--project-name` | Nom du projet (demandé s'il est omis) | - |
+| `--author` | Nom de l'auteur (demandé s'il est omis) | - |
+| `--author-email` | E-mail de l'auteur (demandé s'il est omis) | - |
+| `--description` | Description du projet (demandée si elle est omise) | - |
 | `--package-manager` | Gestionnaire de paquets à utiliser (pip, uv, pdm, poetry) | uv |
+| `--dry-run` | Afficher les fichiers et paquets qui seraient créés, sans rien écrire | désactivé |
+| `--no-venv` | Ignorer la création de l'environnement virtuel (implique `--no-install`) | désactivé |
+| `--no-install` | Ignorer l'installation des dépendances | désactivé |
+| `--yes` / `-y` | Ne pas demander de confirmation avant d'écraser des fichiers existants lors d'un déploiement du projet sur place | désactivé |
 | `--help` | Afficher l'aide de la commande | - |
+
+Comme `init`, `startdemo` refuse de s'exécuter lorsque le répertoire du projet cible existe déjà (`Error: Project '{name}' already exists.`). `--dry-run` fait exception : comme il n'écrit jamais sur le disque, il peut toujours viser un nom qui possède déjà un répertoire. Consultez [Déploiement sur place et confirmation d'écrasement](#deploiement-sur-place-et-confirmation-decrasement-yes-y) ci-dessus pour savoir ce que fait `--yes` lors d'un déploiement dans l'espace de travail courant.
 
 #### Invites interactives
 
@@ -259,11 +428,19 @@ La commande `startdemo` vous demandera :
 | Modèle | Description | Fonctionnalités |
 |----------|-------------|----------|
 | `fastapi-default` | Projet FastAPI simple | CRUD basique, données factices |
-| `fastapi-async-crud` | API asynchrone de gestion d'items | Async/await, performance |
+| `fastapi-domain-starter` | Starter orienté domaine | Un dossier par concept métier, `/health` |
+| `fastapi-auth-jwt` | Authentification JWT | Rotation accès/rafraîchissement, argon2id, rôles et portées, Alembic |
+| `fastapi-sqlmodel` | Persistance asynchrone SQLModel | SQLModel + SQLAlchemy asynchrone, Alembic, CRUD générique, pagination |
+| `fastapi-llm-agent` | Agent Claude en streaming | Streaming SSE, boucle d'appels d'outils, mémoire de conversation |
 | `fastapi-custom-response` | Système de réponses personnalisées | Réponses personnalisées, pagination |
-| `fastapi-dockerized` | API FastAPI dockerisée | Docker, prêt pour la production |
 | `fastapi-psql-orm` | API FastAPI avec PostgreSQL | PostgreSQL, SQLAlchemy, Alembic |
+| `fastapi-mcp` | Serveur Model Context Protocol | Intégration MCP |
+| `fastapi-single-module` | Bac à sable monofichier | Un seul module, sans frontières de package |
 | `fastapi-empty` | Projet FastAPI minimal | Configuration minimale |
+| `fastapi-async-crud` | *(obsolète)* API asynchrone de gestion d'items | Remplacé par `fastapi-sqlmodel` |
+| `fastapi-dockerized` | *(obsolète)* API FastAPI dockerisée | L'outillage Docker est désormais fourni avec les modèles plus récents |
+
+Les modèles obsolètes génèrent toujours des projets fonctionnels ; ils ne sont simplement plus des points de départ recommandés. Consultez [Quel starter choisir ?](choosing-a-starter.md).
 
 #### Exemples
 
@@ -331,8 +508,10 @@ INFO:     Uvicorn running on http://127.0.0.1:8000
 #### Prérequis
 
 - Doit être exécuté depuis un répertoire de projet FastAPI
-- Le projet doit avoir `src/main.py` avec une app FastAPI
+- Le projet doit exposer une app FastAPI — résolue à partir de `[tool.fastapi-fastkit].app_module` lorsqu'il est présent, sinon découverte en recherchant `main.py`
 - L'environnement virtuel doit être activé
+
+Si ni le point d'entrée enregistré ni la recherche ne trouvent de module, `runserver` signale qu'il n'a pas trouvé `main.py` et s'arrête.
 
 ### `list-templates`
 
@@ -372,6 +551,35 @@ $ fastkit list-templates
 
 </div>
 
+## Métadonnées du projet (`[tool.fastapi-fastkit]`)
+
+Chaque projet généré par fastkit enregistre la façon dont il a été produit, dans son propre `pyproject.toml` :
+
+```toml
+[tool.fastapi-fastkit]
+managed = true
+version = "1.4.0"
+template = "fastapi-domain-starter"
+preset = "domain-starter"
+package_manager = "uv"
+app_module = "src.app.main:app"
+features = ["database:PostgreSQL", "authentication:JWT"]
+```
+
+| Clé | Signification |
+|---|---|
+| `managed` | Toujours `true` ; marque le projet comme géré par fastkit |
+| `version` | La version de fastkit qui a généré le projet |
+| `template` | Le modèle `startdemo`, ou le modèle de base du préréglage |
+| `preset` | Le préréglage d'architecture de `init --interactive` (omis sinon) |
+| `package_manager` | Le gestionnaire utilisé pour construire l'environnement |
+| `app_module` | Le point d'entrée uvicorn `module:attr` |
+| `features` | Liste plate `"<category>:<choice>"` des sélections interactives |
+
+Ce bloc est l'unique source de vérité pour le point d'entrée du projet : `fastkit runserver` y lit `app_module` avant de se rabattre sur l'analyse de l'arborescence, `fastkit addroute` l'utilise pour localiser l'application, et les Dockerfiles générés utilisent la même valeur dans leur `CMD`.
+
+Le bloc est écrit à la toute fin de la génération — les gestionnaires de paquets réécrivent `pyproject.toml` pendant la résolution des dépendances, il doit donc être apposé après — et une régénération ultérieure le remplace au lieu d'en ajouter une seconde copie. Modifier `app_module` à la main est la manière prise en charge d'indiquer à fastkit une disposition que vous avez vous-même réorganisée.
+
 ## Variables d'environnement
 
 FastAPI-fastkit prend en compte ces variables d'environnement :
@@ -381,6 +589,14 @@ FastAPI-fastkit prend en compte ces variables d'environnement :
 | `FASTKIT_CONFIG_DIR` | Répertoire de configuration | `~/.fastkit` |
 | `FASTKIT_TEMPLATES_DIR` | Répertoire de modèles personnalisés | Modèles intégrés |
 | `FASTKIT_LOG_LEVEL` | Niveau de journalisation | `INFO` |
+| `FASTKIT_SUBPROCESS_TIMEOUT` | Remplace tous les délais d'expiration des sous-processus du gestionnaire de paquets, en secondes | par opération (30 / 120 / 900) |
+
+Les appels au gestionnaire de paquets sont bornés individuellement afin qu'un processus enfant bloqué ne puisse jamais figer le CLI : 30 secondes pour une vérification de disponibilité, 120 pour la création d'un environnement virtuel, 900 pour l'installation des dépendances. `FASTKIT_SUBPROCESS_TIMEOUT` remplace ces trois valeurs par une seule — utile sur un réseau lent, ou pour échouer rapidement en CI. Une valeur qui n'est pas un entier positif est ignorée.
+
+```console
+$ export FASTKIT_SUBPROCESS_TIMEOUT=1800
+$ fastkit startdemo fastapi-sqlmodel
+```
 
 ### Exemples
 

@@ -17,6 +17,9 @@ FastAPI-fastkit には、プロジェクトを始めるための方法がいく�
 | 可能な限り小さいスキャフォールドが欲しい | `fastkit init --interactive` (preset: **`minimal`**) |
 | 簡単なプロトタイプ / 単一ファイルのスクリプトを書く | `fastkit init --interactive` (preset: **`single-module`**) |
 | 実際のデータベースが必要 (PostgreSQL + SQLAlchemy + Alembic) | `fastkit startdemo fastapi-psql-orm` |
+| マイグレーションと汎用 CRUD を備えた非同期の永続化が欲しい | `fastkit startdemo fastapi-sqlmodel` |
+| 初日からユーザーアカウント、ログイン、保護されたルートが必要 | `fastkit startdemo fastapi-auth-jwt` |
+| ストリーミングとツールを備えた LLM チャットバックエンドを作る | `fastkit startdemo fastapi-llm-agent` |
 | 中規模 API のための本番志向のドメインレイアウトが欲しい | `fastkit init --interactive` (preset: **`domain-starter`**) |
 
 ## `startdemo` と `init --interactive` の違いは?
@@ -112,11 +115,53 @@ $ fastkit init --interactive
 | `fastapi-empty` | `minimal` | 素のスキャフォールド。`minimal` と同じ形になります。 |
 | `fastapi-single-module` | `single-module` | 単一ファイルのデモ。 |
 | `fastapi-domain-starter` | `domain-starter` | 推奨される現代的デフォルト。items ドメインの例を同梱。 |
-| `fastapi-async-crud` | `classic-layered` | `fastapi-default` の非同期版。 |
+| `fastapi-auth-jwt` | `domain-starter` | API にアカウントが必要な場合。アクセス/リフレッシュトークン、argon2id ハッシュ化、ロールとスコープ、Alembic マイグレーション。 |
+| `fastapi-sqlmodel` | `domain-starter` | 非同期の永続化を第一に: SQLModel + 非同期 SQLAlchemy、マイグレーション、汎用 CRUD ベース、ページネーションされたリスト。 |
+| `fastapi-llm-agent` | `domain-starter` | 本物のツール呼び出しループとオフラインのテストを備えた、ストリーミング Claude チャットバックエンド。 |
 | `fastapi-custom-response` | `classic-layered` | カスタムレスポンスエンベロープ / フォーマットのデモ。 |
-| `fastapi-dockerized` | `classic-layered` | デフォルトレイアウトに本番用の Dockerfile を追加。 |
-| `fastapi-psql-orm` | (直接対応するプリセットなし) | PostgreSQL + SQLAlchemy + Alembic。実際のデータベースが必要なときに選択。 |
+| `fastapi-psql-orm` | (直接対応するプリセットなし) | PostgreSQL + SQLAlchemy + Alembic、同期型。実際のデータベースを中心にした Compose スタックが欲しいときに選択。 |
 | `fastapi-mcp` | (直接対応するプリセットなし) | Model Context Protocol 連携。 |
+| `fastapi-async-crud` | `classic-layered` | ⚠️ **非推奨。** `fastapi-default` の非同期版。`fastapi-sqlmodel` を推奨。 |
+| `fastapi-dockerized` | `classic-layered` | ⚠️ **非推奨。** デフォルトレイアウトに Dockerfile を追加。現在のテンプレートにはすべて Dockerfile が含まれています。 |
+
+### 3 つの新しいスターター
+
+v1.4.0 で追加された 3 つのスターターはいずれも `domain-starter` の形 (概念ごとのフォルダを持つ `src/app/`)
+に従っているため、そのプリセットですでに知っている内容とそのまま組み合わせられます。
+
+**`fastapi-auth-jwt` — 本番環境に出しても通用する認証。**
+アクセストークンは短命です。リフレッシュトークンは使うたびにローテーションされ、データベース上で `jti` によって
+追跡されるため、再送されたトークンは黙って受け入れられるのではなく拒否されます。パスワードは `pwdlib` を介して
+argon2id でハッシュ化されます。ログアウトも実際に機能し、1 つのセッション、またはユーザーのすべてのセッションを
+失効させられます。ガードは依存性として付属します — `get_current_user`、`get_current_active_superuser`、そして
+`require_scopes(...)` ファクトリです。外部サービスなしで SQLite 上で動作し、`DATABASE_URL` を設定すれば
+PostgreSQL に移行できます。ウォークスルー: [JWT 認証](../tutorial/auth-jwt.md)。
+
+**`fastapi-sqlmodel` — 概念ごとに 1 つのモデル定義。**
+SQLModel のクラスは SQLAlchemy のテーブルであると同時に pydantic のスキーマでもあるため、新しいカラムは一度
+宣言するだけで、すべてのリクエスト/レスポンススキーマがそれを継承します。端から端まで非同期で、非同期 Alembic
+マイグレーション、create / read / list / count / update / delete を提供して各ドメインが固有の部分だけを書けば
+済むようにする `CRUDBase`、そしてページ用のエンベロープで包まれたリスト系エンドポイントを備えています。
+ウォークスルー: [SQLModel による永続化](../tutorial/sqlmodel.md)。
+
+**`fastapi-llm-agent` — `POST /completion` のラッパーではなく、チャットバックエンド。**
+トークンは SSE でクライアントにストリーミングされ、ツール呼び出しループはモデルの処理が終わるか反復上限に
+達するまで実行されます。会話履歴は `ConversationStore` インターフェースの背後にあるため、同梱の dict から
+Redis への移行は実装を 1 つ用意するだけで済みます。テストスイートは Anthropic クライアントをスクリプト化された
+偽物に置き換えます — 決定的で、オフラインで動作し、API キーも不要です。
+ウォークスルー: [LLM エージェント](../tutorial/llm-agent.md)。
+
+### 非推奨テンプレートについて
+
+`fastapi-async-crud` と `fastapi-dockerized` は引き続き同梱されており、動作するプロジェクトを生成します —
+使っても何も壊れません。非推奨とされているのは、それらを選ぶ理由がなくなったからです:
+
+- `fastapi-dockerized` は Dockerfile を追加するために存在していました。現在のテンプレートにはすべて
+  Dockerfile が含まれており、対話型のデプロイ選択はどのプリセットに対しても Docker ファイルを生成します。
+- `fastapi-async-crud` はモックストアに対する非同期エンドポイントのデモでした。`fastapi-sqlmodel` は同じことを
+  本物の非同期データベースに対して、マイグレーション付きで行います。
+
+どちらかのテンプレートから生成された既存のプロジェクトについて、対応は必要ありません。
 
 `fastkit list-templates` で 1 行説明付きの最新リストを確認できます。
 
@@ -141,5 +186,8 @@ $ fastkit init --interactive
 
 - [クイックスタート](quick-start.md) — 実際に最初のプロジェクトを作成。
 - [プロジェクトの作成](creating-projects.md) — CLI フラグのより踏み込んだウォークスルー。
+- [JWT 認証チュートリアル](../tutorial/auth-jwt.md)、[SQLModel による永続化チュートリアル](../tutorial/sqlmodel.md)、
+  [LLM エージェントチュートリアル](../tutorial/llm-agent.md) — v1.4.0 で追加された 3 つのスターターの
+  エンドツーエンドのウォークスルー。
 - [ドメイン指向プロジェクトのチュートリアル](../tutorial/domain-starter.md) — `domain-starter` を選んだ場合の、生成ツリー、同梱の `items` 例、次のドメインの追加方法までを通したエンドツーエンドの解説。
 - [アーキテクチャプリセットマトリクス](../reference/preset-feature-matrix.md) — プリセット / 機能ごとの完全な契約。

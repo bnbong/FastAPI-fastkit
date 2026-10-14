@@ -212,6 +212,49 @@ Success: no issues found in 12 source files
 | `make inspect-templates-verbose` | verbose 출력으로 템플릿 검사 |
 | `make inspect-template` | 특정 템플릿 검사 (TEMPLATES 파라미터) |
 
+작업을 반복하는 동안 알아 두면 좋은 플래그가 기반 스크립트에 세 가지 있습니다.
+`--offline`은 PyPI 최신 버전 조회를 건너뛰고, `--no-smoke`는 가장 느린 단계인
+uvicorn으로 생성된 프로젝트를 띄우는 과정을 건너뛰며, `--mypy`는 생성된
+프로젝트의 타입을 검사합니다(느리기 때문에 명시적으로 켜야 합니다). 각 검사가
+실제로 무엇을 하는지는 [템플릿 품질 보증](../reference/template-quality-assurance.md)을
+참고하세요.
+
+```console
+$ python scripts/inspect-templates.py --templates fastapi-sqlmodel --offline --no-smoke
+```
+
+### 생성되는 코드는 Jinja2 fragment에 있습니다
+
+`fastkit init --interactive`가 프로젝트에 쓰는 모든 파일(`main.py`, 데이터베이스와
+인증 모듈, Docker 파일, pytest 설정)은 Python 코드 안에서 문자열을 이어 붙여
+만드는 것이 아니라 `src/fastapi_fastkit/fragments/` 아래의 템플릿에서 렌더링됩니다.
+`main.py.j2`는 어떤 기능도 하드코딩하지 않습니다. 이 템플릿은
+`DynamicConfigGenerator`가 제공하는 `import_fragments`, `lifespan_fragments`,
+`setup_fragments` 목록을 순회하면서 각 fragment를 include하므로, 기능들을
+자유롭게 조합할 수 있습니다.
+
+기능을 추가하는 과정은 대략 다음과 같습니다:
+
+1. 코드 조각을 `main/imports/`, `main/lifespan/`, `main/setup/` 중 필요한 곳에
+   넣습니다(lifespan fragment는 공백 네 칸으로 들여쓰고, 나머지 두 종류는
+   들여쓰지 않습니다).
+2. 관련 설정 조회 조건으로 감싸서 `DynamicConfigGenerator._main_fragments()`에
+   등록합니다.
+3. 독립된 모듈이 필요하다면 `<area>/<feature>.py.j2`를 추가하고
+   `self._render(...)`로 렌더링합니다.
+4. `tests/test_backends/test_project_builder_config_generator.py`의 조합
+   매트릭스를 확장합니다. 이 테스트는 렌더링된 모든 Python 파일이
+   `ast.parse`로 파싱되는지 검증합니다.
+
+놓치기 쉬운 제약이 두 가지 있습니다. 모든 fragment는 끝에 줄바꿈이 있어야
+하고(환경이 `keep_trailing_newline=True`로 만들어지기 때문입니다),
+`main.py.j2`는 `# fastkit:imports` / `# fastkit:routes` 앵커를 유지해야 합니다.
+`fastkit addroute`가 이 앵커 위치에 코드를 삽입하기 때문입니다.
+
+공식 절차는 fragment 옆에 있는
+[`src/fastapi_fastkit/fragments/README.md`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fragments/README.md)에
+정리되어 있습니다.
+
 ### 문서 명령
 
 | 명령 | 설명 |
@@ -353,13 +396,16 @@ FastAPI-fastkit/
 - **`src/fastapi_fastkit/`** — 메인 패키지 소스 코드
     - **`cli.py`** — 메인 CLI 진입점
     - **`backend/`** — 핵심 백엔드 로직
-        - **`inspector.py`** — 템플릿 inspector
+        - **`inspection/`** — 템플릿 검사 파이프라인 (context, checks, consistency, freshness, smoke, lint, report)
+        - **`inspector.py`** — `inspection/` 위에 둔 퍼사드로, 기존 import 경로를 유지하기 위해 남겨 둠
         - **`interactive/`** — 대화형 모드 컴포넌트 (prompts, selectors, validators)
         - **`package_managers/`** — 패키지 매니저 구현 (pip, uv, pdm, poetry)
-        - **`project_builder/`** — 프로젝트 빌드 유틸리티
+        - **`project_builder/`** — 프로젝트 빌드 유틸리티 (fragment 기반 설정 생성기 포함)
+        - **`scaffolder.py`** — `init`과 `startdemo`가 공유하는 생성 파이프라인
         - **`transducer.py`** — 템플릿 transducer
     - **`core/`** — 핵심 설정과 예외
-    - **`fastapi_project_template/`** — 프로젝트 템플릿 (fastapi-default, fastapi-async-crud 등)
+    - **`fragments/`** — 생성된 프로젝트에 렌더링되는 Jinja2 fragment (위 내용 참고)
+    - **`fastapi_project_template/`** — 프로젝트 템플릿 (fastapi-default, fastapi-domain-starter 등)
     - **`utils/`** — 공유 유틸리티 함수
 - **`tests/`** — 테스트 스위트
     - **`test_backends/`** — 백엔드 관련 테스트

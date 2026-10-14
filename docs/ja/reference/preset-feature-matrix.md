@@ -29,12 +29,18 @@
 | 機能 | `minimal` / `single-module` | `classic-layered` / `domain-starter` |
 |---|---|---|
 | **データベース** (PostgreSQL、MySQL、SQLite、MongoDB) | 設定モジュールを生成し、再生成された `main.py` に `await init_db()` 呼び出しのスタブも入ります。 | プリセットごとのパスに設定モジュールを生成します。テンプレートに含まれる `main.py` は **そのまま残る** ため、`get_db()` はルーター側で手動で配線してください。 |
-| **認証** (JWT、FastAPI-Users、OAuth2、セッションベース) | 認証設定モジュールを生成します。JWT の場合は再生成された `main.py` に `HTTPBearer` も import されます。 | プリセットのパスに認証設定モジュールを生成します。`main.py` への import は追加されません — 依存性は手動で配線してください。 |
-| **バックグラウンドタスク** (Celery、Dramatiq) | パッケージはインストールされますが、現状は main.py オーバーレイなし。 | 同上。 |
-| **キャッシュ** (Redis) | パッケージはインストールされますが、現状は main.py オーバーレイなし。 | 同上。 |
+| **認証** (JWT、FastAPI-Users、OAuth2、セッションベース) | 認証設定モジュールを生成します。JWT は `HTTPBearer` を import し、OAuth2 とセッションベースは `main.py` にミドルウェアのセットアップも追加します。 | プリセットのパスに認証設定モジュールを生成します。`main.py` への import は追加されません — 依存性は手動で配線してください。 |
+| **バックグラウンドタスク** (Celery、Dramatiq) | `worker.py` と `features/tasks.py` を生成し、再生成された `main.py` にタスクルーターをマウントします。 | `worker.py` と `features/tasks.py` を生成しますが、テンプレートに含まれる `main.py` は **そのまま残る** ため、ルーターは手動でマウントしてください。 |
+| **キャッシュ** (Redis) | `features/cache.py` を生成し、再生成された `main.py` でマウントと初期化を行います。 | `features/cache.py` を生成します。マウントは手動で行ってください。 |
+| **ユーティリティ: ページネーション / WebSocket** | `features/pagination.py` / `features/websocket.py` を生成し、再生成された `main.py` にルーターをマウントします。 | 同じモジュールを生成します。マウントは手動で行ってください。 |
+| **モニタリング: OpenTelemetry** | 独立したファイルはありません — トレーシングのセットアップは再生成された `main.py` に直接追加されます。 | 独立したファイルはありません。テンプレートに含まれる `main.py` はそのまま残るため、トレーシングは **配線されません** — セットアップを手動で追加してください。 |
+| **マイグレーション** (Alembic) | SQL データベースを選択した場合は常に `alembic.ini`、`alembic/env.py`、ベースラインのリビジョン、`scripts/migrate.sh` を生成します — `main.py` オーバーレイとは独立しています。 | 同上 — Alembic の生成は `main.py` がそのまま残るかどうかに依存しません。 |
+| **ツール** (ruff、pre-commit、github-actions、devcontainer、makefile) | 対応する設定ファイルを生成します。`main.py` オーバーレイとは独立しています。 | 同上。 |
+| **ロギング** (構造化) | `logging_config.py` を生成し、再生成された `main.py` に request-id ミドルウェアを配線します。 | `logging_config.py` を生成します。テンプレートに含まれる `main.py` はそのまま残るため、ミドルウェアは手動で配線してください。 |
 | **CORS** (ユーティリティ) | 再生成された `main.py` に `CORSMiddleware` が `allow_origins=['*']` で追加されます。 | テンプレートに含まれる `main.py` に **すでに組み込み済み** です (`settings.all_cors_origins` に応じて条件分岐)。`.env` の `BACKEND_CORS_ORIGINS` を設定すれば有効化されます — コード変更は不要です。 |
-| **テスト** (Basic / Coverage / Advanced) | プロジェクトルートに `pytest.ini` を生成。 | 同上。 |
+| **テスト** (Basic / Coverage / Advanced) | プロジェクトルートに `pytest.ini` を生成。Advanced では `tests/factories.py` と `tests/test_factories.py` も追加されます。 | 同上。 |
 | **デプロイ** (Docker、docker-compose) | プロジェクトルートに `Dockerfile` または `docker-compose.yml` を作成。 | 同上。 |
+| **`/health` / `/ready`** | 再生成された `main.py` に常に含まれます。 | テンプレートに含まれ、そのまま残る `main.py` にすでに含まれています。 |
 
 ## "Preset compatibility" 警告が出る場面
 
@@ -44,10 +50,15 @@
 |---|---|
 | `CORS` (ユーティリティ) | ❌ — テンプレートに含まれる `main.py` で配線済み。`.env` の `BACKEND_CORS_ORIGINS` を埋めるだけ。 |
 | `Rate-Limiting` (ユーティリティ) | ✅ — `slowapi` リミッタのセットアップは追加されない |
-| `Prometheus` (モニタリング) | ✅ — `Instrumentator().instrument(app)` は呼び出されない |
+| `Pagination` / `WebSocket` (ユーティリティ) | ✅ — 生成されたルーター (`features/pagination.py` / `features/websocket.py`) はマウントされない |
+| `Celery` / `Dramatiq` (async_tasks) | ✅ — 生成された `worker.py` / `features/tasks.py` のルーターはマウントされない |
+| `Redis` (キャッシュ) | ✅ — 生成された `features/cache.py` はマウントも初期化もされない |
+| `Prometheus` / `OpenTelemetry` (モニタリング) | ✅ — 計装のセットアップは `main.py` に追加されない |
+| `structured` (ロギング) | ✅ — `logging_config.py` は生成されるが、request-id ミドルウェアは `main.py` に追加されない |
+| `Alembic` (マイグレーション)、`tooling` の選択 | ❌ — これらのファイルはプリセットに関係なく生成され、そのまま使える。`main.py` に依存するものはない |
 | 任意のデータベース / 認証選択 | ⚠️ — 設定ファイルは生成されますが、自分で `Depends()` をルーターに組み込む必要があります |
 
-`minimal` と `single-module` プリセットでは、動的 `main.py` オーバーレイが CORS、レート制限、Prometheus 計装を自動で扱います。警告は出ません。
+`minimal` と `single-module` プリセットでは、動的 `main.py` オーバーレイが上記のすべての項目を自動で扱います。警告は出ません。
 
 ## サポート外の組み合わせ (安全側に倒す)
 

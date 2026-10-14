@@ -34,6 +34,8 @@ Está inspirado en el `SpringBoot initializer` y en el CLI `django-admin` de Pyt
 - **🔍 Aseguramiento de calidad automatizado de las plantillas**: pruebas automáticas semanales garantizan que todas las plantillas siguen funcionando y al día
 - **🚀 Múltiples plantillas de proyecto**: elige entre varias plantillas preconfiguradas para distintos casos de uso (async CRUD, Docker, PostgreSQL, etc.)
 - **📦 Soporte de varios gestores de paquetes**: elige tu gestor de paquetes Python preferido (pip, uv, pdm, poetry) para gestionar dependencias
+- **🧾 Configuraciones de proyecto reproducibles**: guarda una sesión interactiva con `--save-config` y reprodúcela más tarde con `fastkit init --config` — sin prompts, el mismo proyecto
+- **🏷️ Proyectos autodescriptivos**: cada proyecto generado registra su plantilla, preset, gestor de paquetes, entrypoint y funcionalidades seleccionadas en un bloque `[tool.fastapi-fastkit]` que `runserver` y `addroute` vuelven a leer
 
 ## Instalación
 
@@ -123,7 +125,7 @@ Do you want to proceed with project creation? [y/N]: y
 FastAPI project will deploy at '~your-project-path~'
 
 ╭──────────────────────── Info ────────────────────────╮
-│ ℹ Injected metadata into setup.py                    │
+│ ℹ Injected metadata into pyproject.toml              │
 ╰──────────────────────────────────────────────────────╯
 ╭──────────────────────── Info ────────────────────────╮
 │ ℹ Injected metadata into config file                 │
@@ -173,6 +175,16 @@ Installing dependencies...
 </div>
 
 Este comando crea un nuevo espacio de trabajo para tu proyecto FastAPI e incluye también un entorno virtual de Python.
+
+- Opciones principales:
+  - `--project-name`, `--author`, `--author-email`, `--description`
+  - `--package-manager` [pip|uv|pdm|poetry]
+  - `--config <path>`: crea el proyecto a partir de un archivo de configuración guardado (`.json` / `.toml`, y `.yaml` cuando PyYAML está instalado), sin prompts
+  - `--save-config <path>`: con `--interactive`, registra las respuestas para reutilizarlas después
+  - `--dry-run`: muestra los archivos y paquetes que se crearían, sin escribir nada
+  - `--no-venv`: omite la creación del entorno virtual (implica `--no-install`)
+  - `--no-install`: omite la instalación de dependencias
+  - `--yes` / `-y`: omite la confirmación "Overwrite these files?" al desplegar in situ
 
 ### Crear un proyecto en modo interactivo ✨ ¡NUEVO!
 
@@ -264,6 +276,30 @@ Select utilities (comma-separated numbers, e.g., 1,3,4):
 
 Select utilities: 1
 
+🪵 Logging Format
+Select logging format:
+  1. structured - JSON logs + X-Request-ID correlation middleware (stdlib only)
+  2. None - Uvicorn's default plain-text logging
+
+Select logging format [2]: 1
+
+🧬 Database Migrations
+Select migration tool:
+  1. Alembic - alembic.ini + async alembic/env.py + scripts/migrate.sh (recommended for SQL databases)
+  2. None - No migration tooling
+
+Select migration tool [1]: 1
+
+🧰 Developer Tooling
+Select tooling to generate (comma-separated numbers, e.g., 1,3)
+  1. ruff ruff + ruff-format config in pyproject.toml (replaces black/isort)
+  2. pre-commit .pre-commit-config.yaml
+  3. github-actions .github/workflows/test.yml (Python 3.12)
+  4. devcontainer .devcontainer/devcontainer.json
+  5. makefile Makefile with install/test/lint/format/run
+
+Your choice (or press Enter to skip): 1,2
+
 🚀 Deployment Configuration
 Select deployment option:
   1. Docker - Generate Dockerfile
@@ -294,6 +330,9 @@ Enter custom package names (comma-separated, press Enter to skip):
 │ Monitoring          │ Prometheus                                                                │
 │ Testing             │ Coverage                                                                  │
 │ Utilities           │ CORS                                                                      │
+│ Logging             │ structured                                                                │
+│ Migrations          │ Alembic                                                                   │
+│ Tooling             │ ruff, pre-commit                                                          │
 │ Package Manager     │ uv                                                                        │
 └─────────────────────┴───────────────────────────────────────────────────────────────────────────┘
 
@@ -350,6 +389,28 @@ El modo interactivo ofrece:
 - **Gestión inteligente de dependencias** con compatibilidad automática con pip
 - **Validación de funcionalidades** con avisos de cableado manual para las selecciones que el preset no puede conectar automáticamente
 - **Marcadores de identidad** en el `pyproject.toml` generado (marcador en `description` + tabla `[tool.fastapi-fastkit]`) para que `is_fastkit_project()` reconozca después los proyectos generados
+- **Metadatos del proyecto** registrados en `[tool.fastapi-fastkit]` — plantilla, preset, gestor de paquetes, `app_module` y las `features` seleccionadas — que `fastkit runserver` y `fastkit addroute` vuelven a leer
+- **Ejecuciones reproducibles**: `--save-config <path>` registra las respuestas, `--config <path>` las reproduce sin un solo prompt y `--dry-run` previsualiza el resultado sin escribir nada
+
+Ahora cada selección del catálogo genera código real y funcional, en lugar de
+limitarse a instalar un paquete — las tareas en segundo plano
+(Celery/Dramatiq), la caché con Redis, WebSocket, Pagination, el tracing con
+OpenTelemetry y la autenticación OAuth2 / basada en sesiones incluyen un
+módulo correspondiente y su cableado en `main.py`. Tres ejes nuevos completan
+el catálogo:
+
+- **Logging**: `structured` añade salida estructurada con `logging` + `json` de la stdlib y un middleware de request-id — sin dependencias nuevas
+- **Migraciones**: `Alembic` genera un entorno de migraciones asíncrono completo (`alembic.ini`, `alembic/env.py`, una revisión base, `scripts/migrate.sh`) para cualquier base de datos SQL seleccionada
+- **Herramientas** (selección múltiple): `ruff`, `pre-commit`, `github-actions`, `devcontainer`, `makefile` — cada una genera su propio archivo de configuración; `ruff` además fusiona un bloque `[tool.ruff]` en `pyproject.toml`
+
+Cada proyecto generado obtiene también los endpoints `/health` y `/ready`, y
+`--dry-run` lista exactamente el mismo conjunto de archivos que escribiría una
+ejecución real, incluidos estos nuevos artefactos. `classic-layered` y
+`domain-starter` conservan el `main.py` que trae la plantilla, así que la
+validación de funcionalidades avisa cuando una selección de cualquiera de
+estos ejes necesita cableado manual — consulta la
+[matriz de presets / funcionalidades](reference/preset-feature-matrix.md) para
+más detalles.
 
 ### Añadir una ruta nueva al proyecto FastAPI
 
@@ -445,6 +506,12 @@ FastAPI template project will deploy at '~your-project-path~'
 
 </div>
 
+- Opciones principales:
+  - `--project-name`, `--author`, `--author-email`, `--description`
+  - `--package-manager` [pip|uv|pdm|poetry]
+  - `--dry-run`, `--no-venv`, `--no-install`, `--yes`/`-y` — mismo significado que en `init`
+  - Se niega a ejecutarse si el directorio del proyecto de destino ya existe (salvo con `--dry-run`)
+
 Para ver la lista de demos FastAPI disponibles, ejecuta:
 
 <div class="termy">
@@ -463,18 +530,42 @@ $ fastkit list-templates
 │                        │ PostgreSQL                                            │
 │ fastapi-default        │ Simple FastAPI Project                                │
 │ fastapi-single-module  │ FastAPI Single Module Template                        │
+│ fastapi-auth-jwt       │ FastAPI JWT Authentication                            │
+│ fastapi-sqlmodel       │ FastAPI SQLModel                                      │
+│ fastapi-llm-agent      │ FastAPI LLM Agent                                     │
 └────────────────────────┴───────────────────────────────────────────────────────┘
 ```
 
 </div>
 
+Plantillas disponibles:
+
+| Plantilla | Descripción | Notas |
+|---|---|---|
+| [`fastapi-default`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-default/README.md-tpl) | Proyecto FastAPI simple con una estructura clásica por capas | Buena primera opción |
+| [`fastapi-empty`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-empty/README.md-tpl) | Plantilla FastAPI mínima | Base del preset `minimal` |
+| [`fastapi-single-module`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-single-module/README.md-tpl) | App FastAPI de un solo archivo | Base del preset `single-module` |
+| [`fastapi-domain-starter`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-domain-starter/README.md-tpl) | Starter orientado a dominios, centrado en pyproject, para APIs de tamaño medio | Base del preset `domain-starter` |
+| [`fastapi-auth-jwt`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-auth-jwt/README.md-tpl) | Autenticación JWT con rotación de refresh tokens, hash argon2 y scopes | Nueva en v1.4.0 |
+| [`fastapi-sqlmodel`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-sqlmodel/README.md-tpl) | SQLModel asíncrono + migraciones con Alembic + CRUD genérico con paginación | Nueva en v1.4.0 |
+| [`fastapi-llm-agent`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-llm-agent/README.md-tpl) | Agente de chat Claude con streaming (SSE) y bucle de llamadas a herramientas | Nueva en v1.4.0 |
+| [`fastapi-mcp`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-mcp/README.md-tpl) | App FastAPI expuesta como servidor MCP | |
+| [`fastapi-psql-orm`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-psql-orm/README.md-tpl) | API de gestión de items con PostgreSQL, SQLModel, Alembic y docker-compose | Requiere Docker |
+| [`fastapi-custom-response`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-custom-response/README.md-tpl) | API de gestión de items con un envoltorio de respuesta personalizado, manejo de errores y paginación | |
+| [`fastapi-async-crud`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-async-crud/README.md-tpl) | API asíncrona de gestión de items | **Obsoleta** — usa `fastapi-sqlmodel` |
+| [`fastapi-dockerized`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-dockerized/README.md-tpl) | API de gestión de items dockerizada | **Obsoleta** — usa `fastapi-default` con la opción Docker de `init --interactive` |
+
+Las plantillas obsoletas siguen funcionando, pero ya no son puntos de partida recomendados. Consulta [¿Qué starter elegir?](user-guide/choosing-a-starter.md) para una guía de decisión.
+
 ## Documentación
 
 Para guías completas e instrucciones detalladas, explora nuestra documentación:
 
+- 🧭 **[¿Qué starter elegir?](user-guide/choosing-a-starter.md)** - Guía de decisión para principiantes sobre las plantillas de `startdemo` y los presets interactivos
 - 📚 **[Guía de usuario](user-guide/quick-start.md)** - Guías detalladas de instalación y uso
 - 🎯 **[Tutorial](tutorial/getting-started.md)** - Tutoriales paso a paso para principiantes
 - 📖 **[Referencia de la CLI](user-guide/cli-reference.md)** - Referencia completa de comandos
+- 🧱 **[Matriz de presets de arquitectura](reference/preset-feature-matrix.md)** - Contrato por preset y por funcionalidad de la generación interactiva
 - 🔍 **[Aseguramiento de calidad de plantillas](reference/template-quality-assurance.md)** - Pruebas automatizadas y estándares de calidad
 
 ## 🚀 Tutoriales basados en plantillas
@@ -486,16 +577,19 @@ Aprende FastAPI con casos prácticos usando nuestras plantillas ya preparadas:
 - **[Construir un servidor API básico](tutorial/basic-api-server.md)** - Crea tu primer servidor FastAPI con la plantilla `fastapi-default`
 - **[Construir una API CRUD asíncrona](tutorial/async-crud-api.md)** - Desarrolla una API async de alto rendimiento con la plantilla `fastapi-async-crud`
 - **[Proyecto orientado a dominios (Domain Starter)](tutorial/domain-starter.md)** - Construye una API mediana con la plantilla `fastapi-domain-starter`, la opción moderna recomendada
+- **[Autenticación JWT](tutorial/auth-jwt.md)** - Añade cuentas reales con la plantilla `fastapi-auth-jwt`: refresh tokens rotatorios, hash argon2id y guards de roles y scopes
 
 ### 🗄️ Base de datos e infraestructura
 
 - **[Integrar con una base de datos](tutorial/database-integration.md)** - Usa PostgreSQL + SQLAlchemy con la plantilla `fastapi-psql-orm`
-- **[Dockerizar y desplegar](tutorial/docker-deployment.md)** - Configura un entorno de despliegue de producción con la plantilla `fastapi-dockerized`
+- **[Persistencia asíncrona con SQLModel](tutorial/sqlmodel.md)** - SQLModel asíncrono, migraciones con Alembic, una base CRUD genérica y listas paginadas con la plantilla `fastapi-sqlmodel`
+- **[Dockerizar y desplegar](tutorial/docker-deployment.md)** - Configura un entorno de despliegue de producción con la plantilla `fastapi-dockerized` *(plantilla obsoleta — se mantiene para los usuarios existentes)*
 
 ### ⚡ Funcionalidades avanzadas
 
 - **[Manejo personalizado de respuestas y diseño avanzado de API](tutorial/custom-response-handling.md)** - Construye APIs de nivel empresarial con la plantilla `fastapi-custom-response`
 - **[Integrar con MCP](tutorial/mcp-integration.md)** - Crea un servidor API integrado con modelos de IA con la plantilla `fastapi-mcp`
+- **[Agente LLM con streaming](tutorial/llm-agent.md)** - Construye un backend de chat Claude con streaming y un bucle real de llamadas a herramientas con la plantilla `fastapi-llm-agent`
 
 Cada tutorial ofrece:
 

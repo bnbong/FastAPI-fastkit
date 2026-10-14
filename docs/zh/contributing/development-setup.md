@@ -212,6 +212,27 @@ Success: no issues found in 12 source files
 | `make inspect-templates-verbose` | 以详细输出运行模板检查 |
 | `make inspect-template` | 检查指定模板(TEMPLATES 参数) |
 
+迭代开发时,底层脚本有三个值得了解的选项:`--offline`(跳过 PyPI 版本新鲜度查询)、`--no-smoke`(跳过用 uvicorn 启动生成项目这一最慢的步骤)以及 `--mypy`(对生成项目进行类型检查;由于速度较慢,需要显式开启)。每项检查具体做什么,请参阅 [模板质量保障](../reference/template-quality-assurance.md)。
+
+```console
+$ python scripts/inspect-templates.py --templates fastapi-sqlmodel --offline --no-smoke
+```
+
+### 生成的代码存放在 Jinja2 片段中
+
+`fastkit init --interactive` 写入项目的所有内容 —— `main.py`、数据库与认证模块、Docker 文件、pytest 配置 —— 都是由 `src/fastapi_fastkit/fragments/` 下的模板渲染而成,而不是在 Python 中拼接字符串得到的。`main.py.j2` 不硬编码任何功能:它遍历由 `DynamicConfigGenerator` 提供的 `import_fragments`、`lifespan_fragments` 和 `setup_fragments` 列表,并逐一包含,因此各项功能可以自由组合。
+
+添加一个功能的大致步骤:
+
+1. 把各部分放入 `main/imports/`、`main/lifespan/` 和/或 `main/setup/`(lifespan 片段缩进四个空格;另外两种不缩进)。
+2. 在 `DynamicConfigGenerator._main_fragments()` 中注册它们,并以相应的配置查询作为条件。
+3. 对于独立模块,添加 `<area>/<feature>.py.j2`,并用 `self._render(...)` 渲染。
+4. 扩展 `tests/test_backends/test_project_builder_config_generator.py` 中的组合矩阵 —— 它会断言每个渲染出的 Python 文件都能被 `ast.parse` 解析。
+
+有两个容易踩坑的约束:每个片段都必须以换行符结尾(环境以 `keep_trailing_newline=True` 构建),并且 `main.py.j2` 必须保留 `# fastkit:imports` / `# fastkit:routes` 锚点 —— `fastkit addroute` 会在这些位置插入代码。
+
+权威的操作流程与片段本身放在一起,位于 [`src/fastapi_fastkit/fragments/README.md`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fragments/README.md)。
+
 ### 文档命令
 
 | 命令 | 描述 |
@@ -353,13 +374,16 @@ FastAPI-fastkit/
 - **`src/fastapi_fastkit/`** —— 主包源码
     - **`cli.py`** —— 主 CLI 入口
     - **`backend/`** —— 核心后端逻辑
-        - **`inspector.py`** —— 模板检查器
+        - **`inspection/`** —— 模板检查流水线(context、checks、consistency、freshness、smoke、lint、report)
+        - **`inspector.py`** —— `inspection/` 之上的外观层(facade),为保留历史导入路径而存在
         - **`interactive/`** —— 交互模式相关组件(提示、选择器、校验器)
         - **`package_managers/`** —— 包管理器实现(pip、uv、pdm、poetry)
-        - **`project_builder/`** —— 项目构建工具
+        - **`project_builder/`** —— 项目构建工具,包括由片段驱动的配置生成器
+        - **`scaffolder.py`** —— `init` 与 `startdemo` 共用的生成流水线
         - **`transducer.py`** —— 模板 transducer
     - **`core/`** —— 核心配置与异常
-    - **`fastapi_project_template/`** —— 项目模板(fastapi-default、fastapi-async-crud 等)
+    - **`fragments/`** —— 渲染到生成项目中的 Jinja2 片段(见上文)
+    - **`fastapi_project_template/`** —— 项目模板(fastapi-default、fastapi-domain-starter 等)
     - **`utils/`** —— 共享工具函数
 - **`tests/`** —— 测试套件
     - **`test_backends/`** —— 针对后端的测试

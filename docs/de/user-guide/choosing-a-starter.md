@@ -17,6 +17,9 @@ Der Rest dieser Seite erklärt, warum das so ist und wann eine andere Wahl sinnv
 | Möchten das kleinstmögliche Gerüst | `fastkit init --interactive` (Preset: **`minimal`**) |
 | Schreiben einen schnellen Prototyp / ein Single-File-Skript | `fastkit init --interactive` (Preset: **`single-module`**) |
 | Brauchen eine echte Datenbank (PostgreSQL + SQLAlchemy + Alembic) | `fastkit startdemo fastapi-psql-orm` |
+| Möchten asynchrone Persistenz mit Migrationen und generischem CRUD | `fastkit startdemo fastapi-sqlmodel` |
+| Brauchen vom ersten Tag an Benutzerkonten, Login und geschützte Routen | `fastkit startdemo fastapi-auth-jwt` |
+| Bauen ein LLM-Chat-Backend mit Streaming und Tools | `fastkit startdemo fastapi-llm-agent` |
 | Möchten ein produktionsnahes domänenorientiertes Layout für eine mittelgroße API | `fastkit init --interactive` (Preset: **`domain-starter`**) |
 
 ## `startdemo` vs. `init --interactive` — wo ist der Unterschied?
@@ -112,11 +115,33 @@ Für den vollständigen Vertrag pro Funktion (Zielpfade von Datenbank-/Auth-Konf
 | `fastapi-empty` | `minimal` | Nacktes Gerüst; gleiche Form, die `minimal` produziert. |
 | `fastapi-single-module` | `single-module` | Single-File-Demo. |
 | `fastapi-domain-starter` | `domain-starter` | Empfohlener moderner Standard; bringt ein items-Domänenbeispiel mit. |
-| `fastapi-async-crud` | `classic-layered` | Asynchrone Variante von `fastapi-default`. |
+| `fastapi-auth-jwt` | `domain-starter` | Ihre API braucht Konten. Access-/Refresh-Tokens, argon2id-Hashing, Rollen und Scopes, Alembic-Migrationen. |
+| `fastapi-sqlmodel` | `domain-starter` | Asynchrone Persistenz zuerst: SQLModel + asynchrones SQLAlchemy, Migrationen, eine generische CRUD-Basis und paginierte Listen. |
+| `fastapi-llm-agent` | `domain-starter` | Ein streamendes Claude-Chat-Backend mit einer echten Tool-Call-Schleife und Offline-Tests. |
 | `fastapi-custom-response` | `classic-layered` | Demonstriert benutzerdefinierte Response-Hüllen / Formatierung. |
-| `fastapi-dockerized` | `classic-layered` | Fügt dem Standard-Layout ein produktionstaugliches Dockerfile hinzu. |
-| `fastapi-psql-orm` | (kein direktes Preset) | PostgreSQL + SQLAlchemy + Alembic. Wählen Sie dies, wenn Sie eine echte Datenbank brauchen. |
+| `fastapi-psql-orm` | (kein direktes Preset) | PostgreSQL + SQLAlchemy + Alembic, synchron. Wählen Sie dies, wenn Sie einen Compose-Stack rund um eine echte Datenbank möchten. |
 | `fastapi-mcp` | (kein direktes Preset) | Integration des Model Context Protocol. |
+| `fastapi-async-crud` | `classic-layered` | ⚠️ **Veraltet.** Asynchrone Variante von `fastapi-default`; bevorzugen Sie `fastapi-sqlmodel`. |
+| `fastapi-dockerized` | `classic-layered` | ⚠️ **Veraltet.** Fügt dem Standard-Layout ein Dockerfile hinzu; jede aktuelle Vorlage liefert bereits eines mit. |
+
+### Die drei neueren Starter
+
+Alle drei wurden in v1.4.0 hinzugefügt und folgen der Form von `domain-starter` (`src/app/` mit Ordnern pro Konzept), sodass sie zu dem passen, was Sie von diesem Preset bereits kennen.
+
+**`fastapi-auth-jwt` — Authentifizierung, die den Kontakt mit der Produktion übersteht.** Access-Tokens sind kurzlebig; Refresh-Tokens rotieren bei jeder Verwendung und werden über ihren `jti` in der Datenbank erfasst, sodass ein erneut eingespielter Token abgelehnt statt stillschweigend akzeptiert wird. Passwörter werden über `pwdlib` mit argon2id gehasht. Logout wirkt tatsächlich: Sie können eine Sitzung oder alle Sitzungen eines Benutzers widerrufen. Guards werden als Dependencies mitgeliefert — `get_current_user`, `get_current_active_superuser` und eine Factory `require_scopes(...)`. Die Vorlage läuft auf SQLite ohne externe Dienste und wechselt durch Setzen von `DATABASE_URL` zu PostgreSQL. Schritt-für-Schritt-Anleitung: [JWT-Authentifizierung](../tutorial/auth-jwt.md).
+
+**`fastapi-sqlmodel` — eine Modelldefinition pro Konzept.** Eine SQLModel-Klasse ist zugleich die SQLAlchemy-Tabelle und das Pydantic-Schema, sodass eine neue Spalte nur einmal deklariert wird und jedes Request-/Response-Schema sie erbt. Durchgehend asynchron, asynchrone Alembic-Migrationen, eine `CRUDBase`, die create / read / list / count / update / delete bereitstellt, damit jede Domäne nur schreibt, was für sie spezifisch ist, und Listen-Endpunkte in einer Seitenhülle. Schritt-für-Schritt-Anleitung: [SQLModel-Persistenz](../tutorial/sqlmodel.md).
+
+**`fastapi-llm-agent` — ein Chat-Backend, kein `POST /completion`-Wrapper.** Tokens werden per SSE an den Client gestreamt, und eine Tool-Call-Schleife läuft, bis das Modell fertig ist oder die Iterationsobergrenze greift. Der Konversationsverlauf liegt hinter einer `ConversationStore`-Schnittstelle, sodass der Wechsel vom mitgelieferten Dict zu Redis nur eine Implementierung erfordert. Die Testsuite ersetzt den Anthropic-Client durch ein vorgeskriptetes Fake — deterministisch, offline, ohne API-Schlüssel. Schritt-für-Schritt-Anleitung: [LLM-Agent](../tutorial/llm-agent.md).
+
+### Zu den veralteten Vorlagen
+
+`fastapi-async-crud` und `fastapi-dockerized` werden weiterhin mitgeliefert und erzeugen weiterhin funktionierende Projekte — nichts geht kaputt, wenn Sie sie verwenden. Sie sind als veraltet markiert, weil der Grund, sie zu wählen, weggefallen ist:
+
+- `fastapi-dockerized` existierte, um ein Dockerfile hinzuzufügen. Jede aktuelle Vorlage liefert eines mit, und die interaktive Deployment-Auswahl erzeugt Docker-Dateien für jedes Preset.
+- `fastapi-async-crud` demonstrierte asynchrone Endpunkte über einem Mock-Speicher. `fastapi-sqlmodel` macht dasselbe gegen eine echte asynchrone Datenbank, mit Migrationen.
+
+Bestehende Projekte, die aus einer der beiden Vorlagen erzeugt wurden, erfordern keine Maßnahmen.
 
 `fastkit list-templates` zeigt die aktuelle Liste mit einzeiligen Beschreibungen.
 
@@ -141,5 +166,6 @@ Die [Architektur-Preset-Matrix](../reference/preset-feature-matrix.md) ist die R
 
 - [Schnellstart](quick-start.md) — erstellen Sie tatsächlich Ihr erstes Projekt.
 - [Projekte erstellen](creating-projects.md) — ausführlichere Vorstellung der CLI-Optionen.
+- [Tutorial JWT-Authentifizierung](../tutorial/auth-jwt.md), [Tutorial SQLModel-Persistenz](../tutorial/sqlmodel.md) und [Tutorial LLM-Agent](../tutorial/llm-agent.md) — vollständige Anleitungen zu den drei in v1.4.0 hinzugefügten Startern.
 - [Tutorial Domänenorientiertes Projekt](../tutorial/domain-starter.md) — wenn Sie `domain-starter` gewählt haben, führt Sie dieses Tutorial Schritt für Schritt durch den generierten Projektbaum, das mitgelieferte `items`-Beispiel und das Hinzufügen Ihrer nächsten Domäne.
 - [Architektur-Preset-Matrix](../reference/preset-feature-matrix.md) — der vollständige Vertrag pro Preset / pro Funktion.

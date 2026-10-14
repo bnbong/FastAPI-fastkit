@@ -18,15 +18,15 @@ FastAPI-fastkit 以多种语言发布文档,但这些翻译**并不总是完全�
 
 | 语言 | 状态 | Markdown 页面数 | 备注 |
 |---|---|---:|---|
-| 🇬🇧 英文(`en`) | ✅ 权威来源 | 26 / 26 | 标准来源。 |
-| 🇰🇷 韩文(`ko`) | ✅ 完成 | 26 / 26 | 该语言的所有页面都已存在。Phase 1：顶层页面 + 核心用户指南；Phase 2：其余用户指南 + 全部教程；Phase 3：贡献文档 + 参考文档。`docs/ko/changelog.md` 刻意复用规范的英文 `CHANGELOG.md`。 |
-| 🇯🇵 日文(`ja`) | ✅ 完成 | 26 / 26 | 该语言的所有页面都已存在。Phase 1：顶层页面 + 核心用户指南；Phase 2：其余用户指南 + 全部教程；Phase 3：贡献文档 + 参考文档。`docs/ja/changelog.md` 刻意复用规范的英文 `CHANGELOG.md`。 |
-| 🇨🇳 中文(`zh`) | ✅ 完成 | 26 / 26 | 该语言的所有页面都已存在。Phase 1：顶层页面 + 核心用户指南；Phase 2：其余用户指南 + 全部教程；Phase 3：贡献文档 + 参考文档。`docs/zh/changelog.md` 刻意复用规范的英文 `CHANGELOG.md`。 |
-| 🇪🇸 西班牙文(`es`) | ✅ 完成 | 26 / 26 | 该语言的所有页面都已存在。Phase 1：顶层页面 + 核心用户指南；Phase 2：其余用户指南 + 全部教程；Phase 3：贡献文档 + 参考文档。`docs/es/changelog.md` 刻意复用规范的英文 `CHANGELOG.md`。 |
-| 🇫🇷 法文(`fr`) | ✅ 完成 | 26 / 26 | 该语言的所有页面都已存在。Phase 1：顶层页面 + 核心用户指南；Phase 2：其余用户指南 + 全部教程；Phase 3：贡献文档 + 参考文档。`docs/fr/changelog.md` 刻意复用规范的英文 `CHANGELOG.md`。 |
-| 🇩🇪 德文(`de`) | ✅ 完成 | 26 / 26 | 该语言的所有页面都已存在。Phase 1：顶层页面 + 核心用户指南；Phase 2：其余用户指南 + 全部教程；Phase 3：贡献文档 + 参考文档。`docs/de/changelog.md` 刻意复用规范的英文 `CHANGELOG.md`。 |
+| 🇬🇧 英文(`en`) | ✅ 权威来源 | 29 / 29 | 标准来源。 |
+| 🇰🇷 韩文(`ko`) | ✅ 完成 | 29 / 29 | Phase 1-3 已完成。已于 2026-10-11 与 v1.4.1 的英文源重新同步:v1.4.0 新增的三篇教程(`tutorial/auth-jwt.md`、`tutorial/sqlmodel.md`、`tutorial/llm-agent.md`)已经翻译,自最初翻译以来与英文产生偏差的页面也已重新对齐。`docs/ko/changelog.md` 刻意复用规范的英文 `CHANGELOG.md`。 |
+| 🇯🇵 日文(`ja`) | ✅ 完成 | 29 / 29 | Phase 1-3 已完成。已于 2026-10-11 与 v1.4.1 的英文源重新同步:v1.4.0 新增的三篇教程(`tutorial/auth-jwt.md`、`tutorial/sqlmodel.md`、`tutorial/llm-agent.md`)已经翻译,自最初翻译以来与英文产生偏差的页面也已重新对齐。`docs/ja/changelog.md` 刻意复用规范的英文 `CHANGELOG.md`。 |
+| 🇨🇳 中文(`zh`) | ✅ 完成 | 29 / 29 | Phase 1-3 已完成。已于 2026-10-11 与 v1.4.1 的英文源重新同步:v1.4.0 新增的三篇教程(`tutorial/auth-jwt.md`、`tutorial/sqlmodel.md`、`tutorial/llm-agent.md`)已经翻译,自最初翻译以来与英文产生偏差的页面也已重新对齐。`docs/zh/changelog.md` 刻意复用规范的英文 `CHANGELOG.md`。 |
+| 🇪🇸 西班牙文(`es`) | ✅ 完成 | 29 / 29 | Phase 1-3 已完成。已于 2026-10-11 与 v1.4.1 的英文源重新同步:v1.4.0 新增的三篇教程(`tutorial/auth-jwt.md`、`tutorial/sqlmodel.md`、`tutorial/llm-agent.md`)已经翻译,自最初翻译以来与英文产生偏差的页面也已重新对齐。`docs/es/changelog.md` 刻意复用规范的英文 `CHANGELOG.md`。 |
+| 🇫🇷 法文(`fr`) | ✅ 完成 | 29 / 29 | Phase 1-3 已完成。已于 2026-10-11 与 v1.4.1 的英文源重新同步:v1.4.0 新增的三篇教程(`tutorial/auth-jwt.md`、`tutorial/sqlmodel.md`、`tutorial/llm-agent.md`)已经翻译,自最初翻译以来与英文产生偏差的页面也已重新对齐。`docs/fr/changelog.md` 刻意复用规范的英文 `CHANGELOG.md`。 |
+| 🇩🇪 德文(`de`) | ✅ 完成 | 29 / 29 | Phase 1-3 已完成。已于 2026-10-11 与 v1.4.1 的英文源重新同步:v1.4.0 新增的三篇教程(`tutorial/auth-jwt.md`、`tutorial/sqlmodel.md`、`tutorial/llm-agent.md`)已经翻译,自最初翻译以来与英文产生偏差的页面也已重新对齐。`docs/de/changelog.md` 刻意复用规范的英文 `CHANGELOG.md`。 |
 
-*快照验证时间：2026-06-18；在 Phase 3(贡献文档 + 参考文档)完成后,已基于当前分支重新统计 `zh` 这一行。中文目前 26 个本地化页面全部就位,状态记为 ✅ 完成。* 此表通过人工维护；如需在仓库根目录重新统计当前状态,请运行：
+*快照验证时间:2026-10-11,v1.4.1 发布之后。全部六个翻译语言都已与英文源达到一致:v1.4.0 新增的三篇教程已经翻译,所有自最初翻译以来出现偏差的页面也都已重新同步。在一个版本周期内,翻译仍可能暂时落后 —— 如果某个翻译页面与英文不一致,请以英文为准。* 此表通过人工维护；如需在仓库根目录重新统计当前状态,请运行：
 
 ```console
 $ for loc in en ko ja zh es fr de; do
@@ -39,6 +39,7 @@ $ for loc in en ko ja zh es fr de; do
 图例:
 
 - ✅ **权威来源** —— 我们以此语言为基准撰写。
+- ✅ **完成** —— 每个英文页面都有对应的翻译页面。在一个版本周期内,个别页面仍可能落后于英文的更新。
 - 🟡 **部分翻译** —— 已翻译部分页面；缺失的页面会回退到英文。
 - 🔴 **骨架** —— 语言切换器中存在该入口,但尚未提交任何翻译过的页面。站点会在翻译后的导航标签下渲染英文内容。
 

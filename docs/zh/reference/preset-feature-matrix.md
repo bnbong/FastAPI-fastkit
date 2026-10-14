@@ -29,12 +29,18 @@
 | 功能 | `minimal` / `single-module` | `classic-layered` / `domain-starter` |
 |---|---|---|
 | **数据库**(PostgreSQL、MySQL、SQLite、MongoDB) | 生成配置模块,**并且**在重新生成的 `main.py` 中插入 `await init_db()` 调用。 | 在预设对应路径生成配置模块。自带的 `main.py` 会**保留**,因此需要手动把 `get_db()` 接入路由器。 |
-| **认证**(JWT、FastAPI-Users、OAuth2、基于会话) | 生成认证配置模块。JWT 还会在重新生成的 `main.py` 中导入 `HTTPBearer`。 | 在预设对应路径生成认证配置模块。不会向 `main.py` 添加 import —— 需要手动接入依赖。 |
-| **后台任务**(Celery、Dramatiq) | 安装相应包;目前没有 main.py 覆盖。 | 同上。 |
-| **缓存**(Redis) | 安装相应包;目前没有 main.py 覆盖。 | 同上。 |
+| **认证**(JWT、FastAPI-Users、OAuth2、基于会话) | 生成认证配置模块;JWT 会导入 `HTTPBearer`,OAuth2 与基于会话的认证还会添加各自的 `main.py` 中间件配置。 | 在预设对应路径生成认证配置模块。不会向 `main.py` 添加 import —— 需要手动接入依赖。 |
+| **后台任务**(Celery、Dramatiq) | 生成 `worker.py` 与 `features/tasks.py`,并在重新生成的 `main.py` 中挂载任务路由器。 | 生成 `worker.py` 与 `features/tasks.py`,但自带的 `main.py` 会**保留** —— 需要手动挂载路由器。 |
+| **缓存**(Redis) | 生成 `features/cache.py`,并在重新生成的 `main.py` 中挂载并初始化。 | 生成 `features/cache.py`;需要手动挂载。 |
+| **工具类:分页 / WebSocket** | 生成 `features/pagination.py` / `features/websocket.py`,并在重新生成的 `main.py` 中挂载路由器。 | 生成相同的模块;需要手动挂载。 |
+| **监控:OpenTelemetry** | 不生成独立文件 —— 追踪配置直接加入重新生成的 `main.py`。 | 不生成独立文件。自带的 `main.py` 会保留,因此追踪**不会被接入** —— 需要手动添加配置。 |
+| **迁移**(Alembic) | 只要选择了任意 SQL 数据库,就会生成 `alembic.ini`、`alembic/env.py`、一个基线修订版本和 `scripts/migrate.sh` —— 与 `main.py` 覆盖无关。 | 同上 —— Alembic 的生成不取决于 `main.py` 是否被保留。 |
+| **工具链**(ruff、pre-commit、github-actions、devcontainer、makefile) | 生成对应的配置文件,与 `main.py` 覆盖无关。 | 同上。 |
+| **日志**(structured) | 生成 `logging_config.py`,并把 request-id 中间件接入重新生成的 `main.py`。 | 生成 `logging_config.py`;自带的 `main.py` 会保留,因此需要手动接入该中间件。 |
 | **CORS**(工具类) | 在重新生成的 `main.py` 中加入 `CORSMiddleware`,`allow_origins=['*']`。 | 自带的 `main.py` 中**已接入**(以 `settings.all_cors_origins` 作为条件)。只需在 `.env` 中设置 `BACKEND_CORS_ORIGINS` 即可启用 —— 无需修改代码。 |
-| **测试**(基础 / 覆盖率 / 进阶) | 在项目根生成 `pytest.ini`。 | 同上。 |
+| **测试**(基础 / 覆盖率 / 进阶) | 在项目根生成 `pytest.ini`;进阶级别还会添加 `tests/factories.py` 与 `tests/test_factories.py`。 | 同上。 |
 | **部署**(Docker、docker-compose) | 在项目根写入 `Dockerfile` 和/或 `docker-compose.yml`。 | 同上。 |
+| **`/health` / `/ready`** | 重新生成的 `main.py` 中始终包含。 | 保留下来的模板自带 `main.py` 中已经包含。 |
 
 ## 何时会出现「Preset compatibility」警告
 
@@ -44,10 +50,15 @@
 |---|---|
 | `CORS`(工具类) | ❌ —— 自带的 `main.py` 已接入。只需在 `.env` 中填好 `BACKEND_CORS_ORIGINS`。 |
 | `Rate-Limiting`(工具类) | ✅ —— 不会加入 `slowapi` 限流器的初始化 |
-| `Prometheus`(监控) | ✅ —— 不会调用 `Instrumentator().instrument(app)` |
+| `Pagination` / `WebSocket`(工具类) | ✅ —— 生成的路由器(`features/pagination.py` / `features/websocket.py`)不会被挂载 |
+| `Celery` / `Dramatiq`(async_tasks) | ✅ —— 生成的 `worker.py` / `features/tasks.py` 路由器不会被挂载 |
+| `Redis`(缓存) | ✅ —— 生成的 `features/cache.py` 不会被挂载或初始化 |
+| `Prometheus` / `OpenTelemetry`(监控) | ✅ —— 不会向 `main.py` 添加监控埋点配置 |
+| `structured`(日志) | ✅ —— 会生成 `logging_config.py`,但不会向 `main.py` 添加 request-id 中间件 |
+| `Alembic`(迁移)、`tooling` 选择 | ❌ —— 这些文件无论预设如何都会生成且可直接使用;不依赖 `main.py` |
 | 任意数据库 / 认证选择 | ⚠️ —— 配置文件已生成,但需要您手动在路由器中通过 `Depends()` 接入 |
 
-对 `minimal` 与 `single-module` 预设,动态的 `main.py` 覆盖会自动处理 CORS、限流与 Prometheus 监控,因此不会触发警告。
+对 `minimal` 与 `single-module` 预设,动态的 `main.py` 覆盖会自动处理上述所有方面,因此不会触发警告。
 
 ## 不支持的组合(安全起见)
 

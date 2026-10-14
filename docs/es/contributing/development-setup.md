@@ -212,6 +212,50 @@ El Makefile del proyecto incluye comandos útiles para las tareas de desarrollo 
 | `make inspect-templates-verbose` | Inspecciona con salida detallada |
 | `make inspect-template` | Inspecciona plantillas concretas (parámetro TEMPLATES) |
 
+El script subyacente acepta tres flags que conviene conocer mientras iteras:
+`--offline` (omite las consultas de actualidad en PyPI), `--no-smoke` (omite
+el arranque del proyecto generado con uvicorn — el paso más lento) y `--mypy`
+(comprueba los tipos del proyecto generado; es opcional porque es lento).
+Consulta [Aseguramiento de calidad de las plantillas](../reference/template-quality-assurance.md)
+para ver qué hace realmente cada comprobación.
+
+```console
+$ python scripts/inspect-templates.py --templates fastapi-sqlmodel --offline --no-smoke
+```
+
+### El código generado vive en fragmentos Jinja2
+
+Todo lo que `fastkit init --interactive` escribe en un proyecto — `main.py`,
+los módulos de base de datos y autenticación, los archivos de Docker, la
+configuración de pytest — se renderiza a partir de plantillas en
+`src/fastapi_fastkit/fragments/`, no se ensambla a partir de cadenas en
+Python. `main.py.j2` no fija ninguna funcionalidad en el código: itera sobre
+las listas `import_fragments`, `lifespan_fragments` y `setup_fragments` que
+proporciona `DynamicConfigGenerator` e incluye cada una, de modo que las
+funcionalidades se combinan libremente.
+
+Añadir una funcionalidad consiste, a grandes rasgos, en:
+
+1. Colocar las piezas en `main/imports/`, `main/lifespan/` y/o
+   `main/setup/` (los fragmentos de lifespan van indentados con cuatro
+   espacios; los otros dos no).
+2. Registrarlas en `DynamicConfigGenerator._main_fragments()`, protegidas
+   por la consulta de configuración correspondiente.
+3. Para un módulo independiente, añadir `<area>/<feature>.py.j2` y
+   renderizarlo con `self._render(...)`.
+4. Ampliar la matriz de combinaciones en
+   `tests/test_backends/test_project_builder_config_generator.py` — esta
+   comprueba que cada archivo Python renderizado se analiza con `ast.parse`.
+
+Dos restricciones con las que es fácil tropezar: cada fragmento debe terminar
+con un salto de línea final (el entorno se construye con
+`keep_trailing_newline=True`), y `main.py.j2` debe conservar sus anclas
+`# fastkit:imports` / `# fastkit:routes` — `fastkit addroute` inserta código
+en ellas.
+
+El procedimiento de referencia vive junto a los propios fragmentos, en
+[`src/fastapi_fastkit/fragments/README.md`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fragments/README.md).
+
 ### Comandos de documentación
 
 | Comando | Descripción |
@@ -353,13 +397,16 @@ FastAPI-fastkit/
 - **`src/fastapi_fastkit/`** — código fuente del paquete principal
     - **`cli.py`** — punto de entrada principal de la CLI
     - **`backend/`** — lógica central del backend
-        - **`inspector.py`** — inspector de plantillas
+        - **`inspection/`** — pipeline de inspección de plantillas (context, checks, consistency, freshness, smoke, lint, report)
+        - **`inspector.py`** — fachada sobre `inspection/`, mantenida por la ruta de importación histórica
         - **`interactive/`** — componentes del modo interactivo (prompts, selectores, validadores)
         - **`package_managers/`** — implementaciones de los gestores de paquetes (pip, uv, pdm, poetry)
-        - **`project_builder/`** — utilidades de construcción de proyectos
+        - **`project_builder/`** — utilidades de construcción de proyectos, incluido el generador de configuración basado en fragmentos
+        - **`scaffolder.py`** — el pipeline de generación que comparten `init` y `startdemo`
         - **`transducer.py`** — transducer de plantillas
     - **`core/`** — configuración central y excepciones
-    - **`fastapi_project_template/`** — plantillas de proyecto (fastapi-default, fastapi-async-crud, etc.)
+    - **`fragments/`** — fragmentos Jinja2 que se renderizan en los proyectos generados (ver más arriba)
+    - **`fastapi_project_template/`** — plantillas de proyecto (fastapi-default, fastapi-domain-starter, etc.)
     - **`utils/`** — funciones de utilidad compartidas
 - **`tests/`** — suite de pruebas
     - **`test_backends/`** — pruebas específicas del backend

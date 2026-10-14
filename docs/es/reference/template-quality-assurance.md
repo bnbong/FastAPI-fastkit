@@ -21,6 +21,38 @@ Cada miércoles a medianoche (UTC), nuestro flujo de trabajo de GitHub Actions i
 - ✅ **Comprobación de dependencias** — confirma que FastAPI y las dependencias necesarias están bien declaradas
 - ✅ **Implementación de FastAPI** — verifica que las plantillas contienen una inicialización adecuada de la app FastAPI
 - ✅ **Ejecución de pruebas** — ejecuta las pruebas de la plantilla para confirmar que funcionan
+- ✅ **Prueba de humo** — arranca el proyecto generado con uvicorn y sondea su superficie HTTP
+- ✅ **Coherencia de la configuración** — versiones de Python fijadas, divergencia de dependencias, autodependencia
+- ✅ **Restos de marcadores** — ningún `<placeholder>` sobrevive a la generación del proyecto
+- ✅ **Actualidad de las dependencias** — avisa de las versiones fijadas que van por detrás de su última versión en PyPI
+
+## Qué hace cada comprobación
+
+La inspección genera un **proyecto real** a partir de la plantilla — copia, conversión de `-tpl`, inyección de metadatos — y después ejecuta cada comprobación sobre ese proyecto generado, no sobre el código fuente de la plantilla. Una comprobación que solo lee la plantilla no puede detectar un marcador que la generación no consiguió sustituir.
+
+### Prueba de humo
+
+El proyecto generado se inicia con uvicorn en un puerto libre, y el inspector consulta periódicamente hasta que el servidor responde o se agota el tiempo de espera. Una vez arrancado, se solicitan `/docs` y `/health` y se comprueban sus códigos de estado. Después se termina el proceso del servidor, recurriendo a `SIGKILL` si no se detiene.
+
+El objetivo de uvicorn se resuelve en este orden: `[tool.fastapi-fastkit].app_module` en el `pyproject.toml` generado, después `app_module` en el `template-config.yml` de la plantilla y, por último, las ubicaciones convencionales de `main.py`. Es el mismo contrato que usa `fastkit runserver`, así que una plantilla cuya prueba de humo arranca es una plantilla cuyo proyecto generado se ejecuta.
+
+Esta es la comprobación que detecta lo que el análisis estático no puede: un import que solo se resuelve en tiempo de ejecución, un `lifespan` que lanza una excepción, un campo de configuración sin valor por defecto.
+
+### Coherencia de la configuración
+
+Se validan tres cosas contra el `pyproject.toml-tpl` de la plantilla:
+
+- **Las versiones de Python fijadas coinciden y apuntan a 3.12** — `requires-python`, el `target-version` de black y el `python_version` de mypy. Una plantilla que formatea como `py311` mientras declara `>=3.12` es un bug esperando a llegar a un colaborador.
+- **Sin divergencia de dependencias** — los paquetes declarados en `requirements.txt-tpl` y en `[project].dependencies` no deben contradecirse. Las plantillas incluyen ambos archivos por compatibilidad con los gestores de paquetes, y dos listas siempre acaban divergiendo si nada las comprueba.
+- **Sin autodependencia** — un proyecto generado no debe declarar `FastAPI-fastkit` como dependencia de ejecución. La CLI es una herramienta de desarrollo; incluirla en cada app generada arrastra todo el árbol de dependencias de fastkit a proyectos que no tienen nada que ver.
+
+### Restos de marcadores
+
+Cada `<project_name>`, `<description>` y similares debe sustituirse durante la generación. Cualquier `<placeholder>` que siga presente en el proyecto generado es un error — significa que la inyección de metadatos no conoce ese archivo y que el usuario lo recibiría tal cual.
+
+### Actualidad de las dependencias
+
+Las versiones fijadas se comparan con la última versión publicada en PyPI y se informan como avisos, nunca como errores — una plantilla que va una versión menor por detrás es información, no un fallo. Es la única comprobación que accede a la red, y `--offline` la omite.
 
 ## Sistema automatizado de pruebas de plantillas
 
@@ -140,6 +172,30 @@ $ python scripts/inspect-templates.py --verbose
 $ python scripts/inspect-templates.py --output my_results.json
 ```
 
+#### Flags de inspección
+
+| Flag | Efecto | Úsalo cuando |
+|---|---|---|
+| `--offline` | Omite todas las consultas de red (informe de actualidad de las dependencias) | No tienes red o quieres una ejecución rápida y aislada |
+| `--no-smoke` | Omite el arranque del proyecto generado con uvicorn | Solo iteras sobre la estructura; la prueba de humo es el paso más lento |
+| `--mypy` | Comprueba los tipos del proyecto generado con mypy | Antes de enviar una plantilla — es opcional porque es lento |
+| `--templates` | Lista de plantillas a inspeccionar, separadas por comas | Trabajas en una sola plantilla |
+| `--verbose` | Salida detallada | Depuras un fallo |
+| `--output` | Ruta del archivo de resultados JSON | Quieres conservar varias ejecuciones una al lado de otra |
+
+Un ciclo local rápido sobre una sola plantilla:
+
+```console
+$ python scripts/inspect-templates.py \
+    --templates fastapi-sqlmodel --offline --no-smoke --verbose
+```
+
+...y la comprobación completa antes de abrir un PR:
+
+```console
+$ python scripts/inspect-templates.py --templates fastapi-sqlmodel --mypy
+```
+
 ### Usar los comandos del Makefile
 
 ```console
@@ -192,10 +248,11 @@ Para que una plantilla pase la inspección, debe cumplir estos requisitos:
 - Debe contener un directorio `src/` con archivos fuente Python
 - Los archivos Python deben usar la extensión `.py-tpl`
 - Debe incluir un directorio `tests/` y un archivo `README.md-tpl`
-- Debe incluir **al menos uno** de los archivos de metadatos:
-    - `pyproject.toml-tpl` (preferido, PEP 621), o
-    - `setup.py-tpl` (legacy, todavía aceptado)
-- `requirements.txt-tpl` es opcional cuando `pyproject.toml-tpl` declara `[project].dependencies`
+- Debe incluir `pyproject.toml-tpl` (PEP 621). Las plantillas incluidas priorizan pyproject y ya no traen `setup.py-tpl`; la inspección todavía lo acepta para que las plantillas de terceros sigan funcionando, pero las plantillas nuevas no deben añadirlo.
+- `requirements.txt-tpl` es opcional cuando `pyproject.toml-tpl` declara `[project].dependencies` — pero, cuando ambos están presentes, deben coincidir (ver *Coherencia de la configuración*)
+- Debe apuntar a Python 3.12 de forma coherente: `requires-python = ">=3.12"`, black `target-version = ["py312"]`, mypy `python_version = "3.12"` y `python:3.12-slim` para cualquier imagen base de Docker
+- No debe declarar `FastAPI-fastkit` como dependencia de ejecución
+- No debe dejar ningún `<placeholder>` sin sustituir después de la generación
 
 ### Requisitos de FastAPI
 - Debe contener la inicialización de la app FastAPI

@@ -34,6 +34,8 @@
 - **🔍 自動化されたテンプレート品質保証**: 週次の自動テストですべてのテンプレートが動作し最新であることを保証
 - **🚀 多彩なプロジェクトテンプレート**: async CRUD、Docker、PostgreSQL など、ユースケース別の事前構成テンプレートを用意
 - **📦 複数のパッケージマネージャーに対応**: 好みの Python パッケージマネージャー (pip、uv、pdm、poetry) を選択可能
+- **🧾 再現可能なプロジェクト設定**: 対話型セッションを `--save-config` で保存し、後で `fastkit init --config` で再現 — プロンプトなしで同じプロジェクトを作成
+- **🏷️ 自己記述的なプロジェクト**: 生成されるすべてのプロジェクトが、テンプレート、プリセット、パッケージマネージャー、エントリポイント、選択した機能を `[tool.fastapi-fastkit]` ブロックに記録し、`runserver` と `addroute` がそれを読み取る
 
 ## インストール
 
@@ -123,7 +125,7 @@ Do you want to proceed with project creation? [y/N]: y
 FastAPI project will deploy at '~your-project-path~'
 
 ╭──────────────────────── Info ────────────────────────╮
-│ ℹ Injected metadata into setup.py                    │
+│ ℹ Injected metadata into pyproject.toml              │
 ╰──────────────────────────────────────────────────────╯
 ╭──────────────────────── Info ────────────────────────╮
 │ ℹ Injected metadata into config file                 │
@@ -173,6 +175,16 @@ Installing dependencies...
 </div>
 
 このコマンドは、Python の仮想環境を含む新しい FastAPI プロジェクトの開発環境を作成します。
+
+- 主なオプション:
+  - `--project-name`、`--author`、`--author-email`、`--description`
+  - `--package-manager` [pip|uv|pdm|poetry]
+  - `--config <path>`: 保存済みの設定ファイル (`.json` / `.toml`、PyYAML がインストールされていれば `.yaml` も) から、プロンプトなしでプロジェクトを作成
+  - `--save-config <path>`: `--interactive` と併用し、回答を後で再利用できるよう記録
+  - `--dry-run`: 作成されるファイルとパッケージを表示するだけで、何も書き込まない
+  - `--no-venv`: 仮想環境の作成をスキップ (`--no-install` を含意)
+  - `--no-install`: 依存関係のインストールをスキップ
+  - `--yes` / `-y`: その場にデプロイするとき、「Overwrite these files?」の確認をスキップ
 
 ### 対話型モードでプロジェクトを作成 ✨ NEW!
 
@@ -264,6 +276,30 @@ Select utilities (comma-separated numbers, e.g., 1,3,4):
 
 Select utilities: 1
 
+🪵 Logging Format
+Select logging format:
+  1. structured - JSON logs + X-Request-ID correlation middleware (stdlib only)
+  2. None - Uvicorn's default plain-text logging
+
+Select logging format [2]: 1
+
+🧬 Database Migrations
+Select migration tool:
+  1. Alembic - alembic.ini + async alembic/env.py + scripts/migrate.sh (recommended for SQL databases)
+  2. None - No migration tooling
+
+Select migration tool [1]: 1
+
+🧰 Developer Tooling
+Select tooling to generate (comma-separated numbers, e.g., 1,3)
+  1. ruff ruff + ruff-format config in pyproject.toml (replaces black/isort)
+  2. pre-commit .pre-commit-config.yaml
+  3. github-actions .github/workflows/test.yml (Python 3.12)
+  4. devcontainer .devcontainer/devcontainer.json
+  5. makefile Makefile with install/test/lint/format/run
+
+Your choice (or press Enter to skip): 1,2
+
 🚀 Deployment Configuration
 Select deployment option:
   1. Docker - Generate Dockerfile
@@ -294,6 +330,9 @@ Enter custom package names (comma-separated, press Enter to skip):
 │ Monitoring          │ Prometheus                                                                │
 │ Testing             │ Coverage                                                                  │
 │ Utilities           │ CORS                                                                      │
+│ Logging             │ structured                                                                │
+│ Migrations          │ Alembic                                                                   │
+│ Tooling             │ ruff, pre-commit                                                          │
 │ Package Manager     │ uv                                                                        │
 └─────────────────────┴───────────────────────────────────────────────────────────────────────────┘
 
@@ -350,6 +389,23 @@ Installing dependencies...
 - 自動 pip 互換性を備えた **スマートな依存関係管理**
 - プリセットが自動配線できない選択について手動配線の警告を出力する **機能検証**
 - 生成された `pyproject.toml` への **識別マーカー** 注入 (description マーカー + `[tool.fastapi-fastkit]` テーブル) — 後で `is_fastkit_project()` が生成済みプロジェクトを認識可能
+- `[tool.fastapi-fastkit]` に記録される **プロジェクトメタデータ** — テンプレート、プリセット、パッケージマネージャー、`app_module`、選択した `features` — を `fastkit runserver` と `fastkit addroute` が読み取る
+- **再現可能な実行**: `--save-config <path>` で回答を記録し、`--config <path>` でプロンプトを一切出さずに再現でき、`--dry-run` で何も書き込まずに結果をプレビュー可能
+
+現在では、カタログのどの選択もパッケージをインストールするだけでなく、実際に動作するコードを生成します —
+バックグラウンドタスク (Celery/Dramatiq)、Redis キャッシュ、WebSocket、ページネーション、OpenTelemetry
+トレーシング、OAuth2 / セッションベース認証のすべてに、対応するモジュールと `main.py` の配線が付属します。
+さらに 3 つの新しい項目がカタログを補完します:
+
+- **ロギング**: `structured` は、標準ライブラリの `logging` + `json` による構造化出力と request-id ミドルウェアを追加 — 新しい依存関係は不要
+- **マイグレーション**: `Alembic` は、SQL データベースを選択した場合に完全な非同期マイグレーション環境 (`alembic.ini`、`alembic/env.py`、ベースラインのリビジョン、`scripts/migrate.sh`) を生成
+- **ツール** (複数選択): `ruff`、`pre-commit`、`github-actions`、`devcontainer`、`makefile` — それぞれが自身の設定ファイルを生成し、`ruff` は `pyproject.toml` に `[tool.ruff]` ブロックもマージ
+
+生成されるすべてのプロジェクトには `/health` と `/ready` エンドポイントも含まれ、`--dry-run` はこれらの新しい
+成果物を含め、実際の実行で書き込まれるのとまったく同じファイルセットを一覧表示します。`classic-layered` と
+`domain-starter` はテンプレート同梱の `main.py` を保存するため、これらのいずれかの項目の選択に手動配線が必要な
+場合は機能検証が警告を出します — 詳しくは [プリセット / 機能マトリクス](reference/preset-feature-matrix.md) を
+参照してください。
 
 ### FastAPI プロジェクトに新しいルートを追加
 
@@ -445,6 +501,12 @@ FastAPI template project will deploy at '~your-project-path~'
 
 </div>
 
+- 主なオプション:
+  - `--project-name`、`--author`、`--author-email`、`--description`
+  - `--package-manager` [pip|uv|pdm|poetry]
+  - `--dry-run`、`--no-venv`、`--no-install`、`--yes`/`-y` — `init` と同じ意味
+  - 対象のプロジェクトディレクトリがすでに存在する場合は実行を拒否 (`--dry-run` を除く)
+
 利用可能な FastAPI デモの一覧を表示するには、次のコマンドを実行してください:
 
 <div class="termy">
@@ -463,18 +525,42 @@ $ fastkit list-templates
 │                        │ PostgreSQL                                            │
 │ fastapi-default        │ Simple FastAPI Project                                │
 │ fastapi-single-module  │ FastAPI Single Module Template                        │
+│ fastapi-auth-jwt       │ FastAPI JWT Authentication                            │
+│ fastapi-sqlmodel       │ FastAPI SQLModel                                      │
+│ fastapi-llm-agent      │ FastAPI LLM Agent                                     │
 └────────────────────────┴───────────────────────────────────────────────────────┘
 ```
 
 </div>
 
+利用可能なテンプレート:
+
+| テンプレート | 説明 | 備考 |
+|---|---|---|
+| [`fastapi-default`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-default/README.md-tpl) | クラシックなレイヤー型レイアウトのシンプルな FastAPI プロジェクト | 最初の選択肢として最適 |
+| [`fastapi-empty`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-empty/README.md-tpl) | 最小構成の FastAPI テンプレート | `minimal` プリセットのベース |
+| [`fastapi-single-module`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-single-module/README.md-tpl) | 単一ファイルの FastAPI アプリ | `single-module` プリセットのベース |
+| [`fastapi-domain-starter`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-domain-starter/README.md-tpl) | 中規模 API 向けの、ドメイン指向で pyproject を第一とするスターター | `domain-starter` プリセットのベース |
+| [`fastapi-auth-jwt`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-auth-jwt/README.md-tpl) | リフレッシュトークンのローテーション、argon2 ハッシュ化、スコープを備えた JWT 認証 | v1.4.0 で追加 |
+| [`fastapi-sqlmodel`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-sqlmodel/README.md-tpl) | 非同期 SQLModel + Alembic マイグレーション + ページネーション付きの汎用 CRUD | v1.4.0 で追加 |
+| [`fastapi-llm-agent`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-llm-agent/README.md-tpl) | ツール呼び出しループを備えたストリーミング Claude チャットエージェント (SSE) | v1.4.0 で追加 |
+| [`fastapi-mcp`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-mcp/README.md-tpl) | MCP サーバーとして公開される FastAPI アプリ | |
+| [`fastapi-psql-orm`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-psql-orm/README.md-tpl) | PostgreSQL、SQLModel、Alembic、docker-compose を使うアイテム管理 API | Docker が必要 |
+| [`fastapi-custom-response`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-custom-response/README.md-tpl) | カスタムレスポンスエンベロープ、エラー処理、ページネーションを備えたアイテム管理 API | |
+| [`fastapi-async-crud`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-async-crud/README.md-tpl) | 非同期アイテム管理 API | **非推奨** — `fastapi-sqlmodel` を使用 |
+| [`fastapi-dockerized`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-dockerized/README.md-tpl) | Docker 化されたアイテム管理 API | **非推奨** — `init --interactive` の Docker オプションと `fastapi-default` を使用 |
+
+非推奨のテンプレートも引き続き動作しますが、推奨される出発点ではなくなりました。選び方のガイドは [どのスターターを選ぶべき?](user-guide/choosing-a-starter.md) を参照してください。
+
 ## ドキュメント
 
 包括的なガイドと詳細な使い方は、ドキュメントを参照してください:
 
+- 🧭 **[どのスターターを選ぶべき?](user-guide/choosing-a-starter.md)** - `startdemo` テンプレートと対話型プリセットを選ぶための初心者向けガイド
 - 📚 **[ユーザーガイド](user-guide/quick-start.md)** - 詳細なインストール / 利用ガイド
 - 🎯 **[チュートリアル](tutorial/getting-started.md)** - 初心者向けの段階的なチュートリアル
 - 📖 **[CLI リファレンス](user-guide/cli-reference.md)** - コマンドの完全リファレンス
+- 🧱 **[アーキテクチャプリセットマトリクス](reference/preset-feature-matrix.md)** - 対話型生成におけるプリセットごと / 機能ごとの仕様
 - 🔍 **[テンプレート品質保証](reference/template-quality-assurance.md)** - 自動化されたテストと品質基準
 
 ## 🚀 テンプレート別チュートリアル
@@ -486,16 +572,19 @@ $ fastkit list-templates
 - **[基本 API サーバーの構築](tutorial/basic-api-server.md)** - `fastapi-default` テンプレートで初めての FastAPI サーバーを作成
 - **[非同期 CRUD API の構築](tutorial/async-crud-api.md)** - `fastapi-async-crud` テンプレートで高パフォーマンスな非同期 API を開発
 - **[ドメイン指向プロジェクト (Domain Starter)](tutorial/domain-starter.md)** - 推奨される現代的デフォルトである `fastapi-domain-starter` テンプレートで中規模 API を構築
+- **[JWT 認証](tutorial/auth-jwt.md)** - `fastapi-auth-jwt` テンプレートで本物のアカウント機能を追加: ローテーションするリフレッシュトークン、argon2id ハッシュ化、ロールとスコープのガード
 
 ### 🗄️ データベースとインフラ
 
 - **[データベース統合](tutorial/database-integration.md)** - `fastapi-psql-orm` テンプレートで PostgreSQL + SQLAlchemy を活用
-- **[Docker でのデプロイ](tutorial/docker-deployment.md)** - `fastapi-dockerized` テンプレートで本番デプロイ環境を構築
+- **[SQLModel による非同期永続化](tutorial/sqlmodel.md)** - `fastapi-sqlmodel` テンプレートで非同期 SQLModel、Alembic マイグレーション、汎用 CRUD ベース、ページネーションされたリストを活用
+- **[Docker でのデプロイ](tutorial/docker-deployment.md)** - `fastapi-dockerized` テンプレートで本番デプロイ環境を構築 *(非推奨テンプレート — 既存ユーザーのために維持)*
 
 ### ⚡ 高度な機能
 
 - **[カスタムレスポンス処理と高度な API 設計](tutorial/custom-response-handling.md)** - `fastapi-custom-response` テンプレートでエンタープライズグレードの API を構築
 - **[MCP との統合](tutorial/mcp-integration.md)** - `fastapi-mcp` テンプレートで AI モデルと連携する API サーバーを作成
+- **[ストリーミング LLM エージェント](tutorial/llm-agent.md)** - `fastapi-llm-agent` テンプレートで、本物のツール呼び出しループを備えたストリーミング Claude チャットバックエンドを構築
 
 各チュートリアルが提供するもの:
 

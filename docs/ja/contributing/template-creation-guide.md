@@ -97,8 +97,7 @@ fastapi-{template-name}/
 │   ├── lint.sh-tpl             # リンティング
 │   ├── run-server.sh-tpl       # サーバー起動
 │   └── test.sh-tpl             # テスト実行
-├── pyproject.toml-tpl           # ✅ 一次メタデータ (PEP 621、推奨)
-├── setup.py-tpl                # 🟡 レガシーメタデータ (互換のため受け付け)
+├── pyproject.toml-tpl           # ✅ 一次メタデータ (PEP 621、必須)
 ├── requirements.txt-tpl         # 🟡 pyproject が依存関係を宣言する場合は任意
 ├── setup.cfg-tpl               # 開発ツール設定
 ├── README.md-tpl               # ✅ プロジェクトドキュメント (必須)
@@ -110,10 +109,16 @@ fastapi-{template-name}/
 
 - `tests/` ディレクトリ
 - `README.md-tpl`
-- 少なくとも 1 つのメタデータファイル: `pyproject.toml-tpl` (推奨、PEP 621) または `setup.py-tpl` (レガシー、引き続き受け付け)
-- 次のいずれかに `fastapi` を依存関係として宣言: `pyproject.toml-tpl` の `[project].dependencies`、`requirements.txt-tpl`、または `setup.py-tpl` の `install_requires`
+- `pyproject.toml-tpl` (PEP 621)
+- `pyproject.toml-tpl` の `[project].dependencies` または `requirements.txt-tpl` に `fastapi` を依存関係として宣言
 
-`requirements.txt-tpl` は、`pyproject.toml-tpl` が `[project].dependencies` を宣言している場合は厳密には不要です。新しいテンプレートは **`pyproject.toml-tpl` を一次メタデータファイルとして採用すべきです**。
+`requirements.txt-tpl` は、`pyproject.toml-tpl` が `[project].dependencies` を宣言している場合は不要です — ただし、テンプレートが両方を提供する場合は内容が一致している必要があります: 両者の間で依存関係が食い違っていると検査は失敗します。
+
+**新しいテンプレートは pyproject を第一とし、`setup.py-tpl` を含めてはいけません。** v1.4.0 時点で、同梱テンプレートに `setup.py-tpl` を持つものはありません。リポジトリ外のテンプレートが引き続き動作するよう検査はこのファイルをまだ受け付けますが、これはレガシーな経路です。
+
+**Python 3.12 を一貫してターゲットにする**: `requires-python = ">=3.12"`、black の `target-version = ["py312"]`、mypy の `python_version = "3.12"`、そして Docker のベースイメージには `python:3.12-slim` を使います。検査では 3 つのピン指定が一致しているかを確認します。
+
+**生成されるプロジェクトのランタイム依存関係として `FastAPI-fastkit` を宣言してはいけません。** CLI は開発ツールです。テンプレートの依存関係リストには、生成されたアプリケーション自体が import するものだけを含めるべきです。
 
 ### ファイル作成ガイド
 
@@ -238,51 +243,22 @@ isort==5.12.0
 mypy==1.7.1
 ```
 
-#### 4. setup.py-tpl の書き方 (レガシー — pyproject がある場合は任意)
+#### 4. ルートアンカー
 
-レガシーテンプレートのために残されています。`pyproject.toml-tpl` を提供する新規テンプレートでは、このファイルは不要です。
+`main.py-tpl` や API 集約モジュールを提供するテンプレートでは、`fastkit addroute` がコードを挿入する場所に印を付けておく必要があります:
 
 ```python
-"""
-<project_name> パッケージのセットアップ
+from src.app.api import health
 
-FastAPI-fastkit で作成されたプロジェクトです。
-"""
-from setuptools import find_packages, setup
+# fastkit:imports
 
-# 依存関係リスト (型注釈が必要)
-install_requires: list[str] = [
-    "fastapi>=0.104.0",
-    "uvicorn[standard]>=0.24.0",
-    "pydantic>=2.5.0",
-    "pydantic-settings>=2.1.0",
-    "python-dotenv>=1.0.0",
-]
+api_router = APIRouter()
+api_router.include_router(health.router)
 
-setup(
-    name="<project_name>",
-    version="1.0.0",
-    description="[FastAPI-fastkit templated] <description>",  # is_fastkit_project() が利用する識別マーカー
-    long_description=open("README.md").read(),
-    long_description_content_type="text/markdown",
-    author="<author>",
-    author_email="<author_email>",
-    packages=find_packages(),
-    install_requires=install_requires,
-    python_requires=">=3.8",
-    classifiers=[
-        "Development Status :: 4 - Beta",
-        "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
-        "Programming Language :: Python :: 3.12",
-    ],
-)
+# fastkit:routes
 ```
+
+アンカーがない場合、`addroute` は AST ベースの挿入にフォールバックし、import ブロックとルーター登録の位置を自分で探します — そのためアンカーのないテンプレートでも動作はしますが、結果の予測可能性は下がります。これらのファイルを編集するときは、コメントをそのまま残してください。
 
 #### 5. テストファイルの書き方
 
@@ -343,7 +319,16 @@ make inspect-template TEMPLATES="fastapi-your-template"
 
 # 詳細出力付きで検証
 python scripts/inspect-templates.py --templates "fastapi-your-template" --verbose
+
+# 高速なローカルループ: ネットワークなし、サーバー起動なし
+python scripts/inspect-templates.py --templates "fastapi-your-template" \
+    --offline --no-smoke
+
+# PR を出す前の完全なチェック (生成されたプロジェクトに対する mypy を追加)
+python scripts/inspect-templates.py --templates "fastapi-your-template" --mypy
 ```
+
+`--offline` は PyPI での依存関係の鮮度チェックをスキップし、`--no-smoke` は生成されたプロジェクトの起動 (最も時間のかかるステップ) をスキップし、`--mypy` は生成されたプロジェクトを型チェックします。各チェックの内容は [テンプレート品質保証](../reference/template-quality-assurance.md) を参照してください。
 
 !!! note
 
@@ -357,7 +342,7 @@ python scripts/inspect-templates.py --templates "fastapi-your-template" --verbos
 
 - [ ] `tests/` ディレクトリが存在
 - [ ] `README.md-tpl` ファイルが存在
-- [ ] `pyproject.toml-tpl` (推奨) または `setup.py-tpl` (レガシー) のいずれかが存在
+- [ ] `pyproject.toml-tpl` が存在 (新しいテンプレートには `setup.py-tpl` を含めない)
 
 #### ✅ 拡張子の検証
 
@@ -369,7 +354,8 @@ python scripts/inspect-templates.py --templates "fastapi-your-template" --verbos
 - [ ] 次のいずれかに `fastapi` が宣言されている:
     - [ ] `pyproject.toml-tpl` の `[project].dependencies` (推奨)
     - [ ] `requirements.txt-tpl`
-    - [ ] `setup.py-tpl` の `install_requires`
+- [ ] `requirements.txt-tpl` と `[project].dependencies` が食い違っていない
+- [ ] `FastAPI-fastkit` がランタイム依存関係に **含まれていない**
 
 #### ✅ FastAPI 実装の検証
 
@@ -381,6 +367,24 @@ python scripts/inspect-templates.py --templates "fastapi-your-template" --verbos
 - [ ] 仮想環境の作成に成功
 - [ ] 依存関係のインストールに成功
 - [ ] すべての pytest テストが通過
+
+#### ✅ スモークテスト
+
+- [ ] 生成されたプロジェクトが uvicorn で起動する
+- [ ] `/docs` が応答する
+- [ ] `/health` が応答する
+
+uvicorn のターゲットは、生成された `pyproject.toml` の `[tool.fastapi-fastkit].app_module`、次に `template-config.yml` の `app_module`、最後に慣例的な `main.py` の配置場所の順で解決されます。
+
+#### ✅ 設定の一貫性
+
+- [ ] `requires-python`、black の `target-version`、mypy の `python_version` がすべて Python 3.12 を示している
+- [ ] `requirements.txt-tpl` と `[project].dependencies` の間に依存関係の食い違いがない
+- [ ] `FastAPI-fastkit` への自己依存がない
+
+#### ✅ プレースホルダーの残留
+
+- [ ] プロジェクト生成後に `<placeholder>` が残っていない
 
 #### ✅ 自動テンプレートテスト
 

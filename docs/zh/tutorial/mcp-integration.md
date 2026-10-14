@@ -68,8 +68,8 @@ Deploying FastAPI project using 'fastapi-mcp' template
 │ Dependency 1 │ fastapi        │
 │ Dependency 2 │ uvicorn        │
 │ Dependency 3 │ pydantic       │
-│ Dependency 4 │ python-jose    │
-│ Dependency 5 │ passlib        │
+│ Dependency 4 │ PyJWT          │
+│ Dependency 5 │ pwdlib[argon2] │
 │ Dependency 6 │ python-multipart│
 │ Dependency 7 │ mcp            │
 └──────────────┴────────────────┘
@@ -131,21 +131,21 @@ ai-integrated-api/
 ```python
 from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
-from jose import JWTError, jwt
-from passlib.context import CryptContext
+import jwt
+from pwdlib import PasswordHash
 
 from src.core.config import settings
 
-# 密码哈希处理
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# 密码哈希处理 —— argon2id,新应用推荐的默认方案。
+password_hash = PasswordHash.recommended()
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """校验密码"""
-    return pwd_context.verify(plain_password, hashed_password)
+    return password_hash.verify(plain_password, hashed_password)
 
 def get_password_hash(password: str) -> str:
     """生成密码哈希"""
-    return pwd_context.hash(password)
+    return password_hash.hash(password)
 
 def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
     """生成访问令牌"""
@@ -189,7 +189,7 @@ def decode_token(token: str) -> Optional[Dict[str, Any]]:
             algorithms=[settings.ALGORITHM]
         )
         return payload
-    except JWTError:
+    except jwt.PyJWTError:
         return None
 
 def verify_token(token: str, token_type: str = "access") -> Optional[str]:
@@ -452,8 +452,7 @@ user_db = UserDatabase()
 from typing import Optional, List
 from fastapi import Depends, HTTPException, status, Security
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials, APIKeyHeader
-from jose import JWTError
-
+import jwt
 from src.auth.jwt_handler import decode_token, token_manager
 from src.auth.models import User, UserInDB, Permission, user_db
 
@@ -486,7 +485,7 @@ async def get_current_user(
         if user_id is None:
             raise credentials_exception
 
-    except JWTError:
+    except jwt.PyJWTError:
         raise credentials_exception
 
     user = user_db.get_user_by_id(user_id)

@@ -21,6 +21,66 @@ FastAPI-fastkit은 **서로 보완하는 두 가지 품질 보증 시스템**을
 - ✅ **의존성 확인** — FastAPI 와 필수 의존성이 제대로 선언돼 있는지 확인
 - ✅ **FastAPI 구현 확인** — 템플릿이 적절한 FastAPI 앱 초기화를 포함하는지 확인
 - ✅ **테스트 실행** — 템플릿 테스트를 실행해 동작을 확인
+- ✅ **스모크 테스트** — 생성된 프로젝트를 uvicorn으로 띄우고 HTTP 엔드포인트를 확인
+- ✅ **설정 일관성** — Python 버전 고정, 의존성 불일치, 자기 자신에 대한 의존성 확인
+- ✅ **플레이스홀더 잔여 확인** — 프로젝트 생성 후 `<placeholder>`가 남아 있지 않은지 확인
+- ✅ **의존성 최신성** — 고정된 버전이 PyPI 최신 릴리스보다 뒤처져 있으면 경고
+
+## 각 검사가 하는 일
+
+검사는 템플릿에서 **실제 프로젝트**를 생성한 다음(복사, `-tpl` 변환, 메타데이터
+주입), 템플릿 원본이 아니라 그렇게 생성된 프로젝트를 대상으로 모든 검사를
+실행합니다. 템플릿만 읽는 검사로는 생성 과정에서 치환되지 않은 플레이스홀더를
+잡아낼 수 없기 때문입니다.
+
+### 스모크 테스트
+
+생성된 프로젝트를 빈 포트에서 uvicorn으로 시작하고, inspector는 서버가 응답하거나
+제한 시간이 끝날 때까지 폴링합니다. 서버가 뜨면 `/docs`와 `/health`를 요청해
+상태 코드를 확인합니다. 그다음 서버 프로세스를 종료하며, 종료되지 않으면
+`SIGKILL`까지 단계적으로 보냅니다.
+
+uvicorn 대상은 다음 순서로 결정됩니다. 먼저 생성된 `pyproject.toml`의
+`[tool.fastapi-fastkit].app_module`을 확인하고, 다음으로 템플릿의
+`template-config.yml`에 있는 `app_module`을, 마지막으로 관례적인 `main.py`
+위치를 확인합니다. 이는 `fastkit runserver`가 사용하는 계약과 같습니다. 따라서
+스모크 테스트에서 서버가 뜨는 템플릿이라면, 그 템플릿으로 생성한 프로젝트도
+실행됩니다.
+
+정적 분석으로는 잡을 수 없는 문제를 잡아내는 검사가 바로 이 검사입니다. 런타임에만
+해석되는 import, 예외를 던지는 `lifespan`, 기본값이 없는 설정 필드 같은 문제가
+여기에 해당합니다.
+
+### 설정 일관성
+
+템플릿의 `pyproject.toml-tpl`을 기준으로 다음 세 가지를 검증합니다:
+
+- **Python 버전 고정 값이 서로 일치하고 3.12를 대상으로 하는지** —
+  `requires-python`, black의 `target-version`, mypy의 `python_version`을
+  확인합니다. `>=3.12`를 선언하면서 `py311`로 포매팅하는 템플릿은 언젠가
+  기여자에게 문제를 일으킬 버그입니다.
+- **의존성 불일치가 없는지** — `requirements.txt-tpl`과 `[project].dependencies`에
+  선언된 패키지가 서로 달라서는 안 됩니다. 템플릿은 패키지 매니저 호환성을 위해
+  두 파일을 모두 제공하는데, 무언가가 검사하지 않으면 두 목록은 반드시 어긋나게
+  됩니다.
+- **자기 자신에 대한 의존성이 없는지** — 생성된 프로젝트는 `FastAPI-fastkit`을
+  런타임 의존성으로 선언하면 안 됩니다. CLI는 개발 도구입니다. 생성되는 모든 앱에
+  CLI를 포함하면 fastkit의 전체 의존성 트리가 관련 없는 프로젝트에까지 딸려
+  들어갑니다.
+
+### 플레이스홀더 잔여 확인
+
+`<project_name>`, `<description>` 같은 모든 플레이스홀더는 생성 과정에서
+치환되어야 합니다. 생성된 프로젝트에 `<placeholder>`가 하나라도 남아 있으면
+오류로 처리합니다. 메타데이터 주입 단계가 그 파일을 인식하지 못한다는 뜻이며,
+사용자는 그 파일을 치환되지 않은 상태 그대로 받게 됩니다.
+
+### 의존성 최신성
+
+고정된 버전을 PyPI의 최신 릴리스와 비교해 오류가 아니라 항상 경고로 보고합니다.
+템플릿이 마이너 버전 하나만큼 뒤처져 있는 것은 실패가 아니라 참고 정보이기
+때문입니다. 네트워크에 접근하는 검사는 이것 하나뿐이며, `--offline`을 지정하면
+건너뜁니다.
 
 ## 자동 템플릿 테스트 시스템
 
@@ -148,6 +208,30 @@ $ python scripts/inspect-templates.py --verbose
 $ python scripts/inspect-templates.py --output my_results.json
 ```
 
+#### 검사 플래그
+
+| 플래그 | 효과 | 사용하는 경우 |
+|---|---|---|
+| `--offline` | 모든 네트워크 조회(의존성 최신성 보고)를 건너뜀 | 네트워크가 없거나, 빠르고 외부 환경에 영향받지 않는 실행이 필요할 때 |
+| `--no-smoke` | 생성된 프로젝트를 uvicorn으로 띄우는 단계를 건너뜀 | 구조만 반복해서 수정할 때 (스모크 테스트가 가장 느린 단계임) |
+| `--mypy` | 생성된 프로젝트를 mypy로 타입 검사 | 템플릿을 제출하기 전 (느리기 때문에 명시적으로 켜야 함) |
+| `--templates` | 검사할 템플릿 목록 (쉼표로 구분) | 템플릿 하나를 작업할 때 |
+| `--verbose` | 자세한 출력 | 실패 원인을 디버깅할 때 |
+| `--output` | JSON 결과 파일 경로 | 여러 실행 결과를 나란히 보관할 때 |
+
+템플릿 하나를 대상으로 하는 빠른 로컬 반복 실행은 다음과 같습니다:
+
+```console
+$ python scripts/inspect-templates.py \
+    --templates fastapi-sqlmodel --offline --no-smoke --verbose
+```
+
+PR을 열기 전에는 전체 검사를 실행합니다:
+
+```console
+$ python scripts/inspect-templates.py --templates fastapi-sqlmodel --mypy
+```
+
 ### Makefile 명령 사용
 
 ```console
@@ -201,10 +285,17 @@ $ make inspect-template TEMPLATES="fastapi-default,fastapi-async-crud"
 - Python 소스 파일이 들어 있는 `src/` 디렉터리가 있어야 합니다
 - Python 파일은 `.py-tpl` 확장자를 사용해야 합니다
 - `tests/` 디렉터리와 `README.md-tpl` 파일을 포함해야 합니다
-- **최소 하나 이상**의 메타데이터 파일을 포함해야 합니다:
-    - `pyproject.toml-tpl` (권장, PEP 621), 또는
-- `setup.py-tpl` (레거시, 여전히 허용)
-- `pyproject.toml-tpl` 이 `[project].dependencies` 를 선언한다면 `requirements.txt-tpl` 은 선택 사항입니다
+- `pyproject.toml-tpl`(PEP 621)을 포함해야 합니다. 번들 템플릿은 pyproject를
+  우선하며 더 이상 `setup.py-tpl`을 제공하지 않습니다. 서드파티 템플릿이 계속
+  동작하도록 검사 단계에서는 여전히 `setup.py-tpl`을 허용하지만, 새 템플릿에는
+  추가하면 안 됩니다.
+- `pyproject.toml-tpl` 이 `[project].dependencies` 를 선언한다면 `requirements.txt-tpl` 은 선택 사항입니다.
+  다만 두 파일이 모두 있다면 내용이 서로 일치해야 합니다 (*설정 일관성* 참고)
+- Python 3.12를 일관되게 대상으로 해야 합니다: `requires-python = ">=3.12"`, black
+  `target-version = ["py312"]`, mypy `python_version = "3.12"`, 그리고 Docker 베이스
+  이미지는 `python:3.12-slim`을 사용
+- `FastAPI-fastkit`을 런타임 의존성으로 선언하면 안 됩니다
+- 생성 후 치환되지 않은 `<placeholder>`가 남아 있으면 안 됩니다
 
 ### FastAPI 요구 사항
 

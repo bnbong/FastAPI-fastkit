@@ -19,14 +19,14 @@ FastAPI-fastkit 문서는 여러 언어로 빌드되지만, 모든 번역이 **�
 | 언어 | 상태 | 마크다운 페이지 | 비고 |
 |---|---|---:|---|
 | 🇬🇧 English (`en`) | ✅ 원본 | 29 / 29 | 기준이 되는 원문입니다. |
-| 🇰🇷 한국어 (`ko`) | 🟡 일부 | 26 / 29 | Phase 1~3은 모두 반영되어 있습니다. v1.4.0에서 추가된 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)은 아직 번역 전이라 영문으로 폴백됩니다. `docs/ko/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
-| 🇯🇵 일본어 (`ja`) | 🟡 일부 | 26 / 29 | Phase 1~3은 모두 반영되어 있습니다. v1.4.0에서 추가된 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)은 아직 번역 전이라 영문으로 폴백됩니다. `docs/ja/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
-| 🇨🇳 중국어 (`zh`) | 🟡 일부 | 26 / 29 | Phase 1~3은 모두 반영되어 있습니다. v1.4.0에서 추가된 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)은 아직 번역 전이라 영문으로 폴백됩니다. `docs/zh/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
-| 🇪🇸 스페인어 (`es`) | 🟡 일부 | 26 / 29 | Phase 1~3은 모두 반영되어 있습니다. v1.4.0에서 추가된 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)은 아직 번역 전이라 영문으로 폴백됩니다. `docs/es/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
-| 🇫🇷 프랑스어 (`fr`) | 🟡 일부 | 26 / 29 | Phase 1~3은 모두 반영되어 있습니다. v1.4.0에서 추가된 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)은 아직 번역 전이라 영문으로 폴백됩니다. `docs/fr/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
-| 🇩🇪 독일어 (`de`) | 🟡 일부 | 26 / 29 | Phase 1~3은 모두 반영되어 있습니다. v1.4.0에서 추가된 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)은 아직 번역 전이라 영문으로 폴백됩니다. `docs/de/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
+| 🇰🇷 한국어 (`ko`) | ✅ 완료 | 29 / 29 | Phase 1~3은 모두 반영되어 있습니다. 2026-10-11에 v1.4.1 영문 원본과 다시 동기화했습니다. v1.4.0에서 추가된 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)을 번역했고, 처음 번역한 뒤 영문과 어긋난 페이지도 다시 맞췄습니다. `docs/ko/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
+| 🇯🇵 일본어 (`ja`) | ✅ 완료 | 29 / 29 | Phase 1~3은 모두 반영되어 있습니다. 2026-10-11에 v1.4.1 영문 원본과 다시 동기화했습니다. v1.4.0에서 추가된 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)을 번역했고, 처음 번역한 뒤 영문과 어긋난 페이지도 다시 맞췄습니다. `docs/ja/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
+| 🇨🇳 중국어 (`zh`) | ✅ 완료 | 29 / 29 | Phase 1~3은 모두 반영되어 있습니다. 2026-10-11에 v1.4.1 영문 원본과 다시 동기화했습니다. v1.4.0에서 추가된 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)을 번역했고, 처음 번역한 뒤 영문과 어긋난 페이지도 다시 맞췄습니다. `docs/zh/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
+| 🇪🇸 스페인어 (`es`) | ✅ 완료 | 29 / 29 | Phase 1~3은 모두 반영되어 있습니다. 2026-10-11에 v1.4.1 영문 원본과 다시 동기화했습니다. v1.4.0에서 추가된 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)을 번역했고, 처음 번역한 뒤 영문과 어긋난 페이지도 다시 맞췄습니다. `docs/es/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
+| 🇫🇷 프랑스어 (`fr`) | ✅ 완료 | 29 / 29 | Phase 1~3은 모두 반영되어 있습니다. 2026-10-11에 v1.4.1 영문 원본과 다시 동기화했습니다. v1.4.0에서 추가된 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)을 번역했고, 처음 번역한 뒤 영문과 어긋난 페이지도 다시 맞췄습니다. `docs/fr/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
+| 🇩🇪 독일어 (`de`) | ✅ 완료 | 29 / 29 | Phase 1~3은 모두 반영되어 있습니다. 2026-10-11에 v1.4.1 영문 원본과 다시 동기화했습니다. v1.4.0에서 추가된 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)을 번역했고, 처음 번역한 뒤 영문과 어긋난 페이지도 다시 맞췄습니다. `docs/de/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
 
-*스냅샷 검증 시점: 2026-09-04, v1.4.0 릴리스 기준. 영문에 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)이 추가되면서 나머지 로케일은 모두 ✅ 완료에서 🟡 일부(26 / 29)로 내려왔습니다. 같은 릴리스에서 한국어 랜딩 페이지·CLI 레퍼런스·스타터 선택 가이드는 영문 원문과 다시 동기화했고, 나머지 한국어 페이지는 존재하지만 v1.4.0 영문 갱신 이전 내용입니다.* 이 표는 수동으로 관리됩니다. 리포지토리 루트에서 현재 상태를 다시 세고 싶다면 다음 명령을 실행하세요:
+*스냅샷 검증 시점: 2026-10-11, v1.4.1 릴리스 이후. 번역된 6개 로케일을 모두 영문 원본과 같은 수준으로 맞췄습니다. v1.4.0에서 추가된 튜토리얼 3편을 번역했고, 처음 번역한 뒤 영문과 어긋난 페이지도 모두 다시 동기화했습니다. 그래도 한 릴리스 안에서는 번역이 뒤처질 수 있으므로, 번역된 페이지가 영문과 다르다면 영문을 신뢰하세요.* 이 표는 수동으로 관리됩니다. 리포지토리 루트에서 현재 상태를 다시 세고 싶다면 다음 명령을 실행하세요:
 
 ```console
 $ for loc in en ko ja zh es fr de; do
@@ -39,6 +39,7 @@ $ for loc in en ko ja zh es fr de; do
 범례:
 
 - ✅ **원본 (Source of truth)** — 문서를 작성할 때 기준으로 삼는 언어입니다.
+- ✅ **완료 (Complete)** — 모든 영어 페이지에 대응하는 번역 페이지가 있습니다. 다만 한 릴리스 안에서는 개별 페이지가 영어 갱신 내용보다 뒤처져 있을 수 있습니다.
 - 🟡 **부분 번역 (Partial)** — 일부 페이지만 번역된 상태입니다. 번역되지 않은 페이지는 영어 원문이 대신 표시됩니다.
 - 🔴 **기본 구조만 있음 (Skeleton)** — 언어 선택기에는 보이지만, 번역된 페이지가 아직 체크인되지 않은 상태입니다. 모든 페이지가 번역된 탐색 라벨 아래에서 영어 원문으로 표시됩니다.
 
