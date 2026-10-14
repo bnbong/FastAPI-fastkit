@@ -348,6 +348,7 @@ $ fastkit addroute ROUTE_NAME [PROJECT_DIR] [OPTIONS]
 
 | 옵션 | 설명 | 기본값 |
 |--------|-------------|---------|
+| `--layout [classic-layer\|domain]` | 생성할 라우트 모듈의 구조. 프리셋 메타데이터보다 우선 적용 | 프리셋에 따라 자동 결정 |
 | `--help` | 명령 도움말 표시 | - |
 
 #### 예시
@@ -383,25 +384,40 @@ $ fastkit addroute users my-api
 
 #### 생성되는 파일
 
-프로젝트에 다음 파일들을 생성합니다:
+`--layout=classic-layer`를 지정하면 앱 패키지 아래에 다음 파일들을 생성합니다:
 
 - `src/api/routes/users.py` - 라우트 핸들러
 - `src/crud/users.py` - CRUD 작업
 - `src/schemas/users.py` - Pydantic 스키마
 
-또한 `src/api/api.py` 가 갱신되어 새 라우터가 포함됩니다.
+`--layout=domain`을 지정하면 `__init__.py`, `models.py`, `schemas.py`, `repository.py`, `service.py`, `router.py`가 들어 있는 `domains/users/`를 생성합니다. 엔티티는 `id: int`와 `name: str`을 가지며, 실제로 동작하는 인메모리 repository가 함께 생성됩니다.
+
+두 레이아웃 모두 기존 API 라우터를 갱신하고, 필요하면 그 라우터를 애플리케이션에 연결합니다. 경로는 `src/app/`을 포함해 실제 앱 패키지를 따릅니다.
+
+옵션을 생략하면 `[tool.fastapi-fastkit].preset = "domain-starter"`일 때 `domain`이 선택됩니다. `preset`이 없으면 `template` 값에서 프리셋을 추론하며, `fastapi-domain-starter`도 `domain`을 선택합니다. 그 밖의 프리셋과 두 메타데이터 값이 모두 없는 프로젝트에서는 `classic-layer`가 선택됩니다. 알 수 없는 프리셋이면 경고를 출력하고 `classic-layer`로 대체합니다. 명시적으로 선택해도 프로젝트의 프리셋은 변경되지 않습니다.
+
+```console
+$ fastkit addroute users . --layout=domain
+$ fastkit addroute products . --layout=classic-layer
+```
+
+이 명령은 확인 단계 전에 선택된 레이아웃을 표시합니다. 다시 실행하면 기존 파일은 보존하고, 누락된 파일은 복원하며, 라우터 등록은 중복하지 않습니다. 레이아웃이 다른 같은 이름의 모듈도 import 별칭을 통해 함께 존재할 수 있습니다. 생성기는 HTTP 메서드/경로 충돌을 검사하지 않습니다. 마이그레이션은 직접 수행해야 합니다.
 
 #### 생성되는 엔드포인트
 
-전체 CRUD 엔드포인트가 만들어집니다:
+도메인 레이아웃은 다음 엔드포인트를 생성합니다(앱에 이미 설정된 prefix가 `/api/v1`이라고 가정합니다):
 
 | 메서드 | 엔드포인트 | 설명 |
 |--------|----------|-------------|
-| `GET` | `/api/v1/users/` | 모든 사용자 조회 |
-| `POST` | `/api/v1/users/` | 새 사용자 생성 |
-| `GET` | `/api/v1/users/{user_id}` | 특정 사용자 조회 |
-| `PUT` | `/api/v1/users/{user_id}` | 사용자 갱신 |
-| `DELETE` | `/api/v1/users/{user_id}` | 사용자 삭제 |
+| `GET` | `/api/v1/users` | 엔티티 목록, 200 |
+| `POST` | `/api/v1/users` | 엔티티 생성, 201 |
+| `GET` | `/api/v1/users/{entity_id}` | 엔티티 조회, 200 또는 404 |
+| `PUT` | `/api/v1/users/{entity_id}` | 엔티티 교체, 200 또는 404 |
+| `DELETE` | `/api/v1/users/{entity_id}` | 엔티티 삭제, 빈 응답의 204 또는 404 |
+
+POST와 PUT은 1–120자의 `name`을 받습니다. ID는 repository가 부여하고, PUT은 그 ID를 유지합니다. 도메인 레이아웃에서는 PATCH 엔드포인트가 생성되지 않습니다. 저장소는 프로세스 로컬이고, 재시작하면 사라지며, 도메인마다 독립적입니다. 영속성이 필요하면 repository를 교체하세요. 테스트에서는 서비스에 새 repository를 주입하고 `get_users_service`를 오버라이드할 수 있습니다.
+
+classic 레이아웃은 직접 구현할 수 있도록 `/<route_name>/` 경로에 기존 GET/POST/PUT/PATCH/DELETE 스텁을 그대로 생성합니다.
 
 #### 코드가 삽입되는 위치
 
@@ -422,7 +438,7 @@ api_router.include_router(health.router)
 ```
 
 이 파일을 직접 수정할 때도 주석은 그대로 두세요 — `addroute` 는
-`# fastkit:imports` 와 `# fastkit:routes` 바로 위에 코드를 넣습니다. 주석을
+`# fastkit:imports` 와 `# fastkit:routes` 바로 아래에 코드를 넣습니다. 주석을
 잃어버린 프로젝트(또는 앵커가 생기기 전에 만들어진 프로젝트)도 동작합니다.
 fastkit 이 AST 기반 삽입으로 되돌아가 import 블록과 라우터 등록부를 스스로
 찾습니다. 앵커는 그 결과를 예측 가능하게 만들어 줄 뿐입니다.

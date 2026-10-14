@@ -323,6 +323,7 @@ dev = [
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "types-pyyaml" },
+    { name = "virtualenv" },
 ]
 
 [package.dev-dependencies]
@@ -358,6 +359,7 @@ requires-dist = [
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.2.1" },
     { name = "rich", specifier = ">=13.9.2" },
     { name = "types-pyyaml", marker = "extra == 'dev'", specifier = ">=6.0.12.20260408" },
+    { name = "virtualenv", marker = "extra == 'dev'", specifier = ">=21.7.13" },
 ]
 provides-extras = ["dev"]
 
@@ -1239,7 +1241,7 @@ wheels = [
 
 [[package]]
 name = "virtualenv"
-version = "21.7.9"
+version = "21.7.16"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "distlib" },
@@ -1247,9 +1249,9 @@ dependencies = [
     { name = "platformdirs" },
     { name = "python-discovery" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/52/5c/ba82fdd0da13ade01453fc08277a70abc79128101319549f55f2e13f8f83/virtualenv-21.7.9.tar.gz", hash = "sha256:a7e42d81d779dec8afd7dc4be71640fb959ea861bccfa5980cb4ad9f92e30675", size = 5348882, upload-time = "2026-09-09T01:03:27.752Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/45/2b/f7ec483cb56fc84cab8676971b171156111cd125d069ca02fdaf0239f3e5/virtualenv-21.7.16.tar.gz", hash = "sha256:d3fcf6954a07121c2b61efcb96419e2f40b3718d558998f13a7314e32cc42723", size = 5363081, upload-time = "2026-09-19T06:59:08.339Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/85/fc/888c80b8da917bfc48a41887eca244f995d190bd3c01175727089fcaf27e/virtualenv-21.7.9-py3-none-any.whl", hash = "sha256:ba3b0bb41063c848d84d76a9fe3fb7711aaa0f2fe78708e8f3cd9714770e4eac", size = 5324667, upload-time = "2026-09-09T01:03:26.023Z" },
+    { url = "https://files.pythonhosted.org/packages/c7/46/a02c0bb29e6102616aa91d68a5e3f055393d92353d94b52ad6c51d540c20/virtualenv-21.7.16-py3-none-any.whl", hash = "sha256:752fd5d5352502fbd794422983eed65a249fc6f4685c5e2122fd6052e6477a11", size = 5330278, upload-time = "2026-09-19T06:59:06.096Z" },
 ]
 
 [[package]]

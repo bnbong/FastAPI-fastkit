@@ -2,7 +2,63 @@
 
 Apprenez à ajouter de nouvelles routes d'API à votre projet FastAPI existant.
 
+## Choisir la disposition de la route
+
+`addroute` accepte `--layout=classic-layer` ou `--layout=domain`. Sans cette option, il lit `[tool.fastapi-fastkit].preset` : `domain-starter` sélectionne `domain` ; `classic-layered`, `minimal` et `single-module` sélectionnent `classic-layer`. Si `preset` est absent, il déduit le préréglage de `template`, si bien que les projets créés avec `startdemo` ou `init` interactif sélectionnent aussi `domain` pour `fastapi-domain-starter`. En l'absence de ces deux valeurs, il sélectionne `classic-layer`. Un préréglage inconnu se rabat sur `classic-layer` avec un avertissement. Une option explicite remplace cette sélection sans modifier les métadonnées du projet.
+
+```console
+$ cd my-api
+$ fastkit addroute users . --layout=domain
+$ fastkit addroute products . --layout=classic-layer
+```
+
+La disposition sélectionnée est affichée avant la confirmation. Les fichiers sont placés sous le package réel de l'application (`src/` ou `src/app/`), en s'appuyant sur son point d'entrée enregistré lorsqu'il est disponible.
+
+## Générer un CRUD de domaine
+
+Pour un projet `domain-starter`, lancez simplement :
+
+```console
+$ fastkit addroute users
+```
+
+Cette commande crée les fichiers suivants et enregistre automatiquement le routeur du domaine :
+
+```text
+src/app/domains/users/
+├── __init__.py
+├── models.py       # Users(id: int, name: str)
+├── schemas.py      # UsersCreate pour POST/PUT, UsersRead pour les réponses
+├── repository.py   # opérations CRUD typées et stockage en mémoire
+├── service.py      # logique métier et UsersNotFoundError
+└── router.py       # points d'extrémité HTTP et dépendance de service surchargeable
+```
+
+Dans chaque domaine, les classes s'appellent `Users`, `UsersCreate`, `UsersRead`, `UsersRepository` et `UsersService` ; les noms de classe utilisent le PascalCase (`health_checks` devient `HealthChecks`), sans mise au singulier. Le repository attribue des ID à partir de 1. POST et PUT exigent un `name` de 1 à 120 caractères ; PUT conserve l'ID existant.
+
+| Méthode | Chemin du domaine | Résultat |
+|--------|-------------|--------|
+| GET | `/users` | Lister les entités, 200 |
+| GET | `/users/{entity_id}` | Lire une entité, 200 ou 404 |
+| POST | `/users` | Créer une entité, 201 |
+| PUT | `/users/{entity_id}` | Remplacer une entité, 200 ou 404 |
+| DELETE | `/users/{entity_id}` | Supprimer une entité, 204 vide ou 404 |
+
+Le préfixe et les tags du domaine sont définis dans le routeur d'API partagé lorsqu'il appelle `include_router`, comme dans la disposition classique.
+
+Le préfixe d'API existant de l'application reste en vigueur (par exemple `/api/v1/users`). Les routes de domaine n'incluent pas PATCH.
+
+Le repository généré est autonome et protège ses opérations CRUD par un verrou. Son instance par défaut est partagée entre les requêtes **au sein de ce domaine et de ce processus**. Les données sont perdues au redémarrage et ne sont pas partagées entre les processus workers. Adaptez le repository pour une persistance durable ; il ne dépend ni du `db.memory` du starter, ni d'un ORM, ni d'une configuration de base de données.
+
+Pour des tests isolés, injectez un `UsersRepository` neuf dans `UsersService`, puis surchargez la dépendance FastAPI `get_users_service` du routeur. `UsersRepository.reset()` vide ce repository et redémarre les ID à 1. `service.reset_store()` réinitialise le repository par défaut partagé entre les requêtes. Les instances de repository créées explicitement disposent de leur propre stockage.
+
+## Relancer la commande
+
+Les fichiers de module existants sont conservés ; les fichiers manquants sont créés. Les imports et les enregistrements de routeurs ne sont pas dupliqués. Des modules de même nom dans des dispositions différentes peuvent coexister ; des alias d'import évitent les collisions de noms Python. Le générateur ne vérifie pas les conflits de méthode/chemin HTTP. `--layout` ne migre pas les modules existants.
+
 ## Ajout de route basique
+
+Les exemples suivants décrivent la disposition `classic-layer`. Passez explicitement `--layout=classic-layer` lorsque vous utilisez un projet domain-starter.
 
 ### Utiliser la commande `addroute`
 

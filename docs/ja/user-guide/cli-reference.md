@@ -337,6 +337,7 @@ $ fastkit addroute ROUTE_NAME [PROJECT_DIR] [OPTIONS]
 
 | オプション | 説明 | デフォルト |
 |---|---|---|
+| `--layout [classic-layer\|domain]` | 生成するルートモジュールの構造。プリセットのメタデータより優先される | プリセットから自動判定 |
 | `--help` | コマンドのヘルプを表示 | - |
 
 #### 例
@@ -372,25 +373,43 @@ $ fastkit addroute users my-api
 
 #### 生成されるファイル
 
-プロジェクトに次のファイルが作成されます:
+`--layout=classic-layer` の場合、アプリパッケージの下に次のファイルが作成されます:
 
 - `src/api/routes/users.py` - ルートハンドラ
 - `src/crud/users.py` - CRUD 操作
 - `src/schemas/users.py` - Pydantic スキーマ
 
-また、新しいルーターを取り込むよう `src/api/api.py` も自動更新されます。
+`--layout=domain` の場合は、`__init__.py`、`models.py`、`schemas.py`、`repository.py`、`service.py`、`router.py` を含む `domains/users/` が作成されます。
+エンティティは `id: int` と `name: str` を持ち、動作するインメモリ repository が付属します。
+
+どちらのレイアウトも既存の API ルーターを更新し、必要に応じてアプリケーションに接続します。パスは `src/app/` を含め、実際のアプリパッケージに従います。
+
+オプションを省略した場合、`[tool.fastapi-fastkit].preset = "domain-starter"` なら `domain` が選ばれます。`preset` がない場合は `template` からプリセットを推定し、`fastapi-domain-starter` でも `domain` が選ばれます。その他のプリセットや、どちらのメタデータ値も持たないプロジェクトでは `classic-layer` が選ばれます。未知のプリセットは警告を出したうえで `classic-layer` にフォールバックします。明示的に選択しても、プロジェクトのプリセットは変更されません。
+
+```console
+$ fastkit addroute users . --layout=domain
+$ fastkit addroute products . --layout=classic-layer
+```
+
+コマンドは確認の前に選択したレイアウトを表示します。再実行すると、既存のファイルは保持され、不足しているファイルは復元され、ルーター登録の重複は避けられます。異なるレイアウトの同名モジュールは、import エイリアスによって共存できます。ジェネレーターは HTTP メソッドとパスの衝突をチェックしません。
+移行は手動で行います。
 
 #### 生成されるエンドポイント
 
-完全な CRUD エンドポイントが作成されます:
+ドメインレイアウトでは次のエンドポイントが作成されます (アプリの既存プレフィックスが `/api/v1` の場合の例):
 
 | メソッド | エンドポイント | 説明 |
 |---|---|---|
-| `GET` | `/api/v1/users/` | すべてのユーザーを取得 |
-| `POST` | `/api/v1/users/` | 新しいユーザーを作成 |
-| `GET` | `/api/v1/users/{user_id}` | 特定のユーザーを取得 |
-| `PUT` | `/api/v1/users/{user_id}` | ユーザーを更新 |
-| `DELETE` | `/api/v1/users/{user_id}` | ユーザーを削除 |
+| `GET` | `/api/v1/users` | エンティティの一覧、200 |
+| `POST` | `/api/v1/users` | エンティティの作成、201 |
+| `GET` | `/api/v1/users/{entity_id}` | エンティティの取得、200 または 404 |
+| `PUT` | `/api/v1/users/{entity_id}` | エンティティの置換、200 または 404 |
+| `DELETE` | `/api/v1/users/{entity_id}` | エンティティの削除、空の 204 または 404 |
+
+POST と PUT は 1〜120 文字の `name` を受け付けます。ID は repository が割り当て、PUT はそれを維持します。ドメインには PATCH エンドポイントは生成されません。
+ストレージはプロセスローカルで、再起動で失われ、ドメイン間で独立しています。永続化が必要な場合は repository を置き換えてください。テストでは service を通じて新しい repository を注入し、`get_users_service` をオーバーライドできます。
+
+クラシックレイアウトでは、従来どおり `/<route_name>/` に GET/POST/PUT/PATCH/DELETE のスタブが作成され、実装はあなたに任されます。
 
 #### コードが挿入される場所
 
@@ -410,7 +429,7 @@ api_router.include_router(health.router)
 ```
 
 ファイルを編集するときは、これらのコメントをそのまま残してください — `addroute` は `# fastkit:imports` と
-`# fastkit:routes` の直上に挿入します。アンカーを失ったプロジェクト (またはアンカーが導入される前に生成された
+`# fastkit:routes` の直下に挿入します。アンカーを失ったプロジェクト (またはアンカーが導入される前に生成された
 プロジェクト) でも動作はします: fastkit は AST ベースの挿入にフォールバックし、import ブロックとルーター登録の
 位置を自分で探します。アンカーは結果を予測可能にするためのものです。
 

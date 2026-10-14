@@ -7,7 +7,7 @@
 - `fastkit startdemo fastapi-domain-starter` でプロジェクトを生成する
 - レイアウトにおける `core`、`db`、`domains`、`tests` の役割
 - ドメインを router → service → repository → schemas → models に分割する考え方
-- 新しいドメインを追加するための手順 (items フォルダをコピーし、ルーターを登録)
+- `fastkit addroute` で新しいドメインを追加し、テストでそのストレージを分離する方法
 - 付属の `/health` エンドポイントと `/api/v1/items` CRUD が、どのようにアプリに組み込まれているか
 
 ## 前提条件
@@ -76,7 +76,7 @@ orders-api/
 │               ├── schemas.py      # ItemCreate、ItemRead (pydantic)
 │               ├── repository.py   # InMemoryStore を包む ItemRepository
 │               ├── service.py      # ItemService + ItemNotFoundError
-│               └── router.py       # APIRouter(prefix="/items")
+│               └── router.py       # APIRouter エンドポイント
 └── tests/
     ├── __init__.py
     ├── conftest.py             # TestClient フィクスチャ、ストアリセット
@@ -138,7 +138,7 @@ class InMemoryStore(Generic[T]):
 # src/app/api/router.py
 api_router = APIRouter()
 api_router.include_router(health.router)
-api_router.include_router(items_router.router)
+api_router.include_router(items_router.router, prefix="/items", tags=["items"])
 ```
 
 ```python
@@ -166,7 +166,7 @@ app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 
 ランタイムのレイアウトを反映する形で、振る舞いを固定したいポイントごとに 1 つずつテストモジュールを置きます。スターターに含まれているものは次のとおりです:
 
-- `conftest.py` — テストの間に items ストアをリセットする autouse フィクスチャ、および `TestClient(app)` をラップした `client` フィクスチャ。
+- `conftest.py` — テストの間に items ストアをリセットし、生成されたドメインに対して `service.reset_store()` を呼び出す autouse フィクスチャ、および `TestClient(app)` をラップした `client` フィクスチャ。
 - `test_health.py` — `GET /api/v1/health` が 200 と `{"status": "ok"}` を返すことを検証。
 - `test_items.py` — items エンドポイントの完全な CRUD をカバー。未知の id に対する 404、不正なペイロードに対する 422 を含む。
 
@@ -245,7 +245,7 @@ router だけが HTTP を知る部分です。FastAPI の `Depends(...)` を介�
 
 ```python
 # src/app/domains/items/router.py
-router = APIRouter(prefix="/items", tags=["items"])
+router = APIRouter()
 
 def get_item_service() -> ItemService:
     return ItemService()
@@ -256,6 +256,13 @@ def get_item(item_id: int, service: ItemService = Depends(get_item_service)) -> 
         return ItemRead.model_validate(service.get_item(item_id))
     except ItemNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+```
+
+ドメインのプレフィックスとタグは、共有の API ルーターが設定します:
+
+```python
+# src/app/api/router.py
+api_router.include_router(items_router.router, prefix="/items", tags=["items"])
 ```
 
 完全な router は次を公開します:
@@ -286,98 +293,72 @@ $ curl http://127.0.0.1:8000/api/v1/items/999
 
 ## ステップ 5: 次のドメインを追加する
 
-スターターは **ドメインの追加がコピーとリネームの操作で済む** ように設計されています。たとえば `items` の隣に `users` ドメインを置きたい場合:
-
-### 1. `items/` フォルダをコピー
+生成したプロジェクトのルートで、`users` ドメインを追加します:
 
 ```console
-$ cp -r src/app/domains/items src/app/domains/users
+$ fastkit addroute users
 ```
 
-### 2. エンティティ、スキーマ、各ファイルのクラス名を書き換える
+このコマンドは `[tool.fastapi-fastkit].preset` を読み取り、`preset` がない場合は `template` からプリセットを推定します。そのため、`startdemo`、対話式の `init`、`init --config` で作成したプロジェクトでは、domain-starter に対してドメインレイアウトが選ばれます。選択されたレイアウトは確認の前に表示されます。
+明示的に指定することもできます:
+
+```console
+$ fastkit addroute users . --layout=domain
+```
+
+`--layout=classic-layer` を指定すると、従来の `api/routes`、`crud`、`schemas` 構造が生成されます。これは `classic-layered`、`minimal`、`single-module` と、プリセットやテンプレートのメタデータを持たないプロジェクトでのデフォルトでもあります。未知のプリセットは警告を出したうえで `classic-layer` にフォールバックします。このオプションはプロジェクトのプリセットを変更しません。
+
+### 生成されるドメイン
+
+```text
+src/app/domains/users/
+├── __init__.py
+├── models.py       # id と name を持つ Users
+├── schemas.py      # UsersCreate と UsersRead
+├── repository.py   # UsersRepository: 型付きのインメモリ CRUD
+├── service.py      # UsersService と UsersNotFoundError
+└── router.py       # エンドポイントと get_users_service 依存性
+```
+
+新しいドメインはルート名から導いた PascalCase のクラス名を使うため、`users` から単数形の名前を推測する必要はありません。ビジネス概念に必要なフィールドと振る舞いを取り入れるよう、これらのファイルをカスタマイズしてください。
+
+router は `prefix="/users"` と `tags=["users"]` を付けて `src/app/api/router.py` に自動で登録されます。ドメインの router はこれらの設定を持たない `APIRouter()` を使います。既存のアプリケーションプレフィックスはそのまま維持され、次のエンドポイントが公開されます:
+
+| メソッド | エンドポイント | 結果 |
+|---|---|---|
+| GET | `/api/v1/users` | エンティティの一覧、200 |
+| GET | `/api/v1/users/{entity_id}` | エンティティの取得、200 または 404 |
+| POST | `/api/v1/users` | エンティティの作成、201 |
+| PUT | `/api/v1/users/{entity_id}` | エンティティの置換、200 または 404 |
+| DELETE | `/api/v1/users/{entity_id}` | エンティティの削除、空の 204 または 404 |
+
+POST と PUT は `{"name": "Alice"}` を受け付けます。`name` は 1〜120 文字でなければなりません。repository は 1 から始まる ID を割り当て、PUT はその ID を維持します。PATCH エンドポイントは生成されません。
+
+新しい repository は自己完結しており、付属の items ドメインが使う `db.memory` ストアは使いません。明示的に作成した repository インスタンスはそれぞれ独立したストレージを持ち、デフォルトのインスタンスはこのドメインとプロセスの中でリクエスト間で共有されます。CRUD 操作はロックで保護されています。データは再起動で失われ、ワーカープロセス間では共有されません。永続的なストレージが必要な場合は repository を置き換えてください。
+
+### 分離されたテストを追加する
+
+items 専用のリセットフィクスチャは、新しいドメインをリセットしません。テストごとに新しい repository を使うよう、service の依存性をオーバーライドしてください:
 
 ```python
-# src/app/domains/users/models.py
-from dataclasses import dataclass
+from src.app.domains.users.repository import UsersRepository
+from src.app.domains.users.router import get_users_service
+from src.app.domains.users.service import UsersService
 
-@dataclass
-class User:
-    id: int
-    email: str
-    is_active: bool = True
+def test_create_user(client):
+    from src.app.main import app
+
+    service = UsersService(repository=UsersRepository())
+    app.dependency_overrides[get_users_service] = lambda: service
+    try:
+        response = client.post("/api/v1/users", json={"name": "Alice"})
+        assert response.status_code == 201
+        assert response.json() == {"id": 1, "name": "Alice"}
+    finally:
+        app.dependency_overrides.pop(get_users_service, None)
 ```
 
-```python
-# src/app/domains/users/schemas.py
-from pydantic import BaseModel, ConfigDict, Field
-
-class UserCreate(BaseModel):
-    # 単純な ``str`` のままにしておけば、このスニペットはそのまま動きます。
-    # pydantic 組み込みのメール検証を使いたい場合は、オプション依存を追加で
-    # 入れて (``pip install 'pydantic[email]'`` — ``email-validator`` が
-    # 入ります)、``str`` を ``EmailStr`` に切り替えてください。
-    email: str = Field(min_length=3, max_length=320)
-    is_active: bool = True
-
-class UserRead(BaseModel):
-    id: int
-    email: str
-    is_active: bool
-    model_config = ConfigDict(from_attributes=True)
-```
-
-`Item → User`、`ItemNotFoundError → UserNotFoundError`、`ItemRepository → UserRepository`、`ItemService → UserService` を `models.py`、`schemas.py`、`repository.py`、`service.py`、`router.py` の全体でリネームします。router 内の `prefix="/items"` を `prefix="/users"` に、`tags=["items"]` を `tags=["users"]` に変更するのも忘れずに。
-
-repository は同じく `InMemoryStore` ベースのパターンをそのまま流用できます — エンティティ型に対してジェネリックだからです:
-
-```python
-# src/app/domains/users/repository.py
-_store: InMemoryStore[User] = InMemoryStore()
-
-class UserRepository:
-    def __init__(self, store: Optional[InMemoryStore[User]] = None) -> None:
-        self._store = store if store is not None else _store
-    # ... ItemRepository と同じ形 ...
-```
-
-### 3. ドメインの `__init__.py` を更新する
-
-items ドメインは、呼び出し側が `from src.app.domains.items import service` と書けるよう、自身のモジュールを再エクスポートしています。users でも同様にミラーします:
-
-```python
-# src/app/domains/users/__init__.py
-from src.app.domains.users import (  # noqa: F401
-    models,
-    repository,
-    router,
-    schemas,
-    service,
-)
-```
-
-### 4. 集約点に router を登録する
-
-これが **`domains/users/` の外で唯一触る必要のあるファイル** です:
-
-```python
-# src/app/api/router.py
-from src.app.api import health
-from src.app.domains.items import router as items_router
-from src.app.domains.users import router as users_router  # ← 追加
-
-api_router = APIRouter()
-api_router.include_router(health.router)
-api_router.include_router(items_router.router)
-api_router.include_router(users_router.router)             # ← 追加
-```
-
-サーバーを再起動すると、`/docs` に `/api/v1/users` がマウントされます。
-
-### 5. テストを追加する
-
-`tests/test_items.py` をミラーして `tests/test_users.py` を作成します — クライアント駆動の同じ形のまま、新しいエンドポイントを叩くだけです。`conftest.py` の autouse なストアリセットフィクスチャが、各テストを引き続き分離してくれます。
-
-`InMemoryStore` を使う 2 つ目のドメインを追加する場合は、フィクスチャを拡張してそのストアもリセットするか、ドメインごとにフィクスチャを分けてください。
+`addroute` を再実行すると、既存のドメインファイルは保持され、不足しているファイルが作成され、import と登録の重複は避けられます。同名のクラシックモジュールは、import エイリアスによって共存できます。生成されたパッケージは自身のモジュールを再エクスポートし、repository はデータを消去して ID を最初から振り直す `reset()` を公開します。スターターの autouse フィクスチャは、生成されたドメインに対して `service.reset_store()` を呼び出します。古いプロジェクトでは、既存のリセットフィクスチャにこの呼び出しを追加するか、依存性のオーバーライドを通じて分離された repository を使ってください。router を組み合わせるときは、HTTP のパスとメソッドを自分で確認してください。ジェネレーターは重複するエンドポイントを検出しません。
 
 ## ステップ 6: 次に学ぶこと
 
@@ -389,4 +370,4 @@ api_router.include_router(users_router.router)             # ← 追加
 
 - **生成**: `fastkit startdemo fastapi-domain-starter` → `bash scripts/run-server.sh` → ドキュメントは `/docs`。
 - **レイアウト**: 設定は `core/`、永続化抽象化は `db/`、ビジネススライスは `domains/<concept>/`、唯一の集約点が `api/router.py`、`tests/` はランタイムモジュールをミラー。
-- **ドメインの追加**: `items/` をコピー、エンティティ / スキーマ / クラスをリネーム、`__init__.py` の再エクスポートを更新、`src/app/api/router.py` で router を登録、テストモジュールを追加。`main.py` の編集は不要です。
+- **ドメインの追加**: `fastkit addroute users` を実行し、生成された `Users*` CRUD スキャフォールドをカスタマイズし、分離された repository を使うテストを追加します。router は自動で登録されます。

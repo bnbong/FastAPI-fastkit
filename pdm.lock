@@ -5,7 +5,7 @@
 groups = ["default", "dev", "docs", "translation"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:8f0df0c0e00dc1ca95ccb9f01c7e8faa87a40da560806c6bb5e767c66c71c27f"
+content_hash = "sha256:110de45e63dfa0456adaccb1332e234b1e0e96bf900bca03dd72af4b9777275d"
 
 [[metadata.targets]]
 requires_python = ">=3.12"
@@ -1506,7 +1506,7 @@ files = [
 
 [[package]]
 name = "virtualenv"
-version = "21.7.9"
+version = "21.7.16"
 requires_python = ">=3.9"
 summary = "Virtual Python Environment builder"
 groups = ["dev"]
@@ -1519,8 +1519,8 @@ dependencies = [
     "typing-extensions>=4.13.2; python_version < \"3.11\"",
 ]
 files = [
-    {file = "virtualenv-21.7.9-py3-none-any.whl", hash = "sha256:ba3b0bb41063c848d84d76a9fe3fb7711aaa0f2fe78708e8f3cd9714770e4eac"},
-    {file = "virtualenv-21.7.9.tar.gz", hash = "sha256:a7e42d81d779dec8afd7dc4be71640fb959ea861bccfa5980cb4ad9f92e30675"},
+    {file = "virtualenv-21.7.16-py3-none-any.whl", hash = "sha256:752fd5d5352502fbd794422983eed65a249fc6f4685c5e2122fd6052e6477a11"},
+    {file = "virtualenv-21.7.16.tar.gz", hash = "sha256:d3fcf6954a07121c2b61efcb96419e2f40b3718d558998f13a7314e32cc42723"},
 ]
 
 [[package]]

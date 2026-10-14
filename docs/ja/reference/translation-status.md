@@ -19,14 +19,14 @@ FastAPI-fastkit のドキュメントは複数の言語でビルドされます�
 | ロケール | ステータス | Markdown ページ | 備考 |
 |---|---|---:|---|
 | 🇬🇧 English (`en`) | ✅ 原典 (Source of truth) | 29 / 29 | すべての基準になる原文です。 |
-| 🇰🇷 Korean (`ko`) | ✅ 完了 | 29 / 29 | Phase 1〜3 は完了しています。2026-10-11 に v1.4.1 の英語原典と再同期しました: v1.4.0 で追加された 3 つのチュートリアル (`tutorial/auth-jwt.md`、`tutorial/sqlmodel.md`、`tutorial/llm-agent.md`) を翻訳し、最初の翻訳以降に英語原典とずれていたページも元どおりに揃えました。`docs/ko/changelog.md` は英語の `CHANGELOG.md` を意図的に再利用しています。 |
-| 🇯🇵 Japanese (`ja`) | ✅ 完了 | 29 / 29 | Phase 1〜3 は完了しています。2026-10-11 に v1.4.1 の英語原典と再同期しました: v1.4.0 で追加された 3 つのチュートリアル (`tutorial/auth-jwt.md`、`tutorial/sqlmodel.md`、`tutorial/llm-agent.md`) を翻訳し、最初の翻訳以降に英語原典とずれていたページも元どおりに揃えました。`docs/ja/changelog.md` は英語の `CHANGELOG.md` を意図的に再利用しています。 |
-| 🇨🇳 Chinese (`zh`) | ✅ 完了 | 29 / 29 | Phase 1〜3 は完了しています。2026-10-11 に v1.4.1 の英語原典と再同期しました: v1.4.0 で追加された 3 つのチュートリアル (`tutorial/auth-jwt.md`、`tutorial/sqlmodel.md`、`tutorial/llm-agent.md`) を翻訳し、最初の翻訳以降に英語原典とずれていたページも元どおりに揃えました。`docs/zh/changelog.md` は英語の `CHANGELOG.md` を意図的に再利用しています。 |
-| 🇪🇸 Spanish (`es`) | ✅ 完了 | 29 / 29 | Phase 1〜3 は完了しています。2026-10-11 に v1.4.1 の英語原典と再同期しました: v1.4.0 で追加された 3 つのチュートリアル (`tutorial/auth-jwt.md`、`tutorial/sqlmodel.md`、`tutorial/llm-agent.md`) を翻訳し、最初の翻訳以降に英語原典とずれていたページも元どおりに揃えました。`docs/es/changelog.md` は英語の `CHANGELOG.md` を意図的に再利用しています。 |
-| 🇫🇷 French (`fr`) | ✅ 完了 | 29 / 29 | Phase 1〜3 は完了しています。2026-10-11 に v1.4.1 の英語原典と再同期しました: v1.4.0 で追加された 3 つのチュートリアル (`tutorial/auth-jwt.md`、`tutorial/sqlmodel.md`、`tutorial/llm-agent.md`) を翻訳し、最初の翻訳以降に英語原典とずれていたページも元どおりに揃えました。`docs/fr/changelog.md` は英語の `CHANGELOG.md` を意図的に再利用しています。 |
-| 🇩🇪 German (`de`) | ✅ 完了 | 29 / 29 | Phase 1〜3 は完了しています。2026-10-11 に v1.4.1 の英語原典と再同期しました: v1.4.0 で追加された 3 つのチュートリアル (`tutorial/auth-jwt.md`、`tutorial/sqlmodel.md`、`tutorial/llm-agent.md`) を翻訳し、最初の翻訳以降に英語原典とずれていたページも元どおりに揃えました。`docs/de/changelog.md` は英語の `CHANGELOG.md` を意図的に再利用しています。 |
+| 🇰🇷 Korean (`ko`) | ✅ 完了 | 29 / 29 | Phase 1〜3 は完了しています。2026-10-14 に v1.5.0 の英語原典と再同期しました: v1.4.0 で追加された 3 つのチュートリアル (`tutorial/auth-jwt.md`、`tutorial/sqlmodel.md`、`tutorial/llm-agent.md`) を翻訳し、最初の翻訳以降に英語原典とずれていたページも元どおりに揃えました。`docs/ko/changelog.md` は英語の `CHANGELOG.md` を意図的に再利用しています。 |
+| 🇯🇵 Japanese (`ja`) | ✅ 完了 | 29 / 29 | Phase 1〜3 は完了しています。2026-10-14 に v1.5.0 の英語原典と再同期しました: v1.4.0 で追加された 3 つのチュートリアル (`tutorial/auth-jwt.md`、`tutorial/sqlmodel.md`、`tutorial/llm-agent.md`) を翻訳し、最初の翻訳以降に英語原典とずれていたページも元どおりに揃えました。`docs/ja/changelog.md` は英語の `CHANGELOG.md` を意図的に再利用しています。 |
+| 🇨🇳 Chinese (`zh`) | ✅ 完了 | 29 / 29 | Phase 1〜3 は完了しています。2026-10-14 に v1.5.0 の英語原典と再同期しました: v1.4.0 で追加された 3 つのチュートリアル (`tutorial/auth-jwt.md`、`tutorial/sqlmodel.md`、`tutorial/llm-agent.md`) を翻訳し、最初の翻訳以降に英語原典とずれていたページも元どおりに揃えました。`docs/zh/changelog.md` は英語の `CHANGELOG.md` を意図的に再利用しています。 |
+| 🇪🇸 Spanish (`es`) | ✅ 完了 | 29 / 29 | Phase 1〜3 は完了しています。2026-10-14 に v1.5.0 の英語原典と再同期しました: v1.4.0 で追加された 3 つのチュートリアル (`tutorial/auth-jwt.md`、`tutorial/sqlmodel.md`、`tutorial/llm-agent.md`) を翻訳し、最初の翻訳以降に英語原典とずれていたページも元どおりに揃えました。`docs/es/changelog.md` は英語の `CHANGELOG.md` を意図的に再利用しています。 |
+| 🇫🇷 French (`fr`) | ✅ 完了 | 29 / 29 | Phase 1〜3 は完了しています。2026-10-14 に v1.5.0 の英語原典と再同期しました: v1.4.0 で追加された 3 つのチュートリアル (`tutorial/auth-jwt.md`、`tutorial/sqlmodel.md`、`tutorial/llm-agent.md`) を翻訳し、最初の翻訳以降に英語原典とずれていたページも元どおりに揃えました。`docs/fr/changelog.md` は英語の `CHANGELOG.md` を意図的に再利用しています。 |
+| 🇩🇪 German (`de`) | ✅ 完了 | 29 / 29 | Phase 1〜3 は完了しています。2026-10-14 に v1.5.0 の英語原典と再同期しました: v1.4.0 で追加された 3 つのチュートリアル (`tutorial/auth-jwt.md`、`tutorial/sqlmodel.md`、`tutorial/llm-agent.md`) を翻訳し、最初の翻訳以降に英語原典とずれていたページも元どおりに揃えました。`docs/de/changelog.md` は英語の `CHANGELOG.md` を意図的に再利用しています。 |
 
-*スナップショット検証日: 2026-10-11 (v1.4.1 リリース後)。翻訳対象の 6 つのロケールすべてを英語原典と同じ水準に揃えました: v1.4.0 で追加された 3 つのチュートリアルを翻訳し、最初の翻訳以降にずれていたすべてのページを再同期しました。リリースの途中では翻訳が遅れることもあります — 翻訳ページが英語と食い違う場合は英語を信頼してください。* この表は手動で管理されています。リポジトリルートで現在の状態を再カウントしたい場合は、次のコマンドを実行してください:
+*スナップショット検証日: 2026-10-14 (v1.5.0 リリース後)。翻訳対象の 6 つのロケールすべてを英語原典と同じ水準に揃えました: v1.4.0 で追加された 3 つのチュートリアルを翻訳し、最初の翻訳以降にずれていたすべてのページを再同期しました。リリースの途中では翻訳が遅れることもあります — 翻訳ページが英語と食い違う場合は英語を信頼してください。* この表は手動で管理されています。リポジトリルートで現在の状態を再カウントしたい場合は、次のコマンドを実行してください:
 
 ```console
 $ for loc in en ko ja zh es fr de; do

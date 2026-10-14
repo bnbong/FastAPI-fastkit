@@ -1,5 +1,37 @@
 # Changelog
 
+## v1.5.0 (2026-10-14)
+
+### Features
+
+- `fastkit addroute --layout classic-layer|domain` (contributed by @vastimofeev, #83). Without the option, the layout is resolved from `[tool.fastapi-fastkit]`: `preset = "domain-starter"` selects `domain`, other presets keep `classic-layer`; when no preset is recorded (`startdemo`, older `init` projects), a `template = "fastapi-domain-starter"` entry selects `domain`. The resolved layout is shown in the confirmation table.
+- `domain` layout generates `domains/<route>/` with `models.py`, `schemas.py`, `repository.py`, `service.py`, `router.py`, and a re-exporting `__init__.py`; class names are derived from the route (`health_checks` → `HealthChecksService`). The example is a typed CRUD API backed by a thread-safe in-memory repository (process-local, lost on restart) with a `reset_store()` hook, and is registered in the shared API router with `prefix="/<route>"` and `tags=["<route>"]`.
+- Re-running `addroute` is idempotent for both layouts: existing files are kept, existing `include_router` registrations (positional or `router=` keyword form) are not duplicated, and custom prefix/options on an existing registration are preserved with an info message. An unparsable router module falls back to text insertion, and import aliases (`<route>_router`, `<route>_2`, …) let same-named modules from different layouts coexist.
+
+### Templates
+
+- `fastapi-domain-starter`: the shipped `items` domain now follows the same convention (`APIRouter()` in the domain, `prefix="/items", tags=["items"]` on `include_router`; endpoints unchanged), and `tests/conftest.py` resets the in-memory store of every domain that exposes `service.reset_store()` before and after each test, so generated domains stay isolated (#83).
+
+### Security
+
+- `PyJWT` floor raised to 2.15.1 in `fastapi-auth-jwt` and `fastapi-mcp` (PYSEC-2026-4140 ~ 4152); `fastapi-mcp` pins `urllib3==2.8.0` (PYSEC-2026-4175 ~ 4177).
+- Workspace security floors `urllib3>=2.8.0` (GHSA-gh4c-6fx4-qh6g) and `anyio>=4.14.2` (GHSA-82r6-8w77-94w6, GHSA-5p39-cfhj-2xmp) added to `pyproject.toml`; `uv.lock` (anyio 4.14.2, urllib3 2.8.0), `pdm.lock` (anyio 4.15.1, urllib3 2.8.0), and `requirements-docs.txt` (urllib3 2.8.0) relocked (#80, #82).
+- Dev extra floor `virtualenv>=21.7.13` (transitive via `pre-commit`) closes GHSA-p58f-9548-mpm2 (bash/fish activation scripts execute commands embedded in paths), GHSA-x78j-v8h9-3j2q (command injection via `--prompt` in `activate.bat`), GHSA-94p9-xgh2-xp45 (seed wheels not integrity-checked) and GHSA-9h9j-4vrj-gf7g (`pyvenv.cfg` prompt injection); `requirements.txt` pinned to 21.7.16 and `uv.lock` / `pdm.lock` relocked (virtualenv 21.7.9 → 21.7.16, no other packages moved).
+
+### Documentation
+
+- Docs landing pages (root and every locale) now load the logo from `img/fastkit_general_logo.png` instead of the repo-only `.github/` path (#81).
+- English: `adding-routes`, `cli-reference`, and the domain-starter tutorial document `--layout` and the domain layout (#83); the MCP tutorial's `dependencies.py` snippet gains the missing `import jwt`; `development-setup` says "see above" instead of "see below".
+- All six translated locales (ko/ja/zh/es/fr/de) brought to parity with English: the `auth-jwt`, `sqlmodel`, and `llm-agent` tutorials translated, drifted pages (`index`, `development-setup`, `template-creation-guide`, `preset-feature-matrix`, `template-quality-assurance`, `cli-reference`, `creating-projects`, `choosing-a-starter`, `mcp-integration`) re-synced, and the translation-status page updated (#84). The three pages changed by #83 (domain-starter tutorial, `adding-routes`, `cli-reference`) are re-synced in every locale in this release.
+
+### Maintenance
+
+- `addroute` generation moved into `backend/route_generators.py` (`ClassicLayeredRouteGenerator`, `DomainRouteGenerator`, `resolve_route_layout`) and `backend/route_wiring.py` (`register_router`, `router_alias`); `add_new_route()` gained an optional `layout` argument. Suite size: **1047 tests passing**.
+
+### Breaking Changes
+
+- `addroute` in a `domain-starter` project (or a project generated from `fastapi-domain-starter` without a recorded preset) now generates the domain layout instead of `api/routes` / `crud` / `schemas` modules; pass `--layout classic-layer` to keep the old output.
+
 ## v1.4.1 (2026-09-10)
 
 ### Security

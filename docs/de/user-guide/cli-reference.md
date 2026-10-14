@@ -311,6 +311,7 @@ $ fastkit addroute ROUTE_NAME [PROJECT_DIR] [OPTIONS]
 
 | Option | Beschreibung | Standard |
 |--------|-------------|---------|
+| `--layout [classic-layer\|domain]` | Struktur des generierten Routenmoduls; überschreibt die Preset-Metadaten | Automatisch aus dem Preset |
 | `--help` | Hilfe zum Befehl anzeigen | - |
 
 #### Beispiele
@@ -346,25 +347,40 @@ $ fastkit addroute users my-api
 
 #### Generierte Dateien
 
-Erstellt diese Dateien im Projekt:
+Mit `--layout=classic-layer` werden diese Dateien unter dem App-Paket erstellt:
 
 - `src/api/routes/users.py` — Routen-Handler
 - `src/crud/users.py` — CRUD-Operationen
 - `src/schemas/users.py` — Pydantic-Schemas
 
-Aktualisiert außerdem `src/api/api.py`, um den neuen Router einzubinden.
+Mit `--layout=domain` wird `domains/users/` mit `__init__.py`, `models.py`, `schemas.py`, `repository.py`, `service.py` und `router.py` erstellt. Die Entity hat `id: int` und `name: str` und kommt mit einem funktionierenden In-Memory-Repository.
+
+Beide Layouts aktualisieren den bestehenden API-Router und verbinden ihn bei Bedarf mit der Anwendung. Die Pfade folgen dem tatsächlichen App-Paket, einschließlich `src/app/`.
+
+Ohne die Option wählt `[tool.fastapi-fastkit].preset = "domain-starter"` das Layout `domain`. Fehlt `preset`, wird das Preset aus `template` abgeleitet; auch `fastapi-domain-starter` wählt `domain`. Andere Presets und Projekte ohne einen dieser Metadatenwerte wählen `classic-layer`. Ein unbekanntes Preset fällt mit einer Warnung auf `classic-layer` zurück. Eine explizite Auswahl ändert das Preset des Projekts nicht.
+
+```console
+$ fastkit addroute users . --layout=domain
+$ fastkit addroute products . --layout=classic-layer
+```
+
+Der Befehl zeigt das gewählte Layout vor der Bestätigung an. Ein erneutes Ausführen erhält bestehende Dateien, stellt fehlende Dateien wieder her und vermeidet doppelte Router-Registrierungen. Gleichnamige Module verschiedener Layouts können über Import-Aliase nebeneinander bestehen. Der Generator prüft keine Konflikte bei HTTP-Methode/-Pfad. Eine Migration erfolgt manuell.
 
 #### Generierte Endpunkte
 
-Erstellt vollständige CRUD-Endpunkte:
+Das Domänen-Layout erstellt diese Endpunkte (dargestellt mit `/api/v1` als bestehendem Präfix der App):
 
 | Methode | Endpunkt | Beschreibung |
 |--------|----------|-------------|
-| `GET` | `/api/v1/users/` | Alle Nutzer abrufen |
-| `POST` | `/api/v1/users/` | Neuen Nutzer anlegen |
-| `GET` | `/api/v1/users/{user_id}` | Bestimmten Nutzer abrufen |
-| `PUT` | `/api/v1/users/{user_id}` | Nutzer aktualisieren |
-| `DELETE` | `/api/v1/users/{user_id}` | Nutzer löschen |
+| `GET` | `/api/v1/users` | Entities auflisten, 200 |
+| `POST` | `/api/v1/users` | Entity anlegen, 201 |
+| `GET` | `/api/v1/users/{entity_id}` | Entity lesen, 200 oder 404 |
+| `PUT` | `/api/v1/users/{entity_id}` | Entity ersetzen, 200 oder 404 |
+| `DELETE` | `/api/v1/users/{entity_id}` | Entity löschen, leeres 204 oder 404 |
+
+POST und PUT akzeptieren einen `name` mit 1–120 Zeichen. IDs werden vom Repository vergeben, und PUT behält sie bei. Für Domänen wird kein PATCH-Endpunkt generiert. Der Speicher ist prozesslokal, geht beim Neustart verloren und ist zwischen Domänen unabhängig; ersetzen Sie das Repository für dauerhafte Persistenz. Tests können über den Service ein frisches Repository injizieren und `get_users_service` überschreiben.
+
+Das klassische Layout behält seine bestehenden GET/POST/PUT/PATCH/DELETE-Stubs unter `/<route_name>/` bei, die Sie selbst implementieren.
 
 #### Wo der Code eingefügt wird
 
@@ -382,7 +398,7 @@ api_router.include_router(health.router)
 # fastkit:routes
 ```
 
-Lassen Sie diese Kommentare beim Bearbeiten der Datei an ihrem Platz — `addroute` fügt direkt oberhalb von `# fastkit:imports` und `# fastkit:routes` ein. Ein Projekt, dem sie fehlen (oder das erzeugt wurde, bevor es die Anker gab), funktioniert trotzdem: fastkit greift auf ein AST-basiertes Einfügen zurück, das den Importblock und die Router-Registrierungen selbst findet. Die Anker machen das Ergebnis lediglich vorhersehbar.
+Lassen Sie diese Kommentare beim Bearbeiten der Datei an ihrem Platz — `addroute` fügt direkt unterhalb von `# fastkit:imports` und `# fastkit:routes` ein. Ein Projekt, dem sie fehlen (oder das erzeugt wurde, bevor es die Anker gab), funktioniert trotzdem: fastkit greift auf ein AST-basiertes Einfügen zurück, das den Importblock und die Router-Registrierungen selbst findet. Die Anker machen das Ergebnis lediglich vorhersehbar.
 
 `addroute` liest außerdem den `[tool.fastapi-fastkit]`-Block des Projekts, um den Einstiegspunkt zu finden, und funktioniert daher auch bei Layouts, die ein reiner Scan des Dateisystems falsch einordnen würde.
 

@@ -7,7 +7,7 @@ Bauen Sie einen mittelgroßen FastAPI-Dienst mit dem empfohlenen modernen Layout
 - Ein Projekt mit `fastkit startdemo fastapi-domain-starter` generieren
 - Die Rolle von `core`, `db`, `domains` und `tests` im Layout
 - Wie eine Domäne in router → service → repository → schemas → models aufgeteilt wird
-- Den Vertrag zum Hinzufügen einer neuen Domäne (items-Ordner kopieren, Router registrieren)
+- Eine neue Domäne mit `fastkit addroute` hinzufügen und ihren Speicher in Tests isolieren
 - Wie der mitgelieferte `/health`-Endpunkt und das `/api/v1/items`-CRUD in die App eingebunden werden
 
 ## Voraussetzungen
@@ -76,7 +76,7 @@ orders-api/
 │               ├── schemas.py      # ItemCreate, ItemRead (pydantic)
 │               ├── repository.py   # ItemRepository over InMemoryStore
 │               ├── service.py      # ItemService + ItemNotFoundError
-│               └── router.py       # APIRouter(prefix="/items")
+│               └── router.py       # APIRouter endpoints
 └── tests/
     ├── __init__.py
     ├── conftest.py             # TestClient fixture, store reset
@@ -138,7 +138,7 @@ Zwei Teile:
 # src/app/api/router.py
 api_router = APIRouter()
 api_router.include_router(health.router)
-api_router.include_router(items_router.router)
+api_router.include_router(items_router.router, prefix="/items", tags=["items"])
 ```
 
 ```python
@@ -166,7 +166,7 @@ Die **Abhängigkeitsrichtung** ist `router → service → repository → store`
 
 Spiegelt das Laufzeit-Layout — pro Oberfläche, deren Verhalten festgepinnt werden soll, ein Testmodul. Der Starter liefert:
 
-- `conftest.py` — autouse-Fixture, die den Items-Store zwischen Tests zurücksetzt, plus eine `client`-Fixture, die `TestClient(app)` umhüllt.
+- `conftest.py` — autouse-Fixture, die zwischen Tests den Items-Store zurücksetzt und für generierte Domänen `service.reset_store()` aufruft, plus eine `client`-Fixture, die `TestClient(app)` umhüllt.
 - `test_health.py` — prüft, dass `GET /api/v1/health` 200 + `{"status": "ok"}` liefert.
 - `test_items.py` — vollständige CRUD-Abdeckung der Items-Endpunkte, inklusive eines 404 für unbekannte IDs und eines 422 für ungültige Payloads.
 
@@ -245,7 +245,7 @@ Der Router ist das einzige Stück, das HTTP kennt. Beachten Sie, dass er den Ser
 
 ```python
 # src/app/domains/items/router.py
-router = APIRouter(prefix="/items", tags=["items"])
+router = APIRouter()
 
 def get_item_service() -> ItemService:
     return ItemService()
@@ -256,6 +256,13 @@ def get_item(item_id: int, service: ItemService = Depends(get_item_service)) -> 
         return ItemRead.model_validate(service.get_item(item_id))
     except ItemNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+```
+
+Der gemeinsame API-Router setzt das Präfix und die Tags der Domäne:
+
+```python
+# src/app/api/router.py
+api_router.include_router(items_router.router, prefix="/items", tags=["items"])
 ```
 
 Der vollständige Router stellt bereit:
@@ -286,99 +293,71 @@ $ curl http://127.0.0.1:8000/api/v1/items/999
 
 ## Schritt 5: Ihre nächste Domäne hinzufügen
 
-Der Starter ist so gestaltet, dass das **Hinzufügen einer Domäne eine Kopier-und-Umbenenn-Operation** ist. Angenommen, Sie möchten eine `users`-Domäne neben `items`:
-
-### 1. Den `items/`-Ordner kopieren
+Fügen Sie vom Wurzelverzeichnis des generierten Projekts aus eine `users`-Domäne hinzu:
 
 ```console
-$ cp -r src/app/domains/items src/app/domains/users
+$ fastkit addroute users
 ```
 
-### 2. Entity, Schemas und Klassennamen pro Datei umschreiben
+Der Befehl liest `[tool.fastapi-fastkit].preset` oder leitet es aus `template` ab, wenn `preset` fehlt. Projekte, die mit `startdemo`, interaktivem `init` oder `init --config` erstellt wurden, wählen daher für domain-starter das Domänen-Layout. Das gewählte Layout wird vor der Bestätigung angezeigt. Sie können es auch explizit auswählen:
+
+```console
+$ fastkit addroute users . --layout=domain
+```
+
+`--layout=classic-layer` generiert die klassische Struktur aus `api/routes`, `crud` und `schemas`. Das ist auch der Standard für `classic-layered`, `minimal`, `single-module` sowie für Projekte ohne Preset- oder Template-Metadaten. Ein unbekanntes Preset fällt mit einer Warnung auf `classic-layer` zurück. Die Option ändert das Preset des Projekts nicht.
+
+### Generierte Domäne
+
+```text
+src/app/domains/users/
+├── __init__.py
+├── models.py       # Users with id and name
+├── schemas.py      # UsersCreate and UsersRead
+├── repository.py   # UsersRepository: typed, in-memory CRUD
+├── service.py      # UsersService and UsersNotFoundError
+└── router.py       # endpoints and get_users_service dependency
+```
+
+Die neue Domäne verwendet PascalCase-Klassennamen, die aus dem Routennamen abgeleitet werden; aus `users` muss also kein Singular abgeleitet werden. Passen Sie diese Dateien an, um die Felder und das Verhalten einzuführen, die Ihr Geschäftskonzept benötigt.
+
+Der Router wird automatisch in `src/app/api/router.py` mit `prefix="/users"` und `tags=["users"]` registriert. Domänen-Router verwenden `APIRouter()` ohne diese Einstellungen. Das bestehende Anwendungspräfix bleibt erhalten, sodass diese Endpunkte bereitstehen:
+
+| Methode | Endpunkt | Ergebnis |
+|--------|----------|--------|
+| GET | `/api/v1/users` | Entities auflisten, 200 |
+| GET | `/api/v1/users/{entity_id}` | Entity lesen, 200 oder 404 |
+| POST | `/api/v1/users` | Entity anlegen, 201 |
+| PUT | `/api/v1/users/{entity_id}` | Entity ersetzen, 200 oder 404 |
+| DELETE | `/api/v1/users/{entity_id}` | Entity löschen, leeres 204 oder 404 |
+
+POST und PUT akzeptieren `{"name": "Alice"}`; `name` muss 1–120 Zeichen lang sein. Das Repository vergibt IDs beginnend bei 1. PUT behält diese ID bei. Ein PATCH-Endpunkt wird nicht generiert.
+
+Das neue Repository ist eigenständig; es nutzt nicht den `db.memory`-Store der mitgelieferten items-Domäne. Jede explizit erzeugte Repository-Instanz hat einen unabhängigen Speicher, während die Standardinstanz zwischen Anfragen innerhalb dieser Domäne und dieses Prozesses geteilt wird. CRUD-Operationen sind durch einen Lock geschützt. Daten gehen beim Neustart verloren und werden nicht zwischen Worker-Prozessen geteilt; ersetzen Sie das Repository, wenn Sie dauerhaften Speicher benötigen.
+
+### Isolierte Tests hinzufügen
+
+Die items-spezifische Reset-Fixture setzt die neue Domäne nicht zurück. Überschreiben Sie deren Service-Dependency für jeden Test mit einem frischen Repository:
 
 ```python
-# src/app/domains/users/models.py
-from dataclasses import dataclass
+from src.app.domains.users.repository import UsersRepository
+from src.app.domains.users.router import get_users_service
+from src.app.domains.users.service import UsersService
 
-@dataclass
-class User:
-    id: int
-    email: str
-    is_active: bool = True
+def test_create_user(client):
+    from src.app.main import app
+
+    service = UsersService(repository=UsersRepository())
+    app.dependency_overrides[get_users_service] = lambda: service
+    try:
+        response = client.post("/api/v1/users", json={"name": "Alice"})
+        assert response.status_code == 201
+        assert response.json() == {"id": 1, "name": "Alice"}
+    finally:
+        app.dependency_overrides.pop(get_users_service, None)
 ```
 
-```python
-# src/app/domains/users/schemas.py
-from pydantic import BaseModel, ConfigDict, Field
-
-class UserCreate(BaseModel):
-    # Ein einfaches ``str`` sorgt dafür, dass das Beispiel direkt funktioniert.
-    # Wenn Sie stattdessen Pydantics eingebaute E-Mail-Validierung nutzen möchten,
-    # installieren Sie die optionale Abhängigkeit
-    # (``pip install 'pydantic[email]'`` — dadurch wird ``email-validator`` mitinstalliert)
-    # und ersetzen ``str`` durch ``EmailStr``.
-    email: str = Field(min_length=3, max_length=320)
-    is_active: bool = True
-
-class UserRead(BaseModel):
-    id: int
-    email: str
-    is_active: bool
-    model_config = ConfigDict(from_attributes=True)
-```
-
-Benennen Sie `Item → User`, `ItemNotFoundError → UserNotFoundError`, `ItemRepository → UserRepository`, `ItemService → UserService` in `models.py`, `schemas.py`, `repository.py`, `service.py` und `router.py` um. Vergessen Sie nicht `prefix="/items"` → `prefix="/users"` und `tags=["items"]` → `tags=["users"]` im Router.
-
-Das Repository kann dasselbe `InMemoryStore`-gestützte Muster behalten — es ist generisch über den Entity-Typ:
-
-```python
-# src/app/domains/users/repository.py
-_store: InMemoryStore[User] = InMemoryStore()
-
-class UserRepository:
-    def __init__(self, store: Optional[InMemoryStore[User]] = None) -> None:
-        self._store = store if store is not None else _store
-    # ... same shape as ItemRepository ...
-```
-
-### 3. Die `__init__.py` der Domäne aktualisieren
-
-Die items-Domäne re-exportiert ihre Module, sodass Aufrufer `from src.app.domains.items import service` schreiben können. Spiegeln Sie das für users:
-
-```python
-# src/app/domains/users/__init__.py
-from src.app.domains.users import (  # noqa: F401
-    models,
-    repository,
-    router,
-    schemas,
-    service,
-)
-```
-
-### 4. Den Router im Aggregator registrieren
-
-Dies ist die **einzige Datei außerhalb von `domains/users/`, die Sie anfassen müssen**:
-
-```python
-# src/app/api/router.py
-from src.app.api import health
-from src.app.domains.items import router as items_router
-from src.app.domains.users import router as users_router  # ← add
-
-api_router = APIRouter()
-api_router.include_router(health.router)
-api_router.include_router(items_router.router)
-api_router.include_router(users_router.router)             # ← add
-```
-
-Nach einem Server-Neustart sehen Sie `/api/v1/users` in `/docs` eingebunden.
-
-### 5. Tests hinzufügen
-
-Spiegeln Sie `tests/test_items.py` als `tests/test_users.py` — dieselbe client-getriebene Form, einfach gegen die neuen Endpunkte. Die autouse-Fixture zur Store-Reset in `conftest.py` hält jeden Test bereits isoliert.
-
-Wenn Sie eine zweite Domäne hinzufügen, die ebenfalls `InMemoryStore` nutzt, erweitern Sie die Fixture, um auch deren Store zurückzusetzen, oder behalten Sie eine Fixture pro Domäne.
+Ein erneutes Ausführen von `addroute` erhält bestehende Domänendateien, erstellt fehlende Dateien und vermeidet doppelte Imports und Registrierungen. Gleichnamige klassische Module können über Import-Aliase nebeneinander bestehen. Generierte Pakete re-exportieren ihre Module, und Repositories stellen `reset()` bereit, um Daten zu löschen und die IDs neu zu starten. Die autouse-Fixture des Starters ruft für generierte Domänen `service.reset_store()` auf. Ergänzen Sie diesen Aufruf in älteren Projekten in der bestehenden Reset-Fixture oder verwenden Sie isolierte Repositories über Dependency-Overrides. Prüfen Sie HTTP-Pfade und -Methoden selbst, wenn Sie Router kombinieren; der Generator erkennt keine überlappenden Endpunkte.
 
 ## Schritt 6: Wie es weitergeht
 
@@ -390,4 +369,4 @@ Wenn Sie eine zweite Domäne hinzufügen, die ebenfalls `InMemoryStore` nutzt, e
 
 - **Generierung**: `fastkit startdemo fastapi-domain-starter` → `bash scripts/run-server.sh` → Doku unter `/docs`.
 - **Layout**: `core/` für Konfiguration, `db/` für Persistenz-Abstraktionen, `domains/<concept>/` für Geschäfts-Scheiben, `api/router.py` als zentrale Aggregationsstelle, `tests/` als Spiegel der Laufzeitmodule.
-- **Domäne hinzufügen**: `items/` kopieren, Entity / Schemas / Klassen umbenennen, Re-Exports in `__init__.py` aktualisieren, Router in `src/app/api/router.py` registrieren, Testmodul ergänzen. Keine Änderung an `main.py`.
+- **Domäne hinzufügen**: `fastkit addroute users` ausführen, das generierte `Users*`-CRUD-Gerüst anpassen und Tests mit isolierten Repositories ergänzen. Der Router wird automatisch registriert.

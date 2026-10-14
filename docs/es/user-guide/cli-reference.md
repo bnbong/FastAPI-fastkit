@@ -356,6 +356,7 @@ $ fastkit addroute ROUTE_NAME [PROJECT_DIR] [OPTIONS]
 
 | Opción | Descripción | Por defecto |
 |---|---|---|
+| `--layout [classic-layer\|domain]` | Estructura del módulo de ruta generado; anula los metadatos del preset | Automático según el preset |
 | `--help` | Muestra la ayuda del comando | - |
 
 #### Ejemplos
@@ -391,25 +392,57 @@ $ fastkit addroute users my-api
 
 #### Archivos generados
 
-Crea estos archivos en el proyecto:
+Con `--layout=classic-layer`, crea estos archivos bajo el paquete de la aplicación:
 
 - `src/api/routes/users.py` - Handlers de ruta
 - `src/crud/users.py` - Operaciones CRUD
 - `src/schemas/users.py` - Esquemas Pydantic
 
-También actualiza `src/api/api.py` para incluir el nuevo router.
+Con `--layout=domain`, crea `domains/users/` con `__init__.py`,
+`models.py`, `schemas.py`, `repository.py`, `service.py` y `router.py`.
+La entidad tiene `id: int` y `name: str`, con un repositorio en memoria funcional.
+
+Ambos layouts actualizan el router de API existente y lo conectan a la aplicación
+si hace falta. Las rutas siguen el paquete real de la aplicación, incluido `src/app/`.
+
+Sin la opción, `[tool.fastapi-fastkit].preset = "domain-starter"` selecciona
+`domain`. Cuando falta `preset`, el preset se infiere a partir de `template`;
+`fastapi-domain-starter` también selecciona `domain`. Los demás presets y los proyectos sin
+ninguno de esos metadatos seleccionan `classic-layer`. Un preset desconocido recurre a `classic-layer` con una
+advertencia. La selección explícita no cambia el preset del proyecto.
+
+```console
+$ fastkit addroute users . --layout=domain
+$ fastkit addroute products . --layout=classic-layer
+```
+
+El comando muestra el layout seleccionado antes de la confirmación. Volver a ejecutarlo
+conserva los archivos existentes, restaura los que faltan y evita registros duplicados
+del router. Los módulos con el mismo nombre de layouts distintos pueden coexistir mediante
+alias de import. El generador no comprueba conflictos de método/ruta HTTP.
+La migración es manual.
 
 #### Endpoints generados
 
-Crea endpoints CRUD completos:
+El layout de dominio crea estos endpoints (mostrados con `/api/v1` como prefijo
+existente de la aplicación):
 
 | Método | Endpoint | Descripción |
 |---|---|---|
-| `GET` | `/api/v1/users/` | Obtener todos los usuarios |
-| `POST` | `/api/v1/users/` | Crear un usuario nuevo |
-| `GET` | `/api/v1/users/{user_id}` | Obtener un usuario concreto |
-| `PUT` | `/api/v1/users/{user_id}` | Actualizar un usuario |
-| `DELETE` | `/api/v1/users/{user_id}` | Eliminar un usuario |
+| `GET` | `/api/v1/users` | Listar entidades, 200 |
+| `POST` | `/api/v1/users` | Crear una entidad, 201 |
+| `GET` | `/api/v1/users/{entity_id}` | Leer una entidad, 200 o 404 |
+| `PUT` | `/api/v1/users/{entity_id}` | Reemplazar una entidad, 200 o 404 |
+| `DELETE` | `/api/v1/users/{entity_id}` | Eliminar una entidad, 204 vacío o 404 |
+
+POST y PUT aceptan un `name` de 1 a 120 caracteres. Los IDs los asigna el
+repositorio, y PUT los conserva. No se genera ningún endpoint PATCH para los dominios.
+El almacenamiento es local al proceso, se pierde al reiniciar y es independiente entre dominios;
+reemplaza el repositorio para tener persistencia duradera. Las pruebas pueden inyectar un
+repositorio nuevo a través del servicio y sobrescribir `get_users_service`.
+
+El layout clásico conserva sus stubs GET/POST/PUT/PATCH/DELETE existentes en
+`/<route_name>/` para que los implementes.
 
 #### Dónde se inserta el código
 
@@ -430,7 +463,7 @@ api_router.include_router(health.router)
 ```
 
 Mantén esos comentarios en su sitio cuando edites el archivo — `addroute`
-inserta justo encima de `# fastkit:imports` y `# fastkit:routes`. Un
+inserta justo debajo de `# fastkit:imports` y `# fastkit:routes`. Un
 proyecto que los haya perdido (o que se generó antes de que existieran las
 anclas) sigue funcionando: fastkit recurre a una inserción basada en AST que
 encuentra por sí misma el bloque de imports y los registros de routers. Las
