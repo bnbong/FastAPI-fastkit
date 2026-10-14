@@ -97,8 +97,7 @@ fastapi-{template-name}/
 │   ├── lint.sh-tpl             # Linting
 │   ├── run-server.sh-tpl       # Server execution
 │   └── test.sh-tpl             # Test execution
-├── pyproject.toml-tpl           # ✅ Primary metadata (PEP 621, preferred)
-├── setup.py-tpl                # 🟡 Legacy metadata (accepted for back-compat)
+├── pyproject.toml-tpl           # ✅ Primary metadata (PEP 621, required)
 ├── requirements.txt-tpl         # 🟡 Optional when pyproject declares deps
 ├── setup.cfg-tpl               # Development tools configuration
 ├── README.md-tpl               # ✅ Project documentation (required)
@@ -110,10 +109,16 @@ fastapi-{template-name}/
 
 - `tests/` 目录
 - `README.md-tpl`
-- 至少一份元数据文件:`pyproject.toml-tpl`(推荐,PEP 621)或 `setup.py-tpl`(遗留,仍可接受)
-- 在以下至少一个位置声明 `fastapi` 依赖:`pyproject.toml-tpl` 的 `[project].dependencies`、`requirements.txt-tpl`,或 `setup.py-tpl` 的 `install_requires`
+- `pyproject.toml-tpl`(PEP 621)
+- 在 `pyproject.toml-tpl` 的 `[project].dependencies` 或 `requirements.txt-tpl` 中声明 `fastapi` 依赖
 
-当 `pyproject.toml-tpl` 已声明 `[project].dependencies` 时,`requirements.txt-tpl` 不再是严格必需的。新模板**建议**采用 `pyproject.toml-tpl` 作为主要元数据文件。
+当 `pyproject.toml-tpl` 已声明 `[project].dependencies` 时,`requirements.txt-tpl` 不是必需的 —— 但如果模板同时附带两者,它们必须保持一致:两者之间存在依赖漂移时检查会失败。
+
+**新模板以 pyproject 为先,不得附带 `setup.py-tpl`。**截至 v1.4.0,没有任何内置模板包含该文件。检查仍然接受该文件,以便仓库外的模板继续可用,但这是一条遗留路径。
+
+**统一以 Python 3.12 为目标**:`requires-python = ">=3.12"`、black 的 `target-version = ["py312"]`、mypy 的 `python_version = "3.12"`,以及任何 Docker 基础镜像都使用 `python:3.12-slim`。检查会确认这三处固定版本保持一致。
+
+**切勿将 `FastAPI-fastkit` 声明为生成项目的运行时依赖。**该 CLI 是开发工具;模板的依赖列表只应包含生成的应用本身会导入的内容。
 
 ### 文件编写指南
 
@@ -237,51 +242,22 @@ isort==5.12.0
 mypy==1.7.1
 ```
 
-#### 4. 编写 setup.py-tpl(遗留 —— 在已有 pyproject 时为可选)
+#### 4. 路由锚点
 
-保留它是为了兼容遗留模板。如果新模板已附带 `pyproject.toml-tpl`,则无需此文件。
+附带 `main.py-tpl` 或 API 聚合模块的模板,应当标记出 `fastkit addroute` 插入代码的位置:
 
 ```python
-"""
-<project_name> package setup
+from src.app.api import health
 
-Project created with FastAPI-fastkit.
-"""
-from setuptools import find_packages, setup
+# fastkit:imports
 
-# Dependencies list (type annotation required)
-install_requires: list[str] = [
-    "fastapi>=0.104.0",
-    "uvicorn[standard]>=0.24.0",
-    "pydantic>=2.5.0",
-    "pydantic-settings>=2.1.0",
-    "python-dotenv>=1.0.0",
-]
+api_router = APIRouter()
+api_router.include_router(health.router)
 
-setup(
-    name="<project_name>",
-    version="1.0.0",
-    description="[FastAPI-fastkit templated] <description>",  # Identity marker used by is_fastkit_project()
-    long_description=open("README.md").read(),
-    long_description_content_type="text/markdown",
-    author="<author>",
-    author_email="<author_email>",
-    packages=find_packages(),
-    install_requires=install_requires,
-    python_requires=">=3.8",
-    classifiers=[
-        "Development Status :: 4 - Beta",
-        "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
-        "Programming Language :: Python :: 3.12",
-    ],
-)
+# fastkit:routes
 ```
+
+如果没有这些锚点,`addroute` 会退回到基于 AST 的插入方式,自行定位 import 块和路由注册位置 —— 因此缺少锚点的模板仍然可以工作,但结果的可预测性较差。编辑这些文件时请保留这些注释。
 
 #### 5. 编写测试文件
 
@@ -342,7 +318,16 @@ make inspect-template TEMPLATES="fastapi-your-template"
 
 # Validate with verbose output
 python scripts/inspect-templates.py --templates "fastapi-your-template" --verbose
+
+# Fast local loop: no network, no server boot
+python scripts/inspect-templates.py --templates "fastapi-your-template" \
+    --offline --no-smoke
+
+# Full check before opening a PR (adds mypy over the generated project)
+python scripts/inspect-templates.py --templates "fastapi-your-template" --mypy
 ```
+
+`--offline` 会跳过 PyPI 依赖新鲜度查询,`--no-smoke` 会跳过启动生成项目(最慢的步骤),`--mypy` 会对生成项目进行类型检查。每项检查具体做什么,请参阅 [模板质量保障](../reference/template-quality-assurance.md)。
 
 !!! note
 
@@ -356,7 +341,7 @@ inspector 会自动校验以下项目:
 
 - [ ] 存在 `tests/` 目录
 - [ ] 存在 `README.md-tpl` 文件
-- [ ] 至少存在 `pyproject.toml-tpl`(推荐)或 `setup.py-tpl`(遗留)之一
+- [ ] 存在 `pyproject.toml-tpl`(新模板中不包含 `setup.py-tpl`)
 
 #### ✅ 文件扩展名校验
 
@@ -368,7 +353,8 @@ inspector 会自动校验以下项目:
 - [ ] `fastapi` 至少声明于以下其一:
     - [ ] `pyproject.toml-tpl` 的 `[project].dependencies`(推荐)
     - [ ] `requirements.txt-tpl`
-    - [ ] `setup.py-tpl` 的 `install_requires`
+- [ ] `requirements.txt-tpl` 与 `[project].dependencies` 不存在冲突
+- [ ] `FastAPI-fastkit` **不是**运行时依赖
 
 #### ✅ FastAPI 实现校验
 
@@ -380,6 +366,24 @@ inspector 会自动校验以下项目:
 - [ ] 成功创建虚拟环境
 - [ ] 成功安装依赖
 - [ ] 所有 pytest 测试通过
+
+#### ✅ 冒烟测试
+
+- [ ] 生成的项目可以在 uvicorn 下启动
+- [ ] `/docs` 有响应
+- [ ] `/health` 有响应
+
+uvicorn 的目标依次从生成的 `pyproject.toml` 中的 `[tool.fastapi-fastkit].app_module`、`template-config.yml` 中的 `app_module`,以及约定俗成的 `main.py` 位置解析得到。
+
+#### ✅ 配置一致性
+
+- [ ] `requires-python`、black 的 `target-version` 与 mypy 的 `python_version` 都指向 Python 3.12
+- [ ] `requirements.txt-tpl` 与 `[project].dependencies` 之间不存在依赖漂移
+- [ ] 不存在对 `FastAPI-fastkit` 的自我依赖
+
+#### ✅ 占位符残留
+
+- [ ] 项目生成后不残留任何 `<placeholder>`
 
 #### ✅ 自动化模板测试
 

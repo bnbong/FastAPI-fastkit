@@ -403,7 +403,7 @@ FastAPI-fastkit/
         - **`scaffolder.py`** - The generation pipeline shared by `init` and `startdemo`
         - **`transducer.py`** - Template transducer
     - **`core/`** - Core configuration and exceptions
-    - **`fragments/`** - Jinja2 fragments rendered into generated projects (see below)
+    - **`fragments/`** - Jinja2 fragments rendered into generated projects (see above)
     - **`fastapi_project_template/`** - Project templates (fastapi-default, fastapi-domain-starter, etc.)
     - **`utils/`** - Shared utility functions
 - **`tests/`** - Test suite

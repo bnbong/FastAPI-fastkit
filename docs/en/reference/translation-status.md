@@ -34,19 +34,18 @@ next section explains).
 | Locale | Status | Markdown pages | Notes |
 |---|---|---:|---|
 | 🇬🇧 English (`en`) | ✅ Source of truth | 29 / 29 | Authoritative. |
-| 🇰🇷 Korean (`ko`) | 🟡 Partial | 26 / 29 | Phases 1-3 complete. The three tutorials added in v1.4.0 (`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`) are not translated yet and fall back to English. `docs/ko/changelog.md` intentionally reuses the canonical English `CHANGELOG.md`. |
-| 🇯🇵 Japanese (`ja`) | 🟡 Partial | 26 / 29 | Phases 1-3 complete. The three tutorials added in v1.4.0 (`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`) are not translated yet and fall back to English. `docs/ja/changelog.md` intentionally reuses the canonical English `CHANGELOG.md`. |
-| 🇨🇳 Chinese (`zh`) | 🟡 Partial | 26 / 29 | Phases 1-3 complete. The three tutorials added in v1.4.0 (`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`) are not translated yet and fall back to English. `docs/zh/changelog.md` intentionally reuses the canonical English `CHANGELOG.md`. |
-| 🇪🇸 Spanish (`es`) | 🟡 Partial | 26 / 29 | Phases 1-3 complete. The three tutorials added in v1.4.0 (`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`) are not translated yet and fall back to English. `docs/es/changelog.md` intentionally reuses the canonical English `CHANGELOG.md`. |
-| 🇫🇷 French (`fr`) | 🟡 Partial | 26 / 29 | Phases 1-3 complete. The three tutorials added in v1.4.0 (`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`) are not translated yet and fall back to English. `docs/fr/changelog.md` intentionally reuses the canonical English `CHANGELOG.md`. |
-| 🇩🇪 German (`de`) | 🟡 Partial | 26 / 29 | Phases 1-3 complete. The three tutorials added in v1.4.0 (`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`) are not translated yet and fall back to English. `docs/de/changelog.md` intentionally reuses the canonical English `CHANGELOG.md`. |
+| 🇰🇷 Korean (`ko`) | ✅ Complete | 29 / 29 | Phases 1-3 complete. Re-synced with the v1.4.1 English sources on 2026-10-11: the three v1.4.0 tutorials (`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`) are translated and pages that had drifted since their original translation were brought back in line. `docs/ko/changelog.md` intentionally reuses the canonical English `CHANGELOG.md`. |
+| 🇯🇵 Japanese (`ja`) | ✅ Complete | 29 / 29 | Phases 1-3 complete. Re-synced with the v1.4.1 English sources on 2026-10-11: the three v1.4.0 tutorials (`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`) are translated and pages that had drifted since their original translation were brought back in line. `docs/ja/changelog.md` intentionally reuses the canonical English `CHANGELOG.md`. |
+| 🇨🇳 Chinese (`zh`) | ✅ Complete | 29 / 29 | Phases 1-3 complete. Re-synced with the v1.4.1 English sources on 2026-10-11: the three v1.4.0 tutorials (`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`) are translated and pages that had drifted since their original translation were brought back in line. `docs/zh/changelog.md` intentionally reuses the canonical English `CHANGELOG.md`. |
+| 🇪🇸 Spanish (`es`) | ✅ Complete | 29 / 29 | Phases 1-3 complete. Re-synced with the v1.4.1 English sources on 2026-10-11: the three v1.4.0 tutorials (`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`) are translated and pages that had drifted since their original translation were brought back in line. `docs/es/changelog.md` intentionally reuses the canonical English `CHANGELOG.md`. |
+| 🇫🇷 French (`fr`) | ✅ Complete | 29 / 29 | Phases 1-3 complete. Re-synced with the v1.4.1 English sources on 2026-10-11: the three v1.4.0 tutorials (`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`) are translated and pages that had drifted since their original translation were brought back in line. `docs/fr/changelog.md` intentionally reuses the canonical English `CHANGELOG.md`. |
+| 🇩🇪 German (`de`) | ✅ Complete | 29 / 29 | Phases 1-3 complete. Re-synced with the v1.4.1 English sources on 2026-10-11: the three v1.4.0 tutorials (`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`) are translated and pages that had drifted since their original translation were brought back in line. `docs/de/changelog.md` intentionally reuses the canonical English `CHANGELOG.md`. |
 
-*Snapshot verified 2026-09-04, for the v1.4.0 release. English gained three
-tutorial pages (`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`,
-`tutorial/llm-agent.md`), so every other locale dropped from ✅ Complete to
-🟡 Partial at 26 / 29. The Korean landing page, CLI reference and starter
-guide were re-synced with their English sources in the same release; the
-remaining Korean pages are present but predate the v1.4.0 English updates.* These counts are maintained by hand;
+*Snapshot verified 2026-10-11, after the v1.4.1 release. All six translated
+locales were brought to parity with the English sources: the three tutorials
+added in v1.4.0 were translated and every page that had drifted since its
+original translation was re-synced. Translations can still lag within a
+release — if a translated page disagrees with English, trust English.* These counts are maintained by hand;
 to recount the current state from the repo root, run:
 
 ```console
@@ -61,6 +60,8 @@ update it (or open a PR / issue noting the drift).
 Legend:
 
 - ✅ **Source of truth** — the locale we author against.
+- ✅ **Complete** — every English page has a translated counterpart.
+  Individual pages may still lag behind an English update within a release.
 - 🟡 **Partial** — some pages translated; missing pages fall back.
 - 🔴 **Skeleton** — language switcher entry exists, but no translated
   pages are checked in yet. The site renders English content under the

@@ -212,6 +212,40 @@ Success: no issues found in 12 source files
 | `make inspect-templates-verbose` | 詳細出力付きで検査 |
 | `make inspect-template` | 特定のテンプレートを検査 (TEMPLATES パラメータ) |
 
+基盤となるスクリプトには、反復作業中に知っておくと便利なフラグが 3 つあります:
+`--offline` (PyPI の鮮度チェックをスキップ)、`--no-smoke` (生成されたプロジェクトを uvicorn で
+起動する処理をスキップ — 最も時間のかかるステップです)、`--mypy` (生成されたプロジェクトを型チェック。
+時間がかかるためオプトイン) です。各チェックが実際に何を行うかは
+[テンプレート品質保証](../reference/template-quality-assurance.md) を参照してください。
+
+```console
+$ python scripts/inspect-templates.py --templates fastapi-sqlmodel --offline --no-smoke
+```
+
+### 生成コードは Jinja2 フラグメントに置かれる
+
+`fastkit init --interactive` がプロジェクトに書き込むもの — `main.py`、データベースと認証のモジュール、
+Docker ファイル、pytest の設定 — はすべて、Python の文字列から組み立てられるのではなく、
+`src/fastapi_fastkit/fragments/` 配下のテンプレートからレンダリングされます。`main.py.j2` はどの機能も
+ハードコードしていません: `DynamicConfigGenerator` から渡される `import_fragments`、`lifespan_fragments`、
+`setup_fragments` の各リストを順に処理してそれぞれを include するため、機能を自由に組み合わせられます。
+
+機能を追加する手順はおおよそ次のとおりです:
+
+1. 各部品を `main/imports/`、`main/lifespan/`、`main/setup/` のいずれか (または複数) に置きます
+   (lifespan のフラグメントはスペース 4 つでインデントし、他の 2 つはインデントしません)。
+2. 該当する設定の参照で条件分岐させたうえで、`DynamicConfigGenerator._main_fragments()` に登録します。
+3. 単独のモジュールの場合は `<area>/<feature>.py.j2` を追加し、`self._render(...)` でレンダリングします。
+4. `tests/test_backends/test_project_builder_config_generator.py` の組み合わせマトリクスを拡張します —
+   このテストは、レンダリングされたすべての Python ファイルが `ast.parse` でパースできることを検証します。
+
+つまずきやすい制約が 2 つあります: すべてのフラグメントは末尾の改行で終わる必要があり
+(環境は `keep_trailing_newline=True` で構築されています)、`main.py.j2` は `# fastkit:imports` /
+`# fastkit:routes` のアンカーを保持し続ける必要があります — `fastkit addroute` はそこに挿入します。
+
+正式な手順はフラグメント自体のすぐ隣、
+[`src/fastapi_fastkit/fragments/README.md`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fragments/README.md) にあります。
+
 ### ドキュメントコマンド
 
 | コマンド | 説明 |
@@ -353,13 +387,16 @@ FastAPI-fastkit/
 - **`src/fastapi_fastkit/`** — メインパッケージのソース
     - **`cli.py`** — メイン CLI のエントリポイント
     - **`backend/`** — コアのバックエンドロジック
-        - **`inspector.py`** — テンプレートインスペクタ
+        - **`inspection/`** — テンプレート検査パイプライン (context、checks、consistency、freshness、smoke、lint、report)
+        - **`inspector.py`** — `inspection/` に対するファサード。従来の import パスのために残されている
         - **`interactive/`** — 対話型モードの構成要素 (プロンプト、セレクタ、バリデータ)
         - **`package_managers/`** — パッケージマネージャー実装 (pip、uv、pdm、poetry)
-        - **`project_builder/`** — プロジェクト構築ユーティリティ
+        - **`project_builder/`** — プロジェクト構築ユーティリティ (フラグメント駆動の設定ジェネレーターを含む)
+        - **`scaffolder.py`** — `init` と `startdemo` が共有する生成パイプライン
         - **`transducer.py`** — テンプレートトランスデューサ
     - **`core/`** — コアの設定と例外
-    - **`fastapi_project_template/`** — プロジェクトテンプレート (fastapi-default、fastapi-async-crud など)
+    - **`fragments/`** — 生成されるプロジェクトにレンダリングされる Jinja2 フラグメント (前述)
+    - **`fastapi_project_template/`** — プロジェクトテンプレート (fastapi-default、fastapi-domain-starter など)
     - **`utils/`** — 共有ユーティリティ
 - **`tests/`** — テストスイート
     - **`test_backends/`** — バックエンド固有のテスト

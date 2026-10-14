@@ -18,15 +18,15 @@ FastAPI-fastkit のドキュメントは複数の言語でビルドされます�
 
 | ロケール | ステータス | Markdown ページ | 備考 |
 |---|---|---:|---|
-| 🇬🇧 English (`en`) | ✅ 原典 (Source of truth) | 26 / 26 | すべての基準になる原文です。 |
-| 🇰🇷 Korean (`ko`) | ✅ 完了 | 26 / 26 | ロケール側のページはすべてそろっています。Phase 1: トップレベル + コアの user-guide、Phase 2: 残りの user-guide + すべての tutorial、Phase 3: contributing + reference。`docs/ko/changelog.md` は英語の `CHANGELOG.md` を意図的に再利用しています。 |
-| 🇯🇵 Japanese (`ja`) | ✅ 完了 | 26 / 26 | ロケール側のページはすべて存在します。Phase 1: トップレベル + コアの user-guide、Phase 2: 残りの user-guide + すべての tutorial、Phase 3: contributing + reference。`docs/ja/changelog.md` は英語の `CHANGELOG.md` を意図的に再利用しています。 |
-| 🇨🇳 Chinese (`zh`) | ✅ 完了 | 26 / 26 | ロケール側のページはすべて存在します。Phase 1: トップレベル + コアの user-guide、Phase 2: 残りの user-guide + すべての tutorial、Phase 3: contributing + reference。`docs/zh/changelog.md` は英語の `CHANGELOG.md` を意図的に再利用しています。 |
-| 🇪🇸 Spanish (`es`) | ✅ 完了 | 26 / 26 | ロケール側のページはすべて存在します。Phase 1: トップレベル + コアの user-guide、Phase 2: 残りの user-guide + すべての tutorial、Phase 3: contributing + reference。`docs/es/changelog.md` は英語の `CHANGELOG.md` を意図的に再利用しています。 |
-| 🇫🇷 French (`fr`) | ✅ 完了 | 26 / 26 | ロケール側のページはすべて存在します。Phase 1: トップレベル + コアの user-guide、Phase 2: 残りの user-guide + すべての tutorial、Phase 3: contributing + reference。`docs/fr/changelog.md` は英語の `CHANGELOG.md` を意図的に再利用しています。 |
-| 🇩🇪 German (`de`) | ✅ 完了 | 26 / 26 | ロケール側のページはすべて存在します。Phase 1: トップレベル + コアの user-guide、Phase 2: 残りの user-guide + すべての tutorial、Phase 3: contributing + reference。`docs/de/changelog.md` は英語の `CHANGELOG.md` を意図的に再利用しています。 |
+| 🇬🇧 English (`en`) | ✅ 原典 (Source of truth) | 29 / 29 | すべての基準になる原文です。 |
+| 🇰🇷 Korean (`ko`) | ✅ 完了 | 29 / 29 | Phase 1〜3 は完了しています。2026-10-11 に v1.4.1 の英語原典と再同期しました: v1.4.0 で追加された 3 つのチュートリアル (`tutorial/auth-jwt.md`、`tutorial/sqlmodel.md`、`tutorial/llm-agent.md`) を翻訳し、最初の翻訳以降に英語原典とずれていたページも元どおりに揃えました。`docs/ko/changelog.md` は英語の `CHANGELOG.md` を意図的に再利用しています。 |
+| 🇯🇵 Japanese (`ja`) | ✅ 完了 | 29 / 29 | Phase 1〜3 は完了しています。2026-10-11 に v1.4.1 の英語原典と再同期しました: v1.4.0 で追加された 3 つのチュートリアル (`tutorial/auth-jwt.md`、`tutorial/sqlmodel.md`、`tutorial/llm-agent.md`) を翻訳し、最初の翻訳以降に英語原典とずれていたページも元どおりに揃えました。`docs/ja/changelog.md` は英語の `CHANGELOG.md` を意図的に再利用しています。 |
+| 🇨🇳 Chinese (`zh`) | ✅ 完了 | 29 / 29 | Phase 1〜3 は完了しています。2026-10-11 に v1.4.1 の英語原典と再同期しました: v1.4.0 で追加された 3 つのチュートリアル (`tutorial/auth-jwt.md`、`tutorial/sqlmodel.md`、`tutorial/llm-agent.md`) を翻訳し、最初の翻訳以降に英語原典とずれていたページも元どおりに揃えました。`docs/zh/changelog.md` は英語の `CHANGELOG.md` を意図的に再利用しています。 |
+| 🇪🇸 Spanish (`es`) | ✅ 完了 | 29 / 29 | Phase 1〜3 は完了しています。2026-10-11 に v1.4.1 の英語原典と再同期しました: v1.4.0 で追加された 3 つのチュートリアル (`tutorial/auth-jwt.md`、`tutorial/sqlmodel.md`、`tutorial/llm-agent.md`) を翻訳し、最初の翻訳以降に英語原典とずれていたページも元どおりに揃えました。`docs/es/changelog.md` は英語の `CHANGELOG.md` を意図的に再利用しています。 |
+| 🇫🇷 French (`fr`) | ✅ 完了 | 29 / 29 | Phase 1〜3 は完了しています。2026-10-11 に v1.4.1 の英語原典と再同期しました: v1.4.0 で追加された 3 つのチュートリアル (`tutorial/auth-jwt.md`、`tutorial/sqlmodel.md`、`tutorial/llm-agent.md`) を翻訳し、最初の翻訳以降に英語原典とずれていたページも元どおりに揃えました。`docs/fr/changelog.md` は英語の `CHANGELOG.md` を意図的に再利用しています。 |
+| 🇩🇪 German (`de`) | ✅ 完了 | 29 / 29 | Phase 1〜3 は完了しています。2026-10-11 に v1.4.1 の英語原典と再同期しました: v1.4.0 で追加された 3 つのチュートリアル (`tutorial/auth-jwt.md`、`tutorial/sqlmodel.md`、`tutorial/llm-agent.md`) を翻訳し、最初の翻訳以降に英語原典とずれていたページも元どおりに揃えました。`docs/de/changelog.md` は英語の `CHANGELOG.md` を意図的に再利用しています。 |
 
-*スナップショット検証日: 2026-06-18。Phase 3 (contributing + reference) を反映した現在のブランチを基準に `zh` 行を再集計しました。中国語はロケール側のページが 26 件すべて存在し、✅ 完了として追跡されます。* この表は手動で管理されています。リポジトリルートで現在の状態を再カウントしたい場合は、次のコマンドを実行してください:
+*スナップショット検証日: 2026-10-11 (v1.4.1 リリース後)。翻訳対象の 6 つのロケールすべてを英語原典と同じ水準に揃えました: v1.4.0 で追加された 3 つのチュートリアルを翻訳し、最初の翻訳以降にずれていたすべてのページを再同期しました。リリースの途中では翻訳が遅れることもあります — 翻訳ページが英語と食い違う場合は英語を信頼してください。* この表は手動で管理されています。リポジトリルートで現在の状態を再カウントしたい場合は、次のコマンドを実行してください:
 
 ```console
 $ for loc in en ko ja zh es fr de; do
@@ -39,6 +39,7 @@ $ for loc in en ko ja zh es fr de; do
 凡例:
 
 - ✅ **原典 (Source of truth)** — ドキュメントを記述する際に基準とするロケールです。
+- ✅ **完了** — すべての英語ページに対応する翻訳ページがあります。ただし、リリースの途中では個々のページが英語の更新より遅れることがあります。
 - 🟡 **部分** — 一部のページのみ翻訳済み。未翻訳のページは英語にフォールバックします。
 - 🔴 **スケルトン** — 言語切替メニューには表示されますが、翻訳済みのページがまだリポジトリに追加されていない状態です。翻訳済みのナビゲーションラベルの下に、英語コンテンツがそのまま表示されます。
 

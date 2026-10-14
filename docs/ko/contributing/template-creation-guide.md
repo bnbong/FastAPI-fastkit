@@ -97,8 +97,7 @@ fastapi-{template-name}/
 │   ├── lint.sh-tpl             # 린팅
 │   ├── run-server.sh-tpl       # 서버 실행
 │   └── test.sh-tpl             # 테스트 실행
-├── pyproject.toml-tpl           # ✅ 주요 메타데이터 (PEP 621, 권장)
-├── setup.py-tpl                # 🟡 Legacy 메타데이터 (하위 호환을 위해 허용)
+├── pyproject.toml-tpl           # ✅ 주요 메타데이터 (PEP 621, 필수)
 ├── requirements.txt-tpl         # 🟡 pyproject 가 의존성을 선언하면 선택 사항
 ├── setup.cfg-tpl               # 개발 도구 설정
 ├── README.md-tpl               # ✅ 프로젝트 문서 (필수)
@@ -110,10 +109,16 @@ fastapi-{template-name}/
 
 - `tests/` 디렉터리
 - `README.md-tpl`
-- 메타데이터 파일 최소 하나: `pyproject.toml-tpl` (권장, PEP 621) 또는 `setup.py-tpl` (레거시, 여전히 허용)
-- 다음 중 최소 한 곳에 `fastapi` 의존성 선언: `pyproject.toml-tpl` 의 `[project].dependencies`, `requirements.txt-tpl`, 또는 `setup.py-tpl` 의 `install_requires`
+- `pyproject.toml-tpl` (PEP 621)
+- `pyproject.toml-tpl` 의 `[project].dependencies` 또는 `requirements.txt-tpl` 에 `fastapi` 의존성 선언
 
-`pyproject.toml-tpl`이 `[project].dependencies`를 선언한다면 `requirements.txt-tpl`은 더 이상 필수가 아닙니다. 최신 템플릿이라면 `pyproject.toml-tpl`을 주요 메타데이터 파일로 사용하는 편을 권장합니다.
+`pyproject.toml-tpl`이 `[project].dependencies`를 선언한다면 `requirements.txt-tpl`은 필수가 아닙니다. 다만 템플릿이 두 파일을 모두 제공한다면 내용이 서로 일치해야 합니다. 두 파일 사이에 의존성 불일치가 있으면 검사가 실패합니다.
+
+**새 템플릿은 pyproject를 우선해야 하며 `setup.py-tpl`을 제공하면 안 됩니다.** v1.4.0 기준으로 번들 템플릿 중 이 파일을 가진 템플릿은 없습니다. 저장소 밖의 템플릿이 계속 동작하도록 검사 단계에서는 여전히 이 파일을 허용하지만, 이는 레거시 경로입니다.
+
+**Python 3.12를 일관되게 대상으로 하세요**: `requires-python = ">=3.12"`, black `target-version = ["py312"]`, mypy `python_version = "3.12"`, 그리고 Docker 베이스 이미지는 `python:3.12-slim`을 사용합니다. 검사 단계에서는 세 가지 고정 값이 서로 일치하는지 확인합니다.
+
+**생성된 프로젝트의 런타임 의존성으로 `FastAPI-fastkit`을 절대 선언하지 마세요.** CLI는 개발 도구입니다. 템플릿의 의존성 목록에는 생성된 애플리케이션이 실제로 import하는 패키지만 들어 있어야 합니다.
 
 ### 파일 작성 가이드
 
@@ -237,51 +242,22 @@ isort==5.12.0
 mypy==1.7.1
 ```
 
-#### 4. setup.py-tpl 작성 (레거시 — `pyproject`가 있다면 선택 사항)
+#### 4. 라우트 앵커
 
-Legacy 템플릿을 위해 유지됩니다. 새 템플릿은 `pyproject.toml-tpl` 을 제공한다면 이 파일이 필요 없습니다.
+`main.py-tpl`이나 API 집계 모듈을 제공하는 템플릿은 `fastkit addroute`가 코드를 삽입할 위치를 표시해 두어야 합니다:
 
 ```python
-"""
-<project_name> package setup
+from src.app.api import health
 
-Project created with FastAPI-fastkit.
-"""
-from setuptools import find_packages, setup
+# fastkit:imports
 
-# 의존성 목록 (타입 어노테이션 필수)
-install_requires: list[str] = [
-    "fastapi>=0.104.0",
-    "uvicorn[standard]>=0.24.0",
-    "pydantic>=2.5.0",
-    "pydantic-settings>=2.1.0",
-    "python-dotenv>=1.0.0",
-]
+api_router = APIRouter()
+api_router.include_router(health.router)
 
-setup(
-    name="<project_name>",
-    version="1.0.0",
-    description="[FastAPI-fastkit templated] <description>",  # is_fastkit_project()가 사용하는 식별 마커
-    long_description=open("README.md").read(),
-    long_description_content_type="text/markdown",
-    author="<author>",
-    author_email="<author_email>",
-    packages=find_packages(),
-    install_requires=install_requires,
-    python_requires=">=3.8",
-    classifiers=[
-        "Development Status :: 4 - Beta",
-        "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
-        "Programming Language :: Python :: 3.12",
-    ],
-)
+# fastkit:routes
 ```
+
+앵커가 없으면 `addroute`는 AST 기반 삽입 방식으로 대신 동작해 import 블록과 라우터 등록 위치를 직접 찾습니다. 따라서 앵커가 없는 템플릿도 동작은 하지만, 결과를 예측하기가 더 어렵습니다. 이 파일들을 수정할 때는 앵커 주석을 그대로 유지하세요.
 
 #### 5. 테스트 파일 작성
 
@@ -342,7 +318,16 @@ make inspect-template TEMPLATES="fastapi-your-template"
 
 # verbose 출력으로 검증
 python scripts/inspect-templates.py --templates "fastapi-your-template" --verbose
+
+# 빠른 로컬 반복 실행: 네트워크 조회 없음, 서버 실행 없음
+python scripts/inspect-templates.py --templates "fastapi-your-template" \
+    --offline --no-smoke
+
+# PR을 열기 전 전체 검사 (생성된 프로젝트에 mypy 검사 추가)
+python scripts/inspect-templates.py --templates "fastapi-your-template" --mypy
 ```
+
+`--offline`은 PyPI 의존성 최신성 조회를 건너뛰고, `--no-smoke`는 가장 느린 단계인 생성된 프로젝트 실행을 건너뛰며, `--mypy`는 생성된 프로젝트의 타입을 검사합니다. 각 검사가 하는 일은 [템플릿 품질 보증](../reference/template-quality-assurance.md)을 참고하세요.
 
 !!! note
 
@@ -356,7 +341,7 @@ inspector 가 자동으로 검증하는 항목들입니다:
 
 - [ ] `tests/` 디렉터리 존재
 - [ ] `README.md-tpl` 파일 존재
-- [ ] `pyproject.toml-tpl` (권장) 또는 `setup.py-tpl` (레거시) 중 최소 하나 존재
+- [ ] `pyproject.toml-tpl` 존재 (새 템플릿에는 `setup.py-tpl` 없음)
 
 #### ✅ 파일 확장자 검증
 
@@ -368,7 +353,8 @@ inspector 가 자동으로 검증하는 항목들입니다:
 - [ ] 다음 중 최소 한 곳에 `fastapi` 가 선언됨:
     - [ ] `pyproject.toml-tpl` 의 `[project].dependencies` (권장)
     - [ ] `requirements.txt-tpl`
-    - [ ] `setup.py-tpl` 의 `install_requires`
+- [ ] `requirements.txt-tpl` 과 `[project].dependencies` 의 내용이 서로 어긋나지 않음
+- [ ] `FastAPI-fastkit` 이 런타임 의존성이 **아님**
 
 #### ✅ FastAPI 구현 검증
 
@@ -380,6 +366,24 @@ inspector 가 자동으로 검증하는 항목들입니다:
 - [ ] 가상 환경 생성 성공
 - [ ] 의존성 설치 성공
 - [ ] 모든 pytest 테스트 통과
+
+#### ✅ 스모크 테스트
+
+- [ ] 생성된 프로젝트가 uvicorn으로 실행됨
+- [ ] `/docs` 가 응답함
+- [ ] `/health` 가 응답함
+
+uvicorn 대상은 생성된 `pyproject.toml`의 `[tool.fastapi-fastkit].app_module`, `template-config.yml`의 `app_module`, 관례적인 `main.py` 위치 순서로 결정됩니다.
+
+#### ✅ 설정 일관성
+
+- [ ] `requires-python`, black `target-version`, mypy `python_version` 이 모두 Python 3.12를 가리킴
+- [ ] `requirements.txt-tpl` 과 `[project].dependencies` 사이에 의존성 불일치가 없음
+- [ ] `FastAPI-fastkit` 에 대한 자기 의존성이 없음
+
+#### ✅ 플레이스홀더 잔여 확인
+
+- [ ] 프로젝트 생성 후 남아 있는 `<placeholder>`가 없음
 
 #### ✅ 자동 템플릿 테스트
 

@@ -21,6 +21,38 @@ Chaque mercredi à minuit (UTC), notre workflow GitHub Actions inspecte automati
 - ✅ **Vérification des dépendances** — confirme que FastAPI et les dépendances requises sont correctement définies
 - ✅ **Implémentation FastAPI** — vérifie que les modèles contiennent une initialisation correcte de l'application FastAPI
 - ✅ **Exécution des tests** — exécute les tests du modèle pour s'assurer du bon fonctionnement
+- ✅ **Test smoke** — démarre le projet généré avec uvicorn et sonde sa surface HTTP
+- ✅ **Cohérence de la configuration** — épinglages de version Python, divergence des dépendances, auto-dépendance
+- ✅ **Résidus d'emplacements** — aucun `<placeholder>` ne subsiste après la génération du projet
+- ✅ **Fraîcheur des dépendances** — signale les épinglages en retard sur leur dernière version publiée sur PyPI
+
+## Ce que fait chaque vérification
+
+L'inspection génère un **véritable projet** à partir du modèle — copie, conversion des fichiers `-tpl`, injection des métadonnées — puis exécute chaque vérification sur ce projet généré, et non sur la source du modèle. Une vérification qui ne lit que le modèle ne peut pas détecter un emplacement que la génération n'a pas réussi à substituer.
+
+### Test smoke
+
+Le projet généré est démarré avec uvicorn sur un port libre, et l'inspecteur interroge le serveur jusqu'à ce qu'il réponde ou que le délai expire. Une fois le serveur opérationnel, `/docs` et `/health` sont appelés et leurs codes de statut vérifiés. Le processus serveur est ensuite arrêté, avec escalade vers `SIGKILL` s'il ne s'arrête pas.
+
+La cible uvicorn est résolue dans l'ordre suivant : `[tool.fastapi-fastkit].app_module` dans le `pyproject.toml` généré, puis `app_module` dans le `template-config.yml` du modèle, puis les emplacements conventionnels de `main.py`. C'est le même contrat que celui utilisé par `fastkit runserver` : un modèle dont le test smoke démarre est donc un modèle dont le projet généré s'exécute.
+
+C'est la vérification qui détecte ce que l'analyse statique ne peut pas voir : un import qui ne se résout qu'à l'exécution, un `lifespan` qui lève une exception, un champ de configuration sans valeur par défaut.
+
+### Cohérence de la configuration
+
+Trois points sont validés par rapport au `pyproject.toml-tpl` du modèle :
+
+- **Les épinglages de version Python concordent et ciblent 3.12** — `requires-python`, le `target-version` de black et le `python_version` de mypy. Un modèle qui formate en `py311` tout en déclarant `>=3.12` est un bug qui attend de tomber sur un contributeur.
+- **Aucune divergence des dépendances** — les paquets déclarés dans `requirements.txt-tpl` et dans `[project].dependencies` ne doivent pas se contredire. Les modèles fournissent les deux fichiers pour la compatibilité avec les gestionnaires de paquets, et deux listes finissent toujours par diverger si rien ne les vérifie.
+- **Aucune auto-dépendance** — un projet généré ne doit pas déclarer `FastAPI-fastkit` comme dépendance d'exécution. Le CLI est un outil de développement ; l'embarquer dans chaque application générée ferait entrer tout l'arbre de dépendances de fastkit dans des projets sans rapport.
+
+### Résidus d'emplacements
+
+Chaque `<project_name>`, `<description>` et consorts doit être substitué pendant la génération. Tout `<placeholder>` encore présent dans le projet généré est une erreur — cela signifie que l'injection des métadonnées ne connaît pas ce fichier, et que l'utilisateur le recevrait tel quel.
+
+### Fraîcheur des dépendances
+
+Les versions épinglées sont comparées à la dernière version publiée sur PyPI et signalées comme avertissements, jamais comme erreurs — un modèle en retard d'une version mineure est une information, pas un échec. C'est la seule vérification qui accède au réseau, et `--offline` l'ignore.
 
 ## Système de tests automatisés des modèles
 
@@ -140,6 +172,30 @@ $ python scripts/inspect-templates.py --verbose
 $ python scripts/inspect-templates.py --output my_results.json
 ```
 
+#### Options d'inspection
+
+| Option | Effet | Quand l'utiliser |
+|---|---|---|
+| `--offline` | Ignore toutes les requêtes réseau (rapport de fraîcheur des dépendances) | Pas de réseau, ou vous voulez une exécution rapide et hermétique |
+| `--no-smoke` | Ignore le démarrage du projet généré avec uvicorn | Vous itérez uniquement sur la structure ; le test smoke est l'étape la plus lente |
+| `--mypy` | Vérifie les types du projet généré avec mypy | Avant de soumettre un modèle — option à activer explicitement car elle est lente |
+| `--templates` | Liste de modèles à inspecter, séparés par des virgules | Vous travaillez sur un seul modèle |
+| `--verbose` | Sortie détaillée | Vous déboguez un échec |
+| `--output` | Chemin du fichier de résultats JSON | Vous conservez plusieurs exécutions côte à côte |
+
+Une boucle locale rapide sur un seul modèle :
+
+```console
+$ python scripts/inspect-templates.py \
+    --templates fastapi-sqlmodel --offline --no-smoke --verbose
+```
+
+...et la vérification complète avant d'ouvrir une PR :
+
+```console
+$ python scripts/inspect-templates.py --templates fastapi-sqlmodel --mypy
+```
+
 ### Utiliser les commandes Makefile
 
 ```console
@@ -192,10 +248,11 @@ Pour qu'un modèle passe l'inspection, il doit remplir ces exigences :
 - Doit contenir un répertoire `src/` avec des fichiers source Python
 - Les fichiers Python doivent utiliser l'extension `.py-tpl`
 - Doit inclure un répertoire `tests/` et un fichier `README.md-tpl`
-- Doit inclure **au moins un** fichier de métadonnées :
-    - `pyproject.toml-tpl` (préféré, PEP 621), ou
-    - `setup.py-tpl` (legacy, toujours accepté)
-- `requirements.txt-tpl` est optionnel quand `pyproject.toml-tpl` déclare `[project].dependencies`
+- Doit inclure `pyproject.toml-tpl` (PEP 621). Les modèles livrés sont pyproject-first et ne fournissent plus de `setup.py-tpl` ; l'inspection l'accepte toujours pour que les modèles tiers continuent de fonctionner, mais les nouveaux modèles ne doivent pas en ajouter.
+- `requirements.txt-tpl` est optionnel quand `pyproject.toml-tpl` déclare `[project].dependencies` — mais lorsque les deux sont présents, ils doivent concorder (voir *Cohérence de la configuration*)
+- Doit cibler Python 3.12 de manière cohérente : `requires-python = ">=3.12"`, black `target-version = ["py312"]`, mypy `python_version = "3.12"`, et `python:3.12-slim` pour toute image Docker de base
+- Ne doit pas déclarer `FastAPI-fastkit` comme dépendance d'exécution
+- Ne doit laisser aucun `<placeholder>` non substitué après la génération
 
 ### Exigences FastAPI
 - Doit contenir l'initialisation de l'application FastAPI

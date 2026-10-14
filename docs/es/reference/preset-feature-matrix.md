@@ -29,12 +29,18 @@ Estas funcionalidades están soportadas en **todos** los presets: la instalació
 | Funcionalidad | `minimal` / `single-module` | `classic-layered` / `domain-starter` |
 |---|---|---|
 | **Base de datos** (PostgreSQL, MySQL, SQLite, MongoDB) | Genera el módulo de configuración **y** añade llamadas stub `await init_db()` en el `main.py` regenerado. | Genera el módulo de configuración en la ruta del preset. El `main.py` que viene en la plantilla se **conserva**, así que tienes que cablear `get_db()` en los routers manualmente. |
-| **Autenticación** (JWT, FastAPI-Users, OAuth2, basada en sesiones) | Genera el módulo de configuración de auth. JWT también importa `HTTPBearer` en el `main.py` regenerado. | Genera el módulo de configuración de auth en la ruta del preset. No se añaden imports al `main.py` — cablea las dependencias manualmente. |
-| **Tareas en segundo plano** (Celery, Dramatiq) | Los paquetes se instalan; por ahora no hay regeneración automática de `main.py`. | Igual. |
-| **Caché** (Redis) | Los paquetes se instalan; por ahora no hay regeneración automática de `main.py`. | Igual. |
+| **Autenticación** (JWT, FastAPI-Users, OAuth2, basada en sesiones) | Genera el módulo de configuración de auth; JWT importa `HTTPBearer`, y OAuth2 y la basada en sesiones añaden además su configuración de middleware en `main.py`. | Genera el módulo de configuración de auth en la ruta del preset. No se añaden imports al `main.py` — cablea las dependencias manualmente. |
+| **Tareas en segundo plano** (Celery, Dramatiq) | Genera `worker.py` y `features/tasks.py`, y monta el router de tareas en el `main.py` regenerado. | Genera `worker.py` y `features/tasks.py`, pero el `main.py` que trae la plantilla se **conserva** — monta el router manualmente. |
+| **Caché** (Redis) | Genera `features/cache.py` y lo monta e inicializa en el `main.py` regenerado. | Genera `features/cache.py`; móntalo manualmente. |
+| **Utilidades: Pagination / WebSocket** | Genera `features/pagination.py` / `features/websocket.py` y monta el router en el `main.py` regenerado. | Genera el mismo módulo; móntalo manualmente. |
+| **Monitorización: OpenTelemetry** | Sin archivo independiente — la configuración de tracing se añade directamente al `main.py` regenerado. | Sin archivo independiente. El `main.py` de la plantilla se conserva, así que el tracing **no queda cableado** — añade la configuración manualmente. |
+| **Migraciones** (Alembic) | Genera `alembic.ini`, `alembic/env.py`, una revisión base y `scripts/migrate.sh` para cualquier base de datos SQL seleccionada — con independencia de la regeneración de `main.py`. | Igual — la generación de Alembic no depende de si `main.py` se conserva. |
+| **Herramientas** (ruff, pre-commit, github-actions, devcontainer, makefile) | Genera los archivos de configuración correspondientes, con independencia de la regeneración de `main.py`. | Igual. |
+| **Logging** (estructurado) | Genera `logging_config.py` y cablea el middleware de request-id en el `main.py` regenerado. | Genera `logging_config.py`; el `main.py` de la plantilla se conserva, así que cablea el middleware manualmente. |
 | **CORS** (utilidad) | Se añade `CORSMiddleware` al `main.py` regenerado con `allow_origins=['*']`. | **Ya cableado** en el `main.py` que trae la plantilla (condicional a `settings.all_cors_origins`). Actívalo definiendo `BACKEND_CORS_ORIGINS` en `.env` — no requiere cambios de código. |
-| **Pruebas** (Basic / Coverage / Advanced) | Se genera `pytest.ini` en la raíz del proyecto. | Igual. |
+| **Pruebas** (Basic / Coverage / Advanced) | Se genera `pytest.ini` en la raíz del proyecto; Advanced añade además `tests/factories.py` y `tests/test_factories.py`. | Igual. |
 | **Despliegue** (Docker, docker-compose) | Se escribe `Dockerfile` y/o `docker-compose.yml` en la raíz del proyecto. | Igual. |
+| **`/health` / `/ready`** | Siempre presentes en el `main.py` regenerado. | Ya presentes en el `main.py` conservado que trae la plantilla. |
 
 ## Cuándo verás un aviso de "Preset compatibility"
 
@@ -44,10 +50,15 @@ Para los presets que **conservan el `main.py` que trae la plantilla** (`classic-
 |---|---|
 | `CORS` (utilidad) | ❌ — ya cableado en el `main.py` de la plantilla. Solo rellena `BACKEND_CORS_ORIGINS` en `.env`. |
 | `Rate-Limiting` (utilidad) | ✅ — la configuración del limitador `slowapi` no se añade |
-| `Prometheus` (monitorización) | ✅ — no se llama a `Instrumentator().instrument(app)` |
+| `Pagination` / `WebSocket` (utilidad) | ✅ — el router generado (`features/pagination.py` / `features/websocket.py`) no se monta |
+| `Celery` / `Dramatiq` (async_tasks) | ✅ — el router generado de `worker.py` / `features/tasks.py` no se monta |
+| `Redis` (caché) | ✅ — el `features/cache.py` generado no se monta ni se inicializa |
+| `Prometheus` / `OpenTelemetry` (monitorización) | ✅ — la configuración de instrumentación no se añade a `main.py` |
+| `structured` (logging) | ✅ — se genera `logging_config.py`, pero el middleware de request-id no se añade a `main.py` |
+| `Alembic` (migraciones), selecciones de `tooling` | ❌ — estos archivos se generan y se pueden usar sea cual sea el preset; nada depende de `main.py` |
 | Cualquier selección de base de datos / auth | ⚠️ — los archivos de configuración se generan, pero tienes que añadirlos con `Depends()` en tus routers |
 
-Para los presets `minimal` y `single-module`, la regeneración dinámica de `main.py` se encarga automáticamente de CORS, rate limiting e instrumentación con Prometheus; no aparece ningún aviso.
+Para los presets `minimal` y `single-module`, la regeneración dinámica de `main.py` se encarga automáticamente de todos los ejes anteriores; no aparece ningún aviso.
 
 ## Combinaciones no soportadas (juego seguro)
 

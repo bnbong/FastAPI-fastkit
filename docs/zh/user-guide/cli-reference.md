@@ -60,8 +60,126 @@ $ fastkit init [OPTIONS]
 
 | 选项 | 描述 | 默认值 |
 |--------|-------------|---------|
+| `--interactive` | 引导式设置:先选择架构预设,再选择功能 | off |
+| `--config <path>` | 根据已保存的配置文件创建项目,不进行任何提示 | - |
+| `--save-config <path>` | 与 `--interactive` 一起使用,将回答完成的配置写入此路径 | - |
+| `--project-name` | 项目名称(省略时会提示输入) | - |
+| `--author` | 作者名称(省略时会提示输入) | - |
+| `--author-email` | 作者邮箱(省略时会提示输入) | - |
+| `--description` | 项目描述(省略时会提示输入) | - |
 | `--package-manager` | 要使用的包管理器(pip、uv、pdm、poetry) | uv |
+| `--dry-run` | 显示将要创建的文件和包,但不写入任何内容 | off |
+| `--no-venv` | 跳过虚拟环境创建(隐含 `--no-install`) | off |
+| `--no-install` | 跳过依赖安装 | off |
+| `--yes` / `-y` | 在原地部署项目时,覆盖已有文件之前不再询问确认 | off |
 | `--help` | 显示命令帮助 | - |
+
+#### 配置文件(`--config` / `--save-config`)
+
+交互式会话的回答是一个普通的映射,而这个映射可以通过文件传递。这使得项目创建变成了可以提交、审查和重放的东西。
+
+```console
+# 记录一次交互式会话
+$ fastkit init --interactive --save-config fastkit.config.json
+
+# 之后重放它,完全不进行提示
+$ fastkit init --config fastkit.config.json
+```
+
+如果您没有传入 `--save-config`,一次走到最后的交互式运行会询问是否保存所选内容以及保存位置。该提示只会在有人坐在终端前时出现 —— 通过管道或在 CI 中运行时保持静默,改为通过该选项显式开启。
+
+**支持的格式**根据文件扩展名选择:
+
+| 扩展名 | 可用性 |
+|---|---|
+| `.json` | 始终可用(标准库) |
+| `.toml` | 始终可用(标准库) |
+| `.yaml` / `.yml` | 仅在安装了 PyYAML 时可用 —— fastkit 不会将其作为运行时依赖添加 |
+
+加载的文件顶层必须是一个映射,且至少包含 `project_name`、`author` 和 `author_email`。随后它会按照交互式提示所用的相同规则进行校验(项目名称格式、邮箱格式、`all_dependencies` 必须是列表),并在写入任何内容之前报告所有问题。只列出功能选择而没有 `all_dependencies` 的文件,会通过交互式构建器展开,因此手写的配置与向导会话会解析出相同的包集合。
+
+一个最小示例:
+
+```json
+{
+  "project_name": "orders-api",
+  "author": "Developer Kim",
+  "author_email": "developer@example.com",
+  "description": "Domain-oriented orders service",
+  "architecture_preset": "domain-starter",
+  "package_manager": "uv"
+}
+```
+
+#### 配置文件模式
+
+每个配置文件 —— 无论是手写的还是由 `--save-config` 生成的 —— 在到达生成器之前都会经过同一个规范化器(`backend/project_builder/config_schema.py` 中的 `normalize_project_config`)。未知的键、已知维度上的未知选项,或类型错误的值都会被拒绝,并给出出错的名称以及实际允许的值列表,而不是被悄悄忽略。
+
+| 键 | 形式 | 说明 |
+|---|---|---|
+| `project_name`, `author`, `author_email` | 字符串 | 必填 |
+| `description` | 字符串 | 必填 |
+| `architecture_preset`(别名 `preset`) | `"minimal"` \| `"single-module"` \| `"classic-layered"` \| `"domain-starter"` | 如果两种写法同时出现,它们必须一致 |
+| `package_manager` | `"pip"` \| `"uv"` \| `"pdm"` \| `"poetry"` | |
+| `database` | 字符串,或 `{"type": <choice>}` | `PostgreSQL`、`MySQL`、`MongoDB`、`Redis`、`SQLite`、`None` |
+| `authentication`, `async_tasks`, `testing`, `caching`, `monitoring`, `migrations`, `logging` | 字符串,或 `{"type": <choice>}` | 单选维度 —— 各维度的选项请参阅上文的[功能目录](#interactive-builder-feature-catalog-interactive) |
+| `utilities`, `tooling` | 字符串列表 | 多选维度 —— 选项见同一目录 |
+| `deployment` | 字符串列表 | `Docker`、`docker-compose` 的子集;选择 `docker-compose` 会自动带上 `Docker` |
+| `custom_packages` | 字符串列表 | 按原样安装的额外包 |
+
+每个维度都既接受单纯的选项(`"authentication": "JWT"`),也接受 `database` 和项目自身 `[tool.fastapi-fastkit]` 元数据所使用的 `{"type": ...}` 映射形式(`"authentication": {"type": "JWT"}`)—— 两者都会被规范化为相同的标准形式,而 `--save-config` 总是以标准的纯字符串形式写回。
+
+一个覆盖了大多数维度的配置:
+
+```json
+{
+  "project_name": "orders-api",
+  "author": "Developer Kim",
+  "author_email": "developer@example.com",
+  "description": "Domain-oriented orders service",
+  "architecture_preset": "domain-starter",
+  "package_manager": "uv",
+  "database": "PostgreSQL",
+  "authentication": "JWT",
+  "async_tasks": "Celery",
+  "caching": "Redis",
+  "migrations": "Alembic",
+  "tooling": ["ruff", "makefile"],
+  "deployment": ["Docker"]
+}
+```
+
+同样的配置写成 TOML:
+
+```toml
+project_name = "orders-api"
+author = "Developer Kim"
+author_email = "developer@example.com"
+description = "Domain-oriented orders service"
+architecture_preset = "domain-starter"
+package_manager = "uv"
+database = "PostgreSQL"
+authentication = "JWT"
+async_tasks = "Celery"
+caching = "Redis"
+migrations = "Alembic"
+tooling = ["ruff", "makefile"]
+deployment = ["Docker"]
+```
+
+#### 预览与跳过步骤
+
+`--dry-run` 会打印将要创建的目录树以及将要安装的包 —— 连同将用来安装它们的包管理器 —— 然后在不触碰磁盘的情况下退出:
+
+```console
+$ fastkit init --config fastkit.config.json --dry-run
+```
+
+`--no-install` 会在虚拟环境创建后停止;`--no-venv` 则连环境也一并跳过(因此也不会安装)。两者在容器、CI 以及任何由 fastkit 之外的工具管理环境的场景中都很有用。
+
+#### 原地部署与覆盖确认(`--yes` / `-y`) { #in-place-deployment-and-overwrite-confirmation-yes-y }
+
+当项目以原地方式部署 —— 部署到当前工作区而不是新的项目文件夹 —— 时,fastkit 会在替换任何已存在的文件之前询问 "Overwrite these files?"。`--yes`(或其简写 `-y`)会跳过该确认并直接覆盖。它不影响另一个 "Do you want to proceed with project creation?" 提示,该提示仍会显示。在非交互环境中(stdin 不是 TTY,例如 CI 或通过管道运行),即使没有 `--yes`,覆盖确认也会被自动跳过。
 
 #### 交互式提示
 
@@ -95,6 +213,27 @@ $ fastkit init [OPTIONS]
 - 所有 STANDARD 栈的依赖
 - `redis` —— 内存数据存储
 - `celery` —— 分布式任务队列
+
+#### 交互式构建器功能目录(`--interactive`) { #interactive-builder-feature-catalog-interactive }
+
+`fastkit init --interactive` 使用的是另一套基于维度的目录,而不是上面的 minimal/standard/full 栈(事实来源:`core/settings.py` 中的 `FastkitConfig.PACKAGE_CATALOG`,以及决定每个选项生成什么的 `DynamicConfigGenerator.build_artifacts()`)。每个维度默认都是 `None`(跳过);`utilities` 与 `tooling` 为多选。
+
+现在每个选择都会生成真正的代码,而不仅仅是安装包 —— `minimal` / `single-module`(重新生成 `main.py`)与 `classic-layered` / `domain-starter`(保留 `main.py`,并给出手动接入警告)之间有何不同,请参阅[架构预设 / 功能矩阵](../reference/preset-feature-matrix.md)。
+
+| 维度 | 选项 | 安装的包 | 生成的文件 |
+|---|---|---|---|
+| `database` | PostgreSQL, MySQL, MongoDB, Redis, SQLite, None | PostgreSQL: `asyncpg`, `sqlalchemy` · MySQL: `aiomysql`, `sqlalchemy` · MongoDB: `motor` · Redis: `redis[hiredis]` · SQLite: `sqlalchemy`, `aiosqlite` | 位于预设对应路径的数据库配置模块(例如 `src/config/database.py`) |
+| `authentication` | JWT, OAuth2, FastAPI-Users, Session-based, None | JWT: `pyjwt[crypto]`, `pwdlib[argon2]` · OAuth2: `authlib`, `itsdangerous`, `httpx` · FastAPI-Users: `fastapi-users[sqlalchemy]`, `pyjwt[crypto]`, `pwdlib[argon2]` · Session-based: `itsdangerous` | 位于预设对应路径的认证配置模块;OAuth2 与 Session-based 还会添加 `main.py` 中间件配置 |
+| `async_tasks` | Celery, Dramatiq, None | Celery: `celery[redis]`, `redis[hiredis]` · Dramatiq: `dramatiq[redis]`, `redis[hiredis]` | `<pkg>/worker.py`(后台 worker)+ `<pkg>/features/tasks.py`(任务路由) |
+| `testing` | Basic, Coverage, Advanced, None | Basic: `pytest`, `pytest-asyncio`, `httpx` · Coverage: + `pytest-cov` · Advanced: + `faker`, `factory-boy` | `pytest.ini`;Advanced 还会添加 `tests/factories.py` 与 `tests/test_factories.py` |
+| `caching` | Redis, None | Redis: `redis[hiredis]`, `fastapi-cache2`, `jinja2` | `<pkg>/features/cache.py`(带缓存的端点) |
+| `monitoring` | Loguru, OpenTelemetry, Prometheus, None | Loguru: `loguru` · OpenTelemetry: `opentelemetry-api`, `opentelemetry-sdk`, `opentelemetry-instrumentation-fastapi`, `opentelemetry-exporter-otlp-proto-http` · Prometheus: `prometheus-client`, `prometheus-fastapi-instrumentator` | 不生成独立文件 —— 直接接入 `main.py`(import / lifespan / setup) |
+| `utilities`(多选) | CORS, Rate-Limiting, Pagination, WebSocket, None | CORS: 无(FastAPI 内置) · Rate-Limiting: `slowapi` · Pagination: `fastapi-pagination` · WebSocket: `websockets` | CORS 与 Rate-Limiting 直接接入 `main.py`;Pagination 添加 `<pkg>/features/pagination.py`,WebSocket 添加 `<pkg>/features/websocket.py` |
+| `migrations` | Alembic, None | Alembic: `alembic` | `alembic.ini`、`alembic/env.py`、`alembic/script.py.mako`、基线修订 `alembic/versions/<id>_initial.py`、`scripts/migrate.sh` —— 仅当数据库维度为 SQL 数据库时生成 |
+| `tooling`(多选) | ruff, pre-commit, github-actions, devcontainer, makefile, None | ruff: `ruff` · pre-commit: `pre-commit` · github-actions / devcontainer / makefile: 无 | ruff 会把 `[tool.ruff]` 块合并进 `pyproject.toml`(`pip` 项目则写入 `ruff.toml`);pre-commit 写入 `.pre-commit-config.yaml`;github-actions 写入 `.github/workflows/test.yml`;devcontainer 写入 `.devcontainer/devcontainer.json`;makefile 写入 `Makefile` |
+| `logging` | structured, None | 无(仅使用标准库 `logging` + `json`) | `<pkg>/logging_config.py`(结构化 JSON 日志 + request-id 中间件),并接入 `main.py` |
+
+无论如何选择,每个生成的项目都会在 `main.py` 中获得 `/health` 与 `/ready` 端点,而 `--dry-run` 会在写入任何内容之前打印出这一组确切的文件。
 
 #### 示例
 
@@ -227,6 +366,26 @@ $ fastkit addroute users my-api
 | `PUT` | `/api/v1/users/{user_id}` | 更新用户 |
 | `DELETE` | `/api/v1/users/{user_id}` | 删除用户 |
 
+#### 代码插入的位置
+
+`addroute` 需要从项目中得知两件事:新的 import 放在哪里,以及在哪里注册路由器。模板和生成的入口文件都用锚点注释标出了这两处:
+
+```python
+# src/app/api/router.py
+from src.app.api import health
+
+# fastkit:imports
+
+api_router = APIRouter()
+api_router.include_router(health.router)
+
+# fastkit:routes
+```
+
+编辑该文件时请保留这些注释 —— `addroute` 会直接插入到 `# fastkit:imports` 和 `# fastkit:routes` 的上方。丢失了这些锚点(或在锚点出现之前生成)的项目仍然可以工作:fastkit 会退回到基于 AST 的插入方式,自行找到 import 块和路由注册位置。锚点只是让结果变得可预测。
+
+`addroute` 还会读取项目的 `[tool.fastapi-fastkit]` 块来定位入口文件,因此即使在仅凭磁盘扫描会判断错误的布局上也能正常工作。
+
 ### `startdemo`
 
 基于预构建的模板创建 FastAPI 项目。
@@ -241,8 +400,18 @@ $ fastkit startdemo [OPTIONS]
 
 | 选项 | 描述 | 默认值 |
 |--------|-------------|---------|
+| `--project-name` | 项目名称(省略时会提示输入) | - |
+| `--author` | 作者名称(省略时会提示输入) | - |
+| `--author-email` | 作者邮箱(省略时会提示输入) | - |
+| `--description` | 项目描述(省略时会提示输入) | - |
 | `--package-manager` | 要使用的包管理器(pip、uv、pdm、poetry) | uv |
+| `--dry-run` | 显示将要创建的文件和包,但不写入任何内容 | off |
+| `--no-venv` | 跳过虚拟环境创建(隐含 `--no-install`) | off |
+| `--no-install` | 跳过依赖安装 | off |
+| `--yes` / `-y` | 在原地部署项目时,覆盖已有文件之前不再询问确认 | off |
 | `--help` | 显示命令帮助 | - |
+
+与 `init` 一样,当目标项目目录已经存在时,`startdemo` 会拒绝运行(`Error: Project '{name}' already exists.`)。`--dry-run` 是例外:由于它从不写入磁盘,因此仍然可以指定一个已有同名目录的名称。关于部署到当前工作区时 `--yes` 的作用,请参阅上文的[原地部署与覆盖确认](#in-place-deployment-and-overwrite-confirmation-yes-y)。
 
 #### 交互式提示
 
@@ -259,11 +428,19 @@ $ fastkit startdemo [OPTIONS]
 | 模板 | 描述 | 特性 |
 |----------|-------------|----------|
 | `fastapi-default` | 简单的 FastAPI 项目 | 基础 CRUD、mock 数据 |
-| `fastapi-async-crud` | 异步 item 管理 API | async/await、性能优化 |
+| `fastapi-domain-starter` | 面向领域的 starter | 每个业务概念一个文件夹、`/health` |
+| `fastapi-auth-jwt` | JWT 认证 | 访问/刷新令牌轮换、argon2id、角色与作用域、Alembic |
+| `fastapi-sqlmodel` | 异步 SQLModel 持久化 | SQLModel + 异步 SQLAlchemy、Alembic、通用 CRUD、分页 |
+| `fastapi-llm-agent` | 流式 Claude 智能体 | SSE 流式输出、工具调用循环、对话记忆 |
 | `fastapi-custom-response` | 自定义响应系统 | 自定义响应、分页 |
-| `fastapi-dockerized` | 已 Docker 化的 FastAPI | Docker、适合生产部署 |
 | `fastapi-psql-orm` | 基于 PostgreSQL 的 FastAPI | PostgreSQL、SQLAlchemy、Alembic |
+| `fastapi-mcp` | Model Context Protocol 服务器 | MCP 集成 |
+| `fastapi-single-module` | 单文件沙盒 | 单个模块,没有包边界 |
 | `fastapi-empty` | 最小化的 FastAPI 项目 | 极简骨架 |
+| `fastapi-async-crud` | *(已弃用)* 异步 item 管理 API | 已被 `fastapi-sqlmodel` 取代 |
+| `fastapi-dockerized` | *(已弃用)* 已 Docker 化的 FastAPI | Docker 工具链现已随较新的模板一同提供 |
+
+已弃用的模板仍然可以生成可运行的项目;只是不再推荐作为起点。请参阅[应该选择哪个 starter?](choosing-a-starter.md)。
 
 #### 示例
 
@@ -331,8 +508,10 @@ INFO:     Uvicorn running on http://127.0.0.1:8000
 #### 前置条件
 
 - 必须在 FastAPI 项目目录中运行
-- 项目必须含有 `src/main.py`,并定义了 FastAPI 应用
+- 项目必须暴露一个 FastAPI 应用 —— 如果存在 `[tool.fastapi-fastkit].app_module`,就从中解析,否则通过扫描 `main.py` 来发现
 - 建议提前激活虚拟环境
+
+如果记录的入口和扫描都找不到模块,`runserver` 会报告找不到 `main.py` 并停止。
 
 ### `list-templates`
 
@@ -372,6 +551,35 @@ $ fastkit list-templates
 
 </div>
 
+## 项目元数据(`[tool.fastapi-fastkit]`)
+
+fastkit 生成的每个项目都会在自己的 `pyproject.toml` 中记录它是如何生成的:
+
+```toml
+[tool.fastapi-fastkit]
+managed = true
+version = "1.4.0"
+template = "fastapi-domain-starter"
+preset = "domain-starter"
+package_manager = "uv"
+app_module = "src.app.main:app"
+features = ["database:PostgreSQL", "authentication:JWT"]
+```
+
+| 键 | 含义 |
+|---|---|
+| `managed` | 始终为 `true`;将项目标记为由 fastkit 管理 |
+| `version` | 生成该项目的 fastkit 版本 |
+| `template` | `startdemo` 模板,或预设的基础模板 |
+| `preset` | `init --interactive` 的架构预设(其他情况下省略) |
+| `package_manager` | 用于构建环境的包管理器 |
+| `app_module` | uvicorn 的 `module:attr` 入口 |
+| `features` | 交互式选择的扁平 `"<category>:<choice>"` 列表 |
+
+这个块是项目入口的唯一事实来源:`fastkit runserver` 会先从中读取 `app_module`,然后才退回到扫描目录树;`fastkit addroute` 用它定位应用;生成的 Dockerfile 也在 `CMD` 中使用同一个值。
+
+该块在生成的最后阶段写入 —— 包管理器在解析依赖时会重写 `pyproject.toml`,因此必须在那之后再写入 —— 之后的重新生成会替换它,而不是再追加一份。手动编辑 `app_module` 是告知 fastkit 您自行重组了布局的受支持方式。
+
 ## 环境变量
 
 FastAPI-fastkit 会读取以下环境变量:
@@ -381,6 +589,14 @@ FastAPI-fastkit 会读取以下环境变量:
 | `FASTKIT_CONFIG_DIR` | 配置目录 | `~/.fastkit` |
 | `FASTKIT_TEMPLATES_DIR` | 自定义模板目录 | 内置模板 |
 | `FASTKIT_LOG_LEVEL` | 日志级别 | `INFO` |
+| `FASTKIT_SUBPROCESS_TIMEOUT` | 覆盖所有包管理器子进程的超时时间,单位为秒 | 按操作区分(30 / 120 / 900) |
+
+每次包管理器调用都有各自的时间上限,因此挂起的子进程永远不会阻塞 CLI:可用性检查为 30 秒,创建虚拟环境为 120 秒,安装依赖为 900 秒。`FASTKIT_SUBPROCESS_TIMEOUT` 会用一个值替换这三者 —— 在网络较慢时,或想在 CI 中快速失败时很有用。不是正整数的值会被忽略。
+
+```console
+$ export FASTKIT_SUBPROCESS_TIMEOUT=1800
+$ fastkit startdemo fastapi-sqlmodel
+```
 
 ### 示例
 

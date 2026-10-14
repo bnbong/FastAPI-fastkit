@@ -97,8 +97,7 @@ fastapi-{template-name}/
 │   ├── lint.sh-tpl             # Linting
 │   ├── run-server.sh-tpl       # Ejecución del servidor
 │   └── test.sh-tpl             # Ejecución de pruebas
-├── pyproject.toml-tpl           # ✅ Metadatos primarios (PEP 621, preferido)
-├── setup.py-tpl                # 🟡 Metadatos legacy (aceptados por compatibilidad)
+├── pyproject.toml-tpl           # ✅ Metadatos primarios (PEP 621, obligatorio)
 ├── requirements.txt-tpl         # 🟡 Opcional si pyproject declara dependencias
 ├── setup.cfg-tpl               # Configuración de herramientas de desarrollo
 ├── README.md-tpl               # ✅ Documentación del proyecto (requerida)
@@ -110,10 +109,16 @@ fastapi-{template-name}/
 
 - Un directorio `tests/`
 - `README.md-tpl`
-- Al menos un archivo de metadatos: `pyproject.toml-tpl` (preferido, PEP 621) o `setup.py-tpl` (legacy, todavía aceptado)
-- Una declaración de `fastapi` como dependencia en al menos uno de: `pyproject.toml-tpl` `[project].dependencies`, `requirements.txt-tpl`, o `setup.py-tpl` `install_requires`
+- `pyproject.toml-tpl` (PEP 621)
+- Una declaración de `fastapi` como dependencia en `pyproject.toml-tpl` `[project].dependencies` o en `requirements.txt-tpl`
 
-`requirements.txt-tpl` ya no es estrictamente necesario cuando `pyproject.toml-tpl` declara `[project].dependencies`. Las plantillas modernas DEBERÍAN adoptar `pyproject.toml-tpl` como su archivo de metadatos principal.
+`requirements.txt-tpl` no es necesario cuando `pyproject.toml-tpl` declara `[project].dependencies` — pero, si una plantilla incluye ambos, deben coincidir: la inspección falla si hay divergencia de dependencias entre ellos.
+
+**Las plantillas nuevas priorizan pyproject y no deben incluir `setup.py-tpl`.** Desde v1.4.0 ninguna plantilla incluida lo trae. La inspección todavía acepta el archivo para que las plantillas externas sigan funcionando, pero es una vía heredada.
+
+**Apunta a Python 3.12 de forma coherente**: `requires-python = ">=3.12"`, black `target-version = ["py312"]`, mypy `python_version = "3.12"` y `python:3.12-slim` para cualquier imagen base de Docker. La inspección comprueba que las tres versiones fijadas coinciden.
+
+**Nunca declares `FastAPI-fastkit` como dependencia de ejecución** de un proyecto generado. La CLI es una herramienta de desarrollo; la lista de dependencias de una plantilla solo debe contener lo que importa la propia aplicación generada.
 
 ### Guía de escritura de archivos
 
@@ -238,51 +243,22 @@ isort==5.12.0
 mypy==1.7.1
 ```
 
-#### 4. Escribir setup.py-tpl (legacy — opcional si existe pyproject)
+#### 4. Anclas de rutas
 
-Se conserva para plantillas legacy. Las plantillas nuevas no necesitan este archivo si traen `pyproject.toml-tpl`.
+Las plantillas que incluyen un `main.py-tpl` o un módulo agregador de la API deben marcar dónde inserta código `fastkit addroute`:
 
 ```python
-"""
-Setup del paquete <project_name>
+from src.app.api import health
 
-Proyecto creado con FastAPI-fastkit.
-"""
-from setuptools import find_packages, setup
+# fastkit:imports
 
-# Lista de dependencias (anotación de tipo requerida)
-install_requires: list[str] = [
-    "fastapi>=0.104.0",
-    "uvicorn[standard]>=0.24.0",
-    "pydantic>=2.5.0",
-    "pydantic-settings>=2.1.0",
-    "python-dotenv>=1.0.0",
-]
+api_router = APIRouter()
+api_router.include_router(health.router)
 
-setup(
-    name="<project_name>",
-    version="1.0.0",
-    description="[FastAPI-fastkit templated] <description>",  # Marcador de identidad usado por is_fastkit_project()
-    long_description=open("README.md").read(),
-    long_description_content_type="text/markdown",
-    author="<author>",
-    author_email="<author_email>",
-    packages=find_packages(),
-    install_requires=install_requires,
-    python_requires=">=3.8",
-    classifiers=[
-        "Development Status :: 4 - Beta",
-        "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
-        "Programming Language :: Python :: 3.12",
-    ],
-)
+# fastkit:routes
 ```
+
+Sin las anclas, `addroute` recurre a una inserción basada en AST que localiza por sí misma el bloque de imports y los registros de routers — así que una plantilla que no las tenga sigue funcionando, pero el resultado es menos predecible. Mantén los comentarios en su sitio al editar estos archivos.
 
 #### 5. Escribir los archivos de pruebas
 
@@ -343,7 +319,16 @@ make inspect-template TEMPLATES="fastapi-your-template"
 
 # Validar con salida detallada
 python scripts/inspect-templates.py --templates "fastapi-your-template" --verbose
+
+# Ciclo local rápido: sin red, sin arrancar el servidor
+python scripts/inspect-templates.py --templates "fastapi-your-template" \
+    --offline --no-smoke
+
+# Comprobación completa antes de abrir un PR (añade mypy sobre el proyecto generado)
+python scripts/inspect-templates.py --templates "fastapi-your-template" --mypy
 ```
+
+`--offline` omite las consultas de actualidad de dependencias en PyPI, `--no-smoke` omite el arranque del proyecto generado (el paso más lento) y `--mypy` comprueba los tipos del proyecto generado. Consulta [Aseguramiento de calidad de las plantillas](../reference/template-quality-assurance.md) para ver qué hace cada comprobación.
 
 !!! note
 
@@ -357,7 +342,7 @@ El inspector valida automáticamente lo siguiente:
 
 - [ ] Existe el directorio `tests/`
 - [ ] Existe el archivo `README.md-tpl`
-- [ ] Existe al menos uno de `pyproject.toml-tpl` (preferido) o `setup.py-tpl` (legacy)
+- [ ] Existe `pyproject.toml-tpl` (sin `setup.py-tpl` en las plantillas nuevas)
 
 #### ✅ Validación de extensiones
 
@@ -369,7 +354,8 @@ El inspector valida automáticamente lo siguiente:
 - [ ] `fastapi` está declarado en al menos uno de:
     - [ ] `pyproject.toml-tpl` bajo `[project].dependencies` (preferido)
     - [ ] `requirements.txt-tpl`
-    - [ ] `setup.py-tpl` bajo `install_requires`
+- [ ] `requirements.txt-tpl` y `[project].dependencies` no se contradicen
+- [ ] `FastAPI-fastkit` **no** es una dependencia de ejecución
 
 #### ✅ Validación de la implementación de FastAPI
 
@@ -381,6 +367,24 @@ El inspector valida automáticamente lo siguiente:
 - [ ] La creación del entorno virtual es correcta
 - [ ] La instalación de dependencias es correcta
 - [ ] Todas las pruebas de pytest pasan
+
+#### ✅ Prueba de humo
+
+- [ ] El proyecto generado arranca con uvicorn
+- [ ] `/docs` responde
+- [ ] `/health` responde
+
+El objetivo de uvicorn se resuelve a partir de `[tool.fastapi-fastkit].app_module` en el `pyproject.toml` generado, después de `app_module` en `template-config.yml` y, por último, de las ubicaciones convencionales de `main.py`.
+
+#### ✅ Coherencia de la configuración
+
+- [ ] `requires-python`, el `target-version` de black y el `python_version` de mypy indican Python 3.12
+- [ ] No hay divergencia de dependencias entre `requirements.txt-tpl` y `[project].dependencies`
+- [ ] No hay autodependencia de `FastAPI-fastkit`
+
+#### ✅ Restos de marcadores
+
+- [ ] Ningún `<placeholder>` sobrevive a la generación del proyecto
 
 #### ✅ Pruebas automatizadas de plantillas
 

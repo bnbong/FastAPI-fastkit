@@ -34,6 +34,8 @@
 - **🔍 自动化的模板质量保障**：通过每周自动化测试,确保所有模板始终可用并保持更新
 - **🚀 多种项目模板**：提供多种预配置模板,覆盖 async CRUD、Docker、PostgreSQL 等不同使用场景
 - **📦 支持多种包管理器**：可选用您偏好的 Python 包管理器(pip、uv、pdm、poetry)管理依赖
+- **🧾 可复现的项目配置**：用 `--save-config` 保存一次交互式会话,之后用 `fastkit init --config` 重放 —— 无需任何提示,得到相同的项目
+- **🏷️ 自描述的项目**：每个生成的项目都会在 `[tool.fastapi-fastkit]` 块中记录其模板、预设、包管理器、入口和所选功能,`runserver` 与 `addroute` 会读回这些信息
 
 ## 安装
 
@@ -123,7 +125,7 @@ Do you want to proceed with project creation? [y/N]: y
 FastAPI project will deploy at '~your-project-path~'
 
 ╭──────────────────────── Info ────────────────────────╮
-│ ℹ Injected metadata into setup.py                    │
+│ ℹ Injected metadata into pyproject.toml              │
 ╰──────────────────────────────────────────────────────╯
 ╭──────────────────────── Info ────────────────────────╮
 │ ℹ Injected metadata into config file                 │
@@ -173,6 +175,16 @@ Installing dependencies...
 </div>
 
 该命令将创建一个包含 Python 虚拟环境的新 FastAPI 项目工作区。
+
+- 主要选项:
+  - `--project-name`、`--author`、`--author-email`、`--description`
+  - `--package-manager` [pip|uv|pdm|poetry]
+  - `--config <path>`:根据已保存的配置文件(`.json` / `.toml`,安装了 PyYAML 时还支持 `.yaml`)创建项目,不进行任何提示
+  - `--save-config <path>`:与 `--interactive` 一起使用,记录回答以便之后复用
+  - `--dry-run`:打印将要创建的文件和包,不写入任何内容
+  - `--no-venv`:跳过虚拟环境创建(隐含 `--no-install`)
+  - `--no-install`:跳过依赖安装
+  - `--yes` / `-y`:原地部署时跳过 "Overwrite these files?" 确认
 
 ### 使用交互模式创建项目 ✨ 新功能
 
@@ -264,6 +276,30 @@ Select utilities (comma-separated numbers, e.g., 1,3,4):
 
 Select utilities: 1
 
+🪵 Logging Format
+Select logging format:
+  1. structured - JSON logs + X-Request-ID correlation middleware (stdlib only)
+  2. None - Uvicorn's default plain-text logging
+
+Select logging format [2]: 1
+
+🧬 Database Migrations
+Select migration tool:
+  1. Alembic - alembic.ini + async alembic/env.py + scripts/migrate.sh (recommended for SQL databases)
+  2. None - No migration tooling
+
+Select migration tool [1]: 1
+
+🧰 Developer Tooling
+Select tooling to generate (comma-separated numbers, e.g., 1,3)
+  1. ruff ruff + ruff-format config in pyproject.toml (replaces black/isort)
+  2. pre-commit .pre-commit-config.yaml
+  3. github-actions .github/workflows/test.yml (Python 3.12)
+  4. devcontainer .devcontainer/devcontainer.json
+  5. makefile Makefile with install/test/lint/format/run
+
+Your choice (or press Enter to skip): 1,2
+
 🚀 Deployment Configuration
 Select deployment option:
   1. Docker - Generate Dockerfile
@@ -294,6 +330,9 @@ Enter custom package names (comma-separated, press Enter to skip):
 │ Monitoring          │ Prometheus                                                                │
 │ Testing             │ Coverage                                                                  │
 │ Utilities           │ CORS                                                                      │
+│ Logging             │ structured                                                                │
+│ Migrations          │ Alembic                                                                   │
+│ Tooling             │ ruff, pre-commit                                                          │
 │ Package Manager     │ uv                                                                        │
 └─────────────────────┴───────────────────────────────────────────────────────────────────────────┘
 
@@ -350,6 +389,16 @@ Installing dependencies...
 - **智能依赖管理**,自动兼容 pip
 - **功能校验**,当预设无法自动完成接入时会给出手动处理提示
 - **项目身份标识** 会写入生成的 `pyproject.toml`(description 标识 + `[tool.fastapi-fastkit]` 节),便于后续由 `is_fastkit_project()` 识别生成的项目
+- **项目元数据** 记录在 `[tool.fastapi-fastkit]` 中 —— 模板、预设、包管理器、`app_module` 以及所选的 `features` —— `fastkit runserver` 与 `fastkit addroute` 会读回这些信息
+- **可复现的运行**:`--save-config <path>` 记录回答,`--config <path>` 在不出现任何提示的情况下重放它们,`--dry-run` 则在不写入任何内容的情况下预览结果
+
+现在目录中的每个选择都会生成真正可运行的代码,而不仅仅是安装一个包 —— 后台任务(Celery/Dramatiq)、Redis 缓存、WebSocket、分页、OpenTelemetry 追踪,以及 OAuth2 / 基于会话的认证都附带对应的模块和 `main.py` 接入。另有三个新维度补全了这份目录:
+
+- **日志**:`structured` 添加基于标准库 `logging` + `json` 的结构化输出以及 request-id 中间件 —— 不引入新依赖
+- **迁移**:只要选择了任意 SQL 数据库,`Alembic` 就会生成完整的异步迁移环境(`alembic.ini`、`alembic/env.py`、一个基线修订版本、`scripts/migrate.sh`)
+- **工具链**(多选):`ruff`、`pre-commit`、`github-actions`、`devcontainer`、`makefile` —— 各自生成对应的配置文件;`ruff` 还会把 `[tool.ruff]` 块合并进 `pyproject.toml`
+
+每个生成的项目还会获得 `/health` 与 `/ready` 端点,而 `--dry-run` 列出的文件集合与真实运行写入的完全相同,包括这些新产物。`classic-layered` 与 `domain-starter` 会保留其自带的 `main.py`,因此当上述任一维度下的选择需要手动接入时,功能校验会给出警告 —— 详情请参阅[预设 / 功能矩阵](reference/preset-feature-matrix.md)。
 
 ### 向 FastAPI 项目添加新路由
 
@@ -445,6 +494,12 @@ FastAPI template project will deploy at '~your-project-path~'
 
 </div>
 
+- 主要选项:
+  - `--project-name`、`--author`、`--author-email`、`--description`
+  - `--package-manager` [pip|uv|pdm|poetry]
+  - `--dry-run`、`--no-venv`、`--no-install`、`--yes`/`-y` —— 含义与 `init` 中相同
+  - 如果目标项目目录已经存在,则拒绝运行(`--dry-run` 除外)
+
 如需查看可用的 FastAPI 示例列表,请运行:
 
 <div class="termy">
@@ -463,18 +518,42 @@ $ fastkit list-templates
 │                        │ PostgreSQL                                            │
 │ fastapi-default        │ Simple FastAPI Project                                │
 │ fastapi-single-module  │ FastAPI Single Module Template                        │
+│ fastapi-auth-jwt       │ FastAPI JWT Authentication                            │
+│ fastapi-sqlmodel       │ FastAPI SQLModel                                      │
+│ fastapi-llm-agent      │ FastAPI LLM Agent                                     │
 └────────────────────────┴───────────────────────────────────────────────────────┘
 ```
 
 </div>
 
+可用的模板:
+
+| 模板 | 描述 | 备注 |
+|---|---|---|
+| [`fastapi-default`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-default/README.md-tpl) | 采用经典分层布局的简单 FastAPI 项目 | 适合作为第一个选择 |
+| [`fastapi-empty`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-empty/README.md-tpl) | 最小化的 FastAPI 模板 | `minimal` 预设的基础 |
+| [`fastapi-single-module`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-single-module/README.md-tpl) | 单文件 FastAPI 应用 | `single-module` 预设的基础 |
+| [`fastapi-domain-starter`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-domain-starter/README.md-tpl) | 面向中型 API、以 pyproject 为先的面向领域 starter | `domain-starter` 预设的基础 |
+| [`fastapi-auth-jwt`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-auth-jwt/README.md-tpl) | 带刷新令牌轮换、argon2 哈希与作用域的 JWT 认证 | v1.4.0 新增 |
+| [`fastapi-sqlmodel`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-sqlmodel/README.md-tpl) | 异步 SQLModel + Alembic 迁移 + 带分页的通用 CRUD | v1.4.0 新增 |
+| [`fastapi-llm-agent`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-llm-agent/README.md-tpl) | 带工具调用循环的流式 Claude 聊天智能体(SSE) | v1.4.0 新增 |
+| [`fastapi-mcp`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-mcp/README.md-tpl) | 以 MCP 服务器形式暴露的 FastAPI 应用 | |
+| [`fastapi-psql-orm`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-psql-orm/README.md-tpl) | 基于 PostgreSQL、SQLModel、Alembic 和 docker-compose 的 item 管理 API | 需要 Docker |
+| [`fastapi-custom-response`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-custom-response/README.md-tpl) | 带自定义响应封装、错误处理和分页的 item 管理 API | |
+| [`fastapi-async-crud`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-async-crud/README.md-tpl) | 异步 item 管理 API | **已弃用** —— 请使用 `fastapi-sqlmodel` |
+| [`fastapi-dockerized`](https://github.com/bnbong/FastAPI-fastkit/blob/main/src/fastapi_fastkit/fastapi_project_template/fastapi-dockerized/README.md-tpl) | 已 Docker 化的 item 管理 API | **已弃用** —— 请使用 `fastapi-default` 并在 `init --interactive` 中选择 Docker 选项 |
+
+已弃用的模板仍然可用,但不再推荐作为起点。选型指南请参阅[应该选择哪个 starter?](user-guide/choosing-a-starter.md)。
+
 ## 文档
 
 如需更完整的指南与详细使用说明,请查阅我们的文档:
 
+- 🧭 **[应该选择哪个 starter?](user-guide/choosing-a-starter.md)** —— 面向新手的 `startdemo` 模板与交互式预设选型指南
 - 📚 **[用户指南](user-guide/quick-start.md)** —— 详细的安装与使用指南
 - 🎯 **[教程](tutorial/getting-started.md)** —— 面向新手的分步教程
 - 📖 **[CLI 参考](user-guide/cli-reference.md)** —— 完整的命令参考
+- 🧱 **[架构预设矩阵](reference/preset-feature-matrix.md)** —— 交互式生成中按预设 / 按功能划分的契约
 - 🔍 **[模板质量保障](reference/template-quality-assurance.md)** —— 自动化测试与质量标准
 
 ## 🚀 基于模板的教程
@@ -486,16 +565,19 @@ $ fastkit list-templates
 - **[构建基础 API 服务器](tutorial/basic-api-server.md)** —— 使用 `fastapi-default` 模板创建您的第一个 FastAPI 服务器
 - **[构建异步 CRUD API](tutorial/async-crud-api.md)** —— 使用 `fastapi-async-crud` 模板开发高性能异步 API
 - **[领域驱动项目(Domain Starter)](tutorial/domain-starter.md)** —— 使用 `fastapi-domain-starter` 模板构建中型规模的 API,这是推荐的现代默认选项
+- **[JWT 认证](tutorial/auth-jwt.md)** —— 借助 `fastapi-auth-jwt` 模板添加真实账户:轮换式刷新令牌、argon2id 哈希、角色与作用域守卫
 
 ### 🗄️ 数据库与基础设施
 
 - **[集成数据库](tutorial/database-integration.md)** —— 借助 `fastapi-psql-orm` 模板使用 PostgreSQL + SQLAlchemy
-- **[Docker 化与部署](tutorial/docker-deployment.md)** —— 借助 `fastapi-dockerized` 模板搭建生产部署环境
+- **[使用 SQLModel 实现异步持久化](tutorial/sqlmodel.md)** —— 借助 `fastapi-sqlmodel` 模板实现异步 SQLModel、Alembic 迁移、通用 CRUD 基类与分页列表
+- **[Docker 化与部署](tutorial/docker-deployment.md)** —— 借助 `fastapi-dockerized` 模板搭建生产部署环境 *(已弃用的模板 —— 为现有用户保留)*
 
 ### ⚡ 高级功能
 
 - **[自定义响应处理与高级 API 设计](tutorial/custom-response-handling.md)** —— 借助 `fastapi-custom-response` 模板构建企业级 API
 - **[集成 MCP](tutorial/mcp-integration.md)** —— 借助 `fastapi-mcp` 模板创建与 AI 模型集成的 API 服务器
+- **[流式 LLM 智能体](tutorial/llm-agent.md)** —— 借助 `fastapi-llm-agent` 模板构建带有真正工具调用循环的流式 Claude 聊天后端
 
 每个教程包含:
 
