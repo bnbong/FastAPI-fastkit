@@ -311,6 +311,7 @@ $ fastkit addroute ROUTE_NAME [PROJECT_DIR] [OPTIONS]
 
 | 选项 | 描述 | 默认值 |
 |--------|-------------|---------|
+| `--layout [classic-layer\|domain]` | 生成的路由模块的结构;会覆盖 preset 元数据 | 根据 preset 自动选择 |
 | `--help` | 显示命令帮助 | - |
 
 #### 示例
@@ -346,25 +347,40 @@ $ fastkit addroute users my-api
 
 #### 生成的文件
 
-会在项目中生成以下文件：
+使用 `--layout=classic-layer` 时,会在应用包下生成以下文件:
 
 - `src/api/routes/users.py` —— 路由处理器
 - `src/crud/users.py` —— CRUD 操作
 - `src/schemas/users.py` —— Pydantic 模式
 
-同时会更新 `src/api/api.py`,把新路由器纳入其中。
+使用 `--layout=domain` 时,会创建 `domains/users/`,其中包含 `__init__.py`、`models.py`、`schemas.py`、`repository.py`、`service.py` 与 `router.py`。实体包含 `id: int` 与 `name: str`,并配有一个可用的内存 repository。
+
+两种布局都会更新已有的 API 路由器,并在必要时把它连接到应用。路径遵循应用实际所在的包,包括 `src/app/`。
+
+不指定该选项时,`[tool.fastapi-fastkit].preset = "domain-starter"` 会选择 `domain`。缺少 `preset` 时,会根据 `template` 推断 preset;`fastapi-domain-starter` 同样选择 `domain`。其他 preset 以及两种元数据都没有的项目会选择 `classic-layer`。未知的 preset 会回退到 `classic-layer` 并给出警告。显式选择不会改变项目的 preset。
+
+```console
+$ fastkit addroute users . --layout=domain
+$ fastkit addroute products . --layout=classic-layer
+```
+
+该命令会在确认之前显示所选布局。重新运行时会保留已有文件、恢复缺失的文件,并避免重复注册路由器。不同布局的同名模块可以通过导入别名共存。生成器不会检查 HTTP 方法/路径冲突。迁移需要手动完成。
 
 #### 生成的端点
 
-会创建完整的一组 CRUD 端点：
+domain 布局会创建以下端点(以 `/api/v1` 作为应用已有的前缀展示):
 
 | 方法 | 端点 | 描述 |
 |--------|----------|-------------|
-| `GET` | `/api/v1/users/` | 获取所有用户 |
-| `POST` | `/api/v1/users/` | 创建新用户 |
-| `GET` | `/api/v1/users/{user_id}` | 获取指定用户 |
-| `PUT` | `/api/v1/users/{user_id}` | 更新用户 |
-| `DELETE` | `/api/v1/users/{user_id}` | 删除用户 |
+| `GET` | `/api/v1/users` | 列出实体,200 |
+| `POST` | `/api/v1/users` | 创建实体,201 |
+| `GET` | `/api/v1/users/{entity_id}` | 读取实体,200 或 404 |
+| `PUT` | `/api/v1/users/{entity_id}` | 替换实体,200 或 404 |
+| `DELETE` | `/api/v1/users/{entity_id}` | 删除实体,空的 204 或 404 |
+
+POST 与 PUT 接受长度为 1–120 个字符的 `name`。ID 由 repository 分配,PUT 会保留它。domain 布局不会生成 PATCH 端点。存储位于进程本地,重启后会丢失,且各领域之间相互独立;如需持久化,请替换该 repository。测试可以通过 service 注入一个全新的 repository,并覆盖 `get_users_service`。
+
+classic 布局保留其原有的 GET/POST/PUT/PATCH/DELETE 存根,位于 `/<route_name>/`,供您自行实现。
 
 #### 代码插入的位置
 
@@ -382,7 +398,7 @@ api_router.include_router(health.router)
 # fastkit:routes
 ```
 
-编辑该文件时请保留这些注释 —— `addroute` 会直接插入到 `# fastkit:imports` 和 `# fastkit:routes` 的上方。丢失了这些锚点(或在锚点出现之前生成)的项目仍然可以工作:fastkit 会退回到基于 AST 的插入方式,自行找到 import 块和路由注册位置。锚点只是让结果变得可预测。
+编辑该文件时请保留这些注释 —— `addroute` 会直接插入到 `# fastkit:imports` 和 `# fastkit:routes` 的下方。丢失了这些锚点(或在锚点出现之前生成)的项目仍然可以工作:fastkit 会退回到基于 AST 的插入方式,自行找到 import 块和路由注册位置。锚点只是让结果变得可预测。
 
 `addroute` 还会读取项目的 `[tool.fastapi-fastkit]` 块来定位入口文件,因此即使在仅凭磁盘扫描会判断错误的布局上也能正常工作。
 

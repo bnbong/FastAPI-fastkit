@@ -2,7 +2,63 @@
 
 기존 FastAPI 프로젝트에 새 API 라우트를 추가하는 방법을 안내합니다.
 
+## 라우트 레이아웃 선택
+
+`addroute`는 `--layout=classic-layer` 또는 `--layout=domain`을 받습니다. 옵션을 생략하면 `[tool.fastapi-fastkit].preset` 값을 읽습니다. `domain-starter`이면 `domain`을 선택하고, `classic-layered`, `minimal`, `single-module`이면 `classic-layer`를 선택합니다. `preset`이 없으면 `template` 값에서 프리셋을 추론하므로, `startdemo`나 대화형 `init`으로 만든 `fastapi-domain-starter` 프로젝트에서도 `domain`이 선택됩니다. 두 값이 모두 없으면 `classic-layer`를 선택합니다. 알 수 없는 프리셋이면 경고를 출력하고 `classic-layer`로 대체합니다. 옵션을 명시하면 프로젝트 메타데이터를 변경하지 않고 이 선택을 덮어씁니다.
+
+```console
+$ cd my-api
+$ fastkit addroute users . --layout=domain
+$ fastkit addroute products . --layout=classic-layer
+```
+
+선택된 레이아웃은 확인 단계 전에 화면에 표시됩니다. 파일은 애플리케이션의 실제 패키지(`src/` 또는 `src/app/`) 아래에 배치되며, 기록된 진입점이 있으면 그 진입점을 기준으로 삼습니다.
+
+## 도메인 CRUD 생성
+
+`domain-starter` 프로젝트에서는 다음 명령만 실행하면 됩니다:
+
+```console
+$ fastkit addroute users
+```
+
+이 명령은 다음 파일을 생성하고 도메인 라우터를 자동으로 등록합니다:
+
+```text
+src/app/domains/users/
+├── __init__.py
+├── models.py       # Users(id: int, name: str)
+├── schemas.py      # POST/PUT용 UsersCreate, 응답용 UsersRead
+├── repository.py   # 타입이 지정된 CRUD 연산과 인메모리 저장소
+├── service.py      # 비즈니스 로직과 UsersNotFoundError
+└── router.py       # HTTP 엔드포인트와 오버라이드 가능한 서비스 의존성
+```
+
+각 도메인 안에서 클래스 이름은 `Users`, `UsersCreate`, `UsersRead`, `UsersRepository`, `UsersService`가 됩니다. 클래스 이름은 단수형으로 바꾸지 않고 PascalCase를 사용합니다(`health_checks`는 `HealthChecks`가 됩니다). repository는 1부터 시작하는 ID를 부여합니다. POST와 PUT에는 1자 이상 120자 이하의 `name`이 필요하며, PUT은 기존 ID를 유지합니다.
+
+| 메서드 | 도메인 경로 | 결과 |
+|--------|-------------|--------|
+| GET | `/users` | 엔티티 목록, 200 |
+| GET | `/users/{entity_id}` | 엔티티 조회, 200 또는 404 |
+| POST | `/users` | 엔티티 생성, 201 |
+| PUT | `/users/{entity_id}` | 엔티티 교체, 200 또는 404 |
+| DELETE | `/users/{entity_id}` | 엔티티 삭제, 빈 응답의 204 또는 404 |
+
+classic 레이아웃과 마찬가지로, 도메인의 prefix와 tags는 공용 API 라우터가 `include_router`를 호출할 때 설정됩니다.
+
+애플리케이션에 이미 설정된 API prefix는 그대로 적용됩니다(예: `/api/v1/users`). 도메인 라우트에는 PATCH가 포함되지 않습니다.
+
+생성된 repository는 독립적으로 동작하며 CRUD 연산에 락을 겁니다. 기본 인스턴스는 **이 도메인과 프로세스 안에서** 요청 간에 공유됩니다. 데이터는 재시작하면 사라지고 워커 프로세스 간에 공유되지 않습니다. 영속성이 필요하면 repository를 수정하세요. 이 repository는 스타터의 `db.memory`, ORM, 데이터베이스 설정에 의존하지 않습니다.
+
+격리된 테스트를 작성하려면 새 `UsersRepository`를 `UsersService`에 주입한 뒤, 라우터의 `get_users_service` FastAPI 의존성을 오버라이드하세요. `UsersRepository.reset()`은 해당 repository를 비우고 ID를 다시 1부터 매깁니다. `service.reset_store()`는 요청 간에 공유되는 기본 repository를 리셋합니다. 명시적으로 생성한 repository 인스턴스는 각각 독립된 저장소를 갖습니다.
+
+## 명령을 다시 실행할 때
+
+기존 모듈 파일은 보존되고 누락된 파일만 생성됩니다. import와 라우터 등록은 중복되지 않습니다. 레이아웃이 다른 같은 이름의 모듈도 함께 존재할 수 있으며, import 별칭으로 Python 이름 충돌을 피합니다. 생성기는 HTTP 메서드/경로 충돌을 검사하지 않습니다. `--layout`은 기존 모듈을 마이그레이션하지 않습니다.
+
 ## 기본 라우트 추가
+
+다음 예시는 `classic-layer` 레이아웃을 기준으로 설명합니다. domain-starter 프로젝트에서 이 레이아웃을 쓰려면 `--layout=classic-layer`를 명시적으로 전달하세요.
 
 ### `addroute` 명령 사용
 

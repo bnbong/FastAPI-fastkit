@@ -2,7 +2,63 @@
 
 学习如何向已有的 FastAPI 项目添加新的 API 路由。
 
+## 选择路由布局
+
+`addroute` 接受 `--layout=classic-layer` 或 `--layout=domain`。省略时,它会读取 `[tool.fastapi-fastkit].preset`:`domain-starter` 选择 `domain`;`classic-layered`、`minimal` 与 `single-module` 选择 `classic-layer`。如果缺少 `preset`,则根据 `template` 推断 preset,因此通过 `startdemo` 或交互式 `init` 创建的 `fastapi-domain-starter` 项目也会选择 `domain`。两者都不存在时,选择 `classic-layer`。未知的 preset 会回退到 `classic-layer` 并给出警告。显式指定的选项会覆盖上述选择,但不会改变项目的元数据。
+
+```console
+$ cd my-api
+$ fastkit addroute users . --layout=domain
+$ fastkit addroute products . --layout=classic-layer
+```
+
+所选布局会在确认之前显示出来。文件会放在应用实际所在的包(`src/` 或 `src/app/`)下,若项目记录了入口文件则以其为准。
+
+## 生成领域 CRUD
+
+对于 `domain-starter` 项目,只需运行:
+
+```console
+$ fastkit addroute users
+```
+
+这会创建以下文件,并自动注册该领域的路由器:
+
+```text
+src/app/domains/users/
+├── __init__.py
+├── models.py       # Users(id: int, name: str)
+├── schemas.py      # UsersCreate for POST/PUT, UsersRead for responses
+├── repository.py   # typed CRUD operations and in-memory storage
+├── service.py      # business logic and UsersNotFoundError
+└── router.py       # HTTP endpoints and overridable service dependency
+```
+
+每个领域中的类分别命名为 `Users`、`UsersCreate`、`UsersRead`、`UsersRepository` 与 `UsersService`;类名使用 PascalCase(`health_checks` 会变成 `HealthChecks`),不做单数化处理。Repository 从 1 开始分配 ID。POST 与 PUT 要求 `name` 的长度在 1 到 120 个字符之间;PUT 会保留已有的 ID。
+
+| 方法 | 领域路径 | 结果 |
+|--------|-------------|--------|
+| GET | `/users` | 列出实体,200 |
+| GET | `/users/{entity_id}` | 读取实体,200 或 404 |
+| POST | `/users` | 创建实体,201 |
+| PUT | `/users/{entity_id}` | 替换实体,200 或 404 |
+| DELETE | `/users/{entity_id}` | 删除实体,空的 204 或 404 |
+
+与 classic 布局一样,领域的前缀与标签由共享的 API 路由器在调用 `include_router` 时设置。
+
+应用已有的 API 前缀仍然生效(例如 `/api/v1/users`)。领域路由不包含 PATCH。
+
+生成的 repository 是自包含的,并对 CRUD 操作加锁。其默认实例在**该领域与该进程内**的请求之间共享。数据会在重启后丢失,且不会在 worker 进程之间共享。如需持久化,请改造该 repository;它不依赖 starter 的 `db.memory`、ORM 或数据库配置。
+
+若要编写隔离的测试,请把一个全新的 `UsersRepository` 注入 `UsersService`,然后覆盖路由器的 `get_users_service` FastAPI 依赖。`UsersRepository.reset()` 会清空该 repository,并让 ID 重新从 1 开始。`service.reset_store()` 会重置在请求之间共享的默认 repository。显式创建的 repository 实例拥有独立的存储。
+
+## 重新运行命令
+
+已有的模块文件会被保留;缺失的文件会被创建。import 与路由器注册不会重复。不同布局中的同名模块可以共存;导入别名可以避免 Python 名称冲突。生成器不会检查 HTTP 方法/路径冲突。`--layout` 不会迁移已有的模块。
+
 ## 基本的路由添加
+
+以下示例描述的是 `classic-layer` 布局。在 domain-starter 项目中使用时,请显式传入 `--layout=classic-layer`。
 
 ### 使用 `addroute` 命令
 

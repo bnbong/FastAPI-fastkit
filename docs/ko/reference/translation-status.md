@@ -19,14 +19,14 @@ FastAPI-fastkit 문서는 여러 언어로 빌드되지만, 모든 번역이 **�
 | 언어 | 상태 | 마크다운 페이지 | 비고 |
 |---|---|---:|---|
 | 🇬🇧 English (`en`) | ✅ 원본 | 29 / 29 | 기준이 되는 원문입니다. |
-| 🇰🇷 한국어 (`ko`) | ✅ 완료 | 29 / 29 | Phase 1~3은 모두 반영되어 있습니다. 2026-10-11에 v1.4.1 영문 원본과 다시 동기화했습니다. v1.4.0에서 추가된 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)을 번역했고, 처음 번역한 뒤 영문과 어긋난 페이지도 다시 맞췄습니다. `docs/ko/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
-| 🇯🇵 일본어 (`ja`) | ✅ 완료 | 29 / 29 | Phase 1~3은 모두 반영되어 있습니다. 2026-10-11에 v1.4.1 영문 원본과 다시 동기화했습니다. v1.4.0에서 추가된 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)을 번역했고, 처음 번역한 뒤 영문과 어긋난 페이지도 다시 맞췄습니다. `docs/ja/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
-| 🇨🇳 중국어 (`zh`) | ✅ 완료 | 29 / 29 | Phase 1~3은 모두 반영되어 있습니다. 2026-10-11에 v1.4.1 영문 원본과 다시 동기화했습니다. v1.4.0에서 추가된 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)을 번역했고, 처음 번역한 뒤 영문과 어긋난 페이지도 다시 맞췄습니다. `docs/zh/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
-| 🇪🇸 스페인어 (`es`) | ✅ 완료 | 29 / 29 | Phase 1~3은 모두 반영되어 있습니다. 2026-10-11에 v1.4.1 영문 원본과 다시 동기화했습니다. v1.4.0에서 추가된 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)을 번역했고, 처음 번역한 뒤 영문과 어긋난 페이지도 다시 맞췄습니다. `docs/es/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
-| 🇫🇷 프랑스어 (`fr`) | ✅ 완료 | 29 / 29 | Phase 1~3은 모두 반영되어 있습니다. 2026-10-11에 v1.4.1 영문 원본과 다시 동기화했습니다. v1.4.0에서 추가된 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)을 번역했고, 처음 번역한 뒤 영문과 어긋난 페이지도 다시 맞췄습니다. `docs/fr/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
-| 🇩🇪 독일어 (`de`) | ✅ 완료 | 29 / 29 | Phase 1~3은 모두 반영되어 있습니다. 2026-10-11에 v1.4.1 영문 원본과 다시 동기화했습니다. v1.4.0에서 추가된 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)을 번역했고, 처음 번역한 뒤 영문과 어긋난 페이지도 다시 맞췄습니다. `docs/de/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
+| 🇰🇷 한국어 (`ko`) | ✅ 완료 | 29 / 29 | Phase 1~3은 모두 반영되어 있습니다. 2026-10-14에 v1.5.0 영문 원본과 다시 동기화했습니다. v1.4.0에서 추가된 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)을 번역했고, 처음 번역한 뒤 영문과 어긋난 페이지도 다시 맞췄습니다. `docs/ko/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
+| 🇯🇵 일본어 (`ja`) | ✅ 완료 | 29 / 29 | Phase 1~3은 모두 반영되어 있습니다. 2026-10-14에 v1.5.0 영문 원본과 다시 동기화했습니다. v1.4.0에서 추가된 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)을 번역했고, 처음 번역한 뒤 영문과 어긋난 페이지도 다시 맞췄습니다. `docs/ja/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
+| 🇨🇳 중국어 (`zh`) | ✅ 완료 | 29 / 29 | Phase 1~3은 모두 반영되어 있습니다. 2026-10-14에 v1.5.0 영문 원본과 다시 동기화했습니다. v1.4.0에서 추가된 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)을 번역했고, 처음 번역한 뒤 영문과 어긋난 페이지도 다시 맞췄습니다. `docs/zh/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
+| 🇪🇸 스페인어 (`es`) | ✅ 완료 | 29 / 29 | Phase 1~3은 모두 반영되어 있습니다. 2026-10-14에 v1.5.0 영문 원본과 다시 동기화했습니다. v1.4.0에서 추가된 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)을 번역했고, 처음 번역한 뒤 영문과 어긋난 페이지도 다시 맞췄습니다. `docs/es/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
+| 🇫🇷 프랑스어 (`fr`) | ✅ 완료 | 29 / 29 | Phase 1~3은 모두 반영되어 있습니다. 2026-10-14에 v1.5.0 영문 원본과 다시 동기화했습니다. v1.4.0에서 추가된 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)을 번역했고, 처음 번역한 뒤 영문과 어긋난 페이지도 다시 맞췄습니다. `docs/fr/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
+| 🇩🇪 독일어 (`de`) | ✅ 완료 | 29 / 29 | Phase 1~3은 모두 반영되어 있습니다. 2026-10-14에 v1.5.0 영문 원본과 다시 동기화했습니다. v1.4.0에서 추가된 튜토리얼 3편(`tutorial/auth-jwt.md`, `tutorial/sqlmodel.md`, `tutorial/llm-agent.md`)을 번역했고, 처음 번역한 뒤 영문과 어긋난 페이지도 다시 맞췄습니다. `docs/de/changelog.md` 는 영문 기준 `CHANGELOG.md` 를 그대로 사용합니다. |
 
-*스냅샷 검증 시점: 2026-10-11, v1.4.1 릴리스 이후. 번역된 6개 로케일을 모두 영문 원본과 같은 수준으로 맞췄습니다. v1.4.0에서 추가된 튜토리얼 3편을 번역했고, 처음 번역한 뒤 영문과 어긋난 페이지도 모두 다시 동기화했습니다. 그래도 한 릴리스 안에서는 번역이 뒤처질 수 있으므로, 번역된 페이지가 영문과 다르다면 영문을 신뢰하세요.* 이 표는 수동으로 관리됩니다. 리포지토리 루트에서 현재 상태를 다시 세고 싶다면 다음 명령을 실행하세요:
+*스냅샷 검증 시점: 2026-10-14, v1.5.0 릴리스 이후. 번역된 6개 로케일을 모두 영문 원본과 같은 수준으로 맞췄습니다. v1.4.0에서 추가된 튜토리얼 3편을 번역했고, 처음 번역한 뒤 영문과 어긋난 페이지도 모두 다시 동기화했습니다. 그래도 한 릴리스 안에서는 번역이 뒤처질 수 있으므로, 번역된 페이지가 영문과 다르다면 영문을 신뢰하세요.* 이 표는 수동으로 관리됩니다. 리포지토리 루트에서 현재 상태를 다시 세고 싶다면 다음 명령을 실행하세요:
 
 ```console
 $ for loc in en ko ja zh es fr de; do

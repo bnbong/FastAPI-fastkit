@@ -2,7 +2,90 @@
 
 Aprende a añadir nuevas rutas de API a un proyecto FastAPI existente.
 
+## Elegir el layout de la ruta
+
+`addroute` acepta `--layout=classic-layer` o `--layout=domain`. Si se omite,
+lee `[tool.fastapi-fastkit].preset`: `domain-starter` selecciona `domain`;
+`classic-layered`, `minimal` y `single-module` seleccionan `classic-layer`.
+Si falta `preset`, infiere el preset a partir de `template`, de modo que los proyectos creados
+con `startdemo` o con `init` interactivo también seleccionan `domain` para
+`fastapi-domain-starter`. Sin ninguno de los dos valores, selecciona `classic-layer`. Un preset desconocido recurre a `classic-layer` con
+una advertencia. Una opción explícita anula esta selección sin cambiar los
+metadatos del proyecto.
+
+```console
+$ cd my-api
+$ fastkit addroute users . --layout=domain
+$ fastkit addroute products . --layout=classic-layer
+```
+
+El layout seleccionado se muestra antes de la confirmación. Los archivos se colocan en
+el paquete real de la aplicación (`src/` o `src/app/`), usando su
+entrypoint registrado cuando está disponible.
+
+## Generar un CRUD de dominio
+
+En un proyecto `domain-starter`, basta con ejecutar:
+
+```console
+$ fastkit addroute users
+```
+
+Esto crea los siguientes archivos y registra automáticamente el router del dominio:
+
+```text
+src/app/domains/users/
+├── __init__.py
+├── models.py       # Users(id: int, name: str)
+├── schemas.py      # UsersCreate for POST/PUT, UsersRead for responses
+├── repository.py   # typed CRUD operations and in-memory storage
+├── service.py      # business logic and UsersNotFoundError
+└── router.py       # HTTP endpoints and overridable service dependency
+```
+
+Las clases se llaman `Users`, `UsersCreate`, `UsersRead`, `UsersRepository`
+y `UsersService` dentro de cada dominio; los nombres de clase usan PascalCase (`health_checks` pasa a ser `HealthChecks`), sin singularización.
+El repositorio asigna IDs empezando por 1. POST y PUT requieren un `name` de entre
+1 y 120 caracteres; PUT conserva el ID existente.
+
+| Método | Ruta del dominio | Resultado |
+|---|---|---|
+| GET | `/users` | Listar entidades, 200 |
+| GET | `/users/{entity_id}` | Leer una entidad, 200 o 404 |
+| POST | `/users` | Crear una entidad, 201 |
+| PUT | `/users/{entity_id}` | Reemplazar una entidad, 200 o 404 |
+| DELETE | `/users/{entity_id}` | Eliminar una entidad, 204 vacío o 404 |
+
+El prefijo y las etiquetas del dominio se establecen en el router compartido de la API cuando llama a
+`include_router`, igual que en el layout clásico.
+
+El prefijo de API existente de la aplicación sigue vigente (por ejemplo,
+`/api/v1/users`). Las rutas de dominio no incluyen PATCH.
+
+El repositorio generado es autocontenido y protege sus operaciones CRUD con un lock. Su
+instancia por defecto se comparte entre peticiones **dentro de este dominio y proceso**.
+Los datos se pierden al reiniciar y no se comparten entre procesos worker. Adapta el
+repositorio para tener persistencia duradera; no depende de `db.memory` del starter,
+de ningún ORM ni de la configuración de base de datos.
+
+Para pruebas aisladas, inyecta un `UsersRepository` nuevo en `UsersService`
+y después sobrescribe la dependencia de FastAPI `get_users_service` del router.
+`UsersRepository.reset()` vacía ese repositorio y reinicia los IDs en 1.
+`service.reset_store()` reinicia el repositorio por defecto compartido entre peticiones.
+Las instancias de repositorio creadas explícitamente tienen almacenamiento independiente.
+
+## Volver a ejecutar el comando
+
+Los archivos de módulo existentes se conservan; los que faltan se crean. Los imports y
+los registros del router no se duplican. Los módulos con el mismo nombre en layouts distintos
+pueden coexistir; los alias de import evitan colisiones de nombres en Python. El generador no
+comprueba conflictos de método/ruta HTTP. `--layout` no migra los módulos
+existentes.
+
 ## Añadir una ruta básica
+
+Los siguientes ejemplos describen el layout `classic-layer`. Pasa
+`--layout=classic-layer` explícitamente cuando uses un proyecto domain-starter.
 
 ### Usar el comando `addroute`
 

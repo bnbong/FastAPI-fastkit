@@ -2,7 +2,69 @@
 
 既存の FastAPI プロジェクトに新しい API ルートを追加する方法を学びます。
 
+## ルートレイアウトを選ぶ
+
+`addroute` は `--layout=classic-layer` または `--layout=domain` を受け付けます。省略した場合は `[tool.fastapi-fastkit].preset` を読み取ります: `domain-starter` なら `domain` を、`classic-layered`、`minimal`、`single-module` なら `classic-layer` を選びます。
+`preset` がない場合は `template` からプリセットを推定するため、`startdemo` や対話式の `init` で作成したプロジェクトでも、`fastapi-domain-starter` に対して `domain` が選ばれます。どちらの値もなければ `classic-layer` を選びます。未知のプリセットは警告を出したうえで `classic-layer` にフォールバックします。明示的なオプションは、プロジェクトのメタデータを変更せずにこの選択を上書きします。
+
+```console
+$ cd my-api
+$ fastkit addroute users . --layout=domain
+$ fastkit addroute products . --layout=classic-layer
+```
+
+選択されたレイアウトは確認の前に表示されます。ファイルはアプリケーションの実際のパッケージ (`src/` または `src/app/`) の下に配置され、記録されたエントリポイントがあればそれを使います。
+
+## ドメイン CRUD を生成する
+
+`domain-starter` プロジェクトでは、次のコマンドを実行するだけです:
+
+```console
+$ fastkit addroute users
+```
+
+これにより次のファイルが作成され、ドメインのルーターが自動で登録されます:
+
+```text
+src/app/domains/users/
+├── __init__.py
+├── models.py       # Users(id: int, name: str)
+├── schemas.py      # POST/PUT 用の UsersCreate、レスポンス用の UsersRead
+├── repository.py   # 型付きの CRUD 操作とインメモリストレージ
+├── service.py      # ビジネスロジックと UsersNotFoundError
+└── router.py       # HTTP エンドポイントとオーバーライド可能な service 依存性
+```
+
+各ドメインのクラス名は `Users`、`UsersCreate`、`UsersRead`、`UsersRepository`、`UsersService` になります。クラス名は単数形に変換されず、PascalCase になります (`health_checks` は `HealthChecks` になります)。
+repository は 1 から始まる ID を割り当てます。POST と PUT には 1〜120 文字の `name` が必要で、PUT は既存の ID を維持します。
+
+| メソッド | ドメインパス | 結果 |
+|---|---|---|
+| GET | `/users` | エンティティの一覧、200 |
+| GET | `/users/{entity_id}` | エンティティの取得、200 または 404 |
+| POST | `/users` | エンティティの作成、201 |
+| PUT | `/users/{entity_id}` | エンティティの置換、200 または 404 |
+| DELETE | `/users/{entity_id}` | エンティティの削除、空の 204 または 404 |
+
+ドメインのプレフィックスとタグは、クラシックレイアウトと同様に、共有の API ルーターが `include_router` を呼び出すときに設定します。
+
+アプリケーションの既存の API プレフィックスはそのまま有効です (例: `/api/v1/users`)。ドメインのルートには PATCH は含まれません。
+
+生成された repository は自己完結しており、CRUD 操作をロックで保護します。デフォルトのインスタンスは **このドメインとプロセスの中で** リクエスト間で共有されます。
+データは再起動で失われ、ワーカープロセス間では共有されません。永続化が必要な場合は repository を書き換えてください。repository はスターターの `db.memory`、ORM、データベース設定には依存していません。
+
+テストを分離するには、新しい `UsersRepository` を `UsersService` に注入し、router の `get_users_service` という FastAPI 依存性をオーバーライドします。
+`UsersRepository.reset()` はその repository を消去し、ID を 1 から振り直します。
+`service.reset_store()` は、リクエスト間で共有されるデフォルトの repository をリセットします。
+明示的に作成した repository インスタンスは、それぞれ独立したストレージを持ちます。
+
+## コマンドを再実行する
+
+既存のモジュールファイルは保持され、不足しているファイルが作成されます。import とルーター登録は重複しません。異なるレイアウトの同名モジュールは共存でき、import エイリアスによって Python の名前衝突を避けます。HTTP メソッドとパスの衝突はジェネレーターがチェックしません。`--layout` は既存のモジュールを移行しません。
+
 ## 基本的なルート追加
+
+次の例は `classic-layer` レイアウトを前提にしています。domain-starter プロジェクトで使う場合は、`--layout=classic-layer` を明示的に指定してください。
 
 ### `addroute` コマンドを使う
 

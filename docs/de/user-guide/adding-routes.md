@@ -2,7 +2,63 @@
 
 Lernen Sie, wie Sie neue API-Routen zu Ihrem bestehenden FastAPI-Projekt hinzufügen.
 
+## Das Routen-Layout wählen
+
+`addroute` akzeptiert `--layout=classic-layer` oder `--layout=domain`. Ohne Angabe liest der Befehl `[tool.fastapi-fastkit].preset`: `domain-starter` wählt `domain`; `classic-layered`, `minimal` und `single-module` wählen `classic-layer`. Fehlt `preset`, wird das Preset aus `template` abgeleitet, sodass auch Projekte, die mit `startdemo` oder interaktivem `init` erstellt wurden, für `fastapi-domain-starter` `domain` wählen. Ohne einen dieser Werte wird `classic-layer` gewählt. Ein unbekanntes Preset fällt mit einer Warnung auf `classic-layer` zurück. Eine explizite Option überschreibt diese Auswahl, ohne die Metadaten des Projekts zu ändern.
+
+```console
+$ cd my-api
+$ fastkit addroute users . --layout=domain
+$ fastkit addroute products . --layout=classic-layer
+```
+
+Das gewählte Layout wird vor der Bestätigung angezeigt. Die Dateien werden unter dem tatsächlichen Paket der Anwendung (`src/` oder `src/app/`) abgelegt, wobei der hinterlegte Einstiegspunkt verwendet wird, sofern vorhanden.
+
+## Ein Domänen-CRUD generieren
+
+Für ein `domain-starter`-Projekt genügt:
+
+```console
+$ fastkit addroute users
+```
+
+Dies erstellt die folgenden Dateien und registriert den Domänen-Router automatisch:
+
+```text
+src/app/domains/users/
+├── __init__.py
+├── models.py       # Users(id: int, name: str)
+├── schemas.py      # UsersCreate for POST/PUT, UsersRead for responses
+├── repository.py   # typed CRUD operations and in-memory storage
+├── service.py      # business logic and UsersNotFoundError
+└── router.py       # HTTP endpoints and overridable service dependency
+```
+
+Die Klassen heißen innerhalb jeder Domäne `Users`, `UsersCreate`, `UsersRead`, `UsersRepository` und `UsersService`; Klassennamen verwenden PascalCase (`health_checks` wird zu `HealthChecks`), ohne Singularbildung. Das Repository vergibt IDs beginnend bei 1. POST und PUT erfordern einen `name` mit 1 bis 120 Zeichen; PUT behält die bestehende ID bei.
+
+| Methode | Domänenpfad | Ergebnis |
+|--------|-------------|--------|
+| GET | `/users` | Entities auflisten, 200 |
+| GET | `/users/{entity_id}` | Entity lesen, 200 oder 404 |
+| POST | `/users` | Entity anlegen, 201 |
+| PUT | `/users/{entity_id}` | Entity ersetzen, 200 oder 404 |
+| DELETE | `/users/{entity_id}` | Entity löschen, leeres 204 oder 404 |
+
+Präfix und Tags der Domäne werden wie beim klassischen Layout im gemeinsamen API-Router beim Aufruf von `include_router` gesetzt.
+
+Das bestehende API-Präfix der Anwendung bleibt wirksam (zum Beispiel `/api/v1/users`). Domänenrouten enthalten kein PATCH.
+
+Das generierte Repository ist eigenständig und schützt seine CRUD-Operationen mit einem Lock. Seine Standardinstanz wird zwischen Anfragen **innerhalb dieser Domäne und dieses Prozesses** geteilt. Daten gehen beim Neustart verloren und werden nicht zwischen Worker-Prozessen geteilt. Passen Sie das Repository für dauerhafte Persistenz an; es hängt weder von `db.memory` des Starters noch von einem ORM oder einer Datenbankkonfiguration ab.
+
+Für isolierte Tests injizieren Sie ein frisches `UsersRepository` in `UsersService` und überschreiben anschließend die FastAPI-Dependency `get_users_service` des Routers. `UsersRepository.reset()` leert dieses Repository und startet die IDs wieder bei 1. `service.reset_store()` setzt das zwischen Anfragen geteilte Standard-Repository zurück. Explizit erzeugte Repository-Instanzen haben einen unabhängigen Speicher.
+
+## Den Befehl erneut ausführen
+
+Bestehende Moduldateien bleiben erhalten; fehlende Dateien werden erstellt. Imports und Router-Registrierungen werden nicht dupliziert. Gleichnamige Module in verschiedenen Layouts können nebeneinander bestehen; Import-Aliase vermeiden Namenskollisionen in Python. Konflikte bei HTTP-Methode/-Pfad prüft der Generator nicht. `--layout` migriert keine bestehenden Module.
+
 ## Grundlegendes Hinzufügen einer Route
+
+Die folgenden Beispiele beschreiben das Layout `classic-layer`. Übergeben Sie `--layout=classic-layer` explizit, wenn Sie ein domain-starter-Projekt verwenden.
 
 ### Den Befehl `addroute` verwenden
 

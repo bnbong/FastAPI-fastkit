@@ -7,7 +7,7 @@
 - `fastkit startdemo fastapi-domain-starter`로 프로젝트 생성
 - 레이아웃에서 `core`, `db`, `domains`, `tests`가 맡는 역할
 - 한 도메인이 router → service → repository → schemas → models 로 분할되는 방식
-- 새 도메인 추가의 계약 (items 폴더 복사, 라우터 등록)
+- `fastkit addroute`로 새 도메인을 추가하고 테스트에서 저장소를 격리하는 방법
 - 번들된 `/health` 엔드포인트와 `/api/v1/items` CRUD 가 앱에 어떻게 연결되는지
 
 ## 사전 요구 사항
@@ -76,7 +76,7 @@ orders-api/
 │               ├── schemas.py      # ItemCreate, ItemRead (pydantic)
 │               ├── repository.py   # InMemoryStore 위의 ItemRepository
 │               ├── service.py      # ItemService + ItemNotFoundError
-│               └── router.py       # APIRouter(prefix="/items")
+│               └── router.py       # APIRouter 엔드포인트
 └── tests/
     ├── __init__.py
     ├── conftest.py             # TestClient 픽스처, 스토어 리셋
@@ -138,7 +138,7 @@ class InMemoryStore(Generic[T]):
 # src/app/api/router.py
 api_router = APIRouter()
 api_router.include_router(health.router)
-api_router.include_router(items_router.router)
+api_router.include_router(items_router.router, prefix="/items", tags=["items"])
 ```
 
 ```python
@@ -166,7 +166,7 @@ app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 
 런타임 레이아웃을 거울처럼 따라갑니다 — 동작을 고정할 가치가 있는 표면마다 테스트 모듈 하나. 스타터는 다음을 제공합니다:
 
-- `conftest.py` — 테스트 사이에 items 스토어를 리셋하는 autouse 픽스처와 `TestClient(app)` 를 감싸는 `client` 픽스처.
+- `conftest.py` — 테스트 사이에 items 스토어를 리셋하고 생성된 도메인에 대해 `service.reset_store()` 를 호출하는 autouse 픽스처와 `TestClient(app)` 를 감싸는 `client` 픽스처.
 - `test_health.py` — `GET /api/v1/health` 가 200 + `{"status": "ok"}` 를 반환하는지 검증.
 - `test_items.py` — items 엔드포인트의 전체 CRUD 커버리지. 알 수 없는 id 의 404 와 잘못된 페이로드의 422 도 포함.
 
@@ -245,7 +245,7 @@ class ItemService:
 
 ```python
 # src/app/domains/items/router.py
-router = APIRouter(prefix="/items", tags=["items"])
+router = APIRouter()
 
 def get_item_service() -> ItemService:
     return ItemService()
@@ -256,6 +256,13 @@ def get_item(item_id: int, service: ItemService = Depends(get_item_service)) -> 
         return ItemRead.model_validate(service.get_item(item_id))
     except ItemNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+```
+
+도메인의 prefix와 tags는 공용 API 라우터에서 설정합니다:
+
+```python
+# src/app/api/router.py
+api_router.include_router(items_router.router, prefix="/items", tags=["items"])
 ```
 
 전체 라우터가 노출하는 것:
@@ -286,98 +293,71 @@ $ curl http://127.0.0.1:8000/api/v1/items/999
 
 ## 5단계: 다음 도메인 추가
 
-스타터는 **도메인 추가가 복사-이름변경 작업**이 되도록 설계됐습니다. `items` 옆에 `users` 도메인을 만들고 싶다고 가정해 봅시다:
-
-### 1. `items/` 폴더 복사
+생성된 프로젝트의 루트에서 `users` 도메인을 추가합니다:
 
 ```console
-$ cp -r src/app/domains/items src/app/domains/users
+$ fastkit addroute users
 ```
 
-### 2. 엔티티, 스키마, 파일별 클래스 이름 다시 쓰기
+이 명령은 `[tool.fastapi-fastkit].preset` 값을 읽고, `preset`이 없으면 `template` 값에서 프리셋을 추론합니다. 따라서 `startdemo`, 대화형 `init`, `init --config`로 만든 domain-starter 프로젝트에서는 도메인 레이아웃이 선택됩니다. 선택된 레이아웃은 확인 단계 전에 화면에 표시됩니다. 레이아웃을 명시적으로 선택할 수도 있습니다:
+
+```console
+$ fastkit addroute users . --layout=domain
+```
+
+`--layout=classic-layer`를 지정하면 기존 방식의 `api/routes`, `crud`, `schemas` 구조가 생성됩니다. `classic-layered`, `minimal`, `single-module` 프로젝트와 preset 및 template 메타데이터가 없는 프로젝트에서도 이 레이아웃이 기본값입니다. 알 수 없는 프리셋이면 경고를 출력하고 `classic-layer`로 대체합니다. 이 옵션은 프로젝트의 프리셋을 변경하지 않습니다.
+
+### 생성되는 도메인
+
+```text
+src/app/domains/users/
+├── __init__.py
+├── models.py       # id와 name을 가진 Users
+├── schemas.py      # UsersCreate와 UsersRead
+├── repository.py   # UsersRepository: 타입이 지정된 인메모리 CRUD
+├── service.py      # UsersService와 UsersNotFoundError
+└── router.py       # 엔드포인트와 get_users_service 의존성
+```
+
+새 도메인은 라우트 이름에서 파생한 PascalCase 클래스 이름을 사용하므로, `users`에서 단수형 이름을 추론할 필요가 없습니다. 비즈니스 개념에 필요한 필드와 동작을 넣도록 이 파일들을 수정하세요.
+
+라우터는 `src/app/api/router.py`에 `prefix="/users"`와 `tags=["users"]`로 자동 등록됩니다. 도메인 라우터 자체는 이 설정 없이 `APIRouter()`를 사용합니다. 애플리케이션에 이미 설정된 prefix는 그대로 유지되므로, 다음 엔드포인트가 노출됩니다:
+
+| 메서드 | 엔드포인트 | 결과 |
+|--------|----------|--------|
+| GET | `/api/v1/users` | 엔티티 목록, 200 |
+| GET | `/api/v1/users/{entity_id}` | 엔티티 조회, 200 또는 404 |
+| POST | `/api/v1/users` | 엔티티 생성, 201 |
+| PUT | `/api/v1/users/{entity_id}` | 엔티티 교체, 200 또는 404 |
+| DELETE | `/api/v1/users/{entity_id}` | 엔티티 삭제, 빈 응답의 204 또는 404 |
+
+POST와 PUT은 `{"name": "Alice"}` 형태의 본문을 받으며, `name`은 1–120자여야 합니다. repository는 1부터 시작하는 ID를 부여하고, PUT은 그 ID를 유지합니다. PATCH 엔드포인트는 생성되지 않습니다.
+
+새 repository는 독립적으로 동작하며, 번들된 items 도메인이 사용하는 `db.memory` 스토어를 사용하지 않습니다. 명시적으로 생성한 repository 인스턴스는 각각 독립된 저장소를 갖고, 기본 인스턴스는 이 도메인과 프로세스 안에서 요청 간에 공유됩니다. CRUD 연산은 락으로 보호됩니다. 데이터는 재시작하면 사라지고 워커 프로세스 간에 공유되지 않으므로, 영속 저장소가 필요하면 repository를 교체하세요.
+
+### 격리된 테스트 추가
+
+items 전용 리셋 픽스처는 새 도메인을 리셋하지 않습니다. 테스트마다 새 repository를 사용하도록 서비스 의존성을 오버라이드하세요:
 
 ```python
-# src/app/domains/users/models.py
-from dataclasses import dataclass
+from src.app.domains.users.repository import UsersRepository
+from src.app.domains.users.router import get_users_service
+from src.app.domains.users.service import UsersService
 
-@dataclass
-class User:
-    id: int
-    email: str
-    is_active: bool = True
+def test_create_user(client):
+    from src.app.main import app
+
+    service = UsersService(repository=UsersRepository())
+    app.dependency_overrides[get_users_service] = lambda: service
+    try:
+        response = client.post("/api/v1/users", json={"name": "Alice"})
+        assert response.status_code == 201
+        assert response.json() == {"id": 1, "name": "Alice"}
+    finally:
+        app.dependency_overrides.pop(get_users_service, None)
 ```
 
-```python
-# src/app/domains/users/schemas.py
-from pydantic import BaseModel, ConfigDict, Field
-
-class UserCreate(BaseModel):
-    # 평문 ``str`` 을 쓰면 그대로 붙여 넣어도 안전합니다. 대신 pydantic
-    # 의 내장 이메일 검증을 사용하려면 선택 의존성
-    # (``pip install 'pydantic[email]'`` — ``email-validator`` 를 끌어옴)
-    # 을 설치하고 ``str`` 을 ``EmailStr`` 로 바꾸세요.
-    email: str = Field(min_length=3, max_length=320)
-    is_active: bool = True
-
-class UserRead(BaseModel):
-    id: int
-    email: str
-    is_active: bool
-    model_config = ConfigDict(from_attributes=True)
-```
-
-`models.py`, `schemas.py`, `repository.py`, `service.py`, `router.py` 전반에 걸쳐 `Item → User`, `ItemNotFoundError → UserNotFoundError`, `ItemRepository → UserRepository`, `ItemService → UserService` 로 이름을 바꾸세요. 라우터의 `prefix="/items"` → `prefix="/users"` 와 `tags=["items"]` → `tags=["users"]` 도 잊지 마세요.
-
-repository 는 같은 `InMemoryStore` 기반 패턴을 유지할 수 있습니다 — 엔티티 타입에 대해 제네릭이기 때문입니다:
-
-```python
-# src/app/domains/users/repository.py
-_store: InMemoryStore[User] = InMemoryStore()
-
-class UserRepository:
-    def __init__(self, store: Optional[InMemoryStore[User]] = None) -> None:
-        self._store = store if store is not None else _store
-    # ... ItemRepository 와 같은 모양 ...
-```
-
-### 3. 도메인 `__init__.py` 갱신
-
-items 도메인은 호출자가 `from src.app.domains.items import service` 처럼 쓸 수 있도록 자기 모듈들을 다시 export 합니다. users 도 같은 방식으로:
-
-```python
-# src/app/domains/users/__init__.py
-from src.app.domains.users import (  # noqa: F401
-    models,
-    repository,
-    router,
-    schemas,
-    service,
-)
-```
-
-### 4. 집계기에 라우터 등록
-
-여기가 **`domains/users/` 바깥에서 손대야 하는 유일한 파일**입니다:
-
-```python
-# src/app/api/router.py
-from src.app.api import health
-from src.app.domains.items import router as items_router
-from src.app.domains.users import router as users_router  # ← 추가
-
-api_router = APIRouter()
-api_router.include_router(health.router)
-api_router.include_router(items_router.router)
-api_router.include_router(users_router.router)             # ← 추가
-```
-
-서버 재시작 후 `/docs` 에서 `/api/v1/users` 가 마운트된 것을 확인할 수 있습니다.
-
-### 5. 테스트 추가
-
-`tests/test_items.py` 를 거울처럼 옮긴 `tests/test_users.py` 를 만드세요 — 동일한 클라이언트 기반 모양으로 새 엔드포인트를 호출합니다. `conftest.py` 의 autouse 스토어 리셋 픽스처가 이미 각 테스트를 격리해 줍니다.
-
-`InMemoryStore` 를 쓰는 두 번째 도메인을 추가한다면, 그 스토어도 리셋하도록 픽스처를 확장하거나, 도메인별로 픽스처 하나씩 두세요.
+`addroute`를 다시 실행하면 기존 도메인 파일은 보존되고 누락된 파일만 생성되며, import와 라우터 등록은 중복되지 않습니다. 이름이 같은 classic 모듈도 import 별칭을 통해 함께 존재할 수 있습니다. 생성된 패키지는 자기 모듈들을 다시 export하고, repository는 데이터를 비우고 ID를 처음부터 다시 매기는 `reset()`을 제공합니다. 스타터의 autouse 픽스처는 생성된 도메인에 대해 `service.reset_store()`를 호출합니다. 이전에 만든 프로젝트라면 기존 리셋 픽스처에 이 호출을 추가하거나, 의존성 오버라이드로 격리된 repository를 사용하세요. 생성기는 겹치는 엔드포인트를 감지하지 않으므로, 라우터를 조합할 때 HTTP 경로와 메서드를 직접 확인하세요.
 
 ## 6단계: 다음 행선지
 
@@ -389,4 +369,4 @@ api_router.include_router(users_router.router)             # ← 추가
 
 - **생성**: `fastkit startdemo fastapi-domain-starter` → `bash scripts/run-server.sh` → `/docs` 에서 문서.
 - **레이아웃**: 설정용 `core/`, 영속성 추상화용 `db/`, 비즈니스 슬라이스용 `domains/<concept>/`, 단일 집계 지점인 `api/router.py`, 런타임 모듈을 거울처럼 따라가는 `tests/`.
-- **도메인 추가**: `items/` 복사 → 엔티티 / 스키마 / 클래스 이름 변경 → `__init__.py` 의 재export 갱신 → `src/app/api/router.py` 에 라우터 등록 → 테스트 모듈 추가. `main.py` 수정은 없습니다.
+- **도메인 추가**: `fastkit addroute users`를 실행하고, 생성된 `Users*` CRUD 스캐폴드를 수정한 뒤, 격리된 repository로 테스트를 추가합니다. 라우터는 자동으로 등록됩니다.

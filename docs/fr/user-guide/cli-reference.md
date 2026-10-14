@@ -311,6 +311,7 @@ $ fastkit addroute ROUTE_NAME [PROJECT_DIR] [OPTIONS]
 
 | Option | Description | Défaut |
 |--------|-------------|---------|
+| `--layout [classic-layer\|domain]` | Structure du module de route généré ; remplace les métadonnées de préréglage | Automatique selon le préréglage |
 | `--help` | Afficher l'aide de la commande | - |
 
 #### Exemples
@@ -346,25 +347,40 @@ $ fastkit addroute users my-api
 
 #### Fichiers générés
 
-Crée ces fichiers dans le projet :
+Avec `--layout=classic-layer`, crée ces fichiers sous le package de l'application :
 
 - `src/api/routes/users.py` — gestionnaires de route
 - `src/crud/users.py` — opérations CRUD
 - `src/schemas/users.py` — schémas Pydantic
 
-Met aussi à jour `src/api/api.py` pour inclure le nouveau routeur.
+Avec `--layout=domain`, crée `domains/users/` contenant `__init__.py`, `models.py`, `schemas.py`, `repository.py`, `service.py` et `router.py`. L'entité possède `id: int` et `name: str`, avec un repository en mémoire fonctionnel.
+
+Les deux dispositions mettent à jour le routeur d'API existant et le relient à l'application si nécessaire. Les chemins suivent le package réel de l'application, y compris `src/app/`.
+
+Sans l'option, `[tool.fastapi-fastkit].preset = "domain-starter"` sélectionne `domain`. Lorsque `preset` est absent, le préréglage est déduit de `template` ; `fastapi-domain-starter` sélectionne aussi `domain`. Les autres préréglages et les projets sans aucune de ces deux métadonnées sélectionnent `classic-layer`. Un préréglage inconnu se rabat sur `classic-layer` avec un avertissement. Une sélection explicite ne modifie pas le préréglage du projet.
+
+```console
+$ fastkit addroute users . --layout=domain
+$ fastkit addroute products . --layout=classic-layer
+```
+
+La commande affiche la disposition sélectionnée avant la confirmation. La relancer conserve les fichiers existants, restaure les fichiers manquants et évite les enregistrements de routeurs en double. Des modules de même nom issus de dispositions différentes peuvent coexister grâce à des alias d'import. Le générateur ne vérifie pas les conflits de méthode/chemin HTTP. La migration est manuelle.
 
 #### Points d'extrémité générés
 
-Crée des points d'extrémité CRUD complets :
+La disposition domaine crée ces points d'extrémité (affichés avec `/api/v1` comme préfixe existant de l'application) :
 
 | Méthode | Point d'extrémité | Description |
 |--------|----------|-------------|
-| `GET` | `/api/v1/users/` | Récupérer tous les utilisateurs |
-| `POST` | `/api/v1/users/` | Créer un nouvel utilisateur |
-| `GET` | `/api/v1/users/{user_id}` | Récupérer un utilisateur précis |
-| `PUT` | `/api/v1/users/{user_id}` | Mettre à jour un utilisateur |
-| `DELETE` | `/api/v1/users/{user_id}` | Supprimer un utilisateur |
+| `GET` | `/api/v1/users` | Lister les entités, 200 |
+| `POST` | `/api/v1/users` | Créer une entité, 201 |
+| `GET` | `/api/v1/users/{entity_id}` | Lire une entité, 200 ou 404 |
+| `PUT` | `/api/v1/users/{entity_id}` | Remplacer une entité, 200 ou 404 |
+| `DELETE` | `/api/v1/users/{entity_id}` | Supprimer une entité, 204 vide ou 404 |
+
+POST et PUT acceptent un `name` de 1 à 120 caractères. Les ID sont attribués par le repository, et PUT les conserve. Aucun point d'extrémité PATCH n'est généré pour les domaines. Le stockage est local au processus, perdu au redémarrage et indépendant d'un domaine à l'autre ; remplacez le repository pour une persistance durable. Les tests peuvent injecter un repository neuf via le service et surcharger `get_users_service`.
+
+La disposition classique conserve ses ébauches GET/POST/PUT/PATCH/DELETE existantes sur `/<route_name>/`, à implémenter vous-même.
 
 #### Où le code est inséré
 
@@ -382,7 +398,7 @@ api_router.include_router(health.router)
 # fastkit:routes
 ```
 
-Conservez ces commentaires lorsque vous modifiez le fichier — `addroute` insère directement au-dessus de `# fastkit:imports` et de `# fastkit:routes`. Un projet qui les a perdus (ou qui a été généré avant l'existence des ancres) fonctionne toujours : fastkit se rabat sur une insertion fondée sur l'AST qui repère elle-même le bloc d'imports et les enregistrements de routeurs. Les ancres rendent simplement le résultat prévisible.
+Conservez ces commentaires lorsque vous modifiez le fichier — `addroute` insère directement en dessous de `# fastkit:imports` et de `# fastkit:routes`. Un projet qui les a perdus (ou qui a été généré avant l'existence des ancres) fonctionne toujours : fastkit se rabat sur une insertion fondée sur l'AST qui repère elle-même le bloc d'imports et les enregistrements de routeurs. Les ancres rendent simplement le résultat prévisible.
 
 `addroute` lit aussi le bloc `[tool.fastapi-fastkit]` du projet pour localiser le point d'entrée : il fonctionne donc sur des dispositions que la seule analyse du disque classerait mal.
 
