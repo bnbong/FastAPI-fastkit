@@ -24,19 +24,24 @@ Changelog = "https://bnbong.github.io/FastAPI-fastkit/changelog/"
 dev = [
     # Pinned minimums reflect Dependabot security advisories:
     #   pytest   < 9.0.3   — tmpdir handling (GHSA)
-    #   black    < 26.3.1  — arbitrary file writes via cache file name
+    #   black    < 26.10.1 — arbitrary file writes via cache file name
+    #                          (GHSA-cg8m-r9f2-5wm2)
     #   pygments < 2.20.0  — ReDoS in GUID regex (transitive via rich)
-    #   virtualenv < 21.7.13 — activation-script command injection, unverified
-    #                          seed wheels, pyvenv.cfg injection (GHSA-p58f-9548-mpm2
-    #                          and three related advisories; transitive via pre-commit)
+    #   virtualenv < 21.14.9 — activation-script command injection, unverified
+    #                          seed wheels, pyvenv.cfg injection (GHSA-8rjx-v5ww-45pp,
+    #                          GHSA-c947-3pg5-gm8q, GHSA-5vjq-rrrf-7h2q, GHSA-vxj4-q4g9-crj7
+    #                          and 12 related advisories; transitive via pre-commit)
+    #   filelock < 4.2.1   — GHSA-v4x8-3wr5-3wq8 plus two related advisories;
+    #                          transitive via virtualenv
     "pytest>=9.0.3",
     "pytest-cov>=6.2.1",
-    "black>=26.3.1",
+    "black>=26.10.1",
     "pre-commit>=4.0.1",
     "mypy>=1.12.0",
     "isort>=5.13.2",
     "pygments>=2.20.0",
-    "virtualenv>=21.7.13",
+    "virtualenv>=21.14.9",
+    "filelock>=4.2.1",
     "types-pyyaml>=6.0.12.20260408",
 ]
 
@@ -101,10 +106,12 @@ docs = [
     #   requests < 2.33.0 — insecure temp file reuse in extract_zipped_paths
     #   idna     < 3.15   — quadratic complexity in IDNA decoding (transitive via requests)
     #   urllib3  < 2.8.0  — chunked Deflate streaming infinite loop (GHSA-gh4c-6fx4-qh6g), transitive via requests
+    #   certifi  < 2026.10.19 — GHSA-6q48-6c7w-9gw2 (critical); transitive via requests
     "pygments>=2.20.0",
     "requests>=2.33.0",
     "idna>=3.15",
     "urllib3>=2.8.0",
+    "certifi>=2026.10.19",
     # pymdown-extensions <= 11.0.0 — ReDoS plus two path-traversal advisories;
     # 10.17.2+ was already required because earlier releases crash on pygments
     # 2.20+ (NoneType filename passed to html.escape), see pymdown-extensions#2580.
