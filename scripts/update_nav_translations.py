@@ -133,7 +133,7 @@ def translate_nav_item(
 
                 client_openai = openai.OpenAI(api_key=api_key)
                 response = client_openai.chat.completions.create(
-                    model="gpt-4",
+                    model="gpt-5.6-sol",
                     messages=[
                         {
                             "role": "system",
@@ -144,8 +144,7 @@ def translate_nav_item(
                             "content": f"Translate '{text}' to {target_lang}",
                         },
                     ],
-                    temperature=0.3,
-                    max_tokens=50,
+                    max_completion_tokens=1000,
                 )
                 response_content = response.choices[0].message.content
                 if response_content is None:
