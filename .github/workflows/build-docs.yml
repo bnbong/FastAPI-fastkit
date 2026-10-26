@@ -29,7 +29,8 @@ jobs:
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12.4"
+          # Minor-only pin: patch pins break when ubuntu-latest moves to a new OS release
+          python-version: "3.12"
       - name: Install docs dependencies
         run: |
             pip install -r requirements-docs.txt
