@@ -10,6 +10,6 @@ sse-starlette==3.4.10
 pytest==9.1.1
 pytest-asyncio==1.4.0
 httpx==0.28.1
-black==26.5.1
+black==26.10.1
 isort==9.0.1
 mypy==2.3.1
