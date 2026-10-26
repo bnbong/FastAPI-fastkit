@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.5.1 (2026-10-27)
+
+### Security
+
+- Templates: `black` pinned to 26.10.1 in 11 templates and the `black>=26.10.1` floor applied to every `pyproject.toml-tpl` and the `fastapi-mcp` `setup.cfg-tpl` (GHSA-cg8m-r9f2-5wm2); `certifi` 2026.10.23 in 9 templates (GHSA-6q48-6c7w-9gw2, critical); `fastapi-dockerized` pins `setuptools==84.2.1` (GHSA-xmj3-9gf7-h52w); `fastapi-mcp` pins `mcp==1.30.0` with constraint `mcp>=1.30.0,<2.0.0` (GHSA-84m7-p3x7-pcfv). `pip-audit` reports no known vulnerabilities for all 12 template `requirements.txt-tpl` files (#86, #88, #90).
+- Workspace: 40 open Dependabot alerts resolved (#90). Docs group floor `certifi>=2026.10.19` (GHSA-6q48-6c7w-9gw2, critical, transitive via `requests`); dev extra floors `black>=26.10.1`, `virtualenv>=21.14.9` (GHSA-8rjx-v5ww-45pp, GHSA-c947-3pg5-gm8q, GHSA-5vjq-rrrf-7h2q, GHSA-vxj4-q4g9-crj7 and 12 related advisories, transitive via `pre-commit`) and new `filelock>=4.2.1` (GHSA-v4x8-3wr5-3wq8 plus two related advisories, transitive via `virtualenv`). `uv.lock`, `pdm.lock`, `requirements.txt`, and `requirements-docs.txt` relocked on certifi 2026.10.23, black 26.10.1, virtualenv 21.14.13, filelock 4.2.4; `distlib`, `packaging`, and `python-discovery` moved as `virtualenv` requirements.
+
+### Maintenance
+
+- `scripts/update_nav_translations.py` moved its AI fallback from `gpt-4` (retired by OpenAI on 2026-10-23) to `gpt-5.6-sol`, using `max_completion_tokens=1000` and dropping `temperature`, which reasoning models reject (contributed by @brunobuddy, #89).
+
+### Notes
+
+- `mcp` 1.30.0 changes some defaults in generated `fastapi-mcp` projects: HTTP clients follow redirects only within the same origin, idle Streamable HTTP sessions close after 30 minutes (`FastMCP(session_idle_timeout=None, max_sessions=None)` disables this), and the OAuth client validates the authorization server's `issuer`. The template's own tests pass unchanged.
+
 ## v1.5.0 (2026-10-14)
 
 ### Features
